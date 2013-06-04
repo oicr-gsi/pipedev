@@ -29,6 +29,7 @@ public class SgeJobPoll extends TimerTask {
 
     public static void main(String[] args) throws Exception {
         try {
+	    
             SgeJobPoll app = new SgeJobPoll(args);
             app.runMe();
         } catch (Exception e) {
@@ -74,6 +75,7 @@ public class SgeJobPoll extends TimerTask {
 
     private void verifyInput() throws SgePollException {
         String string = (String) options.valueOf("unique-job-string");
+	System.out.println("Starting polling on jobs with extension "+string);
         jobs = findJobs(string);
         for (Integer i : jobs.keySet()) {
             String id = String.valueOf(i);
@@ -84,6 +86,7 @@ public class SgeJobPoll extends TimerTask {
             stderr.append("No running jobs were found with string ").append(string);
             throw new SgePollException("No running jobs were found with string " + string);
         }
+	//System.out.println(printJobs());
     }
 
     public void runMe() throws SgePollException {
@@ -207,8 +210,11 @@ public class SgeJobPoll extends TimerTask {
 
             if (status == JobStatus.RUNNING) {
                 continue;
-            } else if (status == JobStatus.SUCCESSFUL) {
-            } else {
+            } else if (status == JobStatus.LOST) {
+		System.out.println("Job "+jobId+" is temporarily unavailable. Continuing.");
+		continue;
+	    }else if (status == JobStatus.SUCCESSFUL) {
+	    } else {
                 isSuccessful = false;
             }
             stdout.append(new Date().toString()).append(": Job ").append(jobId).append(" status ").append(status.name()).append("\n");
@@ -235,11 +241,13 @@ public class SgeJobPoll extends TimerTask {
         return result.status;
     }
 
-    public void printJobs() {
+    public String printJobs() {
+	StringBuffer stdout = new StringBuffer();
         stdout.append("\nJob ID\tJob name\tStatus\n");
         for (String job : mappedJobs.keySet()) {
             stdout.append(job).append("\t").append(mappedJobs.get(job)[0]).append("\t").append(mappedJobs.get(job)[1]);
         }
         stdout.append("Failures so far? ").append(!isSuccessful);
+	return stdout.toString();
     }
 }
