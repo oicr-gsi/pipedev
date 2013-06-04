@@ -28,8 +28,12 @@ public class SgeJobPoll extends TimerTask {
     public Boolean isSuccessful = null;
 
     public static void main(String[] args) throws Exception {
-        SgeJobPoll app = new SgeJobPoll(args);
-        app.runMe();
+        try {
+            SgeJobPoll app = new SgeJobPoll(args);
+            app.runMe();
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     public SgeJobPoll(String[] args) {
@@ -147,7 +151,7 @@ public class SgeJobPoll extends TimerTask {
      * @param jobString
      * @return
      */
-    protected Map<Integer, String> findJobs(String jobString) {
+    protected Map<Integer, String> findJobs(String jobString) throws SgePollException {
         Map<Integer, String> jobToName = new HashMap<Integer, String>();
 
         Pattern pat = Pattern.compile(".*job_name:(.*" + jobString + ")");
@@ -172,10 +176,15 @@ public class SgeJobPoll extends TimerTask {
         return jobToName;
     }
 
-    private String runACommand(String st) {
+    private String runACommand(String st) throws SgePollException {
         CommandLine command = CommandLine.parse(st);
         Invoker.Result result = Invoker.invoke(command);
-        stdout.append("Exit value from " + st + ":").append(result.exit);
+        
+        if (result.exit != 0) {
+            stderr.append("Exit value from ").append(st).append(":").append(result.exit);
+            stderr.append("Result:").append(result.output);
+            throw new SgePollException("Command failed: "+st);
+        }
         return result.output;
 
     }
