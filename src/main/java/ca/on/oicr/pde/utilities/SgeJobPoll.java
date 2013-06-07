@@ -20,7 +20,7 @@ import org.apache.oozie.action.sge.StatusChecker;
 /**
  *
  */
-public class SgeJobPoll{
+public class SgeJobPoll {
 
     protected StringBuilder stderr = new StringBuilder();
     protected StringBuilder stdout = new StringBuilder();
@@ -30,16 +30,12 @@ public class SgeJobPoll{
     private Collection<String> jobIds;
     private Map<String, String[]> mappedJobs;
     public Boolean isSuccessful = null;
-    public boolean done =false;
+    public boolean done = false;
 
     public static void main(String[] args) throws Exception {
-        try {
+        SgeJobPoll app = new SgeJobPoll(args);
+        app.runMe();
 
-            SgeJobPoll app = new SgeJobPoll(args);
-            app.runMe();
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-        }
     }
 
     public SgeJobPoll(String[] args) {
@@ -81,7 +77,8 @@ public class SgeJobPoll{
     private void verifyInput() throws SgePollException {
         String string = (String) options.valueOf("unique-job-string");
         System.out.println("Starting polling on jobs with extension " + string);
-        jobs = findJobs(string);
+        jobs = findRunningJobs(string);
+        jobs.putAll(findFinishedJobs(string));
         for (Integer i : jobs.keySet()) {
             String id = String.valueOf(i);
             this.jobIds.add(id);
@@ -145,6 +142,7 @@ public class SgeJobPoll{
         OptionParser parser = new OptionParser();
         parser.accepts("unique-job-string", "A unique string that is attached to all jobs of interest.").withRequiredArg().isRequired();
         parser.acceptsAll(Arrays.asList("output-file", "o"), "A location for an output file describing the finished jobs");
+        parser.acceptsAll(Arrays.asList("begin-time", "b"), "The earliest start time for jobs to be summarized, in the format [[CC]YY]MMDDhhmm[.SS]");
         return (parser);
     }
 
@@ -166,17 +164,18 @@ public class SgeJobPoll{
      * There is a command line string in this method that is used to identify
      * those jobs. Qstat (at OICR at least) seems to have a bug where if you run
      * it with -j, it does not respect the -u flag. To avoid pulling back jobs
-     * from other users, we follow this series: <ol><li>Find the job ids with
-     * qstat</li> <li>Query that job id with -j and grep out the job number and
-     * name onto one line</li> <li>Grep this output for the given identifier
-     * </li> </ol>
+     * from other users, we follow this series:
      *
-     * There is a potential bug here if
+     * <ol><li>Find the job ids with qstat</li>
+     *
+     * <li>Query that job id with -j and grep out the job name</li>
+     *
+     * <li>Grep this output for the given identifier</li></ol>
      *
      * @param jobString
      * @return
      */
-    protected Map<Integer, String> findJobs(String jobString) throws SgePollException {
+    protected Map<Integer, String> findRunningJobs(String jobString) throws SgePollException {
         Map<Integer, String> jobToName = new HashMap<Integer, String>();
 
         Pattern pat = Pattern.compile(".*job_name:(.*" + jobString + ")");
@@ -196,6 +195,44 @@ public class SgeJobPoll{
                     System.err.println("No match found in " + id);
                 }
             }
+        }
+
+        return jobToName;
+    }
+
+    /**
+     * Finds the jobs finished recently with the given string.
+     *
+     *
+     * @param jobString
+     * @return
+     */
+    protected Map<Integer, String> findFinishedJobs(String jobString) throws SgePollException {
+        Map<Integer, String> jobToName = new HashMap<Integer, String>();
+
+        StringBuilder st = new StringBuilder();
+        st.append("qacct -j *").append(jobString);
+        if (options.has("b")) {
+            st.append(" -b").append(options.valueOf("b"));
+        }
+
+        String listOfJobs = runACommand(st.toString());
+
+        Pattern pat = Pattern.compile(".*jobnumber(.*)");
+        Pattern pat2 = Pattern.compile(".*jobname(.*" + jobString + ")");
+        Matcher mat = pat.matcher(listOfJobs);
+
+        while (mat.find()) {
+            String id = mat.group(1).trim();
+            String jobInfo = runACommand("qacct -j " + id);
+            Matcher mat2 = pat2.matcher(jobInfo);
+            if (mat2.find() == true) {
+                String name = mat.group(1).trim();
+                jobToName.put(Integer.parseInt(id), name);
+            } else {
+                System.err.println("No match found in " + id);
+            }
+
         }
 
         return jobToName;
@@ -248,12 +285,11 @@ public class SgeJobPoll{
         }
     }
 
-    
     public void cancel() {
         if (isSuccessful == null) {
             isSuccessful = Boolean.TRUE;
         }
-        done =true;
+        done = true;
     }
 
     public JobStatus checkStatus(String jobId) {
