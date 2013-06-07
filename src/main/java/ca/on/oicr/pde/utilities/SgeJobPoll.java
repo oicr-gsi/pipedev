@@ -35,7 +35,6 @@ public class SgeJobPoll {
     public static void main(String[] args) throws Exception {
         SgeJobPoll app = new SgeJobPoll(args);
         app.runMe();
-
     }
 
     public SgeJobPoll(String[] args) {
@@ -45,6 +44,7 @@ public class SgeJobPoll {
     }
 
     private void init() throws OptionException {
+	System.out.println("Init!");
         try {
             OptionParser parser = getOptionParser();
             options = parser.parse(this.getParameters());
@@ -61,7 +61,7 @@ public class SgeJobPoll {
      * @return a ReturnValue object
      */
     private void verifyParameters() throws SgePollException {
-
+	System.out.println("Verify params!");
         // now look at the options and make sure they make sense
         for (String option : new String[]{
                     "unique-job-string", "output-file"
@@ -75,10 +75,13 @@ public class SgeJobPoll {
     }
 
     private void verifyInput() throws SgePollException {
+	System.out.println("verify input!");
         String string = (String) options.valueOf("unique-job-string");
         System.out.println("Starting polling on jobs with extension " + string);
         jobs = findRunningJobs(string);
+	System.out.println("Number of running jobs!" +jobs.keySet().size());
         jobs.putAll(findFinishedJobs(string));
+	System.out.println("Number of running + finished jobs!" +jobs.keySet().size());
         for (Integer i : jobs.keySet()) {
             String id = String.valueOf(i);
             this.jobIds.add(id);
@@ -91,7 +94,7 @@ public class SgeJobPoll {
         //System.out.println(printJobs());
     }
 
-    public void runMe() throws SgePollException {
+    public void runMe() throws Exception {
         try {
             init();
             verifyParameters();
@@ -105,7 +108,10 @@ public class SgeJobPoll {
                     done = true;
                 }
             }
-        } finally {
+        } catch(Exception e) {
+	    e.printStackTrace();
+	    throw e;
+	}finally {
             finish();
         }
     }
@@ -130,7 +136,7 @@ public class SgeJobPoll {
     protected void finish() {
         printLogsToStd();
         printLogsToOutput();
-        if (!isSuccessful) {
+        if (isSuccessful != null && !isSuccessful) {
             new SgePollException("SGE jobs failed or are in an inconsistent "
                     + "state. See the extended log for details.").printStackTrace();
             System.exit(15);
@@ -142,7 +148,7 @@ public class SgeJobPoll {
         OptionParser parser = new OptionParser();
         parser.accepts("unique-job-string", "A unique string that is attached to all jobs of interest.").withRequiredArg().isRequired();
         parser.acceptsAll(Arrays.asList("output-file", "o"), "A location for an output file describing the finished jobs");
-        parser.acceptsAll(Arrays.asList("begin-time", "b"), "The earliest start time for jobs to be summarized, in the format [[CC]YY]MMDDhhmm[.SS]");
+        parser.acceptsAll(Arrays.asList("begin-time", "b"), "The earliest start time for jobs to be summarized, in the format [[CC]YY]MMDDhhmm[.SS]").withRequiredArg();
         return (parser);
     }
 
@@ -176,12 +182,13 @@ public class SgeJobPoll {
      * @return
      */
     protected Map<Integer, String> findRunningJobs(String jobString) throws SgePollException {
+	System.out.println("Find running jobs!");
         Map<Integer, String> jobToName = new HashMap<Integer, String>();
 
         Pattern pat = Pattern.compile(".*job_name:(.*" + jobString + ")");
         String listOfJobs = runACommand("qstat");
         for (String s : listOfJobs.split("\\n")) {
-            if (s.substring(0, 1).matches("^[0-9]")) {
+            if (!s.trim().isEmpty() && s.substring(0, 1).matches("^[0-9]")) {
                 //System.out.println("s:"+s);
                 String id = s.split("\\s")[0];
                 //System.out.println("id:"+id);
@@ -196,7 +203,7 @@ public class SgeJobPoll {
                 }
             }
         }
-
+	System.out.println("Returning from running jobs!");
         return jobToName;
     }
 
@@ -208,16 +215,17 @@ public class SgeJobPoll {
      * @return
      */
     protected Map<Integer, String> findFinishedJobs(String jobString) throws SgePollException {
+	System.out.println("Find finished jobs!");
         Map<Integer, String> jobToName = new HashMap<Integer, String>();
 
         StringBuilder st = new StringBuilder();
         st.append("qacct -j *").append(jobString);
         if (options.has("b")) {
-            st.append(" -b").append(options.valueOf("b"));
+            st.append(" -b ").append(options.valueOf("b"));
         }
-
+	System.out.println(st.toString());
         String listOfJobs = runACommand(st.toString());
-
+	System.out.println("Jobs:"+listOfJobs);
         Pattern pat = Pattern.compile(".*jobnumber(.*)");
         Pattern pat2 = Pattern.compile(".*jobname(.*" + jobString + ")");
         Matcher mat = pat.matcher(listOfJobs);
@@ -239,12 +247,14 @@ public class SgeJobPoll {
     }
 
     private String runACommand(String st) throws SgePollException {
+	System.out.println("Run command!" + st);
         CommandLine command = CommandLine.parse(st);
         Invoker.Result result = Invoker.invoke(command);
 
         if (result.exit != 0) {
             stderr.append("Exit value from ").append(st).append(":").append(result.exit);
             stderr.append("Result:").append(result.output);
+	    System.out.println("Failed command: "+st);
             throw new SgePollException("Command failed: " + st);
         }
         return result.output;
@@ -262,9 +272,11 @@ public class SgeJobPoll {
      * way, log its status, remove it from the pool, and set the class to failed
      */
     public void run() {
+	System.out.println("Run!");
         Collection<String> tempJobIds = new HashSet<String>(jobIds);
         for (String jobId : tempJobIds) {
-            JobStatus status = checkStatus(jobId);
+            System.out.println("Job!" + jobId);
+	    JobStatus status = checkStatus(jobId);
 
             if (status == JobStatus.RUNNING) {
                 continue;
@@ -280,6 +292,7 @@ public class SgeJobPoll {
 
         }
         if (jobIds.isEmpty()) {
+	    System.out.println("No more jobs!");
             cancel();
             finish();
         }
@@ -304,7 +317,7 @@ public class SgeJobPoll {
         for (String job : mappedJobs.keySet()) {
             out.append(job).append("\t").append(mappedJobs.get(job)[0]).append("\t").append(mappedJobs.get(job)[1]);
         }
-        out.append("Failures so far? ").append(!isSuccessful);
+//        out.append("Failures so far? ").append(isSuccessful);
         return out.toString();
     }
 }
