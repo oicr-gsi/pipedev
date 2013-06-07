@@ -20,7 +20,7 @@ import org.apache.oozie.action.sge.StatusChecker;
 /**
  *
  */
-public class SgeJobPoll extends TimerTask {
+public class SgeJobPoll{
 
     protected StringBuilder stderr = new StringBuilder();
     protected StringBuilder stdout = new StringBuilder();
@@ -30,10 +30,11 @@ public class SgeJobPoll extends TimerTask {
     private Collection<String> jobIds;
     private Map<String, String[]> mappedJobs;
     public Boolean isSuccessful = null;
+    public boolean done =false;
 
     public static void main(String[] args) throws Exception {
         try {
-	    
+
             SgeJobPoll app = new SgeJobPoll(args);
             app.runMe();
         } catch (Exception e) {
@@ -79,7 +80,7 @@ public class SgeJobPoll extends TimerTask {
 
     private void verifyInput() throws SgePollException {
         String string = (String) options.valueOf("unique-job-string");
-	System.out.println("Starting polling on jobs with extension "+string);
+        System.out.println("Starting polling on jobs with extension " + string);
         jobs = findJobs(string);
         for (Integer i : jobs.keySet()) {
             String id = String.valueOf(i);
@@ -90,7 +91,7 @@ public class SgeJobPoll extends TimerTask {
             stderr.append("No running jobs were found with string ").append(string);
             throw new SgePollException("No running jobs were found with string " + string);
         }
-	//System.out.println(printJobs());
+        //System.out.println(printJobs());
     }
 
     public void runMe() throws SgePollException {
@@ -98,14 +99,17 @@ public class SgeJobPoll extends TimerTask {
             init();
             verifyParameters();
             verifyInput();
-            try {
-                Timer timer = new Timer();
-                timer.scheduleAtFixedRate(this, 0, 5000);
-            } catch (Exception e) {
-                e.printStackTrace();
+            while (!done) {
+                try {
+                    this.run();
+                    Thread.sleep(5000);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    done = true;
+                }
             }
         } finally {
-            printLogsToStd();
+            finish();
         }
     }
 
@@ -113,6 +117,7 @@ public class SgeJobPoll extends TimerTask {
         System.err.println(stderr.toString());
         System.out.println(stdout.toString());
     }
+
     protected void printLogsToOutput() {
         try {
             FileWriter writer = new FileWriter(String.valueOf(options.valueOf("output-file")));
@@ -199,11 +204,11 @@ public class SgeJobPoll extends TimerTask {
     private String runACommand(String st) throws SgePollException {
         CommandLine command = CommandLine.parse(st);
         Invoker.Result result = Invoker.invoke(command);
-        
+
         if (result.exit != 0) {
             stderr.append("Exit value from ").append(st).append(":").append(result.exit);
             stderr.append("Result:").append(result.output);
-            throw new SgePollException("Command failed: "+st);
+            throw new SgePollException("Command failed: " + st);
         }
         return result.output;
 
@@ -219,7 +224,6 @@ public class SgeJobPoll extends TimerTask {
      * status and remove it from the pool. If the job is completed in any other
      * way, log its status, remove it from the pool, and set the class to failed
      */
-    @Override
     public void run() {
         Collection<String> tempJobIds = new HashSet<String>(jobIds);
         for (String jobId : tempJobIds) {
@@ -228,10 +232,10 @@ public class SgeJobPoll extends TimerTask {
             if (status == JobStatus.RUNNING) {
                 continue;
             } else if (status == JobStatus.LOST) {
-		System.out.println("Job "+jobId+" is temporarily unavailable. Continuing.");
-		continue;
-	    }else if (status == JobStatus.SUCCESSFUL) {
-	    } else {
+                System.out.println("Job " + jobId + " is temporarily unavailable. Continuing.");
+                continue;
+            } else if (status == JobStatus.SUCCESSFUL) {
+            } else {
                 isSuccessful = false;
             }
             stdout.append(new Date().toString()).append(": Job ").append(jobId).append(" status ").append(status.name()).append("\n");
@@ -244,12 +248,12 @@ public class SgeJobPoll extends TimerTask {
         }
     }
 
-    @Override
-    public boolean cancel() {
+    
+    public void cancel() {
         if (isSuccessful == null) {
             isSuccessful = Boolean.TRUE;
         }
-        return super.cancel();
+        done =true;
     }
 
     public JobStatus checkStatus(String jobId) {
@@ -259,12 +263,12 @@ public class SgeJobPoll extends TimerTask {
     }
 
     public String printJobs() {
-	StringBuilder out = new StringBuilder();
+        StringBuilder out = new StringBuilder();
         out.append("\nJob ID\tJob name\tStatus\n");
         for (String job : mappedJobs.keySet()) {
             out.append(job).append("\t").append(mappedJobs.get(job)[0]).append("\t").append(mappedJobs.get(job)[1]);
         }
         out.append("Failures so far? ").append(!isSuccessful);
-	return out.toString();
+        return out.toString();
     }
 }

@@ -56,7 +56,7 @@ public class SgeOfflinePoll extends SgeJobPoll {
     public static void testSuccess() throws Exception {
         try {
             System.out.println("");
-            SgeOfflinePoll poller = new SgeOfflinePoll(new String[]{"--unique-job-string", "1234"}) {
+            SgeOfflinePoll poller = new SgeOfflinePoll(new String[]{"--unique-job-string", "1234", "--output-file", "/tmp/log.txt"}) {
 
                 @Override
                 protected void finish() {
@@ -66,6 +66,7 @@ public class SgeOfflinePoll extends SgeJobPoll {
                     } else if (isSuccessful == Boolean.FALSE) {
                         System.err.println("testSuccess\tFAIL");
                     }
+                    done = true;
                 }
             };
 
@@ -88,7 +89,7 @@ public class SgeOfflinePoll extends SgeJobPoll {
     public static void testFailure() throws Exception {
         try {
             System.out.println("");
-            SgeOfflinePoll poller = new SgeOfflinePoll(new String[]{"--unique-job-string", "1234"}) {
+            SgeOfflinePoll poller = new SgeOfflinePoll(new String[]{"--unique-job-string", "1234", "--output-file", "/tmp/log.txt"}) {
 
                 @Override
                 protected void finish() {
@@ -98,7 +99,7 @@ public class SgeOfflinePoll extends SgeJobPoll {
                     } else if (isSuccessful == Boolean.TRUE) {
                         System.err.println("testFailure\tFAIL");
                     }
-                    
+                    done = true;
                 }
             };
 
