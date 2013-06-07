@@ -1,8 +1,12 @@
 package ca.on.oicr.pde.utilities;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import joptsimple.OptionException;
@@ -63,7 +67,7 @@ public class SgeJobPoll extends TimerTask {
 
         // now look at the options and make sure they make sense
         for (String option : new String[]{
-                    "unique-job-string"
+                    "unique-job-string", "output-file"
                 }) {
             if (!options.has(option)) {
                 stderr.append(get_syntax());
@@ -109,9 +113,21 @@ public class SgeJobPoll extends TimerTask {
         System.err.println(stderr.toString());
         System.out.println(stdout.toString());
     }
+    protected void printLogsToOutput() {
+        try {
+            FileWriter writer = new FileWriter(String.valueOf(options.valueOf("output-file")));
+            writer.append(new Date() + "\n");
+            writer.append(printJobs());
+            writer.flush();
+            writer.close();
+        } catch (IOException ex) {
+            Logger.getLogger(SgeJobPoll.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
     protected void finish() {
         printLogsToStd();
+        printLogsToOutput();
         if (!isSuccessful) {
             new SgePollException("SGE jobs failed or are in an inconsistent "
                     + "state. See the extended log for details.").printStackTrace();
@@ -123,6 +139,7 @@ public class SgeJobPoll extends TimerTask {
     private OptionParser getOptionParser() {
         OptionParser parser = new OptionParser();
         parser.accepts("unique-job-string", "A unique string that is attached to all jobs of interest.").withRequiredArg().isRequired();
+        parser.acceptsAll(Arrays.asList("output-file", "o"), "A location for an output file describing the finished jobs");
         return (parser);
     }
 
@@ -242,12 +259,12 @@ public class SgeJobPoll extends TimerTask {
     }
 
     public String printJobs() {
-	StringBuffer stdout = new StringBuffer();
-        stdout.append("\nJob ID\tJob name\tStatus\n");
+	StringBuilder out = new StringBuilder();
+        out.append("\nJob ID\tJob name\tStatus\n");
         for (String job : mappedJobs.keySet()) {
-            stdout.append(job).append("\t").append(mappedJobs.get(job)[0]).append("\t").append(mappedJobs.get(job)[1]);
+            out.append(job).append("\t").append(mappedJobs.get(job)[0]).append("\t").append(mappedJobs.get(job)[1]);
         }
-        stdout.append("Failures so far? ").append(!isSuccessful);
-	return stdout.toString();
+        out.append("Failures so far? ").append(!isSuccessful);
+	return out.toString();
     }
 }
