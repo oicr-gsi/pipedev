@@ -5,8 +5,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import joptsimple.OptionException;
@@ -44,7 +42,6 @@ public class SgeJobPoll {
     }
 
     private void init() throws OptionException {
-	System.out.println("Init!");
         try {
             OptionParser parser = getOptionParser();
             options = parser.parse(this.getParameters());
@@ -61,7 +58,6 @@ public class SgeJobPoll {
      * @return a ReturnValue object
      */
     private void verifyParameters() throws SgePollException {
-	System.out.println("Verify params!");
         // now look at the options and make sure they make sense
         for (String option : new String[]{
                     "unique-job-string", "output-file"
@@ -75,13 +71,12 @@ public class SgeJobPoll {
     }
 
     private void verifyInput() throws SgePollException {
-	System.out.println("verify input!");
         String string = (String) options.valueOf("unique-job-string");
         System.out.println("Starting polling on jobs with extension " + string);
         jobs = findRunningJobs(string);
-	System.out.println("Number of running jobs!" +jobs.keySet().size());
+	System.out.println("Number of running jobs:" +jobs.keySet().size());
         jobs.putAll(findFinishedJobs(string));
-	System.out.println("Number of running + finished jobs!" +jobs.keySet().size());
+	System.out.println("Number of running + finished jobs:" +jobs.keySet().size());
         for (Integer i : jobs.keySet()) {
             String id = String.valueOf(i);
             this.jobIds.add(id);
@@ -91,7 +86,6 @@ public class SgeJobPoll {
             stderr.append("No running jobs were found with string ").append(string);
             throw new SgePollException("No running jobs were found with string " + string);
         }
-        //System.out.println(printJobs());
     }
 
     public void runMe() throws Exception {
@@ -123,13 +117,14 @@ public class SgeJobPoll {
 
     protected void printLogsToOutput() {
         try {
-            FileWriter writer = new FileWriter(String.valueOf(options.valueOf("output-file")));
+	    File file = new File(options.valueOf("output-file").toString());
+            FileWriter writer = new FileWriter(file);
             writer.append(new Date() + "\n");
             writer.append(printJobs());
             writer.flush();
             writer.close();
         } catch (IOException ex) {
-            Logger.getLogger(SgeJobPoll.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
         }
     }
 
@@ -147,7 +142,7 @@ public class SgeJobPoll {
     private OptionParser getOptionParser() {
         OptionParser parser = new OptionParser();
         parser.accepts("unique-job-string", "A unique string that is attached to all jobs of interest.").withRequiredArg().isRequired();
-        parser.acceptsAll(Arrays.asList("output-file", "o"), "A location for an output file describing the finished jobs");
+        parser.acceptsAll(Arrays.asList("output-file", "o"), "A location for an output file describing the finished jobs").withRequiredArg();
         parser.acceptsAll(Arrays.asList("begin-time", "b"), "The earliest start time for jobs to be summarized, in the format [[CC]YY]MMDDhhmm[.SS]").withRequiredArg();
         return (parser);
     }
@@ -182,28 +177,23 @@ public class SgeJobPoll {
      * @return
      */
     protected Map<Integer, String> findRunningJobs(String jobString) throws SgePollException {
-	System.out.println("Find running jobs!");
         Map<Integer, String> jobToName = new HashMap<Integer, String>();
 
         Pattern pat = Pattern.compile(".*job_name:(.*" + jobString + ")");
         String listOfJobs = runACommand("qstat");
         for (String s : listOfJobs.split("\\n")) {
             if (!s.trim().isEmpty() && s.substring(0, 1).matches("^[0-9]")) {
-                //System.out.println("s:"+s);
                 String id = s.split("\\s")[0];
-                //System.out.println("id:"+id);
                 String jobInfo = runACommand("qstat -j " + id);
                 Matcher mat = pat.matcher(jobInfo);
                 if (mat.find() == true) {
                     String name = mat.group(1).trim();
-                    //System.out.println(name);
                     jobToName.put(Integer.parseInt(id), name);
                 } else {
                     System.err.println("No match found in " + id);
                 }
             }
         }
-	System.out.println("Returning from running jobs!");
         return jobToName;
     }
 
@@ -215,7 +205,6 @@ public class SgeJobPoll {
      * @return
      */
     protected Map<Integer, String> findFinishedJobs(String jobString) throws SgePollException {
-	System.out.println("Find finished jobs!");
         Map<Integer, String> jobToName = new HashMap<Integer, String>();
 
         StringBuilder st = new StringBuilder();
@@ -223,9 +212,7 @@ public class SgeJobPoll {
         if (options.has("b")) {
             st.append(" -b ").append(options.valueOf("b"));
         }
-	System.out.println(st.toString());
         String listOfJobs = runACommand(st.toString());
-	System.out.println("Jobs:"+listOfJobs);
         Pattern pat = Pattern.compile(".*jobnumber(.*)");
         Pattern pat2 = Pattern.compile(".*jobname(.*" + jobString + ")");
         Matcher mat = pat.matcher(listOfJobs);
@@ -247,13 +234,11 @@ public class SgeJobPoll {
     }
 
     private String runACommand(String st) throws SgePollException {
-	System.out.println("Run command!" + st);
         CommandLine command = CommandLine.parse(st);
         Invoker.Result result = Invoker.invoke(command);
 
         if (result.exit != 0) {
             stderr.append("Exit value from ").append(st).append(":").append(result.exit);
-            stderr.append("Result:").append(result.output);
 	    System.out.println("Failed command: "+st);
             throw new SgePollException("Command failed: " + st);
         }
@@ -272,10 +257,8 @@ public class SgeJobPoll {
      * way, log its status, remove it from the pool, and set the class to failed
      */
     public void run() {
-	System.out.println("Run!");
         Collection<String> tempJobIds = new HashSet<String>(jobIds);
         for (String jobId : tempJobIds) {
-            System.out.println("Job!" + jobId);
 	    JobStatus status = checkStatus(jobId);
 
             if (status == JobStatus.RUNNING) {
@@ -315,7 +298,7 @@ public class SgeJobPoll {
         StringBuilder out = new StringBuilder();
         out.append("\nJob ID\tJob name\tStatus\n");
         for (String job : mappedJobs.keySet()) {
-            out.append(job).append("\t").append(mappedJobs.get(job)[0]).append("\t").append(mappedJobs.get(job)[1]);
+            out.append(job).append("\t").append(mappedJobs.get(job)[0]).append("\t").append(mappedJobs.get(job)[1]).append("\n");
         }
 //        out.append("Failures so far? ").append(isSuccessful);
         return out.toString();
