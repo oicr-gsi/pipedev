@@ -29,6 +29,25 @@ public class SgeJobPoll {
     private Map<String, String[]> mappedJobs;
     public Boolean isSuccessful = null;
     public boolean done = false;
+    private int pollInterval = 5000;
+    
+    /**
+     * Get the value of pollInterval
+     *
+     * @return the value of pollInterval
+     */
+    public int getPollInterval() {
+        return pollInterval;
+    }
+
+    /**
+     * Set the value of pollInterval
+     *
+     * @param pollInterval new value of pollInterval
+     */
+    protected void setPollInterval(int pollInterval) {
+        this.pollInterval = pollInterval;
+    }
 
     public static void main(String[] args) throws Exception {
         SgeJobPoll app = new SgeJobPoll(args);
@@ -41,13 +60,13 @@ public class SgeJobPoll {
         this.mappedJobs = new HashMap<String, String[]>();
     }
 
-    private void init() throws OptionException {
+    protected void init() throws OptionException {
         try {
             OptionParser parser = getOptionParser();
             options = parser.parse(this.getParameters());
         } catch (OptionException e) {
-            stderr.append(e.getMessage()).append("\n");
-            stderr.append(get_syntax()).append("\n");
+            errPrintln(e.getMessage());
+            errPrintln(get_syntax());
             throw e;
         }
     }
@@ -63,8 +82,8 @@ public class SgeJobPoll {
                     "unique-job-string", "output-file"
                 }) {
             if (!options.has(option)) {
-                stderr.append(get_syntax()).append("\n");
-                stderr.append("Must include parameter: --").append(option).append("\n");
+                errPrintln(get_syntax());
+                errPrintln("Must include parameter: --", option);
                 throw new SgePollException("Must include parameter: --" + option);
             }
         }
@@ -72,18 +91,18 @@ public class SgeJobPoll {
 
     private void verifyInput() throws SgePollException {
         String string = (String) options.valueOf("unique-job-string");
-        System.out.println("Starting polling on jobs with extension " + string);
+        outPrintln("Starting polling on jobs with extension ", string);
         jobs = findRunningJobs(string);
-	System.out.println("Number of running jobs:" +jobs.keySet().size());
+        outPrintln("Number of running jobs:" + jobs.keySet().size());
         jobs.putAll(findFinishedJobs(string));
-	System.out.println("Number of running + finished jobs:" +jobs.keySet().size());
+        outPrintln("Number of running + finished jobs:", String.valueOf(jobs.keySet().size()));
         for (Integer i : jobs.keySet()) {
             String id = String.valueOf(i);
             this.jobIds.add(id);
             this.mappedJobs.put(id, new String[]{jobs.get(i), ""});
         }
         if (jobs.isEmpty()) {
-            stderr.append("No jobs were found with string ").append(string).append("\n");
+            errPrintln("No jobs were found with string ", string);
             throw new SgePollException("No running jobs were found with string " + string);
         }
     }
@@ -96,35 +115,34 @@ public class SgeJobPoll {
             while (!done) {
                 try {
                     this.run();
-                    Thread.sleep(5000);
+                    Thread.sleep(pollInterval);
                 } catch (Exception e) {
                     e.printStackTrace();
                     done = true;
                 }
             }
-        } catch(Exception e) {
-	    e.printStackTrace();
-	    throw e;
-	}finally {
+        } catch (Exception e) {
+            throw e;
+        } finally {
             finish();
         }
     }
 
     protected void printLogsToStd() {
-        System.err.println(stderr.toString());
         System.out.println(stdout.toString());
+        System.err.println(stderr.toString());
     }
 
     protected void printLogsToOutput() {
         try {
-	    if (options.has("output-file")) {
-	    	File file = new File(options.valueOf("output-file").toString());
-            	FileWriter writer = new FileWriter(file);
-            	writer.append(new Date() + "\n");
-            	writer.append(printJobs());
-            	writer.flush();
-            	writer.close();
-	    }
+            if (options.has("output-file")) {
+                File file = new File(options.valueOf("output-file").toString());
+                FileWriter writer = new FileWriter(file);
+                writer.append(new Date() + "\n");
+                writer.append(printJobs());
+                writer.flush();
+                writer.close();
+            }
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -156,7 +174,7 @@ public class SgeJobPoll {
             parser.printHelpOn(output);
             return (output.toString());
         } catch (IOException e) {
-            stderr.append(e.getMessage()).append("\n");
+            errPrintln(e.getMessage());
             return (e.getMessage());
         }
     }
@@ -179,30 +197,9 @@ public class SgeJobPoll {
      * @return
      */
     protected Map<Integer, String> findRunningJobs(String jobString) throws SgePollException {
-        Map<Integer, String> jobToName = new HashMap<Integer, String>();
-
-        Pattern pat = Pattern.compile(".*job_name:(.*" + jobString + ")");
-	String listOfJobs;
-	try {
-            listOfJobs = runACommand("qstat");
-	} catch (Exception e) {
-	    System.err.println("qstat :" + e.getMessage());
-	    return jobToName;
-	}
-        for (String s : listOfJobs.split("\\n")) {
-            if (!s.trim().isEmpty() && s.substring(0, 1).matches("^[0-9]")) {
-                String id = s.split("\\s")[0];
-                String jobInfo = runACommand("qstat -j " + id);
-                Matcher mat = pat.matcher(jobInfo);
-                if (mat.find() == true) {
-                    String name = mat.group(1).trim();
-                    jobToName.put(Integer.parseInt(id), name);
-                } else {
-                    System.err.println("No match found in " + id);
-                }
-            }
-        }
-        return jobToName;
+        Pattern pat = Pattern.compile(".*job_number:(.*)");
+        Pattern pat2 = Pattern.compile(".*job_name:(.*)");
+        return findJobs(jobString, "qstat ", pat, pat2);
     }
 
     /**
@@ -213,33 +210,44 @@ public class SgeJobPoll {
      * @return
      */
     protected Map<Integer, String> findFinishedJobs(String jobString) throws SgePollException {
-        Map<Integer, String> jobToName = new HashMap<Integer, String>();
+
+        Pattern pat = Pattern.compile(".*jobnumber(.*)");
+        Pattern pat2 = Pattern.compile(".*jobname(.*)");
 
         StringBuilder st = new StringBuilder();
-        st.append("qacct -j *").append(jobString);
+        st.append("qacct").append(jobString);
         if (options.has("b")) {
-            st.append(" -b ").append(options.valueOf("b"));
+            st.append(" -b ").append(options.valueOf("b")).append(" ");
         }
-	String listOfJobs;
-	try {
-            listOfJobs = runACommand(st.toString());
-	} catch (Exception e) {
-	    System.err.println("qacct -j :"+ e.getMessage());
-	    return jobToName;
-	}
-        Pattern pat = Pattern.compile(".*jobnumber(.*)");
-        Pattern pat2 = Pattern.compile(".*jobname(.*" + jobString + ")");
-        Matcher mat = pat.matcher(listOfJobs);
+
+        return findJobs(jobString, st.toString(), pat, pat2);
+    }
+
+    private Map<Integer, String> findJobs(String jobString, String jobFinder, Pattern jobIdPattern, Pattern jobNamePattern) {
+        Map<Integer, String> jobToName = new HashMap<Integer, String>();
+        String listOfJobs;
+        try {
+            listOfJobs = runACommand(jobFinder + " -j *" + jobString);
+        } catch (SgePollException e) {
+            e.printStackTrace();
+            return jobToName;
+        }
+
+        Matcher mat = jobIdPattern.matcher(listOfJobs);
 
         while (mat.find()) {
             String id = mat.group(1).trim();
-            String jobInfo = runACommand("qacct -j " + id);
-            Matcher mat2 = pat2.matcher(jobInfo);
-            if (mat2.find() == true) {
-                String name = mat.group(1).trim();
-                jobToName.put(Integer.parseInt(id), name);
-            } else {
-                System.err.println("No match found in " + id);
+            try {
+                String jobInfo = runACommand(jobFinder + " -j " + id);
+                Matcher mat2 = jobNamePattern.matcher(jobInfo);
+                if (mat2.find() == true) {
+                    String name = mat.group(1).trim();
+                    jobToName.put(Integer.parseInt(id), name);
+                } else {
+                    outPrintln("No match found in ", id);
+                }
+            } catch (SgePollException e) {
+                continue;
             }
 
         }
@@ -247,16 +255,18 @@ public class SgeJobPoll {
         return jobToName;
     }
 
-    private String runACommand(String st) throws SgePollException {
+    protected String runACommand(String st) throws SgePollException {
         CommandLine command = CommandLine.parse(st);
         Invoker.Result result = Invoker.invoke(command);
-
-        if (result.exit != 0) {
-            stderr.append("Exit value from ").append(st).append(":").append(result.exit).append("\n");
-	    System.out.println("Failed command: "+st);
+        String output = result.output;
+        if (result.exit == 1) {
+            output = "";
+            errPrintln(st, " command returned ", String.valueOf(result.exit), ":", result.output);
+        } else if (result.exit != 0) {
+            errPrintln("Exit value from ", st, ":", String.valueOf(result.exit));
             throw new SgePollException("Command failed: " + st);
         }
-        return result.output;
+        return output;
 
     }
 
@@ -273,23 +283,23 @@ public class SgeJobPoll {
     public void run() {
         Collection<String> tempJobIds = new HashSet<String>(jobIds);
         for (String jobId : tempJobIds) {
-	    JobStatus status = checkStatus(jobId);
+            JobStatus status = checkStatus(jobId);
 
             if (status == JobStatus.RUNNING) {
                 continue;
             } else if (status == JobStatus.LOST) {
-                System.out.println("Job " + jobId + " is temporarily unavailable. Continuing.");
+                errPrintln("Job ", jobId, " is temporarily unavailable. Continuing.");
                 continue;
             } else if (status == JobStatus.SUCCESSFUL) {
             } else {
                 isSuccessful = false;
             }
-            stdout.append(new Date().toString()).append(": Job ").append(jobId).append(" status ").append(status.name()).append("\n");
+            outPrintln(new Date().toString(), ": Job ", jobId, " status ", status.name());
             jobIds.remove(jobId);
 
         }
         if (jobIds.isEmpty()) {
-	    System.out.println("No more jobs!");
+            outPrintln("No more jobs!");
             cancel();
             finish();
         }
@@ -310,11 +320,25 @@ public class SgeJobPoll {
 
     public String printJobs() {
         StringBuilder out = new StringBuilder();
-        out.append("\nJob ID\tJob name\tStatus\n");
+        println(out, "\nJob ID\tJob name\tStatus\n");
         for (String job : mappedJobs.keySet()) {
-            out.append(job).append("\t").append(mappedJobs.get(job)[0]).append("\t").append(mappedJobs.get(job)[1]).append("\n");
+            println(out, job, "\t", mappedJobs.get(job)[0], "\t", mappedJobs.get(job)[1]);
         }
-//        out.append("Failures so far? ").append(isSuccessful);
         return out.toString();
+    }
+
+    private void errPrintln(String... details) {
+        println(stderr, details);
+    }
+
+    private void outPrintln(String... details) {
+        println(stdout, details);
+    }
+
+    private void println(StringBuilder builder, String... details) {
+        for (String detail : details) {
+            builder.append(detail);
+        }
+        builder.append("\n");
     }
 }

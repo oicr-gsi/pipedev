@@ -4,7 +4,10 @@
  */
 package ca.on.oicr.pde.utilities;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
 import org.apache.oozie.action.sge.JobStatus;
 
 /**
@@ -19,13 +22,6 @@ public class SgeOfflinePoll extends SgeJobPoll {
     private Map<Integer, String> finjobs;
     private Map<String, Queue<JobStatus>> status;
 
-    public static void main(String[] args) throws Exception {
-        testSuccess();
-        testFailure();
-        testFailure2();
-        
-    }
-
     public Map<String, Queue<JobStatus>> getStatus() {
         return status;
     }
@@ -36,6 +32,7 @@ public class SgeOfflinePoll extends SgeJobPoll {
 
     public SgeOfflinePoll(String[] args) {
         super(args);
+        setPollInterval(50);
     }
 
     @Override
@@ -69,125 +66,15 @@ public class SgeOfflinePoll extends SgeJobPoll {
         return status.get(jobId).poll();
     }
 
-    public static void testSuccess() throws Exception {
-        try {
-            System.out.println("");
-            SgeOfflinePoll poller = new SgeOfflinePoll(new String[]{"--unique-job-string", "1234", "--output-file", "/tmp/log.txt"}) {
-
-                @Override
-                protected void finish() {
-                    printLogsToStd();
-                    if (isSuccessful == Boolean.TRUE) {
-                        System.err.println("testSuccess\tSUCCESS");
-                    } else if (isSuccessful == Boolean.FALSE) {
-                        System.err.println("testSuccess\tFAIL");
-                    }
-                    done = true;
-                }
-            };
-
-            Map<Integer, String> jobs = new HashMap<Integer, String>();
-            jobs.put(1357, "Job1-1234");
-            jobs.put(85950395, "Job2-1234");
-            poller.setJobs(jobs);
-
-            Map<Integer, String> finjobs = new HashMap<Integer, String>();
-            finjobs.put(46745678, "Job0-1234");
-            poller.setFinjobs(finjobs);
-
-            Map<String, Queue<JobStatus>> status = new HashMap<String, Queue<JobStatus>>();
-            addEntry(status, "1357", JobStatus.RUNNING, JobStatus.RUNNING, JobStatus.RUNNING, JobStatus.RUNNING, JobStatus.SUCCESSFUL);
-            addEntry(status, "85950395", JobStatus.RUNNING, JobStatus.SUCCESSFUL);
-            addEntry(status, "46745678", JobStatus.SUCCESSFUL);
-            poller.setStatus(status);
-
-            poller.runMe();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void testFailure() throws Exception {
-        try {
-            System.out.println("");
-            SgeOfflinePoll poller = new SgeOfflinePoll(new String[]{"--unique-job-string", "1234", "--output-file", "/tmp/log.txt"}) {
-
-                @Override
-                protected void finish() {
-                    printLogsToStd();
-                    if (isSuccessful == Boolean.FALSE) {
-                        System.err.println("testFailure\tSUCCESS");
-                    } else if (isSuccessful == Boolean.TRUE) {
-                        System.err.println("testFailure\tFAIL");
-                    }
-                    done = true;
-                }
-            };
-
-            Map<Integer, String> jobs = new HashMap<Integer, String>();
-            jobs.put(1357, "Job1-1234");
-            jobs.put(85950395, "Job2-1234");
-            poller.setJobs(jobs);
-
-            Map<Integer, String> finjobs = new HashMap<Integer, String>();
-            finjobs.put(46745678, "Job0-1234");
-            poller.setFinjobs(finjobs);
-
-            Map<String, Queue<JobStatus>> status = new HashMap<String, Queue<JobStatus>>();
-            addEntry(status, "1357", JobStatus.RUNNING, JobStatus.RUNNING, JobStatus.FAILED);
-            addEntry(status, "85950395", JobStatus.RUNNING, JobStatus.SUCCESSFUL);
-            addEntry(status, "46745678", JobStatus.SUCCESSFUL);
-            poller.setStatus(status);
-
-            poller.runMe();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    
-    
-        public static void testFailure2() throws Exception {
-        try {
-            System.out.println("");
-            SgeOfflinePoll poller = new SgeOfflinePoll(new String[]{"--unique-job-string", "1234", "--output-file", "/tmp/log.txt"}) {
-
-                @Override
-                protected void finish() {
-                    printLogsToStd();
-                    if (isSuccessful == Boolean.FALSE) {
-                        System.err.println("testFailure2\tSUCCESS");
-                    } else if (isSuccessful == Boolean.TRUE) {
-                        System.err.println("testFailure2\tFAIL");
-                    }
-                    done = true;
-                }
-            };
-
-            Map<Integer, String> jobs = new HashMap<Integer, String>();
-            jobs.put(1357, "Job1-1234");
-            jobs.put(85950395, "Job2-1234");
-            poller.setJobs(jobs);
-
-            Map<Integer, String> finjobs = new HashMap<Integer, String>();
-            finjobs.put(46745678, "Job0-1234");
-            poller.setFinjobs(finjobs);
-
-            Map<String, Queue<JobStatus>> status = new HashMap<String, Queue<JobStatus>>();
-            addEntry(status, "1357", JobStatus.RUNNING, JobStatus.RUNNING, JobStatus.SUCCESSFUL);
-            addEntry(status, "85950395", JobStatus.RUNNING, JobStatus.SUCCESSFUL);
-            addEntry(status, "46745678", JobStatus.EXIT_ERROR);
-            poller.setStatus(status);
-
-            poller.runMe();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    
-
-    private static void addEntry(Map<String, Queue<JobStatus>> status, String jobId, JobStatus... jobStatuses) {
+    public void addEntry(Map<String, Queue<JobStatus>> status, String jobId, JobStatus... jobStatuses) {
         Queue<JobStatus> queue = new LinkedList<JobStatus>();
         queue.addAll(Arrays.asList(jobStatuses));
         status.put(jobId, queue);
+    }
+
+    @Override
+    protected void finish() {
+        printLogsToStd();
+        done = true;
     }
 }
