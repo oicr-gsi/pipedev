@@ -229,7 +229,6 @@ public class SgeJobPoll {
         try {
             listOfJobs = runACommand(jobFinder + " -j *" + jobString);
         } catch (SgePollException e) {
-            e.printStackTrace();
             return jobToName;
         }
 
