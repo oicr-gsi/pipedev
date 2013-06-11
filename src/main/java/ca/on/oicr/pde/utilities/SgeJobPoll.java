@@ -46,8 +46,8 @@ public class SgeJobPoll {
             OptionParser parser = getOptionParser();
             options = parser.parse(this.getParameters());
         } catch (OptionException e) {
-            stderr.append(e.getMessage());
-            stderr.append(get_syntax());
+            stderr.append(e.getMessage()).append("\n");
+            stderr.append(get_syntax()).append("\n");
             throw e;
         }
     }
@@ -63,7 +63,7 @@ public class SgeJobPoll {
                     "unique-job-string", "output-file"
                 }) {
             if (!options.has(option)) {
-                stderr.append(get_syntax());
+                stderr.append(get_syntax()).append("\n");
                 stderr.append("Must include parameter: --").append(option).append("\n");
                 throw new SgePollException("Must include parameter: --" + option);
             }
@@ -83,7 +83,7 @@ public class SgeJobPoll {
             this.mappedJobs.put(id, new String[]{jobs.get(i), ""});
         }
         if (jobs.isEmpty()) {
-            stderr.append("No running jobs were found with string ").append(string);
+            stderr.append("No jobs were found with string ").append(string).append("\n");
             throw new SgePollException("No running jobs were found with string " + string);
         }
     }
@@ -117,12 +117,14 @@ public class SgeJobPoll {
 
     protected void printLogsToOutput() {
         try {
-	    File file = new File(options.valueOf("output-file").toString());
-            FileWriter writer = new FileWriter(file);
-            writer.append(new Date() + "\n");
-            writer.append(printJobs());
-            writer.flush();
-            writer.close();
+	    if (options.has("output-file")) {
+	    	File file = new File(options.valueOf("output-file").toString());
+            	FileWriter writer = new FileWriter(file);
+            	writer.append(new Date() + "\n");
+            	writer.append(printJobs());
+            	writer.flush();
+            	writer.close();
+	    }
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -154,7 +156,7 @@ public class SgeJobPoll {
             parser.printHelpOn(output);
             return (output.toString());
         } catch (IOException e) {
-            stderr.append(e.getMessage());
+            stderr.append(e.getMessage()).append("\n");
             return (e.getMessage());
         }
     }
@@ -180,7 +182,13 @@ public class SgeJobPoll {
         Map<Integer, String> jobToName = new HashMap<Integer, String>();
 
         Pattern pat = Pattern.compile(".*job_name:(.*" + jobString + ")");
-        String listOfJobs = runACommand("qstat");
+	String listOfJobs;
+	try {
+            listOfJobs = runACommand("qstat");
+	} catch (Exception e) {
+	    System.err.println("qstat :" + e.getMessage());
+	    return jobToName;
+	}
         for (String s : listOfJobs.split("\\n")) {
             if (!s.trim().isEmpty() && s.substring(0, 1).matches("^[0-9]")) {
                 String id = s.split("\\s")[0];
@@ -212,7 +220,13 @@ public class SgeJobPoll {
         if (options.has("b")) {
             st.append(" -b ").append(options.valueOf("b"));
         }
-        String listOfJobs = runACommand(st.toString());
+	String listOfJobs;
+	try {
+            listOfJobs = runACommand(st.toString());
+	} catch (Exception e) {
+	    System.err.println("qacct -j :"+ e.getMessage());
+	    return jobToName;
+	}
         Pattern pat = Pattern.compile(".*jobnumber(.*)");
         Pattern pat2 = Pattern.compile(".*jobname(.*" + jobString + ")");
         Matcher mat = pat.matcher(listOfJobs);
@@ -238,7 +252,7 @@ public class SgeJobPoll {
         Invoker.Result result = Invoker.invoke(command);
 
         if (result.exit != 0) {
-            stderr.append("Exit value from ").append(st).append(":").append(result.exit);
+            stderr.append("Exit value from ").append(st).append(":").append(result.exit).append("\n");
 	    System.out.println("Failed command: "+st);
             throw new SgePollException("Command failed: " + st);
         }
