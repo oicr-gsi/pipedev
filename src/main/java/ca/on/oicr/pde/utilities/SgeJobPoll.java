@@ -30,7 +30,7 @@ public class SgeJobPoll {
     public Boolean isSuccessful = null;
     public boolean done = false;
     private int pollInterval = 5000;
-    
+
     /**
      * Get the value of pollInterval
      *
@@ -51,13 +51,13 @@ public class SgeJobPoll {
 
     public static void main(String[] args) throws Exception {
 
-	try {
-        SgeJobPoll app = new SgeJobPoll(args);
-        app.runMe();
-	} catch(Exception e) {
-	   System.err.println("Erred out with status: "+e.getMessage());
-	   System.exit(-1);
-	}
+        try {
+            SgeJobPoll app = new SgeJobPoll(args);
+            app.runMe();
+        } catch (Exception e) {
+            System.err.println("Erred out with status: " + e.getMessage());
+            System.exit(-1);
+        }
     }
 
     public SgeJobPoll(String[] args) {
@@ -115,15 +115,15 @@ public class SgeJobPoll {
 
     public void runMe() throws Exception {
         try {
-	    System.out.println("Initializing");
+            System.out.println("Initializing");
             init();
-	    System.out.println("Verifying parameters");
+            System.out.println("Verifying parameters");
             verifyParameters();
-	    System.out.println("Finding jobs");
+            System.out.println("Finding jobs");
             verifyInput();
             while (!done) {
                 try {
-		    System.out.println(new java.util.Date().toString() + ": Running");
+                    System.out.println(new java.util.Date().toString() + ": Running");
                     this.run();
                     Thread.sleep(pollInterval);
                 } catch (Exception e) {
