@@ -50,13 +50,14 @@ public class SgeJobPoll {
     }
 
     public static void main(String[] args) throws Exception {
-        try {
+
+	try {
         SgeJobPoll app = new SgeJobPoll(args);
         app.runMe();
-        } catch (Exception e) {
-            System.exit(-1);
-        }
-        
+	} catch(Exception e) {
+	   System.err.println("Erred out with status: "+e.getMessage());
+	   System.exit(-1);
+	}
     }
 
     public SgeJobPoll(String[] args) {
@@ -114,11 +115,15 @@ public class SgeJobPoll {
 
     public void runMe() throws Exception {
         try {
+	    System.out.println("Initializing");
             init();
+	    System.out.println("Verifying parameters");
             verifyParameters();
+	    System.out.println("Finding jobs");
             verifyInput();
             while (!done) {
                 try {
+		    System.out.println(new java.util.Date().toString() + ": Running");
                     this.run();
                     Thread.sleep(pollInterval);
                 } catch (Exception e) {
@@ -220,7 +225,7 @@ public class SgeJobPoll {
         Pattern pat2 = Pattern.compile(".*jobname(.*)");
 
         StringBuilder st = new StringBuilder();
-        st.append("qacct").append(jobString);
+        st.append("qacct ");
         if (options.has("b")) {
             st.append(" -b ").append(options.valueOf("b")).append(" ");
         }
