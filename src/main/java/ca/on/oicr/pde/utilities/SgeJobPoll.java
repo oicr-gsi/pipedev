@@ -50,8 +50,13 @@ public class SgeJobPoll {
     }
 
     public static void main(String[] args) throws Exception {
+	try {
         SgeJobPoll app = new SgeJobPoll(args);
         app.runMe();
+	} catch(Exception e) {
+	   System.err.println("Erred out with status: "+e.getMessage());
+	   System.exit(-1);
+	}
     }
 
     public SgeJobPoll(String[] args) {
@@ -219,7 +224,7 @@ public class SgeJobPoll {
         Pattern pat2 = Pattern.compile(".*jobname(.*)");
 
         StringBuilder st = new StringBuilder();
-        st.append("qacct").append(jobString);
+        st.append("qacct ");
         if (options.has("b")) {
             st.append(" -b ").append(options.valueOf("b")).append(" ");
         }
