@@ -109,11 +109,15 @@ public class SgeJobPoll {
 
     public void runMe() throws Exception {
         try {
+	    System.out.println("Initializing");
             init();
+	    System.out.println("Verifying parameters");
             verifyParameters();
+	    System.out.println("Finding jobs");
             verifyInput();
             while (!done) {
                 try {
+		    System.out.println(new java.util.Date().toString() + ": Running");
                     this.run();
                     Thread.sleep(pollInterval);
                 } catch (Exception e) {
