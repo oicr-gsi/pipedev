@@ -50,8 +50,13 @@ public class SgeJobPoll {
     }
 
     public static void main(String[] args) throws Exception {
+        try {
         SgeJobPoll app = new SgeJobPoll(args);
         app.runMe();
+        } catch (Exception e) {
+            System.exit(-1);
+        }
+        
     }
 
     public SgeJobPoll(String[] args) {
