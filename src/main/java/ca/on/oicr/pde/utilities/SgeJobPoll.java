@@ -16,73 +16,140 @@ import org.apache.oozie.action.sge.JobStatus;
 import org.apache.oozie.action.sge.StatusChecker;
 
 /**
+ * <p>Monitors the status of jobs submitted to the SGE cluster. Searches in both
+ * qstat and qacct for jobs with the given identifier, provided on the command
+ * line. It then monitors those jobs, polling every few seconds until they
+ * complete.</p>
  *
+ * <p>In any particular round of polling, if the job is running, it is ignored.
+ * If the job is successful, log its changed status and remove it from the pool
+ * of polled jobs. If the job is completed in any other way, log its status,
+ * remove it from the pool, and log its failed status.</p>
+ *
+ * <p>Jobs may occasionally have transient errors, which usually occur when they
+ * transition from running to finished (move from qstat to qacct). This abnormal
+ * only when the state persists for longer than a few minutes.</p>
+ *
+ * @author Morgan Taschuk
  */
 public class SgeJobPoll {
 
-    protected StringBuilder stderr = new StringBuilder();
-    protected StringBuilder stdout = new StringBuilder();
+    private StringBuilder stderr = new StringBuilder();
+    private StringBuilder stdout = new StringBuilder();
     private Map<Integer, String> jobs;
     private OptionSet options;
-    private String[] parameters;
+//    private String[] parameters;
     private Collection<String> jobIds;
     private Map<String, String[]> mappedJobs;
-    public Boolean isSuccessful = null;
-    public boolean done = false;
+    private Boolean isSuccessful = null;
+    private boolean done = false;
     private int pollInterval = 5000;
 
     /**
-     * Get the value of pollInterval
+     * Get the polling interval in milliseconds.
      *
-     * @return the value of pollInterval
+     * @return the polling interval. Default is 5000.
      */
     public int getPollInterval() {
         return pollInterval;
     }
 
     /**
-     * Set the value of pollInterval
+     * Set the polling interval in milliseconds.
      *
-     * @param pollInterval new value of pollInterval
+     * @param pollInterval new polling interval
      */
     protected void setPollInterval(int pollInterval) {
         this.pollInterval = pollInterval;
     }
 
-    public static void main(String[] args) throws Exception {
+    /**
+     * Returns if the polling is completed.
+     *
+     * @return true if completed, false if still polling
+     */
+    public boolean isDone() {
+        return done;
+    }
 
+    /**
+     * Set whether the polling is completed. Setting this value to true will
+     * cause the polling to stop.
+     *
+     * @param done whether the polling is completed
+     */
+    protected void setDone(boolean done) {
+        this.done = done;
+    }
+
+    /**
+     * Returns whether the jobs completed successfully or not. This value is
+     * null if polling is not completed.
+     *
+     * @return true if the jobs all succeeded, false if one or more jobs failed,
+     * or null if the jobs are not complete.
+     */
+    public Boolean isSuccessful() {
+        return isSuccessful;
+    }
+
+    /**
+     * Set whether the jobs completed successfully or not. Can be used in
+     * conjunction with setDone to modify the behaviour of the poller.
+     *
+     * @param isSuccessful true if the jobs all succeeded, false if one or more
+     * jobs failed, and null if the jobs are still running
+     */
+    protected void setSuccessful(Boolean isSuccessful) {
+        this.isSuccessful = isSuccessful;
+    }
+
+    /**
+     * Creates a new SgeJobPoll object and executes the runMe() method. Catches
+     * any exceptions thrown and exits with error code 15.
+     *
+     * @param args command line arguments
+     */
+    public static void main(String[] args) {
         try {
             SgeJobPoll app = new SgeJobPoll(args);
             app.runMe();
         } catch (Exception e) {
             System.err.println("Erred out with status: " + e.getMessage());
-            System.exit(-1);
+            System.exit(15);
         }
+        System.err.println("Program finished unexpectedly");
+        System.exit(-1);
     }
 
+    /**
+     * Constructor for SgeJobPoll. Initializes variables and parses the command
+     * line arguments.
+     *
+     * @param args the command line arguments
+     */
     public SgeJobPoll(String[] args) {
-        this.parameters = args;
         this.jobIds = new HashSet<String>();
         this.mappedJobs = new HashMap<String, String[]>();
-    }
-
-    protected void init() throws OptionException {
         try {
             OptionParser parser = getOptionParser();
-            options = parser.parse(this.getParameters());
+            options = parser.parse(args);
         } catch (OptionException e) {
-            errPrintln(e.getMessage());
-            errPrintln(get_syntax());
+            stderr.append(e.getMessage()).append("\n");
+            stderr.append(get_syntax()).append("\n");
             throw e;
         }
     }
 
     /**
-     * Verifies that the parameters make sense
+     * Verifies that the arguments given on the command line make sense.
+     * Specifies that 'unique-job-string' and 'output-file' are required
+     * arguments.
      *
-     * @return a ReturnValue object
+     * @throws SgePollException when the required arguments are not provided
      */
     private void verifyParameters() throws SgePollException {
+        System.out.println("Verifying parameters");
         // now look at the options and make sure they make sense
         for (String option : new String[]{
                     "unique-job-string", "output-file"
@@ -96,6 +163,7 @@ public class SgeJobPoll {
     }
 
     private void verifyInput() throws SgePollException {
+        System.out.println("Finding jobs");
         String string = (String) options.valueOf("unique-job-string");
         outPrintln("Starting polling on jobs with extension ", string);
         jobs = findRunningJobs(string);
@@ -113,17 +181,21 @@ public class SgeJobPoll {
         }
     }
 
+    /**
+     * Monitors the status of jobs submitted to the cluster. If the job is
+     * running, ignore it and move on. If the job is successful, log its changed
+     * status and remove it from the pool. If the job is completed in any other
+     * way, log its status, remove it from the pool, and set the class to failed
+     *
+     * @throws Exception if the command line arguments are not correct, if no
+     * jobs can be found, or if there is some other error while polling.
+     */
     public void runMe() throws Exception {
         try {
-            System.out.println("Initializing");
-            init();
-            System.out.println("Verifying parameters");
             verifyParameters();
-            System.out.println("Finding jobs");
             verifyInput();
             while (!done) {
                 try {
-                    System.out.println(new java.util.Date().toString() + ": Running");
                     this.run();
                     Thread.sleep(pollInterval);
                 } catch (Exception e) {
@@ -138,12 +210,16 @@ public class SgeJobPoll {
         }
     }
 
+    /**
+     * Prints the stdout and stderr that have been captured thus far to the
+     * command line.
+     */
     protected void printLogsToStd() {
         System.out.println(stdout.toString());
         System.err.println(stderr.toString());
     }
 
-    protected void printLogsToOutput() {
+    private void printLogsToOutput() {
         try {
             if (options.has("output-file")) {
                 File file = new File(options.valueOf("output-file").toString());
@@ -158,6 +234,11 @@ public class SgeJobPoll {
         }
     }
 
+    /**
+     * Prints the logs to standard out, prints to the log file, and exits the
+     * poller with an exit status if any jobs failed. Exits with 15 if any jobs
+     * failed, with 1 if the success was not determined, and 0 otherwise.
+     */
     protected void finish() {
         printLogsToStd();
         printLogsToOutput();
@@ -165,6 +246,10 @@ public class SgeJobPoll {
             new SgePollException("SGE jobs failed or are in an inconsistent "
                     + "state. See the extended log for details.").printStackTrace();
             System.exit(15);
+        } else if (isSuccessful == null) {
+            new SgePollException("Polling was not completed or isSuccessful was "
+                    + "not set").printStackTrace();
+            System.exit(1);
         }
         System.exit(0);
     }
@@ -264,6 +349,13 @@ public class SgeJobPoll {
         return jobToName;
     }
 
+    /**
+     * Runs a command on the command line. Ignores exit code 1 as an acceptable error.
+     * @param st the command to run
+     * @return the text result from the executed command, or empty string if it exited with a 1.
+     * @throws SgePollException if the command execution returns an exit code 
+     * other than 0 or 1.
+     */
     protected String runACommand(String st) throws SgePollException {
         CommandLine command = CommandLine.parse(st);
         Invoker.Result result = Invoker.invoke(command);
@@ -279,17 +371,8 @@ public class SgeJobPoll {
 
     }
 
-    public String[] getParameters() {
-        return parameters;
-    }
-
-    /**
-     * Monitors the status of jobs submitted to the cluster. If the job is
-     * running, ignore it and move on. If the job is successful, log its changed
-     * status and remove it from the pool. If the job is completed in any other
-     * way, log its status, remove it from the pool, and set the class to failed
-     */
-    public void run() {
+    private void run() {
+        System.out.println(new java.util.Date().toString() + ": Running");
         Collection<String> tempJobIds = new HashSet<String>(jobIds);
         for (String jobId : tempJobIds) {
             JobStatus status = checkStatus(jobId);
@@ -297,7 +380,7 @@ public class SgeJobPoll {
             if (status == JobStatus.RUNNING) {
                 continue;
             } else if (status == JobStatus.LOST) {
-                errPrintln("Job ", jobId, " is temporarily unavailable. Continuing.");
+                System.out.println("Job " + jobId + " is temporarily unavailable. Continuing.");
                 continue;
             } else if (status == JobStatus.SUCCESSFUL) {
             } else {
@@ -314,20 +397,26 @@ public class SgeJobPoll {
         }
     }
 
-    public void cancel() {
+    private void cancel() {
         if (isSuccessful == null) {
             isSuccessful = Boolean.TRUE;
         }
         done = true;
     }
 
-    public JobStatus checkStatus(String jobId) {
+    /**
+     * Check the JobStatus of the particular job ID.
+     *
+     * @param jobId the job number
+     * @return the Job Status
+     */
+    protected JobStatus checkStatus(String jobId) {
         StatusChecker.Result result = StatusChecker.check(jobId);
         mappedJobs.get(jobId)[1] = result.status.name();
         return result.status;
     }
 
-    public String printJobs() {
+    private String printJobs() {
         StringBuilder out = new StringBuilder();
         println(out, "\nJob ID\tJob name\tStatus\n");
         for (String job : mappedJobs.keySet()) {
@@ -336,11 +425,22 @@ public class SgeJobPoll {
         return out.toString();
     }
 
-    private void errPrintln(String... details) {
+    /**
+     * Append a line with the given arguments to the standard error log. This will only be printed when
+     * execution is completed.
+     *
+     * @param details Strings to append in a single line to the stderr log.
+     */
+    protected void errPrintln(String... details) {
         println(stderr, details);
     }
-
-    private void outPrintln(String... details) {
+    /**
+     * Append a line with the given arguments to the standard out log. This will only be printed when
+     * execution is completed.
+     *
+     * @param details Strings to append in a single line to the stdout log.
+     */
+    protected void outPrintln(String... details) {
         println(stdout, details);
     }
 

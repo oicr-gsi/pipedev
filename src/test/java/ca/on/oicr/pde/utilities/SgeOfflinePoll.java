@@ -75,6 +75,6 @@ public class SgeOfflinePoll extends SgeJobPoll {
     @Override
     protected void finish() {
         printLogsToStd();
-        done = true;
+        setDone(true);
     }
 }

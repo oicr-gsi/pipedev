@@ -37,7 +37,7 @@ public class SgeJobPollTest extends TestCase {
             @Override
             protected void finish() {
                 printLogsToStd();
-                done = true;
+                setDone(true);
             }
 
             @Override
@@ -46,7 +46,7 @@ public class SgeJobPollTest extends TestCase {
                 throw e;
             }
         };
-        errorPoller.init();
+        
         Assert.assertTrue("Finished jobs not empty?", errorPoller.findFinishedJobs("1234").isEmpty());
         Assert.assertTrue("Running jobs not empty?", errorPoller.findRunningJobs("1234").isEmpty());
     }
@@ -79,7 +79,7 @@ public class SgeJobPollTest extends TestCase {
             @Override
             protected void finish() {
                 printLogsToStd();
-                done = true;
+                setDone(true);
             }
 
             @Override
@@ -96,7 +96,7 @@ public class SgeJobPollTest extends TestCase {
                 }
             }
         };
-        errorPoller.init();
+        
         Map<Integer, String> jobs = errorPoller.findRunningJobs("1234");
         Assert.assertEquals("Wrong number of jobs!", 2, jobs.size());
         Assert.assertNotNull("Job doesn't exist", jobs.get(9608118));
@@ -134,7 +134,7 @@ public class SgeJobPollTest extends TestCase {
             @Override
             protected void finish() {
                 printLogsToStd();
-                done = true;
+                setDone(true);
             }
 
             @Override
@@ -151,7 +151,7 @@ public class SgeJobPollTest extends TestCase {
                 }
             }
         };
-        errorPoller.init();
+        
         Map<Integer, String> jobs = errorPoller.findFinishedJobs("1234");
         Assert.assertEquals("Wrong number of jobs!", 2, jobs.size());
         Assert.assertNotNull("Job doesn't exist", jobs.get(9615552));
@@ -195,7 +195,7 @@ public class SgeJobPollTest extends TestCase {
         poller.addEntry(status, "46745678", JobStatus.SUCCESSFUL);
         poller.setStatus(status);
         poller.runMe();
-        Assert.assertTrue("One of the jobs failed when they should have succeeded", poller.isSuccessful);
+        Assert.assertTrue("One of the jobs failed when they should have succeeded", poller.isSuccessful());
     }
 
     public void testFailedRunningJob() throws Exception {
@@ -217,7 +217,7 @@ public class SgeJobPollTest extends TestCase {
         poller.setStatus(status);
 
         poller.runMe();
-        Assert.assertFalse("Poller didn't find failed running job", poller.isSuccessful);
+        Assert.assertFalse("Poller didn't find failed running job", poller.isSuccessful());
     }
 
     public void testFailedFinishedJob() throws Exception {
@@ -239,7 +239,7 @@ public class SgeJobPollTest extends TestCase {
         poller.setStatus(status);
 
         poller.runMe();
-        Assert.assertFalse("Poller did not find failed finished job", poller.isSuccessful);
+        Assert.assertFalse("Poller did not find failed finished job", poller.isSuccessful());
     }
 
     public void testFailedRunningAndFinishedJobs() throws Exception {
@@ -261,6 +261,6 @@ public class SgeJobPollTest extends TestCase {
         poller.setStatus(status);
 
         poller.runMe();
-        Assert.assertFalse("Poller did not find failed running and/or finished jobs", poller.isSuccessful);
+        Assert.assertFalse("Poller did not find failed running and/or finished jobs", poller.isSuccessful());
     }
 }
