@@ -243,13 +243,15 @@ public class SgeJobPoll {
         printLogsToStd();
         printLogsToOutput();
         if (isSuccessful != null && !isSuccessful) {
-            new SgePollException("SGE jobs failed or are in an inconsistent "
-                    + "state. See the extended log for details.").printStackTrace();
+            System.err.println("SGE jobs failed or are in an inconsistent "
+                    + "state. See the extended log for details.");
+	    System.err.println(printJobs());
             System.exit(15);
         } else if (isSuccessful == null) {
-            new SgePollException("Polling was not completed or isSuccessful was "
-                    + "not set").printStackTrace();
-            System.exit(1);
+            System.err.println("Polling was not completed or isSuccessful was "
+                    + "not set");
+            System.err.println(printJobs());
+	    System.exit(1);
         }
         System.exit(0);
     }
@@ -335,7 +337,7 @@ public class SgeJobPoll {
                 String jobInfo = runACommand(jobFinder + " -j " + id);
                 Matcher mat2 = jobNamePattern.matcher(jobInfo);
                 if (mat2.find() == true) {
-                    String name = mat.group(1).trim();
+                    String name = mat2.group(1).trim();
                     jobToName.put(Integer.parseInt(id), name);
                 } else {
                     outPrintln("No match found in ", id);
