@@ -1,0 +1,137 @@
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ca.on.oicr.pde</groupId>
+    <artifactId>workflow-utilities</artifactId>
+    <version>1.3-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>workflows</name>
+    <url>http://maven.apache.org</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <seqware-version>0.13.6.14</seqware-version>
+        <skipITs>true</skipITs>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+                <configuration>
+                    <links>
+                        <link>http://seqware.github.io/javadoc/stable/apidocs/</link>
+                    </links>
+                    <reportOutputDirectory>/.mounts/labs/PDE/web/${project.artifactId}/${project.version}</reportOutputDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.16</version>
+                <!--                <dependencies>
+                                        <dependency>
+                        <groupId>org.apache.maven.surefire</groupId>
+                        <artifactId>surefire-junit3</artifactId>
+                        <version>2.16</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.maven.surefire</groupId>
+                        <artifactId>surefire-testng</artifactId>
+                        <version>2.16</version>
+                    </dependency>
+                </dependencies>-->
+                <configuration>
+                    <!--<skip>${skipITs}</skip>-->
+                    <excludes>
+                        <exclude>**/ca/on/oicr/pde/common/*.java</exclude>
+                    </excludes>
+                    <systemPropertyVariables>
+                        <!--                        <regressionTestDataDir>/.mounts/labs/PDE/data/RegressionTests/workflows/BamQC/</regressionTestDataDir>
+                        <bundledJava>${project.build.directory}/Workflow_Bundle_${workflow-directory-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-directory-name}/${project.version}/bin/jre1.6.0_29/bin/java</bundledJava>
+                        <bundledSeqware>${project.build.directory}/Workflow_Bundle_${workflow-directory-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-directory-name}/${project.version}/lib/seqware-distribution-${seqware-version}-full.jar</bundledSeqware>
+                        <bundledWorkflow>${project.build.directory}/Workflow_Bundle_${workflow-directory-name}_${project.version}_SeqWare_${seqware-version}/</bundledWorkflow>
+                        <workflowName>${workflow-directory-name}</workflowName>
+                        <workflowVersion>${project.version}</workflowVersion>-->
+                        <!--<workingDirectory>/tmp</workingDirectory>-->
+                    </systemPropertyVariables>
+                    <!--                    <suiteXmlFiles>
+                        <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                    </suiteXmlFiles>-->
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <!--        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
+        </dependency>-->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.8.7</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-pipeline</artifactId>
+            <version>${seqware-version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-exec</artifactId>
+            <version>1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.3</version>
+        </dependency>
+    </dependencies>
+    <repositories>
+        <repository>
+            <id>com.github.seqware</id>
+            <name>SeqWare Maven Repository</name>
+            <url>http://seqwaremaven.oicr.on.ca/artifactory/seqware-release</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+</project>
+
