@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ca.on.oicr.pde</groupId>
+    <artifactId>decider-utilities</artifactId>
+    <version>1.4.3</version>
+    <packaging>jar</packaging>
+
+    <name>decider-utilities</name>
+    <url>http://maven.apache.org</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <seqware-version>0.13.6.10</seqware-version>
+	<workflow-version>1.1</workflow-version>
+    </properties>
+
+    <build>
+	<!--<finalName>Decider_${project.version}_${project.artifactId}_${workflow-version}_SeqWare_${seqware-version}</finalName>-->
+        <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>2.3.2</version>
+            <configuration>
+                <source>1.6</source>
+                <target>1.6</target>
+            </configuration>
+        </plugin>
+	<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+                <configuration>
+                        <links><link>http://seqware.github.io/javadoc/stable/apidocs/</link></links>
+                        <reportOutputDirectory>/.mounts/labs/PDE/web/${project.artifactId}/${project.version}</reportOutputDirectory>
+                </configuration>
+            </plugin>
+    </plugins>
+</build>
+
+<dependencies>
+    <dependency>
+        <groupId>com.github.seqware</groupId>
+        <artifactId>seqware-distribution</artifactId>
+        <version>${seqware-version}</version>
+        <classifier>full</classifier>
+        <scope>provided</scope>
+    </dependency>
+</dependencies>
+
+<repositories>
+    <repository>
+        <id>seqware.sourceforge.net</id>
+        <name>SeqWare Maven Repository</name>
+        <url>http://seqwaremaven.oicr.on.ca/artifactory/seqware-release</url>
+        <releases>
+            <enabled>true</enabled>
+        </releases>
+        <snapshots>
+            <enabled>false</enabled>
+        </snapshots>
+    </repository>
+    <repository>
+        <id>seqware.github.com</id>
+        <name>SeqWare Maven Snapshot Repository</name>
+        <url>http://seqwaremaven.oicr.on.ca/artifactory/seqware-snapshot</url>
+        <releases>
+            <enabled>true</enabled>
+        </releases>
+        <snapshots>
+            <enabled>true</enabled>
+        </snapshots>
+    </repository>
+    <repository>
+      <id>seqwaremaven.oicr.on.ca</id>
+      <name>seqwaremaven.oicr.on.ca-releases</name>
+      <url>http://206.108.121.137/artifactory/seqware-dependencies</url>
+    </repository>
+ </repositories>
+
+</project>
