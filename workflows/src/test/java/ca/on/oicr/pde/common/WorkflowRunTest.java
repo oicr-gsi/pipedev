@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
+import net.sourceforge.seqware.pipeline.runner.PluginRunner;
 import org.testng.Assert;
 import org.testng.annotations.*;
 import org.apache.commons.exec.CommandLine;
@@ -36,6 +37,8 @@ public class WorkflowRunTest implements org.testng.ITest {
     private File compareMetricsScript;
 
     private Map<String, String> environmentVariables;
+
+    private File workflowOutputDirectory;
 
     static {
 
@@ -94,10 +97,10 @@ public class WorkflowRunTest implements org.testng.ITest {
 
         String prefix = new SimpleDateFormat("yyMMdd_HHmm").format(new Date()) + "_";
         String suffix = ""; //"_" + UUID.randomUUID().toString().replace("-", "").substring(0, 4);
-        
+
         testWorkingDirectory = new File(workingDirectory + "/" + prefix + getTestName() + suffix + "/");
         testWorkingDirectory.mkdir();
-        
+
         print(String.format("Bundled Workflow Path=[%s]\n"
                 + "Seqware Distribution=[%s]\n"
                 + "Seqware INI File=[%s]\n"
@@ -128,7 +131,7 @@ public class WorkflowRunTest implements org.testng.ITest {
         command.append(" ").append(schedulingSystem);
         command.append(" ").append(schedulingHost);
 
-        String seqwareSettingsPath = executeCommand(command.toString());
+        String seqwareSettingsPath = executeCommand(command.toString(), testWorkingDirectory);
         Assert.assertTrue(FileUtils.getFile(seqwareSettingsPath).exists(), "Generate seqware settings failed - please verify seqwareDirectory is accessible");
 
         //Record seqware setting file path for execute workflow step
@@ -156,14 +159,14 @@ public class WorkflowRunTest implements org.testng.ITest {
         command.append(" --output_prefix ").append(testWorkingDirectory).append("/");
         command.append(" --output_dir ").append("output");
 
-        executeCommand(command.toString(), environmentVariables);
-
+        executeCommand(command.toString(), testWorkingDirectory, environmentVariables);
+        
     }
 
     @Test(dependsOnMethods = "executeWorkflow", enabled = true)
     public void checkWorkflowOutputExists() {
 
-        File workflowOutputDirectory = new File(testWorkingDirectory + "/output/");
+        workflowOutputDirectory = new File(testWorkingDirectory + "/output/");
         Assert.assertTrue(workflowOutputDirectory.exists() && workflowOutputDirectory.isDirectory(),
                 String.format("The workflow output directory [%s] is not accessible.", workflowOutputDirectory));
 
@@ -173,9 +176,9 @@ public class WorkflowRunTest implements org.testng.ITest {
     public void compareOutputToExpected() throws IOException {
 
         StringBuilder command = new StringBuilder();
-        command.append(compareMetricsScript + " " + "<(" + calculateMetricsScript + " " + testWorkingDirectory + "/output" + ")" + " " + outputExpectationFile);
+        command.append(compareMetricsScript + " " + "<(" + calculateMetricsScript + " " + workflowOutputDirectory + ")" + " " + outputExpectationFile);
 
-        executeCommand(command.toString());
+        executeCommand(command.toString(), workflowOutputDirectory);
 
     }
 
@@ -214,7 +217,7 @@ public class WorkflowRunTest implements org.testng.ITest {
 
     }
 
-    private String executeCommand(String command, Map<String, String>... environmentVariables) throws IOException {
+    private String executeCommand(String command, File workingDirectory, Map<String, String>... environmentVariables) throws IOException {
 
         CommandLine c = new CommandLine("/bin/bash");
         c.addArgument("-c");
@@ -225,8 +228,9 @@ public class WorkflowRunTest implements org.testng.ITest {
         for (Map<String, String> e : environmentVariables) {
             cr.addEnvironmentVariable(e);
         }
+        cr.setWorkingDirectory(workingDirectory);
 
-        print("Executing:\n" + command.toString());
+        print("Executing (with initial directory: " + workingDirectory + "):\n" + command.toString());
 
         CommandResult r = cr.runCommand();
         Assert.assertTrue(r.getExitCode() == 0,
