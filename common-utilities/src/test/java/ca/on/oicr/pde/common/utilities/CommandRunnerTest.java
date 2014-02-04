@@ -1,6 +1,7 @@
-package ca.on.oicr.pde.utilities.workflows;
+package ca.on.oicr.pde.common.utilities;
 
-import ca.on.oicr.pde.common.CommandRunner;
+import ca.on.oicr.pde.common.utilities.CommandRunner;
+import ca.on.oicr.pde.common.utilities.CommandRunner;
 import java.io.File;
 import java.io.IOException;
 import org.apache.commons.exec.CommandLine;
