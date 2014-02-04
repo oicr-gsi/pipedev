@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package ca.on.oicr.pde.deciders;
 
 import java.util.HashMap;
@@ -10,8 +6,8 @@ import net.sourceforge.seqware.common.hibernate.FindAllTheFiles.Header;
 import net.sourceforge.seqware.common.module.FileMetadata;
 import net.sourceforge.seqware.common.module.ReturnValue;
 import net.sourceforge.seqware.common.util.Log;
-import org.junit.*;
-
+import org.testng.annotations.*;
+import org.testng.Assert;
 /**
  *
  * @author mtaschuk
@@ -29,11 +25,11 @@ public class AttributesTest {
     public static void tearDownClass() throws Exception {
     }
 
-    @Before
+    @BeforeClass
     public void setUp() {
     }
 
-    @After
+    @AfterClass
     public void tearDown() {
     }
 
@@ -63,17 +59,17 @@ public class AttributesTest {
         ret.setAttributes(atts);
         
         FileAttributes attributes = new FileAttributes(ret,fm);
-        Assert.assertEquals(atts.get(Header.IUS_TAG.getTitle()), attributes.getBarcode());
-        Assert.assertEquals(donor, attributes.getDonor());
-        Assert.assertEquals(atts.get(Header.EXPERIMENT_NAME.getTitle()), attributes.getExperiment());
-        //Assert.assertEquals(fm.getSize().longValue(), attributes.getFileSize().longValue());
-        //Assert.assertEquals(Integer.parseInt(atts.get(Header.LANE_NUM.getTitle())), attributes.getLane());
-        Assert.assertEquals(atts.get(Header.SAMPLE_NAME.getTitle()), attributes.getLibrarySample());
-        Assert.assertEquals(fm.getMd5sum(), attributes.getMd5());
-        Assert.assertEquals(fm.getMetaType(), attributes.getMetatype());
-        Assert.assertEquals(fm.getFilePath(), attributes.getPath());
-        Assert.assertEquals(atts.get(Header.SEQUENCER_RUN_NAME.getTitle()), attributes.getSequencerRun());
-        Assert.assertEquals(atts.get(Header.STUDY_TITLE.getTitle()), attributes.getStudy());
+        Assert.assertEquals(attributes.getBarcode(), atts.get(Header.IUS_TAG.getTitle()));
+        Assert.assertEquals(attributes.getDonor(), donor);
+        Assert.assertEquals(attributes.getExperiment(), atts.get(Header.EXPERIMENT_NAME.getTitle()));
+        //assertEquals(fm.getSize().longValue(), attributes.getFileSize().longValue());
+        //assertEquals(Integer.parseInt(atts.get(Header.LANE_NUM.getTitle())), attributes.getLane());
+        Assert.assertEquals(attributes.getLibrarySample(), atts.get(Header.SAMPLE_NAME.getTitle()));
+        Assert.assertEquals(attributes.getMd5(), fm.getMd5sum());
+        Assert.assertEquals(attributes.getMetatype(), fm.getMetaType());
+        Assert.assertEquals(attributes.getPath(), fm.getFilePath());
+        Assert.assertEquals(attributes.getSequencerRun(), atts.get(Header.SEQUENCER_RUN_NAME.getTitle()));
+        Assert.assertEquals(attributes.getStudy(), atts.get(Header.STUDY_TITLE.getTitle()));
     }
     
         @Test
@@ -102,17 +98,17 @@ public class AttributesTest {
         ret.setAttributes(atts);
         
         FileAttributes attributes = new FileAttributes(ret,fm);
-        Assert.assertEquals(atts.get(Header.IUS_TAG.getTitle()), attributes.getBarcode());
-//        Assert.assertEquals(donor, attributes.getDonor());
-        Assert.assertEquals(atts.get(Header.EXPERIMENT_NAME.getTitle()), attributes.getExperiment());
-        //Assert.assertEquals(fm.getSize().longValue(), attributes.getFileSize().longValue());
-        //Assert.assertEquals(Integer.parseInt(atts.get(Header.LANE_NUM.getTitle())), attributes.getLane());
-        Assert.assertEquals(atts.get(Header.SAMPLE_NAME.getTitle()), attributes.getLibrarySample());
-        Assert.assertEquals(fm.getMd5sum(), attributes.getMd5());
-        Assert.assertEquals(fm.getMetaType(), attributes.getMetatype());
-        Assert.assertEquals(fm.getFilePath(), attributes.getPath());
-        Assert.assertEquals(atts.get(Header.SEQUENCER_RUN_NAME.getTitle()), attributes.getSequencerRun());
-        Assert.assertEquals(atts.get(Header.STUDY_TITLE.getTitle()), attributes.getStudy());
+        Assert.assertEquals(attributes.getBarcode(), atts.get(Header.IUS_TAG.getTitle()));
+//        assertEquals(donor, attributes.getDonor());
+        Assert.assertEquals(attributes.getExperiment(), atts.get(Header.EXPERIMENT_NAME.getTitle()));
+        //assertEquals(fm.getSize().longValue(), attributes.getFileSize().longValue());
+        //assertEquals(Integer.parseInt(atts.get(Header.LANE_NUM.getTitle())), attributes.getLane());
+        Assert.assertEquals(attributes.getLibrarySample(), atts.get(Header.SAMPLE_NAME.getTitle()));
+        Assert.assertEquals(attributes.getMd5(), fm.getMd5sum());
+        Assert.assertEquals(attributes.getMetatype(), fm.getMetaType());
+        Assert.assertEquals(attributes.getPath(), fm.getFilePath());
+        Assert.assertEquals(attributes.getSequencerRun(), atts.get(Header.SEQUENCER_RUN_NAME.getTitle()));
+        Assert.assertEquals(attributes.getStudy(), atts.get(Header.STUDY_TITLE.getTitle()));
     }
     
     @Test
@@ -121,9 +117,9 @@ public class AttributesTest {
         String test1 = "parent_sample.geo_group_id.492930";
         String test2 = "parent_sample.geo_group_id_description.492930";
         FileAttributes fa = new FileAttributes();
-        Assert.assertEquals("did not find string", "true", fa.extractAttribute(test1, "geo_group_id", "true"));
-        Assert.assertNull("is not null!", fa.extractAttribute(test2, "geo_group_id", "true"));
+        Assert.assertEquals(fa.extractAttribute(test1, "geo_group_id", "true"), "true", "did not find string");
+        Assert.assertNull(fa.extractAttribute(test2, "geo_group_id", "true"), "is not null!");
         
     }        
-        
+
 }
