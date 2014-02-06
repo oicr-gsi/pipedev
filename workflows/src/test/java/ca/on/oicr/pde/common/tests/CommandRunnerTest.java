@@ -1,4 +1,4 @@
-package ca.on.oicr.pde.utilities.workflows;
+package ca.on.oicr.pde.common.tests;
 
 import ca.on.oicr.pde.common.CommandRunner;
 import java.io.File;
@@ -64,7 +64,7 @@ public class CommandRunnerTest {
     }
 
     @Test(expectedExceptions = IOException.class)
-    public void commandWithMissingInitialWorkingDirectoryTest() throws IOException{
+    public void commandWithMissingInitialWorkingDirectoryTest() throws IOException {
         File initialDirectory = new File("/doesnotexist");
 
         CommandLine c = new CommandLine("/bin/bash");
@@ -73,4 +73,20 @@ public class CommandRunnerTest {
         CommandRunner.CommandResult r = new CommandRunner().setCommand(c).setWorkingDirectory(initialDirectory).runCommand();
 
     }
+
+    @Test
+    public void addEnvironmentVariableTest() throws IOException {
+
+        CommandLine c = new CommandLine("/bin/bash");
+        c.addArgument("-c");
+        c.addArgument("echo $PATH", DISABLE_QUOTING);
+
+        CommandRunner cr = new CommandRunner().setCommand(c);
+        cr.setEnvironmentVariable("PATH", "/usr/bin:/bin:/usr/sbin:/sbin:/tmp:/tmp2");
+        CommandRunner.CommandResult r = cr.runCommand();
+
+        Assert.assertEquals(r.getOutput().trim(), "/usr/bin:/bin:/usr/sbin:/sbin:/tmp:/tmp2");
+
+    }
+
 }

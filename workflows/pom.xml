@@ -8,7 +8,7 @@
     <version>1.3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>workflows</name>
+    <name>workflows-utilities</name>
     <url>http://maven.apache.org</url>
 
     <properties>

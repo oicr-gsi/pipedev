@@ -13,7 +13,7 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 
 public class CommandRunner {
 
-    protected Map<String, String> additionalEnvironmentVariables;
+    protected final Map<String, String> additionalEnvironmentVariables;
     protected CommandLine command;
     protected File workingDirectory;
 
@@ -23,17 +23,23 @@ public class CommandRunner {
 
     }
 
-    public CommandRunner addEnvironmentVariable(String key, String value) {
+    public CommandRunner setEnvironmentVariable(String key, String value) {
 
         additionalEnvironmentVariables.put(key, value);
         return this;
 
     }
 
-    public CommandRunner addEnvironmentVariable(Map<String, String> environmentVariables) {
+    public CommandRunner setEnvironmentVariable(Map<String, String> environmentVariables) {
 
         additionalEnvironmentVariables.putAll(environmentVariables);
         return this;
+
+    }
+
+    public String getEnvironmentVariable(String key) {
+
+        return additionalEnvironmentVariables.get(key);
 
     }
 
