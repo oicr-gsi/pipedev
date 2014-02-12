@@ -1,5 +1,6 @@
-package ca.on.oicr.pde.common.utilities.seqwarewebservicemanager;
+package ca.on.oicr.pde.common.utilities;
 
+import ca.on.oicr.pde.common.utilities.WebserviceManager;
 import ca.on.oicr.pde.common.utilities.CommandRunner;
 import java.io.IOException;
 import org.apache.commons.exec.CommandLine;
@@ -21,8 +22,8 @@ public class WebserviceManagerTest
      * The variables used. 
      * Make sure that they change if you are unable to access some of them
      */
-    String dbdump = "/.mounts/labs/PDE/private/PDE_462/20140123-01:02.sql.gz";
-    String patchDir = "/.mounts/labs/PDE/private/PDE_462/scripts";
+    String dbdump = "src/main/resources/regression_test_database.sql.gz";
+    String patchDir = "src/main/resources/scripts";
     String host = "seqbiopgsql.res.oicr.on.ca" ;
     String port = "5432" ;
     String user = "sqwci";

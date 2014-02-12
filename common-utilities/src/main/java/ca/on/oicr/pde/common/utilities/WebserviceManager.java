@@ -1,4 +1,4 @@
-package ca.on.oicr.pde.common.utilities.seqwarewebservicemanager;
+package ca.on.oicr.pde.common.utilities;
 
 /**
  * Allows you to restore a database from a .gz file and then apply patches to it
