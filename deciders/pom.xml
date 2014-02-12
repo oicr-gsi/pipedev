@@ -5,7 +5,7 @@
 
     <groupId>ca.on.oicr.pde</groupId>
     <artifactId>decider-utilities</artifactId>
-    <version>1.4.3</version>
+    <version>1.4.3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>decider-utilities</name>
@@ -14,72 +14,112 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <seqware-version>0.13.6.10</seqware-version>
-	<workflow-version>1.1</workflow-version>
+        <seqware-version>1.0.10</seqware-version>
     </properties>
 
     <build>
-	<!--<finalName>Decider_${project.version}_${project.artifactId}_${workflow-version}_SeqWare_${seqware-version}</finalName>-->
+        <!--<finalName>Decider_${project.version}_${project.artifactId}_${workflow-version}_SeqWare_${seqware-version}</finalName>-->
         <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>2.3.2</version>
-            <configuration>
-                <source>1.6</source>
-                <target>1.6</target>
-            </configuration>
-        </plugin>
-	<plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>2.9.1</version>
                 <configuration>
-                        <links><link>http://seqware.github.io/javadoc/stable/apidocs/</link></links>
-                        <reportOutputDirectory>/.mounts/labs/PDE/web/${project.artifactId}/${project.version}</reportOutputDirectory>
+                    <links>
+                        <link>http://seqware.github.io/javadoc/stable/apidocs/</link>
+                    </links>
+                    <reportOutputDirectory>/.mounts/labs/PDE/web/${project.artifactId}/${project.version}</reportOutputDirectory>
                 </configuration>
             </plugin>
-    </plugins>
-</build>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.16</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/ca/on/oicr/pde/common/*.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
-<dependencies>
-    <dependency>
-        <groupId>com.github.seqware</groupId>
-        <artifactId>seqware-distribution</artifactId>
-        <version>${seqware-version}</version>
-        <classifier>full</classifier>
-        <scope>provided</scope>
-    </dependency>
-</dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>common-utilities</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.8.7</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-distribution</artifactId>
+            <version>${seqware-version}</version>
+            <classifier>full</classifier>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-configuration</groupId>
+            <artifactId>commons-configuration</artifactId>
+            <version>1.10</version>
+        </dependency>
 
-<repositories>
-    <repository>
-        <id>seqware.sourceforge.net</id>
-        <name>SeqWare Maven Repository</name>
-        <url>http://seqwaremaven.oicr.on.ca/artifactory/seqware-release</url>
-        <releases>
-            <enabled>true</enabled>
-        </releases>
-        <snapshots>
-            <enabled>false</enabled>
-        </snapshots>
-    </repository>
-    <repository>
-        <id>seqware.github.com</id>
-        <name>SeqWare Maven Snapshot Repository</name>
-        <url>http://seqwaremaven.oicr.on.ca/artifactory/seqware-snapshot</url>
-        <releases>
-            <enabled>true</enabled>
-        </releases>
-        <snapshots>
-            <enabled>true</enabled>
-        </snapshots>
-    </repository>
-    <repository>
-      <id>seqwaremaven.oicr.on.ca</id>
-      <name>seqwaremaven.oicr.on.ca-releases</name>
-      <url>http://206.108.121.137/artifactory/seqware-dependencies</url>
-    </repository>
- </repositories>
+    </dependencies>
+
+    <repositories>
+        <repository>
+            <id>seqware.sourceforge.net</id>
+            <name>SeqWare Maven Repository</name>
+            <url>http://seqwaremaven.oicr.on.ca/artifactory/seqware-release</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>seqware.github.com</id>
+            <name>SeqWare Maven Snapshot Repository</name>
+            <url>http://seqwaremaven.oicr.on.ca/artifactory/seqware-snapshot</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>seqwaremaven.oicr.on.ca</id>
+            <name>seqwaremaven.oicr.on.ca-releases</name>
+            <url>http://206.108.121.137/artifactory/seqware-dependencies</url>
+        </repository>
+    </repositories>
 
 </project>
