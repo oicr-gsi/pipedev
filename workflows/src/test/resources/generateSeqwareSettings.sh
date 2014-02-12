@@ -8,8 +8,6 @@ die () {
     exit 1
 }
 
-[[ "$#" == 4 ]] || die "4 arguments required, $# provided"
-
 BASE_DIR=$1
 
 SW_REST_URL=$2
@@ -17,6 +15,8 @@ SW_REST_URL=$2
 SCHEDULING_SYSTEM=$3
 
 SCHEDULING_HOST=$4
+
+LOCK_ID=${5:-seqware_testing}
 
 SW_BUNDLE_DIR="${BASE_DIR}"/provisionedBundles
 SW_BUNDLE_REPO_DIR="${BASE_DIR}"/bundleRepo
@@ -177,6 +177,7 @@ HBASE.MASTER=${SCHEDULING_HOST}:60000
 MAPRED.JOB.TRACKER=${SCHEDULING_HOST}:8021
 FS.DEFAULTFS=hdfs://${SCHEDULING_HOST}:8020
 FS.HDFS.IMPL=org.apache.hadoop.hdfs.DistributedFileSystem
+SW_LOCK_ID=${LOCK_ID}
 EOF
 
 echo "${seqware_settings}" > "${SEQWARE_SETTINGS_FILE}"
