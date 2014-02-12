@@ -88,6 +88,14 @@ public class WebserviceManager
     
         this.tomcatPort = tomcatPort;
     }
+    /**
+     * Gets the name of the database that was created
+     * @return the name of the database
+     */
+    public String getDbName()
+    {
+        return dbName;
+    }
     
     /**Creates a webservice with a new database created from the patches + database dump provided
      * 
