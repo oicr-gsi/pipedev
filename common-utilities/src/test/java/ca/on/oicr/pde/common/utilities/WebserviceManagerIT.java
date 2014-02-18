@@ -16,7 +16,7 @@ import org.testng.annotations.Test;
  * @author Raunaq Suri
  *.
  */
-public class WebserviceManagerTest 
+public class WebserviceManagerIT 
 {
     /**
      * The variables used. 
