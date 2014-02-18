@@ -19,13 +19,13 @@ public class WebserviceManagerIT {
     /**
      * The variables used. Make sure that they change if you are unable to access some of them
      */
-    String dbdump = System.getProperty("dbFile");
-    String patchDir = System.getProperty("dbPatchDir");
-    String host = System.getProperty("dbHost");
-    String port = System.getProperty("dbPort");
-    String user = System.getProperty("dbUser");
-    String pass = System.getProperty("dbPass");
-    String seqDir = System.getProperty("seqwareWebserviceDir");
+    String dbdump = getRequiredSystemProperty("dbFile");
+    String patchDir = getRequiredSystemProperty("dbPatchDir");
+    String host = getRequiredSystemProperty("dbHost");
+    String port = getRequiredSystemProperty("dbPort");
+    String user = getRequiredSystemProperty("dbUser");
+    String pass = getRequiredSystemProperty("dbPass");
+    String seqDir = getRequiredSystemProperty("seqwareWebserviceDir");
     WebserviceManager service1 = new WebserviceManager(dbdump, patchDir, host, port, user, pass, seqDir);
     WebserviceManager service2 = new WebserviceManager(dbdump, patchDir, host, port, user, pass, seqDir);
     WebserviceManager service3 = new WebserviceManager(dbdump, patchDir, host, port, user, pass, seqDir);
