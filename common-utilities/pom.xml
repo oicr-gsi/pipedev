@@ -51,6 +51,15 @@
                     <includes>
                         <include>**/*IT.java</include>
                     </includes>
+                    <systemPropertyVariables>
+                        <dbFile>${dbFile}</dbFile>
+                        <dbPatchDir>${dbPatchDir}</dbPatchDir>
+                        <dbHost>${dbHost}</dbHost>
+                        <dbPort>${dbPort}</dbPort>
+                        <dbUser>${dbUser}</dbUser>
+                        <dbPass>${dbPass}</dbPass>
+                        <seqwareWebserviceDir>${seqwareWebserviceDir}</seqwareWebserviceDir>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
         </plugins>
