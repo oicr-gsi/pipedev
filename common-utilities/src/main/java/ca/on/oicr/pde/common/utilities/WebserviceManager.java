@@ -149,6 +149,35 @@ public class WebserviceManager
         }
         
         webservice = "http://"+getWebserviceBaseUrl(u.getOutput().trim())+":"+tomcatPort+"/seqware-webservice/";
+        
+        //Continues to connect to the webservice until a code of 200 is reached or until time is up
+        CommandLine curlCommand = new CommandLine("/bin/bash");
+        curlCommand.addArgument("-c");
+        curlCommand.addArgument("curl -k admin@admin.com:admin -s -I "+ webservice +" | grep HTTP/1.1 | awk {'print $2'}", false);
+        CommandRunner getCurl = new CommandRunner();
+        getCurl.setCommand(curlCommand);
+        CommandResult v = getCurl.runCommand();
+
+         for(int i = 0; i < 6; i++)
+        {
+           try
+           {
+               Thread.sleep(10000);
+           } catch (InterruptedException ex)
+           {
+               System.err.println(ex.getMessage());
+           }
+            //Refreshes command
+           v = getCurl.runCommand();
+
+           //Breaks out of loop if the webservice has been created
+           if(v.getOutput().trim().contains("200"))
+           {
+               break;
+           }
+
+        }
+
         //Runs the webservice
         return webservice;
     }
