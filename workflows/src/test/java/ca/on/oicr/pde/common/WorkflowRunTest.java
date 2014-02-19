@@ -1,14 +1,13 @@
 package ca.on.oicr.pde.common;
 
-import ca.on.oicr.pde.common.CommandRunner.CommandResult;
+import ca.on.oicr.pde.common.utilities.CommandRunner;
+import ca.on.oicr.pde.common.utilities.CommandRunner.CommandResult;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
-import java.util.UUID;
-import net.sourceforge.seqware.pipeline.runner.PluginRunner;
 import org.testng.Assert;
 import org.testng.annotations.*;
 import org.apache.commons.exec.CommandLine;
@@ -17,28 +16,28 @@ import org.apache.commons.io.IOUtils;
 
 public class WorkflowRunTest implements org.testng.ITest {
 
-    private static String bundledJava;
-    private static String seqwareDistribution;
-    private static String bundledWorkflowPath;
-    private static String workflowName;
-    private static String workflowVersion;
-    private static String workingDirectory;
-    private static String schedulingSystem;
-    private static String seqwareWebserviceUrl;
-    private static String schedulingHost;
+    protected static String bundledJava;
+    protected static String seqwareDistribution;
+    protected static String bundledWorkflowPath;
+    protected static String workflowName;
+    protected static String workflowVersion;
+    protected static String workingDirectory;
+    protected static String schedulingSystem;
+    protected static String seqwareWebserviceUrl;
+    protected static String schedulingHost;
 
-    private int testID;
-    private String calculateMetricsScriptName;
-    private String compareMetricsScriptName;
-    private File testWorkingDirectory;
-    private File workflowIniFile;
-    private File outputExpectationFile;
-    private File calculateMetricsScript;
-    private File compareMetricsScript;
+    protected int testID;
+    protected String calculateMetricsScriptName;
+    protected String compareMetricsScriptName;
+    protected File testWorkingDirectory;
+    protected File workflowIniFile;
+    protected File outputExpectationFile;
+    protected File calculateMetricsScript;
+    protected File compareMetricsScript;
 
-    private Map<String, String> environmentVariables;
+    protected Map<String, String> environmentVariables;
 
-    private File workflowOutputDirectory;
+    protected File workflowOutputDirectory;
 
     static {
 
@@ -201,7 +200,7 @@ public class WorkflowRunTest implements org.testng.ITest {
 
     }
 
-    private File getScriptFromResource(String scriptName) throws IOException {
+    protected File getScriptFromResource(String scriptName) throws IOException {
 
         File script = File.createTempFile(scriptName, ".sh");
         script.setExecutable(true);
@@ -217,7 +216,7 @@ public class WorkflowRunTest implements org.testng.ITest {
 
     }
 
-    private String executeCommand(String command, File workingDirectory, Map<String, String>... environmentVariables) throws IOException {
+    protected String executeCommand(String command, File workingDirectory, Map<String, String>... environmentVariables) throws IOException {
 
         CommandLine c = new CommandLine("/bin/bash");
         c.addArgument("-c");
@@ -241,7 +240,7 @@ public class WorkflowRunTest implements org.testng.ITest {
 
     }
 
-    private void print(String s) {
+    protected void print(String s) {
 
         System.out.println(getTestName() + "{\n" + s + "\n}");
 
