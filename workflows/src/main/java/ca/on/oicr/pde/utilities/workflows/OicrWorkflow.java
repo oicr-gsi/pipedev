@@ -172,8 +172,8 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
                 if (outputFile.length != 2) {
                     throw new Exception("The output_files INI property is incorrectly defined at token:" + s);
                 };
-                SqwFile file = this.createOutputFile(outputFile[0], outputFile[1], doIt);
-                file.setType(outputFile[1]);
+                SqwFile file = this.createOutputFile(outputFile[0].trim(), outputFile[1].trim(), doIt);
+                file.setType(outputFile[1].trim());
                 endJob.addFile(file);
             }
         }

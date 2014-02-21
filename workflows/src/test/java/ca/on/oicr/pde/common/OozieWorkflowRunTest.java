@@ -18,7 +18,7 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
     String workflowRunSwid;
 
     public OozieWorkflowRunTest(int testID, String description, String workflowConfigPath, String outputExpectationFilePath, String calculateMetricsScriptName,
-            String compareMetricsScriptName, Map<String, String> environmentVariables) {
+            String compareMetricsScriptName, Map<String, String> environmentVariables) throws IOException {
 
         super(testID, description, workflowConfigPath, outputExpectationFilePath, calculateMetricsScriptName, compareMetricsScriptName, environmentVariables);
 

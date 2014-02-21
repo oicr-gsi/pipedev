@@ -227,8 +227,13 @@ public class OicrDecider extends BasicDecider {
                 return false;
             }
         }
-
+        
+        // SEQWARE-1809, PDE-474 ensure that deciders only use input from completed workflow runs
         FileAttributes attributes = new FileAttributes(returnValue, fm);
+        String status = returnValue.getAttribute(FindAllTheFiles.WORKFLOW_RUN_STATUS);
+        if (status == null || !status.equals("completed")){
+            return false;
+        }
         if (!options.has("skip-status-check")) {
             for (Iterator<String> it = attributes.iterator(); it.hasNext();) {
                 String next = it.next();
