@@ -2,7 +2,7 @@ package ca.on.oicr.pde.common.utilities;
 
 /**
  * Allows you to restore a database from a .gz file and then apply patches to it
- * Then, it will create a seqware webservice based off of that database
+ * Then, it will create a seqware webservice based off of that database by running the startService() method
  * you can choose to destroy that webservice with the destroy() method
  * @author Raunaq Suri
  * @link https://github.com/pipedev/pipedev
@@ -12,6 +12,8 @@ import ca.on.oicr.pde.common.utilities.CommandRunner;
 import ca.on.oicr.pde.common.utilities.CommandRunner.CommandResult;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.exec.CommandLine;
 import org.testng.Assert;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -19,33 +21,13 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 public class WebserviceManager 
 {
-    private final String  dbDump, patchDir, dbHost, dbPort, dbUser, dbPass, dbName, seqwareDir; //variables required
+    private String  dbDump, patchDir, dbHost, dbPort, dbUser, dbPass, dbName, seqwareDir; //variables required
     public String jobID;
     private String javaHome = "/usr/";
     private String tomcatPort = "8181";
+    private String webservice = null;
     
-        /**Call the constructor with the bare minimum number of parameters
-     * @param dbDump the database you want to restore from. Must be in a .gz format
-     * @param patchDir the directory in which the sql patches are located
-     * @param dbHost the host which the database will be on
-     * @param dbPort the port of that host
-     * @param dbUser the database user's name
-     * @param dbPass the database user's password
-     * @param webserviceDir the seqware-webservice directory
-     */
-    public WebserviceManager( String dbDump, String patchDir, String dbHost, String dbPort, String dbUser, String dbPass, String webserviceDir)
-    {   
-        this.dbDump = dbDump;
-        this.patchDir = patchDir;
-        this.dbHost = dbHost;
-        this.dbPort = dbPort;
-        this.dbUser = dbUser;
-        this.dbPass = dbPass;
-        this.seqwareDir = webserviceDir;
-        this.dbName = "webservice_db_"+RandomStringUtils.randomAlphabetic(8).toLowerCase(); //generates a random name for the database
-    }
-    
-    /**
+   /**
      *
      * @param dbDump the database you want to restore from
      * @param patchDir the directory in which the sql patches are located
@@ -56,6 +38,7 @@ public class WebserviceManager
      * @param webserviceDir the seqware-webservice directory
      * @param dbName the name of the database
      */
+    
     public WebserviceManager(String dbDump, String patchDir, String dbHost, String dbPort, String dbUser, String dbPass, String dbName, String webserviceDir )
     {
         /**allows user to choose the database name
@@ -70,6 +53,22 @@ public class WebserviceManager
         this.seqwareDir = webserviceDir;
         this.dbName = dbName.toLowerCase();
     }
+     /**Call the constructor with the bare minimum number of parameters
+     * @param dbDump the database you want to restore from. Must be in a .gz format
+     * @param patchDir the directory in which the sql patches are located
+     * @param dbHost the host which the database will be on
+     * @param dbPort the port of that host
+     * @param dbUser the database user's name
+     * @param dbPass the database user's password
+     * @param webserviceDir the seqware-webservice directory
+     */
+    public WebserviceManager( String dbDump, String patchDir, String dbHost, String dbPort, String dbUser, String dbPass, String webserviceDir)
+    {   
+        //generates a random name for the database
+        this(dbDump, patchDir, dbHost, dbPort, dbUser, dbPass,  "webservice_db_"+RandomStringUtils.randomAlphabetic(8).toLowerCase(), webserviceDir);
+    }
+    
+
     
     /**Sets where the home directory for java is (/bin/java)
      * 
@@ -97,14 +96,21 @@ public class WebserviceManager
         return dbName;
     }
     
-    /**Creates a webservice with a new database created from the patches + database dump provided
+     /**Returns the url of the webservice
      * 
-     * @return The url of the webservice
+     * @return The url of the webservice 
+     */
+    public String getUrl() {
+        return webservice;
+    }
+    
+    /** Creates a webservice with a new database created from the patches + database dump provided
+     * 
      * @throws IOException 
      */
-    public String getUrl() throws IOException
+
+    public void startService() throws IOException
     {
-        String webservice;
         final int MAX_WAIT = 300;
         int count = 0;
         //Restores the database
@@ -178,8 +184,6 @@ public class WebserviceManager
 
         }
 
-        //Runs the webservice
-        return webservice;
     }
     
     /**

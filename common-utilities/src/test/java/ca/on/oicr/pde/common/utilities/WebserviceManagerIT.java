@@ -43,9 +43,13 @@ public class WebserviceManagerIT {
         service1.setJavaHome("/oicr/local/lib/jvm/jdk1.6.0_10");
         service2.setJavaHome("/oicr/local/lib/jvm/jdk1.6.0_10");
         System.out.println("Creating the first webservice");
+        service1.startService();
         String url = service1.getUrl();
+        
         System.out.println("Creating the second webservice");
+        service2.startService();
         String url2 = service2.getUrl();
+        
         System.out.println("This is the url of the first webservice: " + url);
         System.out.println("This is the url of the second webservice: " + url2);
         Assert.assertTrue(url.contains("/seqware-webservice"), "Error starting up webservice. This is the url given:" + url);
@@ -60,6 +64,7 @@ public class WebserviceManagerIT {
     public void testCreateDestroyService() throws IOException {
         System.out.println("Attempting to create, then destroy, a webservice...");
         service3.setJavaHome("/oicr/local/lib/jvm/jdk1.6.0_10");
+        service3.startService();
         String url3 = service3.getUrl();
         System.out.println("Created a webservice with url " + url3);
 
@@ -105,6 +110,7 @@ public class WebserviceManagerIT {
     public void testKilledJob() throws IOException {
         System.out.println("Attempting to see what would happen if the Engine kills the webservice...");
         service5.setJavaHome("/oicr/local/lib/jvm/jdk1.6.0_10");
+        service5.startService();
         String url5 = service5.getUrl();
         System.out.println("Webservice was killed by the engine");
 
