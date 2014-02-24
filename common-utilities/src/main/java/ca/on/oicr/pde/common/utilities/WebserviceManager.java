@@ -336,7 +336,7 @@ public class WebserviceManager
         command2.addArgument(destroyDB.toString(), false);
         
         CommandRunner goodbyeDB = new CommandRunner();
-        goodbyeDB.addEnvironmentVariable("PGPASSWORD", dbPass );
+        goodbyeDB.setEnvironmentVariable("PGPASSWORD", dbPass );
         goodbyeDB.setCommand(command2);
         
         CommandResult s = goodbyeDB.runCommand();

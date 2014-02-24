@@ -31,10 +31,12 @@ public class WorkflowRunTestFactory {
         String defaultMetricsCompareCommand = testConfig.get("defaults").get("metrics_compare").getTextValue();
         String defaultInputConfigDir = testConfig.get("defaults").get("input_config_dir").getTextValue();
         String defaultOutputMetricsDir = testConfig.get("defaults").get("output_metrics_dir").getTextValue();
-        
+
         //build a list of tests
         tests = new ArrayList<WorkflowRunTest>();
-        
+
+        String schedulingSystem = System.getProperty("schedulingSystem");
+
         //Generate a new test for each test defined in json file
         for (JsonNode test : testConfig.get("tests")) {
             String description = test.get("description") == null ? defaultDescription : test.get("description").getTextValue();
@@ -53,12 +55,18 @@ public class WorkflowRunTestFactory {
                     environmentVariables.put(e.getKey(), e.getValue().getTextValue());
                 }
             }
-            
-            tests.add(new WorkflowRunTest(count++, description, inputConfigDir+inputConfig, outputMetricsDir+outputMetrics, metricsCalculateCommand, metricsCompareCommand, environmentVariables));
+
+            if ("oozie".equals(schedulingSystem)) {
+                tests.add(new OozieWorkflowRunTest(count++, description, inputConfigDir + inputConfig, outputMetricsDir + outputMetrics, metricsCalculateCommand, metricsCompareCommand, environmentVariables));
+            } else if ("pegasus".equals(schedulingSystem)) {
+                tests.add(new WorkflowRunTest(count++, description, inputConfigDir + inputConfig, outputMetricsDir + outputMetrics, metricsCalculateCommand, metricsCompareCommand, environmentVariables));
+            } else {
+                throw new RuntimeException();
+            }
 
         }
 
         return tests.toArray();
-        
+
     }
 }
