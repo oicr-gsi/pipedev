@@ -1,0 +1,10 @@
+#!/bin/sh
+
+SEQWARE_DISTRIBUTION=${SEQWARE_DISTRIBUTION:-$(readlink -f target/Workflow_Bundle_OneStepWorkflow_*/Workflow_Bundle_OneStepWorkflow/*/lib/seqware-distribution-*.jar)}
+
+java -cp "${SEQWARE_DISTRIBUTION}":"${DECIDER}" net.sourceforge.seqware.pipeline.runner.PluginRunner --plugin ca.on.oicr.seqprodbio.workflows.Decider -- \
+--wf-accession 000000 \
+--study-name YourStudy \
+--script `pwd`/target/Workflow_Bundle_OneStepWorkflow_1.3_SeqWare_1.0.10/Workflow_Bundle_OneStepWorkflow/1.3/bin/jobs.sh \
+--commit-version `head -1 ../.git/refs/heads/master` \
+--test

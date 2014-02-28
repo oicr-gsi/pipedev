@@ -1,0 +1,7 @@
+#!/bin/sh
+
+SEQWARE_DISTRIBUTION=${SEQWARE_DISTRIBUTION:-$(readlink -f target/Workflow_Bundle_OneStepWorkflow_*/Workflow_Bundle_OneStepWorkflow/*/lib/seqware-distribution-*.jar)}
+
+cd target/Workflow_Bundle*;
+
+java -jar "${SEQWARE_DISTRIBUTION}" --plugin net.sourceforge.seqware.pipeline.plugins.WorkflowLauncher -- --no-metadata --provisioned-bundle-dir `pwd` --workflow OneStepWorkflow --version 1.3 --ini-files `pwd`/Workflow_Bundle_OneStepWorkflow/1.3/config/workflow.ini --wait
