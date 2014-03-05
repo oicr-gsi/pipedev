@@ -51,6 +51,12 @@ public class JSONHelper {
 
             File jsonData = new File(dataPath);
             
+            /*This is how the following section works
+            First the json is read in as a string directly and is also parsed in.
+            Then, the string version is compared to the parsed version
+            If they are the same, that means that there were no duplicate elements
+            Else, there were some.
+            */
             //Reads in the JSON into a string and removes all whitespace
             String jsonActualString = FileUtils.readFileToString(jsonData).trim().replaceAll(" ", "").replaceAll("\n", "");
             JSONParser parser = new JSONParser(this.getClass().getClassLoader().getResourceAsStream(dataJSON));
