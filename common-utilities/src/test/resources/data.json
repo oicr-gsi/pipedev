@@ -1,15 +1,15 @@
 {
     "defaults": {
-        "description": "BamQC workflow test",
+        "description": "My Workflow Test",
         "metrics_calculate": "calculate.sh",
         "metrics_compare": "compare.sh",
-        "input_config_dir": "/.mounts/labs/PDE/data/RegressionTests/BamQC/workflow/input_config/",
-        "output_metrics_dir": "/.mounts/labs/PDE/data/RegressionTests/BamQC/workflow/output_expectation/"
+        "input_config_dir": "/this/is/an/input/dir/",
+        "output_metrics_dir": "/this/is/an/output/dir/"
     },
     
     "tests": [
         {
-            "input_config": "workflow_test_01.ini",
+            "input_config": "oicr.ini",
             "environment_variables" : {
                 "key":"value",
                 "value":"key",
@@ -17,28 +17,28 @@
             }
         },
         {
-            "input_config": "workflow_test_02.ini"
+            "input_config": "oicr02.ini"
         },
         {
-            "input_config": "workflow_test_03.ini"
+            "input_config": "oicr_03.ini"
         },
         {
-            "input_config": "workflow_test_04.ini"
+            "input_config": "oicr_04.ini"
         },
         {
-            "input_config": "workflow_test_05.ini"
+            "input_config": "oicr_05.ini"
         },
         {
-            "input_config": "workflow_test_06.ini"
+            "input_config": "oicr_06.ini"
         },
         {
-            "input_config": "workflow_test_07.ini"
+            "input_config": "oicr_07.ini"
         },
         {
-            "input_config": "workflow_test_08.ini"
+            "input_config": "oicr_08.ini"
         },
         {
-            "input_config": "workflow_test_09.ini"
+            "input_config": "oicr_09.ini"
         }
     ]
 }

@@ -1,15 +1,15 @@
 {
     "defaults": {}
-        "description": "BamQC workflow test",
+        "description": "Tired of making jumbled names",
         "metrics_calculate": "calculate.sh",
         "metrics_compare": "compare.sh",
-        "input_config_dir": "/.mounts/labs/PDE/data/RegressionTests/BamQC/workflow/input_config/",
-        "output_metrics_dir": "/.mounts/labs/PDE/data/RegressionTests/BamQC/workflow/output_expectation/"
+        "input_config_dir": "/i/input_config/",
+        "output_metrics_dir": "/bin/bash/etc/lib/local/output_expectation/"
     },
     
     "tests": [
         {
-            "input_config": "workflow_test_01.ini",
+            "input_config": "test_01.ini",
             "environment_variables" : {
                 "key":"value",
                 "value":"key",
