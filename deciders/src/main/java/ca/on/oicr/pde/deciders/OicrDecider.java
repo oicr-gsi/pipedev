@@ -482,7 +482,7 @@ public class OicrDecider extends BasicDecider {
      * in order to identify mate in paired-end sequencing data
      * (or report that mate info is unavailable if no pattern detected)
      */
-    private static int idMate (String filePath) {
+    public static int idMate (String filePath) {
         int [] indexes = {0, 1};
         int [] mates   = {OicrDecider.MATE_1, OicrDecider.MATE_2};
         for (int i : indexes) {
