@@ -112,6 +112,10 @@ public class OicrDecider extends BasicDecider {
     protected Map<String, FileAttributes> files;
     private int numberOfFilesPerGroup = Integer.MIN_VALUE;
     private List<String> requiredParams = new ArrayList<String>();
+    private static final String [][] readMateFlags = {{"_R1_","1_sequence.txt",".1.fastq"},{"_R2_","2_sequence.txt",".2.fastq"}};
+    public static final int MATE_UNDEF = 0;
+    public static final int MATE_1 = 1;
+    public static final int MATE_2 = 2;
 
     /**
      * <p>Sets up the decider arguments and global variables. Any arguments
@@ -471,5 +475,23 @@ public class OicrDecider extends BasicDecider {
             set.add(value);
         }
         return set;
+    }
+
+    /*
+     * A utility function that seraches for patterns in a file path
+     * in order to identify mate in paired-end sequencing data
+     * (or report that mate info is unavailable if no pattern detected)
+     */
+    private static int idMate (String filePath) {
+        int [] indexes = {0, 1};
+        int [] mates   = {OicrDecider.MATE_1, OicrDecider.MATE_2};
+        for (int i : indexes) {
+          for (int j = 0; j < readMateFlags[i].length; j++) {
+           if (filePath.contains(readMateFlags[i][j])) {
+            return mates[i];
+           }
+          }
+        }
+        return OicrDecider.MATE_UNDEF;
     }
 }
