@@ -2,6 +2,8 @@ package ca.on.oicr.pde.deciders;
 
 import java.io.File;
 import java.util.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.regex.Pattern;
 import net.sourceforge.seqware.common.hibernate.FindAllTheFiles;
 import net.sourceforge.seqware.common.module.FileMetadata;
@@ -116,7 +118,7 @@ public class OicrDecider extends BasicDecider {
     public static final int MATE_UNDEF = 0;
     public static final int MATE_1 = 1;
     public static final int MATE_2 = 2;
-
+    private Date date=null;
     /**
      * <p>Sets up the decider arguments and global variables. Any arguments
      * intended to be used on the command line should be added using either The
@@ -141,6 +143,7 @@ public class OicrDecider extends BasicDecider {
         parser.acceptsAll(Arrays.asList("help", "h"), "Prints this help message");
         defineArgument("output-path", "The absolute path of the directory to put the final file(s) (workflow output-prefix option).", false);
         defineArgument("output-folder", "The relative path to put the final result(s) (workflow output-dir option).", false);
+	defineArgument("after-date", "Optional: Format YYYY-MM-DD. Only run on files that have been modified after a certain date.", false);
         files = new HashMap<String, FileAttributes>();
     }
 
@@ -209,7 +212,16 @@ public class OicrDecider extends BasicDecider {
                 System.out.println(get_syntax());
             }
         }
-
+	if (options.has("after-date")) {
+	    String dateString = options.valueOf("after-date").toString();
+	    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+	    try {
+		date = format.parse(dateString);
+	    } catch (ParseException e) {
+		Log.error("Date should be in the format: "+format.toPattern(), e);
+		ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
+	    }
+	}
         return ret;
     }
 
@@ -250,6 +262,19 @@ public class OicrDecider extends BasicDecider {
 
             }
         }
+	if (options.has("after-date")) {
+	    String dateString = attributes.getOtherAttribute(FindAllTheFiles.Header.PROCESSING_DATE);
+	    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+	    try {
+                Date fileDate = format.parse(dateString);
+		if (date.after(fileDate)) {
+		    Log.debug("File was processed before the after-date "+date.toString()+" : "+attributes.getPath());
+		    return false;
+		}
+            } catch (ParseException e) {
+                Log.error("Date should be in the format: "+format.toPattern(), e);
+            }
+	}
         if (!checkFileDetails(attributes)) {
             return false;
         }
@@ -279,6 +304,7 @@ public class OicrDecider extends BasicDecider {
     @Override
     protected ReturnValue doFinalCheck(String commaSeparatedFilePaths, String commaSeparatedParentAccessions) {
         ReturnValue toReturn = rv;
+
         rv = new ReturnValue();
         return toReturn;
     }
@@ -477,7 +503,7 @@ public class OicrDecider extends BasicDecider {
         return set;
     }
 
-    /*
+    /**
      * A utility function that seraches for patterns in a file path
      * in order to identify mate in paired-end sequencing data
      * (or report that mate info is unavailable if no pattern detected)
@@ -494,4 +520,34 @@ public class OicrDecider extends BasicDecider {
         }
         return OicrDecider.MATE_UNDEF;
     }
+
+    /**
+     * Uses idMate to put read1 and read2 files into order and return the set. 
+     * Tests to make sure that the read names as well as the list of reads are sensible. 
+     * If it encounters a problem, it returns the same set you passed in originally along with printing a warning.
+     */
+    public FileAttributes[] arrangeFastqs(FileAttributes[] files) {
+        FileAttributes[] inputs = new FileAttributes[files.length];
+        for (FileAttributes file : files) {
+            int index = idMate(file.getPath()) - 1;
+            if (index == (OicrDecider.MATE_UNDEF-1)){
+                if (files.length > 1){
+                    Log.warn("Unidentifiable read number! "+ file.toString());
+                }
+                inputs = files;
+                break;
+            } else if (index >= inputs.length) {
+                Log.warn("The read number is larger than the amount of reads given for this study. e.g. this is a read 2 but there is only one file.");
+                Log.warn(index + "is the read number for file "+file);
+                inputs=files;
+                break;
+            } else {
+                inputs[index] = file;
+            }
+        }
+        return inputs;
+    }
+
+
+
 }
