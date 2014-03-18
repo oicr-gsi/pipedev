@@ -1,0 +1,9 @@
+#!/bin/sh
+
+SEQWARE_DISTRIBUTION=${SEQWARE_DISTRIBUTION:-$(readlink -f target/Workflow_Bundle_OneStepWorkflow_*/Workflow_Bundle_OneStepWorkflow/*/lib/seqware-distribution-*.jar)}
+
+cd target/Workflow_Bundle*;
+
+java -jar "${SEQWARE_DISTRIBUTION}" --plugin net.sourceforge.seqware.pipeline.plugins.BundleManager -- \
+--bundle `pwd` \
+--install-dir-only
