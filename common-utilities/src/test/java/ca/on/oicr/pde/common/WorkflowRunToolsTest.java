@@ -1,4 +1,4 @@
-package ca.on.oicr.pde.common.tests;
+package ca.on.oicr.pde.common;
 
 import ca.on.oicr.pde.common.WorkflowRunTools;
 import java.io.File;

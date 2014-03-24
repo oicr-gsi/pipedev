@@ -1,5 +1,7 @@
 package ca.on.oicr.pde.common;
 
+import ca.on.oicr.pde.common.OozieWorkflowRunTest;
+import ca.on.oicr.pde.common.WorkflowRunTest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
