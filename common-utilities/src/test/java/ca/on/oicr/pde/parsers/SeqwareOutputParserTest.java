@@ -1,4 +1,4 @@
-package ca.on.oicr.pde.common.utilities;
+package ca.on.oicr.pde.parsers;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;

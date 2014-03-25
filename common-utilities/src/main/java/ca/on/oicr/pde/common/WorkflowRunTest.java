@@ -1,255 +1,134 @@
 package ca.on.oicr.pde.common;
 
-import ca.on.oicr.pde.common.utilities.CommandRunner;
-import ca.on.oicr.pde.common.utilities.CommandRunner.CommandResult;
+import ca.on.oicr.pde.utilities.Helpers;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Map;
 import org.testng.Assert;
 import org.testng.annotations.*;
-import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 
-public class WorkflowRunTest implements org.testng.ITest {
+public class WorkflowRunTest extends RunTestBase {
 
-    protected static String bundledJava;
-    protected static String seqwareDistribution;
-    private static String bundledBinPath;
-    protected static String bundledWorkflowPath;
-    protected static String workflowName;
-    protected static String workflowVersion;
-    protected static String workingDirectory;
-    protected static String schedulingSystem;
-    protected static String seqwareWebserviceUrl;
-    protected static String schedulingHost;
+    Logger log = Logger.getLogger(this.getClass().getCanonicalName());
 
-    protected int testID;
-    protected String calculateMetricsScriptName;
-    protected String compareMetricsScriptName;
-    protected File testWorkingDirectory;
-    protected File workflowIniFile;
-    protected File outputExpectationFile;
-    protected File calculateMetricsScript;
-    protected File compareMetricsScript;
+    //protected final String bundledJava;
+    protected final File workflowBundleBinPath;
+    protected final File workflowIni;
+    protected final File expectedOutput;
+    protected final File calculateMetricsScript;
+    protected final File compareMetricsScript;
+    protected final Map<String, String> environmentVariables;
+    protected final File workflowOutputDirectory;
+    protected final File workflowBundlePath;
+    protected final String workflowName;
+    protected final String workflowVersion;
 
-    protected Map<String, String> environmentVariables;
+    protected File actualOutput;
 
-    protected File workflowOutputDirectory;
+    public WorkflowRunTest(File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName,
+            File workflowBundlePath, String workflowName, String workflowVersion, File workflowBundleBinPath,
+            File workflowIni, File expectedOutput, File calculateMetricsScript, File compareMetricsScript,
+            Map<String, String> environmentVariables) throws IOException {
 
-    static {
+        super(seqwareDistribution, seqwareSettings, workingDirectory, testName);
 
-        //Get common test parameters from pom.xml testng system properties
-        bundledJava = System.getProperty("bundledJava");
-        bundledBinPath = System.getProperty("bundledBinPath");
-        seqwareDistribution = System.getProperty("seqwareDistribution");
-        bundledWorkflowPath = System.getProperty("bundledWorkflow");
-        workflowName = System.getProperty("workflowName");
-        workflowVersion = System.getProperty("workflowVersion");
-        workingDirectory = System.getProperty("workingDirectory");
-        seqwareWebserviceUrl = System.getProperty("webserviceUrl");
-        schedulingSystem = System.getProperty("schedulingSystem");
-        schedulingHost = System.getProperty("schedulingHost");
-
-    }
-
-    public WorkflowRunTest(int testID, String description, String workflowConfigPath, String outputExpectationFilePath, String calculateMetricsScriptName,
-            String compareMetricsScriptName, Map<String, String> environmentVariables) throws IOException {
-
-        this.testID = testID;
-        this.workflowIniFile = new File(workflowConfigPath);
-        this.calculateMetricsScriptName = calculateMetricsScriptName;
-        this.compareMetricsScriptName = compareMetricsScriptName;
+        this.workflowBundlePath = workflowBundlePath;
+        this.workflowName = workflowName;
+        this.workflowVersion = workflowVersion;
+        this.workflowBundleBinPath = workflowBundleBinPath;
+        this.workflowIni = workflowIni;
+        this.calculateMetricsScript = calculateMetricsScript;
+        this.compareMetricsScript = compareMetricsScript;
         this.environmentVariables = environmentVariables;
-        this.outputExpectationFile = new File(outputExpectationFilePath);
+        this.expectedOutput = expectedOutput;
+        this.workflowOutputDirectory = new File(workingDirectory + "/output/");
 
-        //Build the path from 
-        if (bundledBinPath != null) {
-            environmentVariables.put("PATH", WorkflowRunTools.buildPathFromDirectory("/usr/bin:/bin:/usr/sbin:/sbin", FileUtils.getFile(bundledBinPath)));
-        }
-
-    }
-
-    @BeforeSuite
-    public void workflowCommon() {
-
-        Assert.assertNotNull(bundledJava, "Bundled java path is not set - set bundledJava in pom.xml.");
-        Assert.assertNotNull(seqwareDistribution, "Seqware distribution path is not set - set seqwareDistribution in pom.xml.");
-        Assert.assertNotNull(bundledWorkflowPath, "Bundled workflow path is not set - set bundledWorkflow in pom.xml.");
-        Assert.assertNotNull(workflowName, "Workflow name is not set - set workflowName in pom.xml.");
-        Assert.assertNotNull(workflowVersion, "Workflow version is not set - set workflowVersion in pom.xml.");
-        Assert.assertNotNull(workingDirectory, "Working directory path is not set - set workingDirectory in pom.xml.");
-        Assert.assertNotNull(schedulingSystem, "Scheduling system is not set - set schedulingSystem in pom.xml.");
-        Assert.assertNotNull(seqwareWebserviceUrl, "Webservice url is not set - set webserviceUrl in pom.xml.");
-        Assert.assertNotNull(schedulingHost, "Scheduling host is not set - set schedulingHost in pom.xml.");
-
-        Assert.assertTrue(FileUtils.getFile(bundledJava).exists(),
-                "Bundled java path does not exist - verify bundledJava is correct in pom.xml.");
-        Assert.assertTrue(FileUtils.getFile(seqwareDistribution).exists(),
-                "Seqware distribution does not exist - verify seqwareDistribution is correct in pom.xml.");
-        Assert.assertTrue(FileUtils.getFile(bundledWorkflowPath).exists(),
-                "Bundled workflow path does not exist - verify bundledWorkflow is correct in pom.xml.");
+        this.actualOutput = new File(workingDirectory + "/" + workflowIni.getName() + ".metrics");
+        environmentVariables.put("PATH", Helpers.buildPathFromDirectory("/usr/bin:/bin:/usr/sbin:/sbin", workflowBundleBinPath));
+//        environmentVariables.put("JAVA_HOME", bundledJava);     
 
     }
 
     @BeforeClass
-    public void workflowSpecific() throws IOException {
+    public void beforeAllTests() throws IOException {
 
-        Assert.assertTrue(workflowIniFile.exists() && workflowIniFile.canRead() && workflowIniFile.isFile(),
-                String.format("The seqware ini file [%s] is not accessible.", workflowIniFile));
-
-        String prefix = new SimpleDateFormat("yyMMdd_HHmm").format(new Date()) + "_";
-        String suffix = ""; //"_" + UUID.randomUUID().toString().replace("-", "").substring(0, 4);
-
-        testWorkingDirectory = new File(workingDirectory + "/" + prefix + getTestName() + suffix + "/");
-        testWorkingDirectory.mkdir();
-
-        print(String.format("Bundled Workflow Path=[%s]\n"
-                + "Seqware Distribution=[%s]\n"
-                + "Seqware INI File=[%s]\n"
-                + "Seqware Scheduling Host=[%s](System=[%s])\n"
-                + "Seqware Webservice Host=[%s]\n"
-                + "Workflow Run Test Working Directory=[%s]",
-                bundledWorkflowPath, seqwareDistribution, workflowIniFile, schedulingHost,
-                schedulingSystem, seqwareWebserviceUrl, testWorkingDirectory));
+        Assert.assertNotNull(seqwareDistribution,
+                "Seqware distribution path is not set - set seqwareDistribution in pom.xml.");
+        Assert.assertNotNull(workflowBundlePath,
+                "Bundled workflow path is not set - set bundledWorkflow in pom.xml.");
+        Assert.assertNotNull(workflowName,
+                "Workflow name is not set - set workflowName in pom.xml.");
+        Assert.assertNotNull(workflowVersion,
+                "Workflow version is not set - set workflowVersion in pom.xml.");
+        Assert.assertNotNull(workingDirectory,
+                "Working directory path is not set - set workingDirectory in pom.xml.");
+        Assert.assertTrue(FileUtils.getFile(seqwareDistribution).exists(),
+                "Seqware distribution does not exist - verify seqwareDistribution is correct in pom.xml.");
+        Assert.assertTrue(FileUtils.getFile(workflowBundlePath).exists(),
+                "Bundled workflow path does not exist - verify bundledWorkflow is correct in pom.xml.");
+        Assert.assertTrue(workflowIni.exists() && workflowIni.canRead() && workflowIni.isFile(),
+                String.format("The seqware ini file [%s] is not accessible.", workflowIni));
+        Assert.assertTrue(expectedOutput.exists() && expectedOutput.canRead() && expectedOutput.isFile(),
+                String.format("The output expectation file [%s] is not accessible - please generate it using calculate script.", expectedOutput));
 
     }
 
-    @Test
+    @BeforeMethod
+    public void beforeEachTestMethod() throws IOException {
+        //
+    }
+
+    @AfterMethod
+    public void afterEachTestMethod() throws IOException {
+        //
+    }
+
+    @AfterClass
+    public void afterAllTests() {
+        //
+    }
+
+    @Test(groups = "preExecution")
     public void initializeEnvironment() throws IOException {
-
-        Assert.assertTrue(outputExpectationFile.exists() && outputExpectationFile.canRead() && outputExpectationFile.isFile(),
-                String.format("The output expectation file [%s] is not accessible - please generate it using calculate script.", outputExpectationFile));
-
-        calculateMetricsScript = getScriptFromResource(calculateMetricsScriptName);
-
-        compareMetricsScript = getScriptFromResource(compareMetricsScriptName);
-
-        //TODO: verify webservice url is accessible
-        //TODO: verify scheduling host is accessible
-        StringBuilder command = new StringBuilder();
-        command.append(getScriptFromResource("generateSeqwareSettings.sh"));
-        command.append(" ").append(testWorkingDirectory);
-        command.append(" ").append(seqwareWebserviceUrl);
-        command.append(" ").append(schedulingSystem);
-        command.append(" ").append(schedulingHost);
-
-        String seqwareSettingsPath = executeCommand(command.toString(), testWorkingDirectory);
-        Assert.assertTrue(FileUtils.getFile(seqwareSettingsPath).exists(), "Generate seqware settings failed - please verify seqwareDirectory is accessible");
-
-        //Record seqware setting file path for execute workflow step
-        environmentVariables.put("SEQWARE_SETTINGS", seqwareSettingsPath);
-        Assert.assertNotNull(environmentVariables.get("SEQWARE_SETTINGS"), "");
-
+        //
     }
 
-    @Test(dependsOnMethods = "initializeEnvironment", enabled = true)
+    @Test(dependsOnGroups = "preExecution", groups = "execution")
     public void executeWorkflow() throws IOException {
 
-        //TODO: refactor to use seqware 1.x commandline
-        StringBuilder command = new StringBuilder();
-        command.append("java -jar ").append(seqwareDistribution);
-        command.append(" --plugin net.sourceforge.seqware.pipeline.plugins.WorkflowLauncher");
-        command.append(" --");
-        command.append(" --no-metadata");
-        command.append(" --provisioned-bundle-dir ").append(bundledWorkflowPath);
-        command.append(" --workflow ").append(workflowName);
-        command.append(" --version ").append(workflowVersion);
-        command.append(" --ini-files ").append(workflowIniFile);
-        command.append(" --wait");
-        command.append(" --");
-        command.append(" --manual_output true");
-        command.append(" --output_prefix ").append(testWorkingDirectory).append("/");
-        command.append(" --output_dir ").append("output");
-
-        executeCommand(command.toString(), testWorkingDirectory, environmentVariables);
+        //blocks until completed
+        exec.workflowRunLaunch(workflowBundlePath, workflowIni, workflowName, workflowVersion);
 
     }
 
-    @Test(dependsOnMethods = "executeWorkflow", enabled = true)
+    @Test(dependsOnGroups = "execution", groups = "postExecution")
     public void checkWorkflowOutputExists() {
 
-        workflowOutputDirectory = new File(testWorkingDirectory + "/output/");
         Assert.assertTrue(workflowOutputDirectory.exists() && workflowOutputDirectory.isDirectory(),
                 String.format("The workflow output directory [%s] is not accessible.", workflowOutputDirectory));
 
     }
 
-    @Test(dependsOnMethods = "checkWorkflowOutputExists", enabled = true)
+    @Test(dependsOnGroups = "execution", dependsOnMethods = "checkWorkflowOutputExists", groups = "postExecution")
+    public void calculateOutputMetrics() throws IOException {
+
+        StringBuilder command = new StringBuilder();
+        command.append(calculateMetricsScript + " " + workflowOutputDirectory + " > " + actualOutput);
+
+        Helpers.executeCommand(testName, command.toString(), workflowOutputDirectory, environmentVariables);
+
+    }
+
+    @Test(dependsOnGroups = "execution", dependsOnMethods = "calculateOutputMetrics")
     public void compareOutputToExpected() throws IOException {
 
         StringBuilder command = new StringBuilder();
-        command.append(compareMetricsScript + " " + "<(" + calculateMetricsScript + " " + workflowOutputDirectory + ")" + " " + outputExpectationFile);
+        command.append(compareMetricsScript + " " + actualOutput + " " + expectedOutput);
 
-        executeCommand(command.toString(), workflowOutputDirectory, environmentVariables);
-
-    }
-
-    @AfterClass
-    public void afterTest() {
-        //TODO: clean up testWorkingDirectory if tests were successful?
-    }
-
-    @Override
-    public String getTestName() {
-
-        return getClass().getSimpleName() + "_" + testID + "_" + workflowName + "-" + workflowVersion;
+        Helpers.executeCommand(testName, command.toString(), workingDirectory, environmentVariables);
 
     }
 
-    @Override
-    public String toString() {
-
-        return this.getTestName();
-
-    }
-
-    protected File getScriptFromResource(String scriptName) throws IOException {
-
-        File script = File.createTempFile(scriptName, ".sh");
-        script.setExecutable(true);
-        script.deleteOnExit();
-
-        InputStream resourceStream = this.getClass().getClassLoader().getResourceAsStream(scriptName);
-        Assert.assertNotNull(resourceStream, String.format("Script resource [%s] was not found - verify that script exists as a resource.", scriptName));
-
-        //Write resource to temporary file that can then be executed.
-        FileUtils.writeStringToFile(script, IOUtils.toString(resourceStream));
-
-        return script;
-
-    }
-
-    protected String executeCommand(String command, File workingDirectory, Map<String, String>... environmentVariables) throws IOException {
-
-        CommandLine c = new CommandLine("/bin/bash");
-        c.addArgument("-c");
-        c.addArgument(command, false);
-
-        CommandRunner cr = new CommandRunner();
-        cr.setCommand(c);
-        for (Map<String, String> e : environmentVariables) {
-            cr.setEnvironmentVariable(e);
-        }
-        cr.setWorkingDirectory(workingDirectory);
-
-        print("Executing (with initial directory: " + workingDirectory + "):\n" + command.toString());
-
-        CommandResult r = cr.runCommand();
-        Assert.assertTrue(r.getExitCode() == 0,
-                String.format("The following command returned a non-zero exit code [%s]:\n%s\nOutput from command:\n%s\n",
-                        r.getExitCode(), command, r.getOutput()));
-
-        return r.getOutput().trim();
-
-    }
-
-    protected void print(String s) {
-
-        System.out.println(getTestName() + "{\n" + s + "\n}");
-
-    }
 }
