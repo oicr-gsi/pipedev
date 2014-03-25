@@ -1,4 +1,4 @@
-package ca.on.oicr.pde.common.utilities;
+package ca.on.oicr.pde.utilities;
 
 /**
  * Allows you to restore a database from a .gz file and then apply patches to it
@@ -8,8 +8,8 @@ package ca.on.oicr.pde.common.utilities;
  * @link https://github.com/pipedev/pipedev
  * 
  */
-import ca.on.oicr.pde.common.utilities.CommandRunner;
-import ca.on.oicr.pde.common.utilities.CommandRunner.CommandResult;
+import ca.on.oicr.pde.utilities.CommandRunner;
+import ca.on.oicr.pde.utilities.CommandRunner.CommandResult;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;

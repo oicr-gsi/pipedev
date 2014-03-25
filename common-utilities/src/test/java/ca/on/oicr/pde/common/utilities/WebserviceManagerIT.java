@@ -1,7 +1,7 @@
 package ca.on.oicr.pde.common.utilities;
 
-import ca.on.oicr.pde.common.utilities.WebserviceManager;
-import ca.on.oicr.pde.common.utilities.CommandRunner;
+import ca.on.oicr.pde.utilities.WebserviceManager;
+import ca.on.oicr.pde.utilities.CommandRunner;
 import java.io.IOException;
 import org.apache.commons.exec.CommandLine;
 import org.testng.Assert;
