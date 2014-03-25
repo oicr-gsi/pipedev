@@ -1,6 +1,6 @@
-package ca.on.oicr.pde.common.utilities;
+package ca.on.oicr.pde.utilities;
 
-import ca.on.oicr.pde.common.utilities.JSONHelper;
+import ca.on.oicr.pde.utilities.JSONHelper;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 /**

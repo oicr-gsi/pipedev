@@ -1,4 +1,4 @@
-package ca.on.oicr.pde.common.utilities;
+package ca.on.oicr.pde.utilities;
 
 import antlr.RecognitionException;
 import antlr.TokenStreamException;
