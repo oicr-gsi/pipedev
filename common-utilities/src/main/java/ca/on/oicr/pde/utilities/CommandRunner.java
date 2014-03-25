@@ -1,4 +1,4 @@
-package ca.on.oicr.pde.common.utilities;
+package ca.on.oicr.pde.utilities;
 
 import java.io.File;
 import java.io.IOException;
