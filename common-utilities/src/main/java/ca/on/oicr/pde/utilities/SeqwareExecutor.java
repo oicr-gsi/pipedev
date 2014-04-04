@@ -12,7 +12,7 @@ public interface SeqwareExecutor {
 
     public SeqwareAccession installWorkflow(File workflowPath) throws IOException;
 
-    public void executeDecider(File deciderJar, SeqwareAccession workflowSwid, List<Study> studies, List<SequencerRun> sequencerRuns, List<Sample> samples, String extraArgs) throws IOException;
+    public void deciderRunSchedule(File deciderJar, SeqwareAccession workflowSwid, List<Study> studies, List<SequencerRun> sequencerRuns, List<Sample> samples, String extraArgs) throws IOException;
 
     public SeqwareAccession workflowRunSchedule(SeqwareAccession workflowSwid, File workflowIniFile) throws IOException;
 

@@ -1,5 +1,6 @@
-package ca.on.oicr.pde.common;
+package ca.on.oicr.pde.testing.workflow;
 
+import ca.on.oicr.pde.testing.common.RunTestBase;
 import ca.on.oicr.pde.utilities.Helpers;
 import java.io.File;
 import java.io.IOException;
@@ -11,7 +12,7 @@ import org.apache.log4j.Logger;
 
 public class WorkflowRunTest extends RunTestBase {
 
-    Logger log = Logger.getLogger(this.getClass().getCanonicalName());
+    private final static Logger log = Logger.getLogger(WorkflowRunTest.class);
 
     //protected final String bundledJava;
     protected final File workflowBundleBinPath;

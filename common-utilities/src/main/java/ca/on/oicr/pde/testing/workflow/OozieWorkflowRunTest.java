@@ -1,4 +1,4 @@
-package ca.on.oicr.pde.common;
+package ca.on.oicr.pde.testing.workflow;
 
 import ca.on.oicr.pde.model.SeqwareAccession;
 import java.io.File;

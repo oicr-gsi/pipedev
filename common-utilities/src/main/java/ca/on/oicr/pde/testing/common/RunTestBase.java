@@ -1,10 +1,10 @@
-package ca.on.oicr.pde.common;
+package ca.on.oicr.pde.testing.common;
 
 import ca.on.oicr.pde.utilities.SeqwareExecutor;
 import ca.on.oicr.pde.utilities.ShellExecutor;
 import java.io.File;
 
-public abstract class RunTestBase implements org.testng.ITest{
+public abstract class RunTestBase implements org.testng.ITest {
 
     protected final File seqwareDistribution;
     protected final File seqwareSettings;
@@ -22,12 +22,12 @@ public abstract class RunTestBase implements org.testng.ITest{
         exec = new ShellExecutor(testName, seqwareDistribution, seqwareSettings, workingDirectory);
 
     }
-    
+
     @Override
-    public String getTestName(){
-        
+    public String getTestName() {
+
         return testName;
-        
+
     }
 
 }

@@ -1,5 +1,7 @@
-package ca.on.oicr.pde.common;
+package ca.on.oicr.pde.testing;
 
+import ca.on.oicr.pde.testing.workflow.OozieWorkflowRunTest;
+import ca.on.oicr.pde.testing.workflow.WorkflowRunTest;
 import static ca.on.oicr.pde.utilities.Helpers.generateSeqwareSettings;
 import static ca.on.oicr.pde.utilities.Helpers.generateTestWorkingDirectory;
 import static ca.on.oicr.pde.utilities.Helpers.getRequiredSystemPropertyAsFile;
@@ -70,6 +72,8 @@ public class WorkflowRunTestFactory {
         //build a list of tests
         tests = new ArrayList<WorkflowRunTest>();
 
+        
+        //TODO: implement a TestDefinition and TestResult class
         int count = 0;
         //Generate a new test for each test defined in json file
         for (JsonNode test : testConfig.get("tests")) {
