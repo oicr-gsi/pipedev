@@ -47,7 +47,7 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
 
     File actualReportFile;
     File expectedReportFile;
-    
+
     TestResult actual;
     TestResult expected;
 
@@ -225,7 +225,7 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
         }
         //TODO: option to provide sw accession of successful run?
 
-        Assert.assertTrue(compareReports(actual, expected), 
+        Assert.assertTrue(compareReports(actual, expected),
                 "There are differences between reports:\nExpected: " + expectedReportFile + "\nActual: " + actualReportFile);
 
     }
@@ -287,14 +287,14 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
                 ini.remove(s);
             }
 
-            TestResult.WorkflowRun x = new TestResult.WorkflowRun();
+            WorkflowRunReport x = new WorkflowRunReport();
             x.setWorkflowIni(ini);
             x.setFiles(seq.getFiles(inputFileAccessions));
 
             t.addWorkflowRun(x);
 
         }
-
+        
         return t;
 
     }

@@ -112,7 +112,7 @@ public class DeciderRunTestTest {
     }
 
     @Test(enabled = true)
-    public void testSomeMethod2() throws IOException {
+    public void compareUnordered() throws IOException {
 
         String expected = "{\n"
                 + "  \"workflowRunCount\" : 1,\n"
@@ -221,7 +221,16 @@ public class DeciderRunTestTest {
                 + " ] }";
 
         //Assert.assertTrue(compareReports(actual, expected));
-        Assert.assertTrue(compareReports(TestResult.buildFromJson(actual), TestResult.buildFromJson(expected)));
+        TestResult actualObject = TestResult.buildFromJson(actual);
+        TestResult expectedObject = TestResult.buildFromJson(expected);
+
+        Assert.assertEquals(3, actualObject.getWorkflowRuns().size());
+        Assert.assertEquals(3, expectedObject.getWorkflowRuns().size());
+
+        System.out.println("actual: \n" + actualObject);
+        System.out.println("expected: \n" + expectedObject);
+
+        Assert.assertTrue(compareReports(actualObject, expectedObject));
 
     }
 

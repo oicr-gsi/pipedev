@@ -1,32 +1,30 @@
 package ca.on.oicr.pde.testing.decider;
 
-import ca.on.oicr.pde.model.ReducedFileProvenanceReportRecord;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class TestResult {
 
-    Integer workflowRunCount;
-    Set<String> studies;
-    Set<String> sequencerRuns;
-    Set<String> lanes;
-    Set<String> samples;
-    Set<String> workflows;
-    Set<String> processingAlgorithms;
-    Set<String> fileMetaTypes;
-    Integer maxInputFiles;
-    Integer minInputFiles;
-    Collection<WorkflowRun> workflowRuns;
+    private Integer workflowRunCount;
+    private final Set<String> studies;
+    private final Set<String> sequencerRuns;
+    private final Set<String> lanes;
+    private final Set<String> samples;
+    private final Set<String> workflows;
+    private final Set<String> processingAlgorithms;
+    private final Set<String> fileMetaTypes;
+    private Integer maxInputFiles;
+    private Integer minInputFiles;
+    private final List<WorkflowRunReport> workflowRuns;
 
     public TestResult() {
         studies = new HashSet<String>();
@@ -39,7 +37,7 @@ public class TestResult {
         maxInputFiles = Integer.MIN_VALUE;
         minInputFiles = Integer.MAX_VALUE;
         
-        workflowRuns = new ArrayList<WorkflowRun>();
+        workflowRuns = new ArrayList<WorkflowRunReport>();
     }
 
     public static TestResult buildFromJson(java.io.File jsonPath) throws IOException {
@@ -110,7 +108,14 @@ public class TestResult {
         return workflowRunCount;
     }
 
-    public Collection<WorkflowRun> getWorkflowRuns() {
+    public List<WorkflowRunReport> getWorkflowRuns() {
+        Collections.sort(workflowRuns, new Comparator<WorkflowRunReport>() {
+
+            @Override
+            public int compare(WorkflowRunReport o1, WorkflowRunReport o2) {
+               return o1.toString().compareTo(o2.toString());
+            }
+        });
         return workflowRuns;
     }
 
@@ -142,7 +147,7 @@ public class TestResult {
         this.fileMetaTypes.addAll(fileMetaTypes);
     }
 
-    public void addWorkflowRun(WorkflowRun s) {
+    public void addWorkflowRun(WorkflowRunReport s) {
         this.workflowRuns.add(s);
     }
 
@@ -153,51 +158,6 @@ public class TestResult {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
-    }
-
-    public static class WorkflowRun {
-        
-        Map workflowIni = new HashMap<String, String>();
-        Collection<ReducedFileProvenanceReportRecord> files;
-
-        public Map getWorkflowIni() {
-            return workflowIni;
-        }
-
-        public void setWorkflowIni(Map workflowIni) {
-            this.workflowIni = workflowIni;
-        }
-
-        public Collection<ReducedFileProvenanceReportRecord> getFiles() {
-            return files;
-        }
-
-        public void setFiles(Collection<ReducedFileProvenanceReportRecord> files) {
-            this.files = files;
-        }
-
-        @Override
-        public String toString() {
-            return ToStringBuilder.reflectionToString(this);
-        }
-
-        @Override
-        public int hashCode() {
-            return HashCodeBuilder.reflectionHashCode(this);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            //
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            return EqualsBuilder.reflectionEquals(this, obj);
-        }
-
     }
 
 }

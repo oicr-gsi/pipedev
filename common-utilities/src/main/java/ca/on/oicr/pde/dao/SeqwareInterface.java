@@ -10,6 +10,7 @@ import ca.on.oicr.pde.model.WorkflowRunReportRecord;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -41,6 +42,8 @@ public abstract class SeqwareInterface {
             }
         }
 
+        Collections.sort(files);
+        
         return files;
     }
 
