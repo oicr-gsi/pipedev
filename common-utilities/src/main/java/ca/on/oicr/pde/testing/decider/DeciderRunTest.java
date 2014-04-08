@@ -45,6 +45,9 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
     private final List<SequencerRun> sequencerRuns = new ArrayList<SequencerRun>();
     private final List<Sample> samples = new ArrayList<Sample>();
 
+    File actualReportFile;
+    File expectedReportFile;
+    
     TestResult actual;
     TestResult expected;
 
@@ -79,10 +82,10 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
         }
 
         try {
-            File metricsFile = td.metrics();
-            if (metricsFile != null) {
-                log.warn("found a metrics file: " + metricsFile.getAbsolutePath());
-                expected = TestResult.buildFromJson(metricsFile);
+            expectedReportFile = td.metrics();
+            if (expectedReportFile != null) {
+                log.warn("found a metrics file: " + expectedReportFile.getAbsolutePath());
+                expected = TestResult.buildFromJson(expectedReportFile);
             } else {
                 log.error("metrics does not exist, skipping comparison step");
             }
@@ -191,10 +194,10 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         String x = mapper.writeValueAsString(actual);
-        File output = new File(workingDirectory.getAbsolutePath() + "/" + td.outputName());
-        Assert.assertFalse(output.exists());
+        actualReportFile = new File(workingDirectory.getAbsolutePath() + "/" + td.outputName());
+        Assert.assertFalse(actualReportFile.exists());
 
-        FileUtils.write(output, x);
+        FileUtils.write(actualReportFile, x);
 //        
 //        boolean populateMetricsDirectory = true;        
 //        if(populateMetricsDirectory && expected == null){
@@ -210,7 +213,7 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
         Assert.assertNotNull(actual);
         //Assert.assertTrue(actual.isConsistent);
 
-        reports.add(output);
+        reports.add(actualReportFile);
 
     }
 
@@ -222,7 +225,8 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
         }
         //TODO: option to provide sw accession of successful run?
 
-        Assert.assertTrue(compareReports(actual, expected));
+        Assert.assertTrue(compareReports(actual, expected), 
+                "There are differences between reports:\nExpected: " + expectedReportFile + "\nActual: " + actualReportFile);
 
     }
 
