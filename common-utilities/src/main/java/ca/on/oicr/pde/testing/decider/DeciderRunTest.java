@@ -81,10 +81,10 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
         try {
             File metricsFile = td.metrics();
             if (metricsFile != null) {
-                log.error("found a metrics file: " + metricsFile.getAbsolutePath());
+                log.warn("found a metrics file: " + metricsFile.getAbsolutePath());
                 expected = TestResult.buildFromJson(metricsFile);
             } else {
-                log.error("metrics does not exist, will skip comparison step");
+                log.error("metrics does not exist, skipping comparison step");
             }
         } catch (IOException ioe) {
             log.error(ioe);
@@ -240,6 +240,7 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
 
     private TestResult getWorkflowReport(Workflow w) {
 
+        //TODO: move this to a separate implementation class of "Decider Report"
         List<WorkflowRunReportRecord> wrrs = seq.getWorkflowRunRecords(w);
 
         TestResult t = new TestResult();
@@ -254,6 +255,11 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
             //Get the workflow run's parent accession (aka, the input files)
             List<Accessionable> parentAccessions = seq.getParentAccessions(wr);
             List<Accessionable> inputFileAccessions = seq.getInputFileAccessions(wr);
+
+            //TODO: 0.13.x series deciders do not use input_files, generalize parent and input file accessions
+            if (inputFileAccessions.isEmpty()) {
+                inputFileAccessions = parentAccessions;
+            }
 
             t.addStudies(seq.getStudy(parentAccessions));
             t.addSamples(seq.getSamples(parentAccessions));

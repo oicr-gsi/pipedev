@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.io.InputStream;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.WordUtils;
 import org.apache.log4j.Logger;
@@ -76,12 +77,28 @@ public class DeciderRunTestFactory {
 
     @Parameters({"testDefinition"})
     @Factory
-    public Object[] createTests(String testDefinition) throws IOException {
+    public Object[] createTests(String testDefinitionFilePath) throws IOException {
 
-        log.info("test definition: [" + testDefinition + "]");
+        if (System.getProperty("testDefinition") != null) {
+            testDefinitionFilePath = System.getProperty("testDefinition");
+            log.warn("test definition has been defined as a jvm argument");
+        }
 
-        //TODO: generalize for path etc
-        InputStream tdStream = getClass().getResourceAsStream(testDefinition);
+        log.warn("test definition path=[" + testDefinitionFilePath + "]");
+
+        //TODO: below is temporary workaround to allow the user to override the test definition via the command line (eg, mvn -DtestDefinition=/tmp/a.json ...)
+        // refactor create tests into a separate function, create command line tool as a different way to execute test?
+        InputStream tdStream = null;
+        try {
+            if (FileUtils.getFile(testDefinitionFilePath).exists()) {
+                tdStream = FileUtils.openInputStream(FileUtils.getFile(testDefinitionFilePath));
+            } else {
+                tdStream = getClass().getResourceAsStream(testDefinitionFilePath);
+            }
+        } catch (IOException ioe) {
+            log.error("Error locating the test definition file:", ioe);
+            throw new RuntimeException(ioe);
+        }
 
         String tdString;
         try {

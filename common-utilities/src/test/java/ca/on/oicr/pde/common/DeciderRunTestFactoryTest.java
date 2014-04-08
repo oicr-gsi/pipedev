@@ -29,7 +29,7 @@ public class DeciderRunTestFactoryTest {
 
         System.out.println("Starting factory");
         DeciderRunTestFactory d = new DeciderRunTestFactory();
-        d.createTests("");
+        //d.createTests("");
 
     }
 }
