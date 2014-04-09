@@ -7,12 +7,8 @@ import ca.on.oicr.pde.model.ReducedFileProvenanceReportRecord;
 import ca.on.oicr.pde.model.Workflow;
 import ca.on.oicr.pde.model.WorkflowRun;
 import ca.on.oicr.pde.model.WorkflowRunReportRecord;
-import ca.on.oicr.pde.testing.decider.WorkflowRunReport;
-import com.google.common.base.Joiner;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -43,14 +39,6 @@ public abstract class SeqwareInterface {
                 files.add(f.getSimpleFileProvenanceReportRecord());
             }
         }
-
-        Collections.sort(files, new Comparator<ReducedFileProvenanceReportRecord>() {
-
-            @Override
-            public int compare(ReducedFileProvenanceReportRecord o1, ReducedFileProvenanceReportRecord o2) {
-                return o1.toString().compareTo(o2.toString());
-            }
-        });
 
         return files;
     }

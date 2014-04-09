@@ -14,9 +14,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.base.Joiner;
-import de.danielbechler.diff.ObjectDifferFactory;
-import de.danielbechler.diff.node.Node;
-import de.danielbechler.diff.visitor.PrintingVisitor;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -232,13 +229,13 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
 
     public static <T> boolean compareReports(T actual, T expected) {
 
-        Node root = ObjectDifferFactory.getInstance().compare(actual, expected);
-
-        log.warn("root categories: " + root.getCategories());
-        log.warn(root.getChildren());
+        //Node root = ObjectDifferFactory.getInstance().compare(actual, expected);
+        //log.warn("root categories: " + root.getCategories());
+        //log.warn(root.getChildren());
         //diff is not working root.visit(new PrintingVisitor(actual, expected));
-
-        return (!root.hasChanges());
+        //return (!root.hasChanges());
+        
+        return actual.equals(expected);
 
     }
 

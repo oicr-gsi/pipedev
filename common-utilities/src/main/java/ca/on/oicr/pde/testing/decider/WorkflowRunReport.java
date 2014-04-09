@@ -1,14 +1,16 @@
 package ca.on.oicr.pde.testing.decider;
 
 import ca.on.oicr.pde.model.ReducedFileProvenanceReportRecord;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
-public class WorkflowRunReport {
+public class WorkflowRunReport implements Comparable<WorkflowRunReport>{
 
     Map workflowIni = new HashMap<String,String>();
 
@@ -23,16 +25,18 @@ public class WorkflowRunReport {
     }
 
     public List<ReducedFileProvenanceReportRecord> getFiles() {
+        Collections.sort(files);
         return files;
     }
 
     public void setFiles(List<ReducedFileProvenanceReportRecord> files) {
+        Collections.sort(files);
         this.files = files;
     }
 
     @Override
     public String toString() {
-        return ToStringBuilder.reflectionToString(this);
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
     @Override
@@ -42,14 +46,13 @@ public class WorkflowRunReport {
 
     @Override
     public boolean equals(Object obj) {
-        //
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
         return EqualsBuilder.reflectionEquals(this, obj);
+    }
+
+    @Override
+    public int compareTo(WorkflowRunReport o) {
+        //TODO: optimize
+        return this.toString().compareTo(o.toString());
     }
 
 }

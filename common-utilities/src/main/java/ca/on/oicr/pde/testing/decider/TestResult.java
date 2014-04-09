@@ -10,7 +10,10 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class TestResult {
 
@@ -24,7 +27,7 @@ public class TestResult {
     private final Set<String> fileMetaTypes;
     private Integer maxInputFiles;
     private Integer minInputFiles;
-    private final List<WorkflowRunReport> workflowRuns;
+    private List<WorkflowRunReport> workflowRuns;
 
     public TestResult() {
         studies = new HashSet<String>();
@@ -36,7 +39,7 @@ public class TestResult {
         fileMetaTypes = new HashSet<String>();
         maxInputFiles = Integer.MIN_VALUE;
         minInputFiles = Integer.MAX_VALUE;
-        
+
         workflowRuns = new ArrayList<WorkflowRunReport>();
     }
 
@@ -108,14 +111,13 @@ public class TestResult {
         return workflowRunCount;
     }
 
-    public List<WorkflowRunReport> getWorkflowRuns() {
-        Collections.sort(workflowRuns, new Comparator<WorkflowRunReport>() {
+    public void setWorkflowRuns(List<WorkflowRunReport> workflowRuns) {
+        Collections.sort(workflowRuns);
+        this.workflowRuns = workflowRuns;
+    }
 
-            @Override
-            public int compare(WorkflowRunReport o1, WorkflowRunReport o2) {
-               return o1.toString().compareTo(o2.toString());
-            }
-        });
+    public List<WorkflowRunReport> getWorkflowRuns() {
+        Collections.sort(workflowRuns);
         return workflowRuns;
     }
 
@@ -157,7 +159,17 @@ public class TestResult {
 
     @Override
     public String toString() {
-        return ToStringBuilder.reflectionToString(this);
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
 }

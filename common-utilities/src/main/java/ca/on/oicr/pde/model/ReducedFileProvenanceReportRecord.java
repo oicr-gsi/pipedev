@@ -5,8 +5,9 @@ import java.util.Map;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
-public class ReducedFileProvenanceReportRecord {
+public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFileProvenanceReportRecord>{
     private String studyTitle = "";
     private Map<String, String> studyAttributes = Collections.EMPTY_MAP;
     private String experimentName = "";
@@ -197,7 +198,7 @@ public class ReducedFileProvenanceReportRecord {
 
     @Override
     public String toString() {
-        return ToStringBuilder.reflectionToString(this);
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
     @Override
@@ -207,14 +208,13 @@ public class ReducedFileProvenanceReportRecord {
 
     @Override
     public boolean equals(Object obj) {
-        //
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
         return EqualsBuilder.reflectionEquals(this, obj);
+    }
+
+    @Override
+    public int compareTo(ReducedFileProvenanceReportRecord o) {
+        //TODO: optimize
+        return this.toString().compareTo(o.toString());
     }
 
 }
