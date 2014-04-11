@@ -2,6 +2,7 @@ package ca.on.oicr.pde.testing.decider;
 
 import ca.on.oicr.pde.dao.SeqwareInterface;
 import ca.on.oicr.pde.model.Accessionable;
+import ca.on.oicr.pde.model.ReducedFileProvenanceReportRecord;
 import ca.on.oicr.pde.model.Sample;
 import ca.on.oicr.pde.model.SequencerRun;
 import ca.on.oicr.pde.model.SeqwareAccession;
@@ -174,7 +175,9 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
 
         log.warn(testName + " starting execution");
 
-        exec.deciderRunSchedule(deciderJar, workflowSwid, studies, sequencerRuns, samples, "");
+        //TODO: add support for extra args
+        String extraArgs = "";
+        exec.deciderRunSchedule(deciderJar, workflowSwid, studies, sequencerRuns, samples, extraArgs);
 
         log.warn(testName + " execution complete");
 
@@ -223,7 +226,8 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
         //TODO: option to provide sw accession of successful run?
 
         Assert.assertTrue(compareReports(actual, expected),
-                "There are differences between reports:\nExpected: " + expectedReportFile + "\nActual: " + actualReportFile);
+                "There are differences between reports:\nExpected: " + expectedReportFile + "\nActual: " + actualReportFile
+                + "\nExpected object:\n" + expected.toString() + "\nActual object:\n" + actual.toString());
 
     }
 
@@ -234,7 +238,6 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
         //log.warn(root.getChildren());
         //diff is not working root.visit(new PrintingVisitor(actual, expected));
         //return (!root.hasChanges());
-        
         return actual.equals(expected);
 
     }
@@ -259,6 +262,7 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
 
             //TODO: 0.13.x series deciders do not use input_files, generalize parent and input file accessions
             if (inputFileAccessions.isEmpty()) {
+                log.warn("overriding input file accessions with parent accessions, workflow run swid=[" + wr.getSwid() + "]");
                 inputFileAccessions = parentAccessions;
             }
 
@@ -271,12 +275,13 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
             t.addProcessingAlgorithms(seq.getProcessingAlgorithms(inputFileAccessions));
             t.addFileMetaTypes(seq.getFileMetaTypes(inputFileAccessions));
 
-            if (parentAccessions.size() > t.getMaxInputFiles()) {
-                t.setMaxInputFiles(inputFileAccessions.size());
+            List<ReducedFileProvenanceReportRecord> files = seq.getFiles(inputFileAccessions);
+            if (files.size() > t.getMaxInputFiles()) {
+                t.setMaxInputFiles(files.size());
             }
 
-            if (parentAccessions.size() < t.getMinInputFiles()) {
-                t.setMinInputFiles(inputFileAccessions.size());
+            if (files.size() < t.getMinInputFiles()) {
+                t.setMinInputFiles(files.size());
             }
 
             Map ini = seq.getWorkflowRunIni(wr);
@@ -286,12 +291,12 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
 
             WorkflowRunReport x = new WorkflowRunReport();
             x.setWorkflowIni(ini);
-            x.setFiles(seq.getFiles(inputFileAccessions));
+            x.setFiles(files);
 
             t.addWorkflowRun(x);
 
         }
-        
+
         return t;
 
     }

@@ -6,10 +6,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -30,13 +29,13 @@ public class TestResult {
     private List<WorkflowRunReport> workflowRuns;
 
     public TestResult() {
-        studies = new HashSet<String>();
-        sequencerRuns = new HashSet<String>();
-        lanes = new HashSet<String>();
-        samples = new HashSet<String>();
-        workflows = new HashSet<String>();
-        processingAlgorithms = new HashSet<String>();
-        fileMetaTypes = new HashSet<String>();
+        studies = new TreeSet<String>();
+        sequencerRuns = new TreeSet<String>();
+        lanes = new TreeSet<String>();
+        samples = new TreeSet<String>();
+        workflows = new TreeSet<String>();
+        processingAlgorithms = new TreeSet<String>();
+        fileMetaTypes = new TreeSet<String>();
         maxInputFiles = Integer.MIN_VALUE;
         minInputFiles = Integer.MAX_VALUE;
 
@@ -117,7 +116,6 @@ public class TestResult {
     }
 
     public List<WorkflowRunReport> getWorkflowRuns() {
-        Collections.sort(workflowRuns);
         return workflowRuns;
     }
 
@@ -151,6 +149,7 @@ public class TestResult {
 
     public void addWorkflowRun(WorkflowRunReport s) {
         this.workflowRuns.add(s);
+        Collections.sort(workflowRuns);
     }
 
     public void validate() {

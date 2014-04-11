@@ -35,9 +35,7 @@ public abstract class SeqwareInterface {
         List files = new ArrayList<ReducedFileProvenanceReportRecord>();
 
         for (Accessionable s : swids) {
-            for (FileProvenanceReportRecord f : swidToFpr.get(s.getSwid())) {
-                files.add(f.getSimpleFileProvenanceReportRecord());
-            }
+            files.add(new ReducedFileProvenanceReportRecord(swidToFpr.get(s.getSwid())));
         }
 
         return files;

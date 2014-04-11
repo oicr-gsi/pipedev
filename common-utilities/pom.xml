@@ -80,7 +80,6 @@
             <groupId>com.github.seqware</groupId>
             <artifactId>seqware-distribution</artifactId>
             <version>${seqware-version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.jcabi</groupId>

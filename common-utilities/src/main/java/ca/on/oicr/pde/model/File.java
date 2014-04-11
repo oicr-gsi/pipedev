@@ -16,7 +16,7 @@ public class File implements Accessionable, Attributable {
     private String path;
     private String md5sum;
     private String size;
-    private String description;
+    private String description;  
 
     public File() {
         attributes = Collections.EMPTY_MAP;

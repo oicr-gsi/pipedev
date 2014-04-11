@@ -32,6 +32,15 @@ public class Helpers {
 
     public static String executeCommand(String id, String command, File workingDirectory, Map<String, String>... environmentVariables) throws IOException {
 
+        return executeCommand(id, command, workingDirectory, false, environmentVariables);
+
+    }
+
+    public static String executeCommand(String id, String command, File workingDirectory, boolean saveOutputToWorkingDirectory,
+            Map<String, String>... environmentVariables) throws IOException {
+
+        
+        //TODO: if saveOutputToWorkingDirectory record to workingDirectory
         CommandLine c = new CommandLine("/bin/bash");
         c.addArgument("-c");
         c.addArgument(command, false);

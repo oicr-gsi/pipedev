@@ -2,17 +2,17 @@ package ca.on.oicr.pde.testing.decider;
 
 import ca.on.oicr.pde.model.ReducedFileProvenanceReportRecord;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-public class WorkflowRunReport implements Comparable<WorkflowRunReport>{
+public class WorkflowRunReport implements Comparable<WorkflowRunReport> {
 
-    Map workflowIni = new HashMap<String,String>();
+    Map workflowIni = new TreeMap<String, String>();
 
     List<ReducedFileProvenanceReportRecord> files;
 
@@ -21,7 +21,7 @@ public class WorkflowRunReport implements Comparable<WorkflowRunReport>{
     }
 
     public void setWorkflowIni(Map<String, String> workflowIni) {
-        this.workflowIni.putAll(workflowIni);
+        this.workflowIni = new TreeMap<String, String>(workflowIni);
     }
 
     public List<ReducedFileProvenanceReportRecord> getFiles() {

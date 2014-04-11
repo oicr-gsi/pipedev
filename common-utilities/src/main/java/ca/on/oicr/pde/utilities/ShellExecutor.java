@@ -61,9 +61,10 @@ public class ShellExecutor implements SeqwareExecutor {
         cmd.append(listToParamString(" --sequencer-run-name ", sequencerRuns));
         cmd.append(listToParamString(" --sample-name ", samples));
         cmd.append(" --schedule");
+        cmd.append(" --force-run-all");
         cmd.append(extraArgs);
 
-        Helpers.executeCommand(id, cmd.toString(), workingDirectory, environmentVariables);
+        Helpers.executeCommand(id, cmd.toString(), workingDirectory, true, environmentVariables);
 
     }
 

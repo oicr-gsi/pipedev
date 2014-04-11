@@ -111,7 +111,7 @@ public class DeciderRunTestTest {
 
     }
 
-    @Test(enabled = true)
+    @Test(enabled = false)
     public void compareUnordered() throws IOException {
 
         String expected = "{\n"
@@ -231,6 +231,86 @@ public class DeciderRunTestTest {
         System.out.println("expected: \n" + expectedObject);
 
         Assert.assertTrue(compareReports(actualObject, expectedObject));
+
+    }
+
+    @Test(enabled = true)
+    public void compareMergedFiles() throws IOException {
+
+        String actual = "{\n"
+                + "  \"workflowRunCount\" : 1,\n"
+                + "  \"studies\" : [ \"Study 1\" ],\n"
+                + "  \"sequencerRuns\" : [ \"B\", \"A\", \"C\" ],\n"
+                + "  \"lanes\" : [ \"1\", \"2\", \"3\", \"4\", \"5\" ],\n"
+                + "  \"samples\" : [ \"1\", \"3\", \"2\" ],\n"
+                + "  \"workflows\" : [ \"1\", \"2\" ],\n"
+                + "  \"processingAlgorithms\" : [ \"1\", \"3\", \"2\" ],\n"
+                + "  \"fileMetaTypes\" : [ \"1\" ],\n"
+                + "  \"maxInputFiles\" : 1,\n"
+                + "  \"minInputFiles\" : 1,\n"
+                + "  \"workflowRuns\" : [ {\n"
+                + "    \"workflowIni\" : {\n"
+                + "      \"test\" : \"1500\"\n"
+                + "    },"
+                + "    \"files\" : [ {\n"
+                + "      \"studyTitle\" : [ \"2\" ],\n"
+                + "      \"studyAttributes\" : {\n"
+                + "        \"attr1\" : [ \"1\", \"4\", \"2\", \"3\" ]\n"
+                + "      }"
+                + "    } ]\n"
+                + "  }, "
+                + "{\n"
+                + "    \"workflowIni\" : {\n"
+                + "      \"test\" : \"1500\"\n"
+                + "    },"
+                + "    \"files\" : [ {\n"
+                + "      \"studyTitle\" : [ \"1\" ],\n"
+                + "      \"studyAttributes\" : {\n"
+                + "        \"attr1\" : [ \"4\", \"1\", \"2\", \"3\" ]\n"
+                + "      }"
+                + "    } ]\n"
+                + "  } ] }";
+
+        String expected = "{\n"
+                + "  \"workflowRunCount\" : 1,\n"
+                + "  \"studies\" : [ \"Study 1\" ],\n"
+                + "  \"sequencerRuns\" : [ \"A\", \"B\", \"C\" ],\n"
+                + "  \"lanes\" : [ \"1\", \"5\", \"3\", \"4\", \"2\" ],\n"
+                + "  \"samples\" : [ \"1\", \"2\", \"3\" ],\n"
+                + "  \"workflows\" : [ \"1\", \"2\" ],\n"
+                + "  \"processingAlgorithms\" : [ \"2\", \"3\", \"1\" ],\n"
+                + "  \"fileMetaTypes\" : [ \"1\" ],\n"
+                + "  \"maxInputFiles\" : 1,\n"
+                + "  \"minInputFiles\" : 1,\n"
+                + "  \"workflowRuns\" : [ {\n"
+                + "    \"workflowIni\" : {\n"
+                + "      \"test\" : \"1500\"\n"
+                + "    },"
+                + "    \"files\" : [ {\n"
+                + "      \"studyTitle\" : [ \"1\" ],\n"
+                + "      \"studyAttributes\" : {\n"
+                + "        \"attr1\" : [ \"1\", \"4\", \"2\", \"3\" ]\n"
+                + "      }"
+                + "    } ]\n"
+                + "  }, {\n"
+                + "    \"workflowIni\" : {\n"
+                + "      \"test\" : \"1500\"\n"
+                + "    },"
+                + "    \"files\" : [ {\n"
+                + "      \"studyTitle\" : [ \"2\" ],\n"
+                + "      \"studyAttributes\" : {\n"
+                + "        \"attr1\" : [ \"1\", \"4\", \"2\", \"3\" ]\n"
+                + "      }"
+                + "    } ]\n"
+                + "  } ] }";
+
+        TestResult actualObject = TestResult.buildFromJson(actual);
+        TestResult expectedObject = TestResult.buildFromJson(expected);
+
+        Assert.assertEquals(2, actualObject.getWorkflowRuns().size());
+        Assert.assertEquals(2, expectedObject.getWorkflowRuns().size());
+
+        Assert.assertTrue(actualObject.equals(expectedObject), "expected:\n" + expectedObject.toString());
 
     }
 
