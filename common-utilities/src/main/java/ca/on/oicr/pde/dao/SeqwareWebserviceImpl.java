@@ -23,6 +23,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import net.sourceforge.seqware.common.util.maptools.MapTools;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpGet;
@@ -133,14 +134,14 @@ public final class SeqwareWebserviceImpl extends SeqwareInterface {
 
         List<String> fileAccessions = new ArrayList<String>();
         try {
-            fileAccessions = getElementFromXML(getHttpResponse(restUrl + "/workflowruns/" + workflowRun.getSwid()), 
+            fileAccessions = getElementFromXML(getHttpResponse(restUrl + "/workflowruns/" + workflowRun.getSwid()),
                     "/WorkflowRun/inputFileAccessions/text()", true);
         } catch (IOException ioe) {
             throw new RuntimeException(ioe);
         }
-        
+
         List files = new ArrayList<File>();
-        for(String s:fileAccessions){
+        for (String s : fileAccessions) {
             //TODO: use a factory to get File
             File f = new File();
             f.setSwid(s);
@@ -210,6 +211,10 @@ public final class SeqwareWebserviceImpl extends SeqwareInterface {
         httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(user, password));
 
         HttpResponse r = httpClient.execute(new HttpGet(url));
+
+        if (r.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+            throw new IOException("HTTP status code = [" + r.getStatusLine().getStatusCode() + "] was returned when accessing url = [" + url + "]");
+        }
 
         return r.getEntity().getContent();
 
