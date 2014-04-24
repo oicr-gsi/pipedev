@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
@@ -49,10 +50,10 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
     TestResult actual;
     TestResult expected;
 
-    TestDefinition.Test td;
+    TestDefinition.Test testDefinition;
 
     public DeciderRunTest(SeqwareInterface seq, File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName,
-            File deciderJar, File bundledWorkflow, String deciderClass, TestDefinition.Test td) {
+            File deciderJar, File bundledWorkflow, String deciderClass, TestDefinition.Test testDefinition) {
 
         super(seqwareDistribution, seqwareSettings, workingDirectory, testName);
 
@@ -61,26 +62,26 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
         this.bundledWorkflow = bundledWorkflow;
         this.deciderClass = deciderClass;
 
-        for (String s : td.studies) {
+        for (String s : testDefinition.studies) {
             Study x = new Study();
             x.setTitle(s);
             studies.add(x);
         }
 
-        for (String s : td.samples) {
+        for (String s : testDefinition.samples) {
             Sample x = new Sample();
             x.setName(s);
             samples.add(x);
         }
 
-        for (String s : td.sequencerRuns) {
+        for (String s : testDefinition.sequencerRuns) {
             SequencerRun x = new SequencerRun();
             x.setName(s);
             sequencerRuns.add(x);
         }
 
         try {
-            expectedReportFile = td.metrics();
+            expectedReportFile = testDefinition.metrics();
             if (expectedReportFile != null) {
                 log.warn("found a metrics file: " + expectedReportFile.getAbsolutePath());
                 expected = TestResult.buildFromJson(expectedReportFile);
@@ -92,7 +93,7 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
             throw new RuntimeException(ioe);
         }
 
-        this.td = td;
+        this.testDefinition = testDefinition;
     }
 
     @BeforeSuite
@@ -175,9 +176,12 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
 
         log.warn(testName + " starting execution");
 
-        //TODO: add support for extra args
-        String extraArgs = "";
-        exec.deciderRunSchedule(deciderJar, workflowSwid, studies, sequencerRuns, samples, extraArgs);
+        StringBuilder extraArgs = new StringBuilder();
+        for(Entry<String, Object> e : testDefinition.parameters.entrySet()){
+            extraArgs.append(" ").append(e.getKey()).append(" ").append(e.getValue().toString());
+        }
+
+        exec.deciderRunSchedule(deciderJar, workflowSwid, studies, sequencerRuns, samples, extraArgs.toString());
 
         log.warn(testName + " execution complete");
 
@@ -194,7 +198,7 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         String x = mapper.writeValueAsString(actual);
-        actualReportFile = new File(workingDirectory.getAbsolutePath() + "/" + td.outputName());
+        actualReportFile = new File(workingDirectory.getAbsolutePath() + "/" + testDefinition.outputName());
         Assert.assertFalse(actualReportFile.exists());
 
         FileUtils.write(actualReportFile, x);
@@ -226,8 +230,8 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
         //TODO: option to provide sw accession of successful run?
 
         Assert.assertTrue(compareReports(actual, expected),
-                "There are differences between reports:\nExpected: " + expectedReportFile + "\nActual: " + actualReportFile
-                + "\nExpected object:\n" + expected.toString() + "\nActual object:\n" + actual.toString());
+                "There are differences between reports:\nExpected: " + expectedReportFile + "\nActual: " + actualReportFile);
+                //+ "\nExpected object:\n" + expected.toString() + "\nActual object:\n" + actual.toString());
 
     }
 
@@ -242,9 +246,9 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
 
     }
 
+    //TODO: move this to a separate implementation class of "Decider Report"
     private TestResult getWorkflowReport(Workflow w) {
 
-        //TODO: move this to a separate implementation class of "Decider Report"
         List<WorkflowRunReportRecord> wrrs = seq.getWorkflowRunRecords(w);
 
         TestResult t = new TestResult();
@@ -256,8 +260,10 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
             WorkflowRun wr = new WorkflowRun();
             wr.setSwid(wrr.getWorkflowRunSwid());
 
-            //Get the workflow run's parent accession (aka, the input files)
+            //Get the workflow run's parent accession(s) (processing accession(s))
             List<Accessionable> parentAccessions = seq.getParentAccessions(wr);
+            
+            //Get the workflow run's input file(s) (file accession(s))
             List<Accessionable> inputFileAccessions = seq.getInputFileAccessions(wr);
 
             //TODO: 0.13.x series deciders do not use input_files, generalize parent and input file accessions
@@ -285,7 +291,7 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
             }
 
             Map ini = seq.getWorkflowRunIni(wr);
-            for (String s : td.iniExclusions) {
+            for (String s : testDefinition.iniExclusions) {
                 ini.remove(s);
             }
 

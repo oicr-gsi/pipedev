@@ -35,7 +35,7 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
     private Multimap<String, String> fileAttributes;
     private int fileHash = 0;
 
-    public ReducedFileProvenanceReportRecord() {
+    private ReducedFileProvenanceReportRecord() {
         studyTitle = new TreeSet<String>();
         studyAttributes = TreeMultimap.create();
         experimentName = new TreeSet<String>();

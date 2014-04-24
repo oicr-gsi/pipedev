@@ -7,12 +7,17 @@ import ca.on.oicr.pde.model.ReducedFileProvenanceReportRecord;
 import ca.on.oicr.pde.model.Workflow;
 import ca.on.oicr.pde.model.WorkflowRun;
 import ca.on.oicr.pde.model.WorkflowRunReportRecord;
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -30,12 +35,45 @@ public abstract class SeqwareInterface {
 
     }
 
-    public List<ReducedFileProvenanceReportRecord> getFiles(List<? extends Accessionable> swids) {
+    /**
+     * Get a list ReducedFileProvenanceReportRecord (file records) from a collection of accessions.
+     * Two notable operations occur in this method:
+     * 1) All input accessions that uniquely (determined by file accession) reference a file will be converted directly into a ReducedFileProvenanceReportRecord.
+     * 2) Any input accessions that reference the same file (determined by file accession) will be merged into one ReducedFileProvenanceReportRecord.
+     * 
+     * For example:
+     * Case 1)
+     *      Accession 1 --> File1 --> ReducedFile1
+     *      Accession 2 --> File2 --> ReducedFile2
+     * Case 2)
+     *      Accession 3 --> File3 \ 
+     *      Accession 4 --> File3 --> ReducedFile3
+     *      Accession 5 --> File3 /
+     * 
+     * @param accessions a collection of objects that implement Accessionable
+     * @return a list of ReducedFileProvenanceReportRecord
+     */
+    public List<ReducedFileProvenanceReportRecord> getFiles(Collection<? extends Accessionable> accessions) {
 
-        List files = new ArrayList<ReducedFileProvenanceReportRecord>();
+        List<FileProvenanceReportRecord> filesToBeProcessed = new ArrayList<FileProvenanceReportRecord>();
+        for (Accessionable s : accessions) {
+            filesToBeProcessed.addAll(swidToFpr.get(s.getSwid()));
+        }
 
-        for (Accessionable s : swids) {
-            files.add(new ReducedFileProvenanceReportRecord(swidToFpr.get(s.getSwid())));
+        //Parition filesToBeProcessed by file swid
+        ImmutableListMultimap<String, FileProvenanceReportRecord> filesMap = Multimaps.index(filesToBeProcessed, new Function<FileProvenanceReportRecord, String>() {
+            @Override
+            public String apply(FileProvenanceReportRecord f) {
+                return f.getFileSwid();
+            }
+        });
+        
+        //Convert set of FileProvenanceReportRecord to ReducedFileProvenanceReportRecord
+        //If the accession only has one file, transform it into one ReducedFileProvenanceReportRecord
+        //If the accession has multiple files, merge them all into one ReducedFileProvenanceReportRecord
+        List<ReducedFileProvenanceReportRecord> files = new ArrayList<ReducedFileProvenanceReportRecord>();
+        for(Entry<String, Collection<FileProvenanceReportRecord>> e : filesMap.asMap().entrySet()){
+            files.add(new ReducedFileProvenanceReportRecord(e.getValue()));
         }
 
         return files;

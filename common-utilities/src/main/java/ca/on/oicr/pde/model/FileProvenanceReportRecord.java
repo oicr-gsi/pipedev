@@ -267,7 +267,6 @@ public class FileProvenanceReportRecord implements Serializable {
 
     }
 
-
 //    public SimpleFileProvenanceReportRecord getSimpleRecord(){
 //        
 //    }
@@ -307,46 +306,46 @@ public class FileProvenanceReportRecord implements Serializable {
         private Sample sample;
         //private List<Sample> parentSamples;
 
-        private String lastModified;
-        private String studyTitle;
-        private String studySwid;
-        private String studyAttributes;
-        private String experimentName;
-        private String experimentSwid;
-        private String experimentAttributes;
-        private String parentSampleNames;
-        private String parentSampleSwids;
-        private String parentSampleAttributes;
-        private String sampleName;
-        private String sampleSwid;
-        private String sampleAttributes;
-        private String sequencerRunName;
-        private String sequencerRunSwid;
-        private String sequencerRunAttributes;
-        private String laneName;
-        private String laneNumber;
-        private String laneSwid;
-        private String laneAttributes;
-        private String iusTag;
-        private String iusSwid;
-        private String iusAttributes;
-        private String workflowName;
-        private String workflowVersion;
-        private String workflowSwid;
-        private String workflowRunName;
-        private String workflowRunStatus;
-        private String workflowRunSwid;
-        private String processingAlgorithm;
-        private String processingSwid;
-        private String processingAttributes;
-        private String fileMetaType;
-        private String fileSwid;
-        private String fileAttributes;
-        private String filePath;
-        private String fileMd5sum;
-        private String fileSize;
-        private String fileDescription;
-        private String skip;
+        private String lastModified = "";
+        private String studyTitle = "";
+        private String studySwid = "";
+        private String studyAttributes = "";
+        private String experimentName = "";
+        private String experimentSwid = "";
+        private String experimentAttributes = "";
+        private String parentSampleNames = "";
+        private String parentSampleSwids = "";
+        private String parentSampleAttributes = "";
+        private String sampleName = "";
+        private String sampleSwid = "";
+        private String sampleAttributes = "";
+        private String sequencerRunName = "";
+        private String sequencerRunSwid = "";
+        private String sequencerRunAttributes = "";
+        private String laneName = "";
+        private String laneNumber = "";
+        private String laneSwid = "";
+        private String laneAttributes = "";
+        private String iusTag = "";
+        private String iusSwid = "";
+        private String iusAttributes = "";
+        private String workflowName = "";
+        private String workflowVersion = "";
+        private String workflowSwid = "";
+        private String workflowRunName = "";
+        private String workflowRunStatus = "";
+        private String workflowRunSwid = "";
+        private String processingAlgorithm = "";
+        private String processingSwid = "";
+        private String processingAttributes = "";
+        private String fileMetaType = "";
+        private String fileSwid = "";
+        private String fileAttributes = "";
+        private String filePath = "";
+        private String fileMd5sum = "";
+        private String fileSize = "";
+        private String fileDescription = "";
+        private String skip = "";
 
         public Builder() {
 

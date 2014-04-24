@@ -1,6 +1,7 @@
 package ca.on.oicr.pde.testing.decider;
 
 import ca.on.oicr.pde.model.ReducedFileProvenanceReportRecord;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -13,8 +14,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 public class WorkflowRunReport implements Comparable<WorkflowRunReport> {
 
     Map workflowIni = new TreeMap<String, String>();
-
-    List<ReducedFileProvenanceReportRecord> files;
+    List<ReducedFileProvenanceReportRecord> files = new ArrayList<ReducedFileProvenanceReportRecord>();
 
     public Map getWorkflowIni() {
         return workflowIni;
@@ -30,8 +30,8 @@ public class WorkflowRunReport implements Comparable<WorkflowRunReport> {
     }
 
     public void setFiles(List<ReducedFileProvenanceReportRecord> files) {
-        Collections.sort(files);
-        this.files = files;
+        this.files.addAll(files);
+        Collections.sort(this.files);
     }
 
     @Override
