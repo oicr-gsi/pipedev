@@ -177,7 +177,7 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
         log.warn(testName + " starting execution");
 
         StringBuilder extraArgs = new StringBuilder();
-        for(Entry<String, Object> e : testDefinition.parameters.entrySet()){
+        for (Entry<String, Object> e : testDefinition.parameters.entrySet()) {
             extraArgs.append(" ").append(e.getKey()).append(" ").append(e.getValue().toString());
         }
 
@@ -224,14 +224,26 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
     @Test(dependsOnGroups = "execution", dependsOnMethods = "calculateWorkflowRunReport", groups = "postExecution")
     public void compareWorkflowRunReport() throws JsonProcessingException, IOException {
 
-        if (expected == null) {
-            Assert.fail("no expected output to compare to.");
-        }
-        //TODO: option to provide sw accession of successful run?
+        Assert.assertNotNull(expected, "no expected output to compare to.");
+
+        List<String> problems = validateReport(actual);
+        Assert.assertTrue(problems.isEmpty(), problems.toString());
 
         Assert.assertTrue(compareReports(actual, expected),
                 "There are differences between reports:\nExpected: " + expectedReportFile + "\nActual: " + actualReportFile);
-                //+ "\nExpected object:\n" + expected.toString() + "\nActual object:\n" + actual.toString());
+        //+ "\nExpected object:\n" + expected.toString() + "\nActual object:\n" + actual.toString());
+
+    }
+
+    private List<String> validateReport(TestResult t) {
+
+        List<String> problems = new ArrayList<String>();
+
+        if (t.getWorkflowRunCount().equals(Integer.valueOf("0"))) {
+            problems.add("No workflow run were scheduled.");
+        }
+
+        return problems;
 
     }
 
@@ -262,7 +274,7 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
 
             //Get the workflow run's parent accession(s) (processing accession(s))
             List<Accessionable> parentAccessions = seq.getParentAccessions(wr);
-            
+
             //Get the workflow run's input file(s) (file accession(s))
             List<Accessionable> inputFileAccessions = seq.getInputFileAccessions(wr);
 
