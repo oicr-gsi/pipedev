@@ -1,4 +1,10 @@
-target/
-.DS_Store
-*.class
-*.swp
+target/                                                                                                                                                                                                                                                  
+*.DS_Store                                                                                                                                                                                                                                                
+*.class                                                                                                                                                                                                                                                  
+*.swp 
+*~
+.project
+.classpath
+.settings
+nbactions.xml
+nb-configuration.xml
