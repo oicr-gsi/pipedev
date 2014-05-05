@@ -12,7 +12,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <seqware-version>1.0.13</seqware-version>
+        <seqware-version>1.0.14</seqware-version>
         <decider-utilities-version>1.4.3-SNAPSHOT</decider-utilities-version>
         <final-name>Decider_${project.version}_${project.artifactId}_${workflow-version}_SeqWare_${seqware-version}</final-name>
         <skipITs>true</skipITs>
