@@ -25,6 +25,7 @@
         <schedulingSystem>oozie</schedulingSystem>
         <schedulingHost>hsqwstage-node2.hpc.oicr.on.ca</schedulingHost>
         <seqwareDistribution>${bundleDirectory}/lib/seqware-distribution-${seqware-version}-full.jar</seqwareDistribution>
+        <jre-version>1.7.0_51</jre-version>
     </properties>
     
     <dependencies>
@@ -53,13 +54,13 @@
             <groupId>com.github.seqware</groupId>
             <artifactId>seqware-distribution</artifactId>
             <version>${seqware-version}</version>
-<!--            <scope>provided</scope>-->
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>ca.on.oicr.pde</groupId>
             <artifactId>workflow-utilities</artifactId>
             <version>${workflow-utilities-version}</version>
-<!--            <scope>provided</scope>-->
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>ca.on.oicr.pde</groupId>
