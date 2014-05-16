@@ -88,7 +88,7 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
 
         //TODO: what if the test/workflow run should fail?
         //TODO: print std out/err if workflow failed.
-        Assert.assertEquals("completed", workflowRunStatus);
+        Assert.assertEquals(workflowRunStatus, "completed");
 
     }
 
