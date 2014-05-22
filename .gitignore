@@ -1,7 +1,7 @@
-target/                                                                                                                                                                                                                                                  
-*.DS_Store                                                                                                                                                                                                                                                
-*.class                                                                                                                                                                                                                                                  
-*.swp 
+target/
+*.DS_Store
+*.class
+*.swp
 *~
 .project
 .classpath
