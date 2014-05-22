@@ -126,7 +126,7 @@ public class CutAdaptModule extends OicrModule {
     public ReturnValue do_run() {
         ReturnValue ret = new ReturnValue();
         try {
-            tempDir = FileTools.createTempDirectory(new File("."));
+            tempDir = FileTools.createTempDirectory(new File(System.getProperty("user.dir")));
         } catch (IOException e) {
             e.printStackTrace();
             ret.setStderr(e.getMessage());
@@ -149,12 +149,18 @@ public class CutAdaptModule extends OicrModule {
         command += tempDir.getAbsolutePath() + "/tmp.1.fastq.gz ";
         command += ";";
 
-        Log.stdout("Command: " + command);
-        try {
-            ret = RunTools.runCommand(command);
-        } catch (Exception e) {
-            e.printStackTrace();
-            
+	try{
+        java.util.ArrayList<String> theCommand = new java.util.ArrayList<String>();
+        theCommand.add("bash");
+        theCommand.add("-lc");
+        StringBuffer cmdBuff = new StringBuffer();
+        cmdBuff.append(command+ " ");
+        theCommand.add(cmdBuff.toString());
+        Log.stdout("Command run: \nbash -lc " + cmdBuff.toString());
+        ret = RunTools.runCommand(theCommand.toArray(new String[0]));
+        Log.stdout("Command exit code: " + ret.getExitStatus());
+
+
         } finally {
             cleanUp();
         }
