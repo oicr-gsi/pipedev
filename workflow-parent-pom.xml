@@ -246,6 +246,7 @@
                             <outputDirectory>${bundleDirectory}/bin</outputDirectory>
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>true</overWriteSnapshots>
+			    <includeScope>runtime</includeScope>
                             <excludeScope>provided</excludeScope>
                             <excludeArtifactIds>workflow-utilities</excludeArtifactIds>
                         </configuration>
