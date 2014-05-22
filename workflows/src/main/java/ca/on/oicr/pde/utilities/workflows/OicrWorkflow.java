@@ -58,9 +58,10 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
     protected SqwFile[] provisionInputFiles(String identifier) {
         String[] files = getInputFiles(identifier);
         Random random = new Random(System.currentTimeMillis());
+	int start = random.nextInt(10000);
         SqwFile[] pFiles = new SqwFile[files.length];
         for (int i = 0; i < files.length; i++) {
-            SqwFile file = this.createFile("file_in_" + random.nextInt(10000));
+            SqwFile file = this.createFile("file_in_" + start++);
             file.setSourcePath(files[i]);
             file.setIsInput(true);
             pFiles[i] = file;
