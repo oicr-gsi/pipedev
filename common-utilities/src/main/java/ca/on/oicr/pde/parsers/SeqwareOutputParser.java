@@ -1,7 +1,12 @@
 package ca.on.oicr.pde.parsers;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.io.FileUtils;
 
 public class SeqwareOutputParser {
 
@@ -11,18 +16,26 @@ public class SeqwareOutputParser {
         Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(seqwareExecutionOutput);
 
-        int matches = 0;
-        String result = null;
+        List<String> accessions = new ArrayList<String>();
         while (m.find()) {
-            matches++;
-            result = m.group(1).trim();
+            accessions.add(m.group(1).trim());
         }
 
-        if (matches != 1 || result == null || result.isEmpty()) {
-            throw new RuntimeException("Invalid SWID state.");
+        if (accessions.isEmpty()) {
+            try {
+                File seqwareOutputFile = File.createTempFile("seqwareCommandExecutionOutput", "");
+                FileUtils.writeStringToFile(seqwareOutputFile, seqwareExecutionOutput);
+                System.out.println("Seqware execution output has been exported to [" + seqwareOutputFile.getAbsolutePath() + "]");
+            } catch (IOException ioe) {
+                //not able to write seqware output to disk, continue.
+            }
+
+            throw new RuntimeException("No seqware accessions found.");
         }
 
-        return result;
+        //TODO: only return one accession, there may be multiple seqware accessions.
+        return accessions.get(0);
+        //return accessions;
 
     }
 

@@ -16,12 +16,28 @@ public class SeqwareOutputParserTest {
         Assert.assertEquals(SeqwareOutputParser.getSwidFromOutput(input), "999999");
 
     }
+    
+//    @Test(expectedExceptions = RuntimeException.class)
+//    public void getSwidFromOutputFailTest() {
+//
+//        String input = "(SWID: 999999)\n(SWID: 199999)";
+//        SeqwareOutputParser.getSwidFromOutput(input);
+//
+//    }
+
+    public void multipleAccessions() {
+
+        String input = "(SWID: 999999)\n(SWID: 1)\n(SWID: 2)\n(SWID: 3)";
+        String output = SeqwareOutputParser.getSwidFromOutput(input);
+        
+        Assert.assertEquals(output, "999999");
+
+    }
 
     @Test(expectedExceptions = RuntimeException.class)
-    public void getSwidFromOutputFailTest() {
+    public void noSwidInOutput() {
 
-        String input = "(SWID: 999999)\n(SWID: 199999)";
-        SeqwareOutputParser.getSwidFromOutput(input);
+        SeqwareOutputParser.getSwidFromOutput("No swid test.");
 
     }
 
@@ -49,5 +65,5 @@ public class SeqwareOutputParserTest {
         Assert.assertEquals(SeqwareOutputParser.getWorkflowRunStatusFromOutput(input), "running");
 
     }
-    
+
 }
