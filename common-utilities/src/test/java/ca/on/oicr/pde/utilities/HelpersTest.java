@@ -38,6 +38,13 @@ public class HelpersTest {
         File subDir2 = Helpers.generateTestWorkingDirectory(tempDir, "", "testDir", "1"); //should fail
 
     }
+    
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void missingWorkingDirectory() throws IOException {
+        
+        Helpers.generateTestWorkingDirectory(new File("/tmp/does/not/exist/"), "", "testDir", "1");
+        
+    }
 
     @Test
     public void getDirectoriesInLocationTest() throws IOException {

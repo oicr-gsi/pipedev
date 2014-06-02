@@ -12,6 +12,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.testng.Assert;
+import static com.google.common.base.Preconditions.*;
 
 public class Helpers {
 
@@ -118,14 +119,18 @@ public class Helpers {
 
     }
 
-    public static File generateTestWorkingDirectory(File workingDirectory, String prefix, String testName, String suffix) throws IOException {
+    public static File generateTestWorkingDirectory(File baseWorkingDirectory, String prefix, String testName, String suffix) throws IOException {
 
-        //String prefix = new SimpleDateFormat("yyMMdd_HHmm").format(new Date()) + "_";
-        //String suffix = "_" + testId;
-        File testWorkingDirectory = new File(workingDirectory + "/" + prefix + "_" + testName + "_" + suffix + "/");
+        checkArgument(baseWorkingDirectory != null && baseWorkingDirectory.isDirectory(), "The base working directory [%s] does not exist.", baseWorkingDirectory.getAbsolutePath());
+        
+        File testWorkingDirectory = new File(baseWorkingDirectory + "/" + prefix + "_" + testName + "_" + suffix + "/");
+        
+        if(testWorkingDirectory.exists()){
+            throw new IOException("The directory [" + testWorkingDirectory + "] already exists.");
+        }
 
         if (!testWorkingDirectory.mkdir()) {
-            throw new IOException("Cannot create directory because it already exists.");
+            throw new IOException("The directory [" + testWorkingDirectory + "] could not be created.");
         }
 
         return testWorkingDirectory;
