@@ -47,8 +47,9 @@ public class WorkflowRunTest extends RunTestBase {
         this.workflowOutputDirectory = new File(workingDirectory + "/output/");
 
         this.actualOutput = new File(workingDirectory + "/" + workflowIni.getName() + ".metrics");
-        environmentVariables.put("PATH", Helpers.buildPathFromDirectory("/usr/bin:/bin:/usr/sbin:/sbin", workflowBundleBinPath));
-//        environmentVariables.put("JAVA_HOME", bundledJava);     
+        
+        // Add all directories located within "workflowBundleBinPath" to the PATH
+        environmentVariables.put("PATH", Helpers.buildPathFromDirectory(System.getenv("PATH"), workflowBundleBinPath));
 
     }
 
