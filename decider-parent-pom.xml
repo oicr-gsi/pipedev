@@ -18,6 +18,10 @@
         <skipITs>true</skipITs>
         <testSuite>src/test/resources/development.xml</testSuite>
         <final-jar-location>/.mounts/labs/PDE/jenkins/deciders</final-jar-location>
+        <workingDirectory>${user.home}/_testing/</workingDirectory>
+        <schedulingSystem>oozie</schedulingSystem>
+        <schedulingHost>hsqwstage-node2.hpc.oicr.on.ca</schedulingHost>
+        <seqwareDistribution>${project.build.directory}/dependency/seqware-distribution-${seqware-version}-full.jar</seqwareDistribution>
     </properties>
     
     <build>
@@ -92,6 +96,10 @@
                         <deciderClass>${main-class}</deciderClass>
                         <deciderName>${project.artifactId}</deciderName>
                         <deciderVersion>${project.version}</deciderVersion>
+                        <seqwareDistribution>${seqwareDistribution}</seqwareDistribution>
+                        <workingDirectory>${workingDirectory}</workingDirectory>
+                        <schedulingSystem>${schedulingSystem}</schedulingSystem>
+                        <schedulingHost>${schedulingHost}</schedulingHost>
                     </systemPropertyVariables>
                     <suiteXmlFiles>
                         <suiteXmlFile>${testSuite}</suiteXmlFile>
@@ -102,10 +110,19 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>wagon-maven-plugin</artifactId>
                 <version>1.0-beta-5</version>
-                <configuration>
-                    <fromFile>${project.build.directory}/${final-name}-jar-with-dependencies.jar</fromFile>
-                    <url>file://${final-jar-location}</url>
-                </configuration>
+                <executions>
+                    <execution>
+                        <id>upload-jar</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>upload</goal>
+                        </goals>
+                        <configuration>
+                            <fromFile>${project.build.directory}/${final-name}-jar-with-dependencies.jar</fromFile>
+                            <url>file://${final-jar-location}</url>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
