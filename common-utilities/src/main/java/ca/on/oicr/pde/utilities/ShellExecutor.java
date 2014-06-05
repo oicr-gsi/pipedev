@@ -5,6 +5,7 @@ import ca.on.oicr.pde.model.Sample;
 import ca.on.oicr.pde.model.SequencerRun;
 import ca.on.oicr.pde.model.SeqwareAccession;
 import ca.on.oicr.pde.model.Study;
+import ca.on.oicr.pde.model.WorkflowRun;
 import ca.on.oicr.pde.parsers.SeqwareOutputParser;
 import static com.google.common.base.Preconditions.*;
 import java.io.File;
@@ -141,6 +142,18 @@ public class ShellExecutor implements SeqwareExecutor {
 
         return SeqwareOutputParser.getWorkflowRunStatusFromOutput(Helpers.executeCommand(id, cmd.toString(), workingDirectory, environmentVariables));
 
+    }
+    
+    @Override
+    public void cancelWorkflowRun(WorkflowRun wr) throws IOException {
+
+        StringBuilder cmd = new StringBuilder();
+        cmd.append("java -cp ").append(seqwareDistribution);
+        cmd.append(" io.seqware.cli.Main workflow-run cancel");
+        cmd.append(" --accession ").append(wr.getSwid());
+        
+        Helpers.executeCommand(id, cmd.toString(), workingDirectory, environmentVariables);
+        
     }
 
     /**

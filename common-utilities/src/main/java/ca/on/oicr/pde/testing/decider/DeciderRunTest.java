@@ -126,8 +126,22 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
     }
 
     @AfterClass
-    public void afterEachRunTest() {
-        //
+    public void afterEachRunTest() throws IOException {
+
+        /* Cancel all submitted workflow runs
+         * Each decider test run installs a separate instance of its associated
+         * workflow bundle. So each decider run test has a unique workflow swid.
+         * TODO: Simplify this when the pde-seqware API is complete
+         */
+        Workflow w = new Workflow();
+        w.setSwid(workflowSwid.toString());
+        List<WorkflowRunReportRecord> wrrrs = seq.getWorkflowRunRecords(w);
+        for (WorkflowRunReportRecord wrrr : wrrrs) {
+            WorkflowRun wr = new WorkflowRun();
+            wr.setSwid(wrrr.getWorkflowRunSwid());
+            exec.cancelWorkflowRun(wr);
+        }
+
     }
 
     @AfterSuite

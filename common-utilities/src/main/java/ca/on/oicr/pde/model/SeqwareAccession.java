@@ -16,5 +16,10 @@ public class SeqwareAccession implements Accessionable {
     public String getSwid() {
         return swid;
     }
+    
+    @Override 
+    public String toString(){
+        return swid;
+    }
 
 }
