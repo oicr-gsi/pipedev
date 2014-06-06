@@ -37,7 +37,8 @@ public class ShellExecutor implements SeqwareExecutor {
         // Use a java tmp dir that is located within the working directory
         File javaTmpDir = new File(workingDirectory + "/" + "javaTmp");
         javaTmpDir.mkdir();
-        environmentVariables.put("_JAVA_OPTIONS", System.getenv("_JAVA_OPTIONS") + " -Djava.io.tmpdir=" + javaTmpDir.getAbsolutePath());
+        environmentVariables.put("_JAVA_OPTIONS", System.getenv("_JAVA_OPTIONS") == null ?  
+                "-Djava.io.tmpdir=" + javaTmpDir.getAbsolutePath() :  System.getenv("_JAVA_OPTIONS") + " " + "-Djava.io.tmpdir=" + javaTmpDir.getAbsolutePath());
 
     }
 
