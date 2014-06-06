@@ -1,4 +1,4 @@
-package ca.on.oicr.pde.common;
+package ca.on.oicr.pde.testing;
 
 import ca.on.oicr.pde.testing.decider.TestResult;
 import static ca.on.oicr.pde.testing.decider.DeciderRunTest.compareReports;

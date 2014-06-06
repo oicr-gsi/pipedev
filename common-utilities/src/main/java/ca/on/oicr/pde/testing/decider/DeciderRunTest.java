@@ -62,19 +62,19 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
         this.bundledWorkflow = bundledWorkflow;
         this.deciderClass = deciderClass;
 
-        for (String s : testDefinition.studies) {
+        for (String s : testDefinition.getStudies()) {
             Study x = new Study();
             x.setTitle(s);
             studies.add(x);
         }
 
-        for (String s : testDefinition.samples) {
+        for (String s : testDefinition.getSamples()) {
             Sample x = new Sample();
             x.setName(s);
             samples.add(x);
         }
 
-        for (String s : testDefinition.sequencerRuns) {
+        for (String s : testDefinition.getSequencerRuns()) {
             SequencerRun x = new SequencerRun();
             x.setName(s);
             sequencerRuns.add(x);
@@ -191,8 +191,8 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
         log.warn(testName + " starting execution");
 
         StringBuilder extraArgs = new StringBuilder();
-        for (Entry<String, Object> e : testDefinition.parameters.entrySet()) {
-            extraArgs.append(" ").append(e.getKey()).append(" ").append(e.getValue().toString());
+        for (Entry<String, String> e : testDefinition.getParameters().entrySet()) {
+            extraArgs.append(" ").append(e.getKey()).append(" ").append(e.getValue());
         }
 
         exec.deciderRunSchedule(deciderJar, workflowSwid, studies, sequencerRuns, samples, extraArgs.toString());
@@ -317,7 +317,7 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
             }
 
             Map ini = seq.getWorkflowRunIni(wr);
-            for (String s : testDefinition.iniExclusions) {
+            for (String s : testDefinition.getIniExclusions()) {
                 ini.remove(s);
             }
 

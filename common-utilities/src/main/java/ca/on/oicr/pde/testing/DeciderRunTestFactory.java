@@ -129,9 +129,9 @@ public class DeciderRunTestFactory {
             StringBuilder b = new StringBuilder();
             b.append("DeciderRunTest_");
             b.append(deciderName).append("-").append(deciderVersion);
-            if (!t.id.trim().isEmpty()) {
+            if (!t.getId().trim().isEmpty()) {
                 //camel case the id
-                b.append("_").append(WordUtils.capitalizeFully(t.id.trim()).replaceAll("[^A-Za-z0-9]", ""));
+                b.append("_").append(WordUtils.capitalizeFully(t.getId().trim()).replaceAll("[^A-Za-z0-9]", ""));
             }
 
             String testName = b.toString();
