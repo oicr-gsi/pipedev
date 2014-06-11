@@ -15,10 +15,10 @@ import net.sourceforge.seqware.common.util.runtools.RunTools;
  * the files writes to temporary files, and the second pass writes the final
  * files.</p>
  *
- * <p>cutadapt -a AGCT -q 20 -M 20 --paired-output tmp.2.fq.gz -o tmp.1.fq.gz
+ * <p>cutadapt -a AGCT -q 20 -m 20 --paired-output tmp.2.fq.gz -o tmp.1.fq.gz
  * fq.1.gz fq.2.gz</p>
  *
- * <p>cutadapt -a AGCT -q 20 -M 20 --paired-output trim.1.fq.gz -o trim.2.fq.gz
+ * <p>cutadapt -a AGCT -q 20 -m 20 --paired-output trim.1.fq.gz -o trim.2.fq.gz
  * tmp.2.fq.gz tmp.1.fq.gz</p>
  *
  *
@@ -114,7 +114,7 @@ public class CutAdaptModule extends OicrModule {
 
         length = getArgument("minimum-length");
         if (!length.trim().isEmpty()) {
-            length = "-M " + length;
+            length = "-m " + length;
         }
 
         cutadapt = getArgument("cutadapt");
