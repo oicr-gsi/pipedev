@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.io.FileUtils;
@@ -19,7 +19,7 @@ public class TestDefinition {
 
     private static String defaultDescription = "";
     private static String defaultMetricsDirectory = "";
-    private static Map<String, Object> defaultParameters = new LinkedHashMap<String, Object>();
+    private static Map<String, String> defaultParameters = new LinkedHashMap<String, String>();
     private static Set<String> defaultIniExclusions = new HashSet<String>();
     private static Set<String> defaultStudies = new HashSet<String>();
     private static Set<String> defaultSequencerRuns = new HashSet<String>();
@@ -41,7 +41,7 @@ public class TestDefinition {
         TestDefinition.defaultMetricsDirectory = defaultMetricsDirectory;
     }
 
-    public void setDefaultParameters(Map<String, Object> defaultParameters) {
+    public void setDefaultParameters(Map<String, String> defaultParameters) {
         TestDefinition.defaultParameters = defaultParameters;
     }
 
@@ -63,16 +63,92 @@ public class TestDefinition {
 
     public static class Test {
 
-        public String id = "";
-        public String description = defaultDescription;
-        public Set<String> studies = defaultStudies;
-        public Set<String> sequencerRuns = defaultSequencerRuns;
-        public Set<String> samples = defaultSamples;
-        public Map<String, Object> parameters = defaultParameters;
-        public String metricsDirectory = defaultMetricsDirectory;
-        public String metricsFile;
+        private String id = "";
+        private String description = defaultDescription;
+        private Set<String> studies = defaultStudies;
+        private Set<String> sequencerRuns = defaultSequencerRuns;
+        private Set<String> samples = defaultSamples;
+        private final Map<String, String> parameters;
+        private String metricsDirectory = defaultMetricsDirectory;
+        private String metricsFile;
+        private Set<String> iniExclusions = defaultIniExclusions;
 
-        public Set<String> iniExclusions = defaultIniExclusions;
+        public Test(){
+            parameters = new LinkedHashMap<String,String>();
+            parameters.putAll(defaultParameters);
+        }
+        
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public Set<String> getStudies() {
+            return Collections.unmodifiableSet(studies);
+        }
+
+        public void setStudies(Set<String> studies) {
+            this.studies = studies;
+        }
+
+        public Set<String> getSequencerRuns() {
+            return Collections.unmodifiableSet(sequencerRuns);
+        }
+
+        public void setSequencerRuns(Set<String> sequencerRuns) {
+            this.sequencerRuns = sequencerRuns;
+        }
+
+        public Set<String> getSamples() {
+            return Collections.unmodifiableSet(samples);
+        }
+
+        public void setSamples(Set<String> samples) {
+            this.samples = samples;
+        }
+
+        public Map<String, String> getParameters() {
+            return Collections.unmodifiableMap(parameters);
+        }
+
+        public void setParameters(Map<String, String> parameters) {
+            this.parameters.putAll(parameters);
+        }
+
+        public String getMetricsDirectory() {
+            return metricsDirectory;
+        }
+
+        public void setMetricsDirectory(String metricsDirectory) {
+            this.metricsDirectory = metricsDirectory;
+        }
+
+        public String getMetricsFile() {
+            return metricsFile;
+        }
+
+        public void setMetricsFile(String metricsFile) {
+            this.metricsFile = metricsFile;
+        }
+
+        public Set<String> getIniExclusions() {
+            return Collections.unmodifiableSet(iniExclusions);
+        }
+
+        public void setIniExclusions(Set<String> iniExclusions) {
+            this.iniExclusions = iniExclusions;
+        }
 
         @Override
         public String toString() {

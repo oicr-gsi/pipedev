@@ -5,6 +5,7 @@ import ca.on.oicr.pde.model.Sample;
 import ca.on.oicr.pde.model.SequencerRun;
 import ca.on.oicr.pde.model.SeqwareAccession;
 import ca.on.oicr.pde.model.Study;
+import ca.on.oicr.pde.model.WorkflowRun;
 import ca.on.oicr.pde.parsers.SeqwareOutputParser;
 import static com.google.common.base.Preconditions.*;
 import java.io.File;
@@ -24,16 +25,20 @@ public class ShellExecutor implements SeqwareExecutor {
     public ShellExecutor(String id, File seqwareDistrubution, File seqwareSettings, File workingDirectory) {
 
         this.seqwareSettings = checkNotNull(seqwareSettings);
-        this.environmentVariables = new HashMap<String, String>();
-        environmentVariables.put("SEQWARE_SETTINGS", this.seqwareSettings.getAbsolutePath());
-
         this.seqwareDistribution = checkNotNull(seqwareDistrubution);
-
+        this.id = checkNotNull(id);
         checkNotNull(workingDirectory);
         checkArgument(workingDirectory.exists() && workingDirectory.isDirectory(), "The working directory %s is invalid", workingDirectory.getAbsolutePath());
         this.workingDirectory = workingDirectory;
 
-        this.id = checkNotNull(id);
+        this.environmentVariables = new HashMap<String, String>();
+        environmentVariables.put("SEQWARE_SETTINGS", this.seqwareSettings.getAbsolutePath());
+        
+        // Use a java tmp dir that is located within the working directory
+        File javaTmpDir = new File(workingDirectory + "/" + "javaTmp");
+        javaTmpDir.mkdir();
+        environmentVariables.put("_JAVA_OPTIONS", System.getenv("_JAVA_OPTIONS") == null ?  
+                "-Djava.io.tmpdir=" + javaTmpDir.getAbsolutePath() :  System.getenv("_JAVA_OPTIONS") + " " + "-Djava.io.tmpdir=" + javaTmpDir.getAbsolutePath());
 
     }
 
@@ -143,11 +148,25 @@ public class ShellExecutor implements SeqwareExecutor {
 
     }
 
+    @Override
+    public void cancelWorkflowRun(WorkflowRun wr) throws IOException {
+
+        StringBuilder cmd = new StringBuilder();
+        cmd.append("java -cp ").append(seqwareDistribution);
+        cmd.append(" io.seqware.cli.Main workflow-run cancel");
+        cmd.append(" --accession ").append(wr.getSwid());
+
+        Helpers.executeCommand(id, cmd.toString(), workingDirectory, environmentVariables);
+
+    }
+
     /**
      *
-     * @param prefix The string to prefix each <code>objects</code> "Name" representation
+     * @param prefix The string to prefix each <code>objects</code> "Name"
+     * representation
      * @param objects A list of objects that implement the "Name" interface.
-     * @return A string in the following format: [prefix][object 1's name][prefix][object 2's name]...
+     * @return A string in the following format: [prefix][object 1's
+     * name][prefix][object 2's name]...
      */
     public static String listToParamString(String prefix, List<? extends Name> objects) {
 

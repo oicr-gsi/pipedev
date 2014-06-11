@@ -1,6 +1,5 @@
-package ca.on.oicr.pde.common;
+package ca.on.oicr.pde.testing;
 
-import ca.on.oicr.pde.testing.DeciderRunTestFactory;
 import java.io.IOException;
 import java.util.Properties;
 import org.testng.annotations.Test;
