@@ -21,6 +21,7 @@ public class ShellExecutor implements SeqwareExecutor {
     private final File seqwareSettings;
     private final Map<String, String> environmentVariables;
     private final String id;
+    private final File loggingDirectory;
 
     public ShellExecutor(String id, File seqwareDistrubution, File seqwareSettings, File workingDirectory) {
 
@@ -33,12 +34,16 @@ public class ShellExecutor implements SeqwareExecutor {
 
         this.environmentVariables = new HashMap<String, String>();
         environmentVariables.put("SEQWARE_SETTINGS", this.seqwareSettings.getAbsolutePath());
-        
-        // Use a java tmp dir that is located within the working directory
+
+        // Setup a java tmp dir that is located within the working directory
         File javaTmpDir = new File(workingDirectory + "/" + "javaTmp");
         javaTmpDir.mkdir();
-        environmentVariables.put("_JAVA_OPTIONS", System.getenv("_JAVA_OPTIONS") == null ?  
-                "-Djava.io.tmpdir=" + javaTmpDir.getAbsolutePath() :  System.getenv("_JAVA_OPTIONS") + " " + "-Djava.io.tmpdir=" + javaTmpDir.getAbsolutePath());
+        environmentVariables.put("_JAVA_OPTIONS", System.getenv("_JAVA_OPTIONS") == null
+                ? "-Djava.io.tmpdir=" + javaTmpDir.getAbsolutePath() : System.getenv("_JAVA_OPTIONS") + " " + "-Djava.io.tmpdir=" + javaTmpDir.getAbsolutePath());
+
+        // Setup an output/logging directory for command output
+        loggingDirectory = new File(workingDirectory + "/" + "logs");
+        loggingDirectory.mkdir();
 
     }
 
@@ -51,7 +56,9 @@ public class ShellExecutor implements SeqwareExecutor {
         cmd.append(" -- --bundle ").append(bundledWorkflowPath);
         cmd.append(" --install-dir-only");
 
-        return new SeqwareAccession(SeqwareOutputParser.getSwidFromOutput(Helpers.executeCommand(id, cmd.toString(), workingDirectory, environmentVariables)));
+        File stdOutAndErrFile = new File(loggingDirectory + "/" + "installWorkflow.out");
+
+        return new SeqwareAccession(SeqwareOutputParser.getSwidFromOutput(Helpers.executeCommand(id, cmd.toString(), workingDirectory, stdOutAndErrFile, environmentVariables)));
 
     }
 
@@ -69,7 +76,9 @@ public class ShellExecutor implements SeqwareExecutor {
         cmd.append(" --force-run-all");
         cmd.append(extraArgs);
 
-        Helpers.executeCommand(id, cmd.toString(), workingDirectory, true, environmentVariables);
+        File stdOutAndErrFile = new File(loggingDirectory + "/" + "deciderRunSchedule.out");
+
+        Helpers.executeCommand(id, cmd.toString(), workingDirectory, stdOutAndErrFile, environmentVariables);
 
     }
 
@@ -86,7 +95,9 @@ public class ShellExecutor implements SeqwareExecutor {
         cmd.append(" --override output_prefix=").append(workingDirectory).append("/");
         cmd.append(" --override output_dir=").append("output");
 
-        return new SeqwareAccession(SeqwareOutputParser.getSwidFromOutput(Helpers.executeCommand(id, cmd.toString(), workingDirectory, environmentVariables)));
+        File stdOutAndErrFile = new File(loggingDirectory + "/" + "workflowRunSchedule.out");
+
+        return new SeqwareAccession(SeqwareOutputParser.getSwidFromOutput(Helpers.executeCommand(id, cmd.toString(), workingDirectory, stdOutAndErrFile, environmentVariables)));
 
     }
 
@@ -98,7 +109,9 @@ public class ShellExecutor implements SeqwareExecutor {
         cmd.append(" io.seqware.cli.Main workflow-run launch-scheduled");
         cmd.append(" --accession ").append(workflowRunSwid.getSwid());
 
-        Helpers.executeCommand(id, cmd.toString(), workingDirectory, environmentVariables);
+        File stdOutAndErrFile = new File(loggingDirectory + "/" + "workflowRunLaunch.out");
+
+        Helpers.executeCommand(id, cmd.toString(), workingDirectory, stdOutAndErrFile, environmentVariables);
 
     }
 
@@ -120,6 +133,8 @@ public class ShellExecutor implements SeqwareExecutor {
         cmd.append(" --output_prefix ").append(workingDirectory).append("/");
         cmd.append(" --output_dir ").append("output");
 
+        File stdOutAndErrFile = new File(loggingDirectory + "/" + "workflowRunLaunch.out");
+
         Helpers.executeCommand(id, cmd.toString(), workingDirectory, environmentVariables);
 
     }
@@ -132,7 +147,9 @@ public class ShellExecutor implements SeqwareExecutor {
         cmd.append(" io.seqware.cli.Main workflow-run propagate-statuses");
         cmd.append(" --accession ").append(workflowRunSwid.getSwid());
 
-        Helpers.executeCommand(id, cmd.toString(), workingDirectory, environmentVariables);
+        File stdOutAndErrFile = new File(loggingDirectory + "/" + "workflowRunUpdateStatus.out");
+
+        Helpers.executeCommand(id, cmd.toString(), workingDirectory, stdOutAndErrFile, environmentVariables);
 
     }
 
@@ -144,7 +161,9 @@ public class ShellExecutor implements SeqwareExecutor {
         cmd.append(" io.seqware.cli.Main workflow-run report");
         cmd.append(" --accession ").append(workflowRunSwid.getSwid());
 
-        return SeqwareOutputParser.getWorkflowRunStatusFromOutput(Helpers.executeCommand(id, cmd.toString(), workingDirectory, environmentVariables));
+        File stdOutAndErrFile = new File(loggingDirectory + "/" + "workflowRunReport.out");
+
+        return SeqwareOutputParser.getWorkflowRunStatusFromOutput(Helpers.executeCommand(id, cmd.toString(), workingDirectory, stdOutAndErrFile, environmentVariables));
 
     }
 
@@ -156,7 +175,9 @@ public class ShellExecutor implements SeqwareExecutor {
         cmd.append(" io.seqware.cli.Main workflow-run cancel");
         cmd.append(" --accession ").append(wr.getSwid());
 
-        Helpers.executeCommand(id, cmd.toString(), workingDirectory, environmentVariables);
+        File stdOutAndErrFile = new File(loggingDirectory + "/" + "cancelWorkflowRun.out");
+
+        Helpers.executeCommand(id, cmd.toString(), workingDirectory, stdOutAndErrFile, environmentVariables);
 
     }
 

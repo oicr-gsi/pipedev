@@ -33,11 +33,11 @@ public class Helpers {
 
     public static String executeCommand(String id, String command, File workingDirectory, Map<String, String>... environmentVariables) throws IOException {
 
-        return executeCommand(id, command, workingDirectory, false, environmentVariables);
+        return executeCommand(id, command, workingDirectory, null, environmentVariables);
 
     }
 
-    public static String executeCommand(String id, String command, File workingDirectory, boolean saveOutputToWorkingDirectory,
+    public static String executeCommand(String id, String command, File workingDirectory, File outputFilePath,
             Map<String, String>... environmentVariables) throws IOException {
 
         
@@ -47,11 +47,22 @@ public class Helpers {
         c.addArgument(command, false);
 
         CommandRunner cr = new CommandRunner();
+        
+        //Setup command to execute
         cr.setCommand(c);
+        
+        //Setup environment variables for command's shell
         for (Map<String, String> e : environmentVariables) {
             cr.setEnvironmentVariable(e);
         }
+        
+        //Set the initial directory the command should execute from within
         cr.setWorkingDirectory(workingDirectory);
+        
+        //Set the path where the command's shell std out and std err should be saved to
+        if(outputFilePath!=null){
+            cr.setCommandOutputFile(outputFilePath);
+        }
 
         System.out.println(id + "{\n" + "Executing (with initial directory: " + workingDirectory + "):\n" + command.toString() + "\n}");
 

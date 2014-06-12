@@ -1,7 +1,9 @@
 package ca.on.oicr.pde.utilities;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.exec.CommandLine;
@@ -10,15 +12,21 @@ import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.exec.environment.EnvironmentUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.commons.io.output.TeeOutputStream;
 
 public class CommandRunner {
 
     protected final Map<String, String> additionalEnvironmentVariables;
     protected CommandLine command;
     protected File workingDirectory;
+    protected OutputStream commandOutputStream;
+    protected ByteArrayOutputStream inMemoryCommandOutputStream;
 
     public CommandRunner() {
 
+        inMemoryCommandOutputStream = new ByteArrayOutputStream();
+        commandOutputStream = inMemoryCommandOutputStream;
+        
         additionalEnvironmentVariables = new HashMap<String, String>();
 
     }
@@ -49,6 +57,14 @@ public class CommandRunner {
         return this;
     }
 
+    public CommandRunner setCommandOutputFile(File outputFilePath) throws IOException {
+        
+        //Split the output stream and record output to a file also
+        this.commandOutputStream = new TeeOutputStream(inMemoryCommandOutputStream, new FileOutputStream(outputFilePath, true));
+        return this;
+
+    }
+
     public CommandResult runCommand() throws IOException {
 
         CommandResult result = new CommandResult();
@@ -57,13 +73,10 @@ public class CommandRunner {
         //http://stackoverflow.com/questions/6295866/how-can-i-capture-the-output-of-a-command-as-a-string-with-commons-exec
         DefaultExecutor commandExecutor = new DefaultExecutor();
 
-        //ByteArrayOutputStream as we don't know how much output we'll get back from the command
-        ByteArrayOutputStream commandOutputStream = new ByteArrayOutputStream();
-
         //Copies standard output and error of subprocesses to standard output and error of the parent process
-        PumpStreamHandler outputStreamHandler = new PumpStreamHandler(commandOutputStream);
+        PumpStreamHandler stdOutAndErrHandler = new PumpStreamHandler(commandOutputStream);
 
-        commandExecutor.setStreamHandler(outputStreamHandler);
+        commandExecutor.setStreamHandler(stdOutAndErrHandler);
         commandExecutor.setExitValue(0); //expected return value
 
         //Set the initial working directory for the command
@@ -83,8 +96,10 @@ public class CommandRunner {
         } catch (ExecuteException ee) {
             result.setExitCode(ee.getExitValue());
         }
-        result.setOutput(commandOutputStream.toString());
         result.setExecutionTime(System.nanoTime() - start);
+        result.setOutput(inMemoryCommandOutputStream.toString());
+        
+        commandOutputStream.close();
 
         return result;
     }

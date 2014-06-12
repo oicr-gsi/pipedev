@@ -3,6 +3,7 @@ package ca.on.oicr.pde.utilities;
 import java.io.File;
 import java.io.IOException;
 import org.apache.commons.exec.CommandLine;
+import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -17,16 +18,7 @@ public class CommandRunnerTest {
 
     @Test
     public void commandWithRedirectTest() throws IOException {
-        File expectedFile = File.createTempFile("redirectTest", ".out");
-
-        //when test is done, delete file
-        expectedFile.deleteOnExit();
-
-        //delete the temporary file, as the redirect command should recreate it
-        expectedFile.delete(); //delete file
-
-        //Check that output file doesn't exist, the redirect command will recreate this file
-        Assert.assertFalse(expectedFile.exists(), "Temporary file deletion failed.");
+        File expectedFile = createTempFile("redirectTest", ".out");
 
         CommandLine c = new CommandLine("/bin/bash");
         c.addArgument("-c");
@@ -63,13 +55,50 @@ public class CommandRunnerTest {
     }
 
     @Test(expectedExceptions = IOException.class)
-    public void commandWithMissingInitialWorkingDirectoryTest() throws IOException{
+    public void commandWithMissingInitialWorkingDirectoryTest() throws IOException {
         File initialDirectory = new File("/doesnotexist");
 
         CommandLine c = new CommandLine("/bin/bash");
         c.addArgument("-c");
         c.addArgument("pwd", DISABLE_QUOTING);
         CommandRunner.CommandResult r = new CommandRunner().setCommand(c).setWorkingDirectory(initialDirectory).runCommand();
+
+    }
+
+    @Test
+    public void saveCommandStdAndErrToFile() throws IOException {
+        File initialDirectory = new File("/tmp");
+
+        File commandOutputFile = createTempFile("commandOutput", ".out");
+        
+        //Generate some unique output
+        CommandLine c = new CommandLine("/bin/bash");
+        c.addArgument("-c");
+        c.addArgument("for i in `seq 1 5`; do date +%s%N; sleep 0.1; done", DISABLE_QUOTING);
+        CommandRunner.CommandResult r = new CommandRunner().setCommand(c).setWorkingDirectory(initialDirectory).setCommandOutputFile(commandOutputFile).runCommand();
+
+        String fileContents = FileUtils.readFileToString(commandOutputFile).trim();
+        String memoryContents = r.getOutput().trim();
+        
+        Assert.assertTrue(fileContents.equals(memoryContents),
+                "File stream output and in-memory stream output are not equal.");
+
+    }
+
+    private File createTempFile(String prefix, String suffix) throws IOException {
+
+        File tempFile = File.createTempFile(prefix, suffix);
+
+        //when test is done, delete file
+        tempFile.deleteOnExit();
+
+        //delete the temporary file, as the redirect command should recreate it
+        tempFile.delete(); //delete file
+
+        //Check that output file doesn't exist, the redirect command will recreate this file
+        Assert.assertFalse(tempFile.exists(), "Temporary file deletion failed.");
+
+        return tempFile;
 
     }
 }
