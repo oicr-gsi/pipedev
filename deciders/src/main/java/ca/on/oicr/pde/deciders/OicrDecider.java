@@ -114,11 +114,14 @@ public class OicrDecider extends BasicDecider {
     protected Map<String, FileAttributes> files;
     private int numberOfFilesPerGroup = Integer.MIN_VALUE;
     private List<String> requiredParams = new ArrayList<String>();
-    private static final String [][] readMateFlags = {{"_R1_","1_sequence.txt",".1.fastq"},{"_R2_","2_sequence.txt",".2.fastq"}};
+    private static final String[][] readMateFlags = {{"_R1_", "1_sequence.txt", ".1.fastq"}, {"_R2_", "2_sequence.txt", ".2.fastq"}};
     public static final int MATE_UNDEF = 0;
     public static final int MATE_1 = 1;
     public static final int MATE_2 = 2;
-    private Date date=null;
+    private Date afterDate = null;
+    private Date beforeDate = null;
+    private SimpleDateFormat format;
+
     /**
      * <p>Sets up the decider arguments and global variables. Any arguments
      * intended to be used on the command line should be added using either The
@@ -143,8 +146,10 @@ public class OicrDecider extends BasicDecider {
         parser.acceptsAll(Arrays.asList("help", "h"), "Prints this help message");
         defineArgument("output-path", "The absolute path of the directory to put the final file(s) (workflow output-prefix option).", false);
         defineArgument("output-folder", "The relative path to put the final result(s) (workflow output-dir option).", false);
-	defineArgument("after-date", "Optional: Format YYYY-MM-DD. Only run on files that have been modified after a certain date.", false);
+        defineArgument("after-date", "Optional: Format YYYY-MM-DD. Only run on files that have been modified after a certain date, not inclusive.", false);
+        defineArgument("before-date", "Optional: Format YYYY-MM-DD. Only run on files that have been modified before a certain date, not inclusive.", false);
         files = new HashMap<String, FileAttributes>();
+        format = new SimpleDateFormat("yyyy-MM-dd");
     }
 
     /**
@@ -212,16 +217,25 @@ public class OicrDecider extends BasicDecider {
                 System.out.println(get_syntax());
             }
         }
-	if (options.has("after-date")) {
-	    String dateString = options.valueOf("after-date").toString();
-	    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-	    try {
-		date = format.parse(dateString);
-	    } catch (ParseException e) {
-		Log.error("Date should be in the format: "+format.toPattern(), e);
-		ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
-	    }
-	}
+
+        if (options.has("after-date")) {
+            String dateString = options.valueOf("after-date").toString();
+            try {
+                afterDate = format.parse(dateString);
+            } catch (ParseException e) {
+                Log.error("After Date should be in the format: " + format.toPattern(), e);
+                ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
+            }
+        }
+        if (options.has("before-date")) {
+            String dateString = options.valueOf("before-date").toString();
+            try {
+                beforeDate = format.parse(dateString);
+            } catch (ParseException e) {
+                Log.error("Before Date should be in the format: " + format.toPattern(), e);
+                ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
+            }
+        }
         return ret;
     }
 
@@ -243,11 +257,11 @@ public class OicrDecider extends BasicDecider {
                 return false;
             }
         }
-        
+
         // SEQWARE-1809, PDE-474 ensure that deciders only use input from completed workflow runs
         FileAttributes attributes = new FileAttributes(returnValue, fm);
         String status = returnValue.getAttribute(FindAllTheFiles.WORKFLOW_RUN_STATUS);
-        if (status == null || !status.equals("completed")){
+        if (status == null || !status.equals("completed")) {
             return false;
         }
         if (!options.has("skip-status-check")) {
@@ -262,24 +276,50 @@ public class OicrDecider extends BasicDecider {
 
             }
         }
-	if (options.has("after-date")) {
-	    String dateString = attributes.getOtherAttribute(FindAllTheFiles.Header.PROCESSING_DATE);
-	    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-	    try {
-                Date fileDate = format.parse(dateString);
-		if (date.after(fileDate)) {
-		    Log.debug("File was processed before the after-date "+date.toString()+" : "+attributes.getPath());
-		    return false;
-		}
-            } catch (ParseException e) {
-                Log.error("Date should be in the format: "+format.toPattern(), e);
+        String dateString = attributes.getOtherAttribute(FindAllTheFiles.Header.PROCESSING_DATE);
+        if (options.has("after-date")) {
+            if (isAfterDate(dateString, afterDate)) {
+                Log.debug("File was processed before the after-date " + afterDate.toString() + " : " + attributes.getPath());
+                return false;
             }
-	}
+        }
+        if (options.has("before-date")) {
+            if (isBeforeDate(dateString, beforeDate)) {
+                Log.debug("File was processed after the before-date " + afterDate.toString() + " : " + attributes.getPath());
+                return false;
+            }
+        }
         if (!checkFileDetails(attributes)) {
             return false;
         }
         files.put(fm.getFilePath(), attributes);
         return toReturn;
+    }
+
+    public boolean isAfterDate(String dateString, Date afterDate) {
+
+        try {
+            Date fileDate = format.parse(dateString);
+            if (fileDate.after(afterDate)) {
+                return true;
+            }
+        } catch (ParseException e) {
+            Log.error("File date is not in the format: " + format.toPattern(), e);
+        }
+        return false;
+    }
+
+    public boolean isBeforeDate(String dateString, Date beforeDate) {
+
+        try {
+            Date fileDate = format.parse(dateString);
+            if (fileDate.before(beforeDate)) {
+                return true;
+            }
+        } catch (ParseException e) {
+            Log.error("File date is not in the format: " + format.toPattern(), e);
+        }
+        return false;
     }
 
     protected boolean checkFileDetails(FileAttributes attributes) {
@@ -504,42 +544,43 @@ public class OicrDecider extends BasicDecider {
     }
 
     /**
-     * A utility function that seraches for patterns in a file path
-     * in order to identify mate in paired-end sequencing data
-     * (or report that mate info is unavailable if no pattern detected)
+     * A utility function that seraches for patterns in a file path in order to
+     * identify mate in paired-end sequencing data (or report that mate info is
+     * unavailable if no pattern detected)
      */
-    public static int idMate (String filePath) {
-        int [] indexes = {0, 1};
-        int [] mates   = {OicrDecider.MATE_1, OicrDecider.MATE_2};
+    public static int idMate(String filePath) {
+        int[] indexes = {0, 1};
+        int[] mates = {OicrDecider.MATE_1, OicrDecider.MATE_2};
         for (int i : indexes) {
-          for (int j = 0; j < readMateFlags[i].length; j++) {
-           if (filePath.contains(readMateFlags[i][j])) {
-            return mates[i];
-           }
-          }
+            for (int j = 0; j < readMateFlags[i].length; j++) {
+                if (filePath.contains(readMateFlags[i][j])) {
+                    return mates[i];
+                }
+            }
         }
         return OicrDecider.MATE_UNDEF;
     }
 
     /**
-     * Uses idMate to put read1 and read2 files into order and return the set. 
-     * Tests to make sure that the read names as well as the list of reads are sensible. 
-     * If it encounters a problem, it returns the same set you passed in originally along with printing a warning.
+     * Uses idMate to put read1 and read2 files into order and return the set.
+     * Tests to make sure that the read names as well as the list of reads are
+     * sensible. If it encounters a problem, it returns the same set you passed
+     * in originally along with printing a warning.
      */
     public FileAttributes[] arrangeFastqs(FileAttributes[] files) {
         FileAttributes[] inputs = new FileAttributes[files.length];
         for (FileAttributes file : files) {
             int index = idMate(file.getPath()) - 1;
-            if (index == (OicrDecider.MATE_UNDEF-1)){
-                if (files.length > 1){
-                    Log.warn("Unidentifiable read number! "+ file.toString());
+            if (index == (OicrDecider.MATE_UNDEF - 1)) {
+                if (files.length > 1) {
+                    Log.warn("Unidentifiable read number! " + file.toString());
                 }
                 inputs = files;
                 break;
             } else if (index >= inputs.length) {
                 Log.warn("The read number is larger than the amount of reads given for this study. e.g. this is a read 2 but there is only one file.");
-                Log.warn(index + "is the read number for file "+file);
-                inputs=files;
+                Log.warn(index + "is the read number for file " + file);
+                inputs = files;
                 break;
             } else {
                 inputs[index] = file;
@@ -547,7 +588,4 @@ public class OicrDecider extends BasicDecider {
         }
         return inputs;
     }
-
-
-
 }
