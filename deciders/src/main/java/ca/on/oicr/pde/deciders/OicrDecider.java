@@ -285,7 +285,7 @@ public class OicrDecider extends BasicDecider {
         }
         if (options.has("before-date")) {
             if (isBeforeDate(dateString, beforeDate)) {
-                Log.debug("File was processed after the before-date " + afterDate.toString() + " : " + attributes.getPath());
+                Log.debug("File was processed after the before-date " + beforeDate.toString() + " : " + attributes.getPath());
                 return false;
             }
         }
