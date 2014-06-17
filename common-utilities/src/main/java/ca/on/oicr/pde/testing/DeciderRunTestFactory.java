@@ -118,9 +118,12 @@ public class DeciderRunTestFactory {
         log.warn(td);
 
         //TODO: provide user a way to specify impl
+        log.debug("Start loading information required by all tests");
         SeqwareInterface seq = new SeqwareWebserviceImpl(webserviceUrl, "admin@admin.com", "admin");
         seq.update();
+        log.debug("Completed loading information required by all tests");
 
+        log.debug("Starting transform of json test definition to TestDefinition objects");
         List<DeciderRunTest> tests = new ArrayList<DeciderRunTest>();
         int count = 0;
         for (TestDefinition.Test t : td.tests) {
@@ -144,6 +147,10 @@ public class DeciderRunTestFactory {
             tests.add(new DeciderRunTest(seq, seqwareDistribution, seqwareSettings, testWorkingDir, testName, deciderJar, bundledWorkflow, deciderClass, t));
 
         }
+        log.debug("Completed transform of json test definition to TestDefinition objects");
+
+        log.warn("Completed loading test definitions, tests will start now");
+        
         return tests.toArray();
 
     }

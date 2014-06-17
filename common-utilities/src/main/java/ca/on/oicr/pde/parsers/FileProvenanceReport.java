@@ -12,8 +12,11 @@ import java.util.Map;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.log4j.Logger;
 
 public class FileProvenanceReport {
+
+    private final static Logger log = Logger.getLogger(FileProvenanceReport.class);
 
     public static class ValidationException extends RuntimeException {
 
@@ -87,7 +90,7 @@ public class FileProvenanceReport {
 
         if (!fileProvenanceReportExpectedHeader.equals(header)) {
 
-            System.out.println("Expected header:\n" + fileProvenanceReportExpectedHeader.toString() + "\nActual header:\n" + header.toString());
+            log.warn("Expected header:\n" + fileProvenanceReportExpectedHeader.toString() + "\nActual header:\n" + header.toString());
             throw new ValidationException("FileProvenanceReport headers differ from expected format.");
 
         }
@@ -130,13 +133,14 @@ public class FileProvenanceReport {
             if (HeaderValidationMode.STRICT.equals(mode)) {
                 throw ve;
             } else if (HeaderValidationMode.SKIP.equals(mode)) {
-                System.out.println("Continuing with execution.");
+                log.warn("Header validation has been skipped, continuing");
             } else {
                 throw ve;
             }
         }
 
         // Build a list of FileProvenanceRecord from tsv stream reader
+        log.debug("Starting transform of file provenance csv to FileProvenanceRecord objects");
         List ls = new ArrayList<FileProvenanceReportRecord>();
         for (CSVRecord r : p) {
 
@@ -186,6 +190,7 @@ public class FileProvenanceReport {
             ls.add(rec.build());
 
         }
+        log.debug("Completed transform of file provenance csv to FileProvenanceRecord objects");
 
         return ls;
 

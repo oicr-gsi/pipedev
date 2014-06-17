@@ -28,11 +28,14 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public final class SeqwareWebserviceImpl extends SeqwareInterface {
+
+    private final static Logger log = Logger.getLogger(SeqwareWebserviceImpl.class);
 
     //private final DefaultHttpClient httpClient;
     private final String restUrl;
@@ -85,17 +88,21 @@ public final class SeqwareWebserviceImpl extends SeqwareInterface {
     protected void updateFileProvenanceRecords() {
 
         try {
+            log.debug("Starting update of local file provenance record store");
             fprs = FileProvenanceReport.parseFileProvenanceReport(getHttpResponse(restUrl + "/reports/file-provenance"), FileProvenanceReport.HeaderValidationMode.SKIP);
+            log.debug("Completed update of local file provenance record store");
         } catch (IOException ioe) {
             throw new RuntimeException(ioe);
         }
 
         swidToFpr = HashMultimap.create();
+        log.debug("Starting update of seqware accession to file provenance record map");
         for (FileProvenanceReportRecord f : fprs) {
             for (String swid : f.getSeqwareAccessions()) {
                 swidToFpr.put(swid, f);
             }
         }
+        log.debug("Completed update of seqware accession to file provenance record map");
 
     }
 
