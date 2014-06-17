@@ -3,9 +3,12 @@ package ca.on.oicr.pde.model;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -63,7 +66,7 @@ public class FileProvenanceReportRecord implements Serializable {
         return study.getSwid();
     }
 
-    public Map<String, String> getStudyAttributes() {
+    public Map<String, Set<String>> getStudyAttributes() {
         return study.getAttributes();
     }
 
@@ -75,7 +78,7 @@ public class FileProvenanceReportRecord implements Serializable {
         return experiment.getSwid();
     }
 
-    public Map<String, String> getExperimentAttributes() {
+    public Map<String, Set<String>> getExperimentAttributes() {
         return experiment.getAttributes();
     }
 
@@ -123,7 +126,7 @@ public class FileProvenanceReportRecord implements Serializable {
         return sample.getSwid();
     }
 
-    public Map<String, String> getSampleAttributes() {
+    public Map<String, Set<String>> getSampleAttributes() {
         return sample.getAttributes();
     }
 
@@ -135,7 +138,7 @@ public class FileProvenanceReportRecord implements Serializable {
         return sequencerRun.getSwid();
     }
 
-    public Map<String, String> getSequencerRunAttributes() {
+    public Map<String, Set<String>> getSequencerRunAttributes() {
         return sequencerRun.getAttributes();
     }
 
@@ -151,7 +154,7 @@ public class FileProvenanceReportRecord implements Serializable {
         return lane.getSwid();
     }
 
-    public Map<String, String> getLaneAttributes() {
+    public Map<String, Set<String>> getLaneAttributes() {
         return lane.getAttributes();
     }
 
@@ -163,7 +166,7 @@ public class FileProvenanceReportRecord implements Serializable {
         return ius.getSwid();
     }
 
-    public Map<String, String> getIusAttributes() {
+    public Map<String, Set<String>> getIusAttributes() {
         return ius.getAttributes();
     }
 
@@ -199,7 +202,7 @@ public class FileProvenanceReportRecord implements Serializable {
         return processing.getSwid();
     }
 
-    public Map<String, String> getProcessingAttributes() {
+    public Map<String, Set<String>> getProcessingAttributes() {
         return processing.getAttributes();
     }
 
@@ -211,7 +214,7 @@ public class FileProvenanceReportRecord implements Serializable {
         return file.getSwid();
     }
 
-    public Map<String, String> getFileAttributes() {
+    public Map<String, Set<String>> getFileAttributes() {
         return file.getAttributes();
     }
 
@@ -553,37 +556,50 @@ public class FileProvenanceReportRecord implements Serializable {
 
         public FileProvenanceReportRecord build() {
 
+            //Seqware attribute field formatting:  key1=value1&value2&...&valueN;key2=...;keyN=...
+            //For examole:
+            //key1=value1&value2&value3;key2=value1;key3=value1&value2
+            String attrKeyValuePairDelimiter = ";";
+            String attrKeyValueDelimiter = "=";
+            String attrValueDelimiter = "&";
+
             //TODO: use factory to create these objects:
             experiment = new Experiment();
             experiment.setSwid(getSwid(experimentSwid));
             experiment.setName(experimentName);
-            experiment.setAttributes(experimentAttributes);
+            experiment.setAttributes(transformAttributeStringToMap(experimentAttributes,
+                    attrKeyValuePairDelimiter, attrKeyValueDelimiter, attrValueDelimiter));
 
             study = new Study();
             study.setSwid(getSwid(studySwid));
             study.setTitle(studyTitle);
-            study.setAttributes(studyAttributes);
+            study.setAttributes(transformAttributeStringToMap(studyAttributes,
+                    attrKeyValuePairDelimiter, attrKeyValueDelimiter, attrValueDelimiter));
 
             ius = new Ius();
             ius.setSwid(getSwid(iusSwid));
             ius.setTag(iusTag);
-            ius.setAttributes(iusAttributes);
+            ius.setAttributes(transformAttributeStringToMap(iusAttributes,
+                    attrKeyValuePairDelimiter, attrKeyValueDelimiter, attrValueDelimiter));
 
             lane = new Lane();
             lane.setSwid(getSwid(laneSwid));
             lane.setName(laneName);
             lane.setNumber(laneNumber);
-            lane.setAttributes(laneAttributes);
+            lane.setAttributes(transformAttributeStringToMap(laneAttributes,
+                    attrKeyValuePairDelimiter, attrKeyValueDelimiter, attrValueDelimiter));
 
             sequencerRun = new SequencerRun();
             sequencerRun.setSwid(getSwid(sequencerRunSwid));
             sequencerRun.setName(sequencerRunName);
-            sequencerRun.setAttributes(sequencerRunAttributes);
+            sequencerRun.setAttributes(transformAttributeStringToMap(sequencerRunAttributes,
+                    attrKeyValuePairDelimiter, attrKeyValueDelimiter, attrValueDelimiter));
 
             processing = new Processing();
             processing.setSwid(getSwid(processingSwid));
             processing.setAlgorithm(processingAlgorithm);
-            processing.setAttributes(processingAttributes);
+            processing.setAttributes(transformAttributeStringToMap(processingAttributes,
+                    attrKeyValuePairDelimiter, attrKeyValueDelimiter, attrValueDelimiter));
 
             workflow = new Workflow();
             workflow.setSwid(getSwid(workflowSwid));
@@ -602,12 +618,14 @@ public class FileProvenanceReportRecord implements Serializable {
             file.setMd5sum(fileMd5sum);
             file.setDescription(fileDescription);
             file.setPath(filePath);
-            file.setAttributes(fileAttributes);
+            file.setAttributes(transformAttributeStringToMap(fileAttributes,
+                    attrKeyValuePairDelimiter, attrKeyValueDelimiter, attrValueDelimiter));
 
             sample = new Sample();
             sample.setSwid(getSwid(sampleSwid));
             sample.setName(sampleName);
-            sample.setAttributes(sampleAttributes);
+            sample.setAttributes(transformAttributeStringToMap(sampleAttributes,
+                    attrKeyValuePairDelimiter, attrKeyValueDelimiter, attrValueDelimiter));
 
 //            parentSamples = new ArrayList<Sample>();
 //            
@@ -640,4 +658,25 @@ public class FileProvenanceReportRecord implements Serializable {
 
     }
 
+    public static Map<String, Set<String>> transformAttributeStringToMap(String input,
+            String keyValuePairDelimiter, String keyValueDelimiter, String valueDelimiter) {
+
+        Map<String, Set<String>> out = new TreeMap<String, Set<String>>();
+
+        for (String keyValuePair : StringUtils.split(input, keyValuePairDelimiter)) {
+            String[] kv = StringUtils.split(keyValuePair, keyValueDelimiter);
+
+            String key = kv[0];
+            Set<String> values = kv.length == 1 ? new TreeSet<String>() : new TreeSet<String>(Arrays.asList(StringUtils.split(kv[1], valueDelimiter)));
+
+            if (out.containsKey(key)) {
+                out.get(key).addAll(values);
+            } else {
+                out.put(key, values);
+            }
+        }
+
+        return out;
+
+    }
 }

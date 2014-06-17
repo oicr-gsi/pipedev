@@ -5,6 +5,7 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.TreeMultimap;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -17,42 +18,56 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFileProvenanceReportRecord> {
 
     private Set<String> studyTitle;
-    private Multimap<String, String> studyAttributes;
+    private Multimap<String, Set<String>> studyAttributes;
     private Set<String> experimentName;
-    private Multimap<String, String> experimentAttributes;
+    private Multimap<String, Set<String>> experimentAttributes;
     private Set<String> sampleName;
-    private Multimap<String, String> sampleAttributes;
+    private Multimap<String, Set<String>> sampleAttributes;
     private Set<String> sequencerRunName;
-    private Multimap<String, String> sequencerRunAttributes;
+    private Multimap<String, Set<String>> sequencerRunAttributes;
     private Set<String> laneName;
-    private Multimap<String, String> laneAttributes;
+    private Multimap<String, Set<String>> laneAttributes;
     private Set<String> iusTag;
-    private Multimap<String, String> iusAttributes;
+    private Multimap<String, Set<String>> iusAttributes;
     private Set<String> workflowName;
     private Set<String> processingAlgorithm;
-    private Multimap<String, String> processingAttributes;
+    private Multimap<String, Set<String>> processingAttributes;
     private Set<String> fileMetaType;
-    private Multimap<String, String> fileAttributes;
+    private Multimap<String, Set<String>> fileAttributes;
     private int fileHash = 0;
+
+    private static final Comparator stringComparator = new Comparator<String>() {
+        @Override
+        public int compare(String lhs, String rhs) {
+            return lhs.compareTo(rhs);
+        }
+    };
+
+    private static final Comparator stringSetComparator = new Comparator<Set<String>>() {
+        @Override
+        public int compare(Set<String> lhs, Set<String> rhs) {
+            return lhs.toString().compareTo(rhs.toString());
+        }
+    };
 
     private ReducedFileProvenanceReportRecord() {
         studyTitle = new TreeSet<String>();
-        studyAttributes = TreeMultimap.create();
+        studyAttributes = TreeMultimap.create(stringComparator, stringSetComparator);
         experimentName = new TreeSet<String>();
-        experimentAttributes = TreeMultimap.create();
+        experimentAttributes = TreeMultimap.create(stringComparator, stringSetComparator);
         sampleName = new TreeSet<String>();
-        sampleAttributes = TreeMultimap.create();
+        sampleAttributes = TreeMultimap.create(stringComparator, stringSetComparator);
         sequencerRunName = new TreeSet<String>();
-        sequencerRunAttributes = TreeMultimap.create();
+        sequencerRunAttributes = TreeMultimap.create(stringComparator, stringSetComparator);
         laneName = new TreeSet<String>();
-        laneAttributes = TreeMultimap.create();
+        laneAttributes = TreeMultimap.create(stringComparator, stringSetComparator);
         iusTag = new TreeSet<String>();
-        iusAttributes = TreeMultimap.create();
+        iusAttributes = TreeMultimap.create(stringComparator, stringSetComparator);
         workflowName = new TreeSet<String>();
         processingAlgorithm = new TreeSet<String>();
-        processingAttributes = TreeMultimap.create();
+        processingAttributes = TreeMultimap.create(stringComparator, stringSetComparator);
         fileMetaType = new TreeSet<String>();
-        fileAttributes = TreeMultimap.create();
+        fileAttributes = TreeMultimap.create(stringComparator, stringSetComparator);
         fileHash = 0;
     }
 
@@ -92,13 +107,13 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
         this.studyTitle = new TreeSet<String>(studyTitle);
     }
 
-    public Map<String, Collection<String>> getStudyAttributes() {
+    public Map<String, Collection<Set<String>>> getStudyAttributes() {
         return studyAttributes.asMap();
     }
 
-    public void setStudyAttributes(Map<String, Collection<String>> studyAttributes) {
-        this.studyAttributes = TreeMultimap.create();
-        for (Entry<String, Collection<String>> e : studyAttributes.entrySet()) {
+    public void setStudyAttributes(Map<String, Collection<TreeSet<String>>> studyAttributes) {
+        this.studyAttributes = TreeMultimap.create(stringComparator, stringSetComparator);
+        for (Entry<String, Collection<TreeSet<String>>> e : studyAttributes.entrySet()) {
             this.studyAttributes.putAll(e.getKey(), e.getValue());
         }
     }
@@ -111,13 +126,13 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
         this.experimentName = new TreeSet<String>(experimentName);
     }
 
-    public Map<String, Collection<String>> getExperimentAttributes() {
+    public Map<String, Collection<Set<String>>> getExperimentAttributes() {
         return experimentAttributes.asMap();
     }
 
-    public void setExperimentAttributes(Map<String, Collection<String>> experimentAttributes) {
-        this.experimentAttributes = TreeMultimap.create();
-        for (Entry<String, Collection<String>> e : experimentAttributes.entrySet()) {
+    public void setExperimentAttributes(Map<String, Collection<TreeSet<String>>> experimentAttributes) {
+        this.experimentAttributes = TreeMultimap.create(stringComparator, stringSetComparator);
+        for (Entry<String, Collection<TreeSet<String>>> e : experimentAttributes.entrySet()) {
             this.experimentAttributes.putAll(e.getKey(), e.getValue());
         }
     }
@@ -130,13 +145,13 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
         this.sampleName = new TreeSet<String>(sampleName);
     }
 
-    public Map<String, Collection<String>> getSampleAttributes() {
+    public Map<String, Collection<Set<String>>> getSampleAttributes() {
         return sampleAttributes.asMap();
     }
 
-    public void setSampleAttributes(Map<String, Collection<String>> sampleAttributes) {
-        this.sampleAttributes = TreeMultimap.create();
-        for (Entry<String, Collection<String>> e : sampleAttributes.entrySet()) {
+    public void setSampleAttributes(Map<String, Collection<TreeSet<String>>> sampleAttributes) {
+        this.sampleAttributes = TreeMultimap.create(stringComparator, stringSetComparator);
+        for (Entry<String, Collection<TreeSet<String>>> e : sampleAttributes.entrySet()) {
             this.sampleAttributes.putAll(e.getKey(), e.getValue());
         }
     }
@@ -149,13 +164,13 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
         this.sequencerRunName = new TreeSet<String>(sequencerRunName);
     }
 
-    public Map<String, Collection<String>> getSequencerRunAttributes() {
+    public Map<String, Collection<Set<String>>> getSequencerRunAttributes() {
         return sequencerRunAttributes.asMap();
     }
 
-    public void setSequencerRunAttributes(Map<String, Collection<String>> sequencerRunAttributes) {
-        this.sequencerRunAttributes = TreeMultimap.create();
-        for (Entry<String, Collection<String>> e : sequencerRunAttributes.entrySet()) {
+    public void setSequencerRunAttributes(Map<String, Collection<TreeSet<String>>> sequencerRunAttributes) {
+        this.sequencerRunAttributes = TreeMultimap.create(stringComparator, stringSetComparator);
+        for (Entry<String, Collection<TreeSet<String>>> e : sequencerRunAttributes.entrySet()) {
             this.sequencerRunAttributes.putAll(e.getKey(), e.getValue());
         }
     }
@@ -168,13 +183,13 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
         this.laneName = new TreeSet<String>(laneName);
     }
 
-    public Map<String, Collection<String>> getLaneAttributes() {
+    public Map<String, Collection<Set<String>>> getLaneAttributes() {
         return laneAttributes.asMap();
     }
 
-    public void setLaneAttributes(Map<String, Collection<String>> laneAttributes) {
-        this.laneAttributes = TreeMultimap.create();
-        for (Entry<String, Collection<String>> e : laneAttributes.entrySet()) {
+    public void setLaneAttributes(Map<String, Collection<TreeSet<String>>> laneAttributes) {
+        this.laneAttributes = TreeMultimap.create(stringComparator, stringSetComparator);
+        for (Entry<String, Collection<TreeSet<String>>> e : laneAttributes.entrySet()) {
             this.laneAttributes.putAll(e.getKey(), e.getValue());
         }
     }
@@ -187,13 +202,13 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
         this.iusTag = new TreeSet<String>(iusTag);
     }
 
-    public Map<String, Collection<String>> getIusAttributes() {
+    public Map<String, Collection<Set<String>>> getIusAttributes() {
         return iusAttributes.asMap();
     }
 
-    public void setIusAttributes(Map<String, Collection<String>> iusAttributes) {
-        this.iusAttributes = TreeMultimap.create();
-        for (Entry<String, Collection<String>> e : iusAttributes.entrySet()) {
+    public void setIusAttributes(Map<String, Collection<TreeSet<String>>> iusAttributes) {
+        this.iusAttributes = TreeMultimap.create(stringComparator, stringSetComparator);
+        for (Entry<String, Collection<TreeSet<String>>> e : iusAttributes.entrySet()) {
             this.iusAttributes.putAll(e.getKey(), e.getValue());
         }
     }
@@ -214,13 +229,13 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
         this.processingAlgorithm = new TreeSet<String>(processingAlgorithm);
     }
 
-    public Map<String, Collection<String>> getProcessingAttributes() {
+    public Map<String, Collection<Set<String>>> getProcessingAttributes() {
         return processingAttributes.asMap();
     }
 
-    public void setProcessingAttributes(Map<String, Collection<String>> processingAttributes) {
-        this.processingAttributes = TreeMultimap.create();
-        for (Entry<String, Collection<String>> e : processingAttributes.entrySet()) {
+    public void setProcessingAttributes(Map<String, Collection<TreeSet<String>>> processingAttributes) {
+        this.processingAttributes = TreeMultimap.create(stringComparator, stringSetComparator);
+        for (Entry<String, Collection<TreeSet<String>>> e : processingAttributes.entrySet()) {
             this.processingAttributes.putAll(e.getKey(), e.getValue());
         }
     }
@@ -233,13 +248,13 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
         this.fileMetaType = new TreeSet<String>(fileMetaType);
     }
 
-    public Map<String, Collection<String>> getFileAttributes() {
+    public Map<String, Collection<Set<String>>> getFileAttributes() {
         return fileAttributes.asMap();
     }
 
-    public void setFileAttributes(Map<String, Collection<String>> fileAttributes) {
-        this.fileAttributes = TreeMultimap.create();
-        for (Entry<String, Collection<String>> e : fileAttributes.entrySet()) {
+    public void setFileAttributes(Map<String, Collection<TreeSet<String>>> fileAttributes) {
+        this.fileAttributes = TreeMultimap.create(stringComparator, stringSetComparator);
+        for (Entry<String, Collection<TreeSet<String>>> e : fileAttributes.entrySet()) {
             this.fileAttributes.putAll(e.getKey(), e.getValue());
         }
     }

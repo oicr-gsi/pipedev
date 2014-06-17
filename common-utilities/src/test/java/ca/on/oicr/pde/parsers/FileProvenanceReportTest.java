@@ -1,14 +1,12 @@
-package ca.on.oicr.pde.common.utilities;
+package ca.on.oicr.pde.parsers;
 
 import ca.on.oicr.pde.model.FileProvenanceReportRecord;
-import ca.on.oicr.pde.parsers.FileProvenanceReport;
-import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import net.sf.cglib.core.CollectionUtils;
 import org.testng.Assert;
 import static org.testng.Assert.*;
 import org.testng.annotations.BeforeClass;
@@ -228,6 +226,14 @@ public class FileProvenanceReportTest {
         String reportFile = "/fileprovenance/doesNotExist";
 
         getReport(reportFile);
+
+    }
+
+    @Test
+    public void checkAttributes() {
+
+        Assert.assertEquals(rec1.getSampleAttributes().get("sample.geo_run_id_and_position_and_slot"),
+                Arrays.asList("1179_1_1", "1179_2_1", "1179_3_1", "1179_4_1"));
 
     }
 

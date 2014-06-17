@@ -1,13 +1,14 @@
 package ca.on.oicr.pde.model;
 
 import java.util.Map;
+import java.util.Set;
 
 public interface Attributable {
 
-    public Map<String,String> getAttributes();
+    public Map<String,Set<String>> getAttributes();
 
-    public void setAttributes(String attributes);
+    public void setAttributes(Map<String,Set<String>> attributes);
     
-    public String getAttribute(String key);
+    public Set<String> getAttribute(String key);
     
 }

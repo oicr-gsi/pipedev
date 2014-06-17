@@ -1,18 +1,24 @@
 package ca.on.oicr.pde.testing;
 
+import ca.on.oicr.pde.model.ReducedFileProvenanceReportRecord;
 import ca.on.oicr.pde.testing.decider.TestResult;
 import static ca.on.oicr.pde.testing.decider.DeciderRunTest.compareReports;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.TreeSet;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class DeciderRunTestTest {
 
     //TODO: write some helper functions so that the json documents below can be dynamically generated
-    @Test(enabled = false)
-    public void testSomeMethod() throws IOException {
+    @Test(enabled = true)
+    public void jsonReportComparision() throws IOException {
 
-        String expected = "{\n"
+        String expectedJson = "{\n"
                 + "  \"workflowRunCount\" : 1,\n"
                 + "  \"studies\" : [ \"Test Study 1\" ],\n"
                 + "  \"sequencerRuns\" : [ \"AAA_BBB_CCC_DDD\" ],\n"
@@ -24,90 +30,83 @@ public class DeciderRunTestTest {
                 + "  \"maxInputFiles\" : 1,\n"
                 + "  \"minInputFiles\" : 1,\n"
                 + "  \"workflowRuns\" : [ {\n"
+                + "  \"workflowIni\" : { "
+                + "  },"
                 + "    \"files\" : [ {\n"
-                + "      \"studyTitle\" : \"Test Study 1\",\n"
+                + "      \"studyTitle\" : [\"Test Study 1\"],\n"
                 + "      \"studyAttributes\" : {\n"
-                + "        \"study.geo_lab_group_id\" : \"121\"\n"
+                + "        \"study.geo_lab_group_id\" : [[\"121\"]]\n"
                 + "      },\n"
-                + "      \"experimentName\" : \"Geo_Ovarian_Brain_Colon_Exome_Seq_ILLUMINA_EX_{F*101}{..}{R*101}\",\n"
+                + "      \"experimentName\" : [\"Geo_Ovarian_Brain_Colon_Exome_Seq_ILLUMINA_EX_{F*101}{..}{R*101}\"],\n"
                 + "      \"experimentAttributes\" : { },\n"
-                + "      \"sampleName\" : \"OBC_0001_Ov_X_PE_389_EX\",\n"
+                + "      \"sampleName\" : [\"OBC_0001_Ov_X_PE_389_EX\"],\n"
                 + "      \"sampleAttributes\" : {\n"
-                + "        \"sample.geo_template_id\" : \"15687\",\n"
-                + "        \"sample.geo_tissue_type\" : \"X\",\n"
-                + "        \"sample.geo_template_type\" : \"Illumina PE Library Seq\",\n"
-                + "        \"sample.geo_run_id_and_position_and_slot\" : \"866_1_1&889_1_1\",\n"
-                + "        \"sample.geo_library_source_template_type\" : \"EX\",\n"
-                + "        \"sample.geo_reaction_id\" : \"5581&5773\",\n"
-                + "        \"sample.geo_tissue_origin\" : \"Ov\",\n"
-                + "        \"sample.geo_targeted_resequencing\" : \"Agilent SureSelect ICGC/Sanger Exon\"\n"
+                + "        \"sample.geo_template_id\" : [[\"1\",\"2\" ], [\"15687\",\"15688\"]]\n"
                 + "      },\n"
-                + "      \"sequencerRunName\" : \"120106_h804_0076_AD0LFWACXX\",\n"
+                + "      \"sequencerRunName\" : [\"120106_h804_0076_AD0LFWACXX\"],\n"
                 + "      \"sequencerRunAttributes\" : {\n"
-                + "        \"sequencerrun.geo_instrument_run_id\" : \"889\"\n"
+                + "        \"sequencerrun.geo_instrument_run_id\" : [[\"889\"]]\n"
                 + "      },\n"
-                + "      \"laneName\" : \"120106_h804_0076_AD0LFWACXX_lane_1\",\n"
+                + "      \"laneName\" : [\"120106_h804_0076_AD0LFWACXX_lane_1\"],\n"
                 + "      \"laneAttributes\" : {\n"
-                + "        \"lane.geo_lane\" : \"1\"\n"
+                + "        \"lane.geo_lane\" : [[\"1\"]]\n"
                 + "      },\n"
-                + "      \"iusTag\" : \"ATCACG\",\n"
+                + "      \"iusTag\" : [\"ATCACG\"],\n"
                 + "      \"iusAttributes\" : { },\n"
-                + "      \"workflowName\" : \"GenomicAlignmentNovoalign\",\n"
-                + "      \"processingAlgorithm\" : \"PicardAddReadGroups\",\n"
+                + "      \"workflowName\" : [\"GenomicAlignmentNovoalign\"],\n"
+                + "      \"processingAlgorithm\" : [\"PicardAddReadGroups\"],\n"
                 + "      \"processingAttributes\" : { },\n"
-                + "      \"fileMetaType\" : \"application/bam\",\n"
+                + "      \"fileMetaType\" : [\"application/bam\"],\n"
                 + "      \"fileAttributes\" : { }\n"
                 + "    } ] } ] }";
 
-        String actual = "{\n"
+        String actualJson = "{\n"
                 + "  \"workflowRunCount\" : 1,\n"
-                + "  \"studies\" : [ \"Ovarian_Brain_Colon_Exome_Seq\" ],\n"
-                + "  \"sequencerRuns\" : [ \"120106_h804_0076_AD0LFWACXX\" ],\n"
-                + "  \"lanes\" : [ \"111212_h1080_0086_AC045BACXX_lane_1\" ],\n"
-                + "  \"samples\" : [ \"OBC_0001_Ov_X_PE_389_EX\" ],\n"
+                + "  \"studies\" : [ \"Test Study 1\" ],\n"
+                + "  \"sequencerRuns\" : [ \"AAA_BBB_CCC_DDD\" ],\n"
+                + "  \"lanes\" : [ \"AAA_BBB_CCC_DDD_lane1\" ],\n"
+                + "  \"samples\" : [ \"TEST_0001_Ov_X_PE_389_EX\" ],\n"
                 + "  \"workflows\" : [ \"GenomicAlignmentNovoalign\" ],\n"
                 + "  \"processingAlgorithms\" : [ \"PicardAddReadGroups\" ],\n"
                 + "  \"fileMetaTypes\" : [ \"application/bam\" ],\n"
                 + "  \"maxInputFiles\" : 1,\n"
                 + "  \"minInputFiles\" : 1,\n"
                 + "  \"workflowRuns\" : [ {\n"
+                + "  \"workflowIni\" : { "
+                + "  },"
                 + "    \"files\" : [ {\n"
-                + "      \"studyTitle\" : \"Ovarian_Brain_Colon_Exome_Seq\",\n"
+                + "      \"studyTitle\" : [\"Test Study 1\"],\n"
                 + "      \"studyAttributes\" : {\n"
-                + "        \"study.geo_lab_group_id\" : \"121\"\n"
+                + "        \"study.geo_lab_group_id\" : [[\"121\"]]\n"
                 + "      },\n"
-                + "      \"experimentName\" : \"Geo_Ovarian_Brain_Colon_Exome_Seq_ILLUMINA_EX_{F*101}{..}{R*101}\",\n"
+                + "      \"experimentName\" : [\"Geo_Ovarian_Brain_Colon_Exome_Seq_ILLUMINA_EX_{F*101}{..}{R*101}\"],\n"
                 + "      \"experimentAttributes\" : { },\n"
-                + "      \"sampleName\" : \"OBC_0001_Ov_X_PE_389_EX\",\n"
+                + "      \"sampleName\" : [\"OBC_0001_Ov_X_PE_389_EX\"],\n"
                 + "      \"sampleAttributes\" : {\n"
-                + "        \"sample.geo_template_id\" : \"15687\",\n"
-                + "        \"sample.geo_tissue_type\" : \"X\",\n"
-                + "        \"sample.geo_template_type\" : \"Illumina PE Library Seq\",\n"
-                + "        \"sample.geo_run_id_and_position_and_slot\" : \"866_1_1&889_1_1\",\n"
-                + "        \"sample.geo_library_source_template_type\" : \"EX\",\n"
-                + "        \"sample.geo_reaction_id\" : \"5581&5773\",\n"
-                + "        \"sample.geo_tissue_origin\" : \"Ov\",\n"
-                + "        \"sample.geo_targeted_resequencing\" : \"Agilent SureSelect ICGC/Sanger Exon\"\n"
+                + "        \"sample.geo_template_id\" : [[ \"15687\",\"15688\"], [\"1\",\"2\" ]]\n"
                 + "      },\n"
-                + "      \"sequencerRunName\" : \"120106_h804_0076_AD0LFWACXX\",\n"
+                + "      \"sequencerRunName\" : [\"120106_h804_0076_AD0LFWACXX\"],\n"
                 + "      \"sequencerRunAttributes\" : {\n"
-                + "        \"sequencerrun.geo_instrument_run_id\" : \"889\"\n"
+                + "        \"sequencerrun.geo_instrument_run_id\" : [[\"889\"]]\n"
                 + "      },\n"
-                + "      \"laneName\" : \"120106_h804_0076_AD0LFWACXX_lane_1\",\n"
+                + "      \"laneName\" : [\"120106_h804_0076_AD0LFWACXX_lane_1\"],\n"
                 + "      \"laneAttributes\" : {\n"
-                + "        \"lane.geo_lane\" : \"1\"\n"
+                + "        \"lane.geo_lane\" : [[\"1\"]]\n"
                 + "      },\n"
-                + "      \"iusTag\" : \"ATCACG\",\n"
+                + "      \"iusTag\" : [\"ATCACG\"],\n"
                 + "      \"iusAttributes\" : { },\n"
-                + "      \"workflowName\" : \"GenomicAlignmentNovoalign\",\n"
-                + "      \"processingAlgorithm\" : \"PicardAddReadGroups\",\n"
+                + "      \"workflowName\" : [\"GenomicAlignmentNovoalign\"],\n"
+                + "      \"processingAlgorithm\" : [\"PicardAddReadGroups\"],\n"
                 + "      \"processingAttributes\" : { },\n"
-                + "      \"fileMetaType\" : \"application/bam\",\n"
+                + "      \"fileMetaType\" : [\"application/bam\"],\n"
                 + "      \"fileAttributes\" : { }\n"
                 + "    } ] } ] }";
 
         //Assert.assertTrue(compareReports(actual, expected));
-        Assert.assertTrue(compareReports(TestResult.buildFromJson(actual), TestResult.buildFromJson(expected)));
+        TestResult actual = TestResult.buildFromJson(actualJson);
+        TestResult expected = TestResult.buildFromJson(expectedJson);
+
+        Assert.assertTrue(compareReports(actual, expected), "Expected: " + expected.toString() +"\nActual: " + actual);
 
     }
 
@@ -234,7 +233,7 @@ public class DeciderRunTestTest {
 
     }
 
-    @Test(enabled = true)
+    @Test
     public void compareMergedFiles() throws IOException {
 
         String actual = "{\n"
@@ -255,7 +254,7 @@ public class DeciderRunTestTest {
                 + "    \"files\" : [ {\n"
                 + "      \"studyTitle\" : [ \"2\" ],\n"
                 + "      \"studyAttributes\" : {\n"
-                + "        \"attr1\" : [ \"1\", \"4\", \"2\", \"3\" ]\n"
+                + "        \"attr1\" : [[ \"1\", \"3\", \"2\", \"4\" ]]\n"
                 + "      }"
                 + "    } ]\n"
                 + "  }, "
@@ -266,7 +265,7 @@ public class DeciderRunTestTest {
                 + "    \"files\" : [ {\n"
                 + "      \"studyTitle\" : [ \"1\" ],\n"
                 + "      \"studyAttributes\" : {\n"
-                + "        \"attr1\" : [ \"4\", \"1\", \"2\", \"3\" ]\n"
+                + "        \"attr1\" : [[ \"4\", \"1\", \"2\", \"3\" ]]\n"
                 + "      }"
                 + "    } ]\n"
                 + "  } ] }";
@@ -289,7 +288,7 @@ public class DeciderRunTestTest {
                 + "    \"files\" : [ {\n"
                 + "      \"studyTitle\" : [ \"1\" ],\n"
                 + "      \"studyAttributes\" : {\n"
-                + "        \"attr1\" : [ \"1\", \"4\", \"2\", \"3\" ]\n"
+                + "        \"attr1\" : [[ \"1\", \"4\", \"2\", \"3\" ]]\n"
                 + "      }"
                 + "    } ]\n"
                 + "  }, {\n"
@@ -299,7 +298,7 @@ public class DeciderRunTestTest {
                 + "    \"files\" : [ {\n"
                 + "      \"studyTitle\" : [ \"2\" ],\n"
                 + "      \"studyAttributes\" : {\n"
-                + "        \"attr1\" : [ \"1\", \"4\", \"2\", \"3\" ]\n"
+                + "        \"attr1\" : [[ \"1\", \"4\", \"2\", \"3\" ]]\n"
                 + "      }"
                 + "    } ]\n"
                 + "  } ] }";
@@ -309,7 +308,15 @@ public class DeciderRunTestTest {
 
         Assert.assertEquals(2, actualObject.getWorkflowRuns().size());
         Assert.assertEquals(2, expectedObject.getWorkflowRuns().size());
-
+        
+        List<ReducedFileProvenanceReportRecord> files = actualObject.getWorkflowRuns().get(0).getFiles();
+        for(ReducedFileProvenanceReportRecord r : files){
+            Collection actualAttrSet = r.getStudyAttributes().get("attr1");
+            Collection expectedAttrSet = new ArrayList();
+            expectedAttrSet.add(new TreeSet(Arrays.asList("1", "2" , "3", "4")));
+            Assert.assertEquals(actualAttrSet, expectedAttrSet);
+        }
+        
         Assert.assertTrue(actualObject.equals(expectedObject), "expected:\n" + expectedObject.toString());
 
     }

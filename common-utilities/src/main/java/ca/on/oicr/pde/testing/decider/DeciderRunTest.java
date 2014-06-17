@@ -53,7 +53,7 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
     TestDefinition.Test testDefinition;
 
     public DeciderRunTest(SeqwareInterface seq, File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName,
-            File deciderJar, File bundledWorkflow, String deciderClass, TestDefinition.Test testDefinition) {
+            File deciderJar, File bundledWorkflow, String deciderClass, TestDefinition.Test definition) throws IOException {
 
         super(seqwareDistribution, seqwareSettings, workingDirectory, testName);
 
@@ -61,6 +61,7 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
         this.deciderJar = deciderJar;
         this.bundledWorkflow = bundledWorkflow;
         this.deciderClass = deciderClass;
+        this.testDefinition = definition;
 
         for (String s : testDefinition.getStudies()) {
             Study x = new Study();
@@ -80,20 +81,21 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
             sequencerRuns.add(x);
         }
 
-        try {
-            expectedReportFile = testDefinition.metrics();
-            if (expectedReportFile != null) {
-                log.warn("found a metrics file: " + expectedReportFile.getAbsolutePath());
+        expectedReportFile = testDefinition.metrics();
+        
+        if (expectedReportFile != null) {
+            log.warn("Found a metrics file: [" + expectedReportFile.getAbsolutePath() +"].");
+            try {
                 expected = TestResult.buildFromJson(expectedReportFile);
-            } else {
-                log.error("metrics does not exist, skipping comparison step");
+            } catch (IOException ioe) {
+                log.error("There was a problem loading the metrics file: [" + expectedReportFile.getAbsolutePath() + "]." +
+                "\nThe exception output:\n" + ioe.toString() + "\nContinuing with test but comparision step will fail.");
+                expected = null;
             }
-        } catch (IOException ioe) {
-            log.error(ioe);
-            throw new RuntimeException(ioe);
+        } else {
+            log.error("Metrics does not exist, skipping comparison step");
         }
 
-        this.testDefinition = testDefinition;
     }
 
     @BeforeSuite
@@ -209,27 +211,10 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
 
         actual = getWorkflowReport(w);
 
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        String x = mapper.writeValueAsString(actual);
         actualReportFile = new File(workingDirectory.getAbsolutePath() + "/" + testDefinition.outputName());
         Assert.assertFalse(actualReportFile.exists());
 
-        FileUtils.write(actualReportFile, x);
-//        
-//        boolean populateMetricsDirectory = true;        
-//        if(populateMetricsDirectory && expected == null){
-//            File outputDir = new File(t.metricsDirectory);
-//            Assert.assertTrue(outputDir.exists() && outputDir.isDirectory() && outputDir.canWrite());
-//            
-//            File outputFile = outputDir.
-//            
-//        }
-
-        log.debug(x);
-
-        Assert.assertNotNull(actual);
-        //Assert.assertTrue(actual.isConsistent);
+        FileUtils.write(actualReportFile, testResultToJson(actual));
 
         reports.add(actualReportFile);
 
@@ -330,6 +315,14 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
         }
 
         return t;
+
+    }
+
+    public static String testResultToJson(TestResult t) throws IOException {
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        return mapper.writeValueAsString(t);
 
     }
 

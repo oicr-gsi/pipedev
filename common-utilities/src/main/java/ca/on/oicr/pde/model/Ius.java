@@ -1,9 +1,9 @@
 package ca.on.oicr.pde.model;
 
-import com.google.common.base.Splitter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -12,7 +12,7 @@ public class Ius implements Accessionable, Attributable {
 
     private String tag;
     private String swid;
-    private Map<String, String> attributes;
+    private Map<String, Set<String>> attributes;
 
     public Ius() {
         attributes = Collections.EMPTY_MAP;
@@ -27,19 +27,19 @@ public class Ius implements Accessionable, Attributable {
     }
 
     @Override
-    public Map getAttributes() {
+    public Map<String, Set<String>> getAttributes() {
         return new HashMap(attributes);
     }
 
     @Override
-    public void setAttributes(String attributes) {
+    public void setAttributes(Map<String, Set<String>> attributes) {
 
-        this.attributes = Splitter.on(";").omitEmptyStrings().withKeyValueSeparator("=").split(attributes);
+        this.attributes = attributes;
 
     }
 
     @Override
-    public String getAttribute(String key) {
+    public Set<String> getAttribute(String key) {
 
         return this.attributes.get(key);
 
