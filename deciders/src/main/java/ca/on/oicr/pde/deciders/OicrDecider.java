@@ -277,17 +277,13 @@ public class OicrDecider extends BasicDecider {
             }
         }
         String dateString = attributes.getOtherAttribute(FindAllTheFiles.Header.PROCESSING_DATE);
-        if (options.has("after-date")) {
-            if (isAfterDate(dateString, afterDate)) {
+        if (options.has("after-date") && !isAfterDate(dateString, afterDate)) {
                 Log.debug("File was processed before the after-date " + afterDate.toString() + " : " + attributes.getPath());
                 return false;
-            }
         }
-        if (options.has("before-date")) {
-            if (isBeforeDate(dateString, beforeDate)) {
+        if (options.has("before-date") && !isBeforeDate(dateString, beforeDate)) {
                 Log.debug("File was processed after the before-date " + beforeDate.toString() + " : " + attributes.getPath());
                 return false;
-            }
         }
         if (!checkFileDetails(attributes)) {
             return false;
