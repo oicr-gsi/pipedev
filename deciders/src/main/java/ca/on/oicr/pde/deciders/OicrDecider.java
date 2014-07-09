@@ -109,7 +109,6 @@ import net.sourceforge.seqware.pipeline.deciders.BasicDecider;
  */
 public class OicrDecider extends BasicDecider {
 
-    private ReturnValue rv = new ReturnValue();
     private Group groupBy = null;
     protected Map<String, FileAttributes> files;
     private int numberOfFilesPerGroup = Integer.MIN_VALUE;
@@ -121,6 +120,7 @@ public class OicrDecider extends BasicDecider {
     private Date afterDate = null;
     private Date beforeDate = null;
     private SimpleDateFormat format;
+    private WorkflowRun run;
 
     /**
      * <p>Sets up the decider arguments and global variables. Any arguments
@@ -282,8 +282,8 @@ public class OicrDecider extends BasicDecider {
                 return false;
         }
         if (options.has("before-date") && !isBeforeDate(dateString, beforeDate)) {
-                Log.debug("File was processed after the before-date " + beforeDate.toString() + " : " + attributes.getPath());
-                return false;
+            Log.debug("File was processed after the before-date " + beforeDate.toString() + " : " + attributes.getPath());
+            return false;
         }
         if (!checkFileDetails(attributes)) {
             return false;
@@ -339,48 +339,44 @@ public class OicrDecider extends BasicDecider {
      */
     @Override
     protected ReturnValue doFinalCheck(String commaSeparatedFilePaths, String commaSeparatedParentAccessions) {
-        ReturnValue toReturn = rv;
-
-        rv = new ReturnValue();
-        return toReturn;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected Map<String, String> modifyIniFile(String commaSeparatedFilePaths, String commaSeparatedParentAccessions) {
-        Map<String, String> iniFile = super.modifyIniFile(commaSeparatedFilePaths, commaSeparatedParentAccessions);
-
         String[] paths = commaSeparatedFilePaths.split(",");
         FileAttributes[] attributes = new FileAttributes[paths.length];
         for (int i = 0; i < paths.length; i++) {
             attributes[i] = files.get(paths[i]);
         }
 
-        WorkflowRun run = new WorkflowRun(iniFile, attributes);
-        run.addProperty("output_prefix", getArgument("output-path").isEmpty() ? "" : (getArgument("output-path").endsWith("/") ? getArgument("output-path") : getArgument("output-path").concat("/")), "./");
+        //create a new workflow run (with a blank set of ini properties) for each final check
+        //get the upstream ini file for further modification in customizeRun and modifyIniFile
+        run = new WorkflowRun(super.modifyIniFile(commaSeparatedFilePaths, commaSeparatedParentAccessions), attributes);
+        run.addProperty("output_prefix", getArgument("output-path").isEmpty()
+                ? "" : (getArgument("output-path").endsWith("/") ? getArgument("output-path") : getArgument("output-path").concat("/")), "./");
         run.addProperty("output_dir", getArgument("output-folder"), "seqware-results");
-//        run.addProperty("output_path", getArgument("output-path"), "NA");
-//        if(!getArgument("output-path").isEmpty()){
-//            run.setManualOutput(true);
-//        }
-        ret = customizeRun(run);
 
-        iniFile = run.getIniFile();
-
-        return iniFile;
+        return customizeRun(run);
     }
 
     public ReturnValue customizeRun(WorkflowRun run) {
+        ReturnValue r = new ReturnValue();
+        r.setExitStatus(ReturnValue.SUCCESS);
+
+        //Check for expected number of input files
         Log.debug("Number of files: " + run.getFiles().length);
         if (numberOfFilesPerGroup != Integer.MIN_VALUE) {
             if (run.getFiles().length != numberOfFilesPerGroup) {
                 Log.debug("Invalid number of files: " + run.getFiles().length + ":" + run.getFiles()[0]);
-                rv.setExitStatus(ReturnValue.INVALIDFILE);
+                r.setExitStatus(ReturnValue.INVALIDFILE);
             }
         }
-        return rv;
+
+        return r;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected Map<String, String> modifyIniFile(String commaSeparatedFilePaths, String commaSeparatedParentAccessions) {
+        return run.getIniFile();
     }
 
     /**
