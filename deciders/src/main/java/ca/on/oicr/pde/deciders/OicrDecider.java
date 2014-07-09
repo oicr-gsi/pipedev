@@ -278,8 +278,8 @@ public class OicrDecider extends BasicDecider {
         }
         String dateString = attributes.getOtherAttribute(FindAllTheFiles.Header.PROCESSING_DATE);
         if (options.has("after-date") && !isAfterDate(dateString, afterDate)) {
-                Log.debug("File was processed before the after-date " + afterDate.toString() + " : " + attributes.getPath());
-                return false;
+            Log.debug("File was processed before the after-date " + afterDate.toString() + " : " + attributes.getPath());
+            return false;
         }
         if (options.has("before-date") && !isBeforeDate(dateString, beforeDate)) {
             Log.debug("File was processed after the before-date " + beforeDate.toString() + " : " + attributes.getPath());
@@ -339,6 +339,9 @@ public class OicrDecider extends BasicDecider {
      */
     @Override
     protected ReturnValue doFinalCheck(String commaSeparatedFilePaths, String commaSeparatedParentAccessions) {
+        ReturnValue r = new ReturnValue();
+        r.setExitStatus(ReturnValue.SUCCESS);
+
         String[] paths = commaSeparatedFilePaths.split(",");
         FileAttributes[] attributes = new FileAttributes[paths.length];
         for (int i = 0; i < paths.length; i++) {
@@ -346,18 +349,7 @@ public class OicrDecider extends BasicDecider {
         }
 
         //create a new workflow run (with a blank set of ini properties) for each final check
-        //get the upstream ini file for further modification in customizeRun and modifyIniFile
-        run = new WorkflowRun(super.modifyIniFile(commaSeparatedFilePaths, commaSeparatedParentAccessions), attributes);
-        run.addProperty("output_prefix", getArgument("output-path").isEmpty()
-                ? "" : (getArgument("output-path").endsWith("/") ? getArgument("output-path") : getArgument("output-path").concat("/")), "./");
-        run.addProperty("output_dir", getArgument("output-folder"), "seqware-results");
-
-        return customizeRun(run);
-    }
-
-    public ReturnValue customizeRun(WorkflowRun run) {
-        ReturnValue r = new ReturnValue();
-        r.setExitStatus(ReturnValue.SUCCESS);
+        run = new WorkflowRun(null, attributes);
 
         //Check for expected number of input files
         Log.debug("Number of files: " + run.getFiles().length);
@@ -365,17 +357,41 @@ public class OicrDecider extends BasicDecider {
             if (run.getFiles().length != numberOfFilesPerGroup) {
                 Log.debug("Invalid number of files: " + run.getFiles().length + ":" + run.getFiles()[0]);
                 r.setExitStatus(ReturnValue.INVALIDFILE);
+                return r;
             }
         }
 
         return r;
     }
-    
+
+    @Deprecated
+    public ReturnValue customizeRun(WorkflowRun run) {
+
+        return new ReturnValue();
+        
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     protected Map<String, String> modifyIniFile(String commaSeparatedFilePaths, String commaSeparatedParentAccessions) {
+
+        //Get default ini file
+        run.addProperty(super.modifyIniFile(commaSeparatedFilePaths, commaSeparatedParentAccessions));
+        
+        //Common decider ini modifications
+        run.addProperty("output_prefix", getArgument("output-path").isEmpty()
+                ? "" : (getArgument("output-path").endsWith("/") ? getArgument("output-path") : getArgument("output-path").concat("/")), "./");
+        run.addProperty("output_dir", getArgument("output-folder"), "seqware-results");
+
+        //Set the final return value to non-zero as the return value from customizeRun does not actually affect the run state.
+        ReturnValue ignoredReturnValue = customizeRun(run);
+        if (ignoredReturnValue.getExitStatus() != ReturnValue.SUCCESS) {
+            Log.error("This decider is using customizeRun to abort workflow runs - this functionality is not supported.  Please submit a bug.");
+            super.ret = ignoredReturnValue;
+        }
+
         return run.getIniFile();
     }
 

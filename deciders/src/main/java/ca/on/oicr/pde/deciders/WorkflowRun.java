@@ -23,8 +23,8 @@ public class WorkflowRun {
         this.files = files;
         //Create a unique string for the job identifier
         String uuid = String.valueOf(UUID.randomUUID());
-        iniFile.put("unique_string", uuid);
-        iniFile.put("manual_output", "false");
+        this.iniFile.put("unique_string", uuid);
+        this.iniFile.put("manual_output", "false");
     }
 
     public void addProperty(String property, String value) {
@@ -41,6 +41,10 @@ public class WorkflowRun {
         } else {
             iniFile.put(property, value);
         }
+    }
+    
+    public void addProperty(Map<String,String> properties){
+        iniFile.putAll(properties);
     }
 
     public StringBuilder addOutputFile(String workingFilepath, String metatype) {
