@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<references>
+    <resequencing_type id="Type1">
+        <template_type>EX</template_type>
+        <interval_file>/path/to/file1.bed</interval_file>
+        <template_type>WG</template_type>
+    </resequencing_type>
+</references>
+

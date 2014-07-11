@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<references>
+    <template_type>TS</template_type>
+    <interval_file>/path/to/file10.bed</interval_file>
+</references>

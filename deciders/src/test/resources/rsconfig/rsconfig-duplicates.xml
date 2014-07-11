@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<references>
+    <resequencing_type id="Type1">
+        <template_type>EX</template_type>
+        <interval_file>/path/to/file1.bed</interval_file>
+    </resequencing_type>
+    <resequencing_type id="Type1">
+        <template_type>EX</template_type>
+        <interval_file>/path/to/file2.bed</interval_file>
+    </resequencing_type>
+</references>
+
