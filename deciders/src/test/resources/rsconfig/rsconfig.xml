@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<references>
+    <resequencing_type id="">
+        <template_type>WG</template_type>
+        <interval_file>/path/to/file0.bed</interval_file>
+    </resequencing_type>
+    <resequencing_type id="Type1">
+        <template_type>EX</template_type>
+        <interval_file>/path/to/file1.bed</interval_file>
+    </resequencing_type>
+    <resequencing_type id="Type2">
+        <template_type>EX</template_type>
+        <interval_file>/path/to/file2.bed</interval_file>
+    </resequencing_type>
+    <resequencing_type id="Type3">
+        <template_type>EX</template_type>
+        <interval_file>/path/to/file3.bed</interval_file>
+    </resequencing_type>
+    <resequencing_type id="Type4">
+        <template_type>EX</template_type>
+        <interval_file>/path/to/file4.bed</interval_file>
+    </resequencing_type>
+    <resequencing_type id="Type5">
+        <template_type>EX</template_type>
+        <interval_file>/path/to/file5.bed</interval_file>
+    </resequencing_type>
+    <resequencing_type id="Type1">
+        <template_type>TS</template_type>
+        <interval_file>/path/to/file6.bed</interval_file>
+    </resequencing_type>
+    <resequencing_type id="Type2">
+        <template_type>TS</template_type>
+        <interval_file>/path/to/file7.bed</interval_file>
+    </resequencing_type>
+    <resequencing_type id="Type3">
+        <template_type>TS</template_type>
+        <interval_file>/path/to/file8.bed</interval_file>
+    </resequencing_type>
+    <resequencing_type id="Type4">
+        <template_type>TS</template_type>
+        <interval_file>/path/to/file9.bed</interval_file>
+    </resequencing_type>
+    <resequencing_type id="Type5">
+        <template_type>TS</template_type>
+        <interval_file>/path/to/file10.bed</interval_file>
+    </resequencing_type>
+</references>
+
