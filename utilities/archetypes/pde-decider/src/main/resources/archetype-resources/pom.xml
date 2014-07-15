@@ -1,0 +1,34 @@
+#set( $symbol_dollar = '$' )
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>ca.on.oicr.pde.deciders</groupId>
+        <artifactId>deciders</artifactId>
+        <version>2014.1.0</version>
+        <relativePath>../decider-parent-pom.xml</relativePath>
+    </parent>
+
+    <artifactId>${decider-name}</artifactId>
+    <version>${version}</version>
+    <packaging>jar</packaging>
+
+    <name>${final-name}</name>
+
+    <properties>
+        <workflow-name>${workflow-name-camel-case}</workflow-name>
+        <workflow-version>${workflow-version}</workflow-version>
+        <main-class>ca.on.oicr.pde.deciders.${decider-name}Decider</main-class>
+    </properties>
+    
+    <dependencies>
+        <dependency>
+            <groupId>ca.on.oicr.pde.workflows</groupId>
+            <artifactId>${symbol_dollar}{workflow-name}</artifactId>
+            <version>${symbol_dollar}{workflow-version}</version>
+        </dependency>
+    </dependencies>
+
+</project>
