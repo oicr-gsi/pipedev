@@ -49,6 +49,8 @@
         <fileSet encoding="UTF-8">
             <directory>workflow/lib</directory>
             <includes>
+                <!--required for git + empty directories-->
+                <include>.directory</include>
                 <include>**/*.jar</include>
             </includes>
         </fileSet>
