@@ -21,6 +21,7 @@
         <skipBundleTest>true</skipBundleTest>
         <bundleDirectory>${project.build.directory}/Workflow_Bundle_${workflow-directory-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-directory-name}/${project.version}</bundleDirectory>
         <seqwareDistribution>${bundleDirectory}/lib/seqware-distribution-${seqware-version}-full.jar</seqwareDistribution>
+        <final-name>Workflow_${project.artifactId}_${project.version}_SeqWare_${seqware-version}</final-name>
     </properties>
     
     <dependencies>
@@ -226,6 +227,16 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.17</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <bundleDirectory>${bundleDirectory}</bundleDirectory>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
