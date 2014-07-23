@@ -159,8 +159,15 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
      * Alternatively you can create each output file individually using this.createOutputFile(String,String) and assign them manually to a job.</p>
      *
      * @param endJob the job that produces the output files.
+     * @param directory the directory where the file is located
      */
-    protected void defineOutputFiles(Job endJob) throws Exception {
+    protected void defineOutputFiles(Job endJob, String directory) throws Exception {
+        if (directory == null) {
+            directory = "";
+        }
+        if (!directory.equals("") && !directory.endsWith("/")) {
+            directory = directory + "/";
+        }
         String outputFiles = getProperty("output_files");
         Boolean doIt = false;
         if (getProperty("manual_output") != null) {
@@ -173,11 +180,15 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
                 if (outputFile.length != 2) {
                     throw new Exception("The output_files INI property is incorrectly defined at token:" + s);
                 };
-                SqwFile file = this.createOutputFile(outputFile[0].trim(), outputFile[1].trim(), doIt);
+                SqwFile file = this.createOutputFile(directory + outputFile[0].trim(), outputFile[1].trim(), doIt);
                 file.setType(outputFile[1].trim());
                 endJob.addFile(file);
             }
         }
+    }
+    
+    protected void defineOutputFiles(Job endJob) throws Exception {
+        defineOutputFiles(endJob, "");
     }
 
     /**
