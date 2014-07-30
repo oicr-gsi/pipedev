@@ -8,6 +8,7 @@ import ca.on.oicr.pde.model.WorkflowRun;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 public interface SeqwareExecutor {
 
@@ -15,7 +16,7 @@ public interface SeqwareExecutor {
 
     public void deciderRunSchedule(File deciderJar, SeqwareAccession workflowSwid, List<Study> studies, List<SequencerRun> sequencerRuns, List<Sample> samples, String extraArgs) throws IOException;
 
-    public SeqwareAccession workflowRunSchedule(SeqwareAccession workflowSwid, File workflowIniFile) throws IOException;
+    public SeqwareAccession workflowRunSchedule(SeqwareAccession workflowSwid, File workflowIniFile, Map<String, String> parameters) throws IOException;
 
     public void workflowRunLaunch(SeqwareAccession workflowRunSwid) throws IOException;
 
@@ -24,7 +25,7 @@ public interface SeqwareExecutor {
     public void workflowRunUpdateStatus(SeqwareAccession workflowRunSwid) throws IOException;
 
     public String workflowRunReport(SeqwareAccession workflowRunSwid) throws IOException;
-    
+
     public void cancelWorkflowRun(WorkflowRun wr) throws IOException;
 
 }

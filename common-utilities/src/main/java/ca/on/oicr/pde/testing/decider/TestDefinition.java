@@ -1,5 +1,6 @@
 package ca.on.oicr.pde.testing.decider;
 
+import static ca.on.oicr.pde.utilities.Helpers.isAccessible;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
@@ -155,21 +156,6 @@ public class TestDefinition {
             return ToStringBuilder.reflectionToString(this);
         }
 
-        private boolean isAccessible(String s) {
-
-            if (s == null || s.isEmpty()) {
-                return false;
-            }
-
-            File f = FileUtils.getFile(s);
-
-            if (f == null) {
-                return false;
-            }
-
-            return f.exists() && f.isFile() && f.canRead();
-
-        }
 
         @JsonIgnore
         //TODO: @JsonIgnore is broken...?: public String getMetrics() throws IOException {

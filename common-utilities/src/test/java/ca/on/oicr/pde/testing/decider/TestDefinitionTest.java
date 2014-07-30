@@ -1,4 +1,4 @@
-package ca.on.oicr.pde.testing;
+package ca.on.oicr.pde.testing.decider;
 
 import ca.on.oicr.pde.testing.decider.TestDefinition;
 import com.fasterxml.jackson.databind.ObjectMapper;

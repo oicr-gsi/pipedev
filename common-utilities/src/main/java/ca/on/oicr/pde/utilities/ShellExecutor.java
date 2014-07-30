@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class ShellExecutor implements SeqwareExecutor {
 
@@ -82,7 +83,7 @@ public class ShellExecutor implements SeqwareExecutor {
     }
 
     @Override
-    public SeqwareAccession workflowRunSchedule(SeqwareAccession workflowSwid, File workflowIniFile) throws IOException {
+    public SeqwareAccession workflowRunSchedule(SeqwareAccession workflowSwid, File workflowIniFile, Map<String, String> parameters) throws IOException {
 
         StringBuilder cmd = new StringBuilder();
         cmd.append("java -cp ").append(seqwareDistribution);
@@ -93,6 +94,11 @@ public class ShellExecutor implements SeqwareExecutor {
         cmd.append(" --override manual_output=true");
         cmd.append(" --override output_prefix=").append(workingDirectory).append("/");
         cmd.append(" --override output_dir=").append("output");
+        
+        //Add additional parameters from map.  Note, these paramters override entries in ini file
+        for(Entry<String,String> e:parameters.entrySet()){
+            cmd.append(" --override ").append(e.getKey()).append("=").append(e.getValue());
+        }
 
         File stdOutAndErrFile = new File(loggingDirectory + "/" + "workflowRunSchedule.out");
 
@@ -182,11 +188,9 @@ public class ShellExecutor implements SeqwareExecutor {
 
     /**
      *
-     * @param prefix The string to prefix each <code>objects</code> "Name"
-     * representation
+     * @param prefix The string to prefix each <code>objects</code> "Name" representation
      * @param objects A list of objects that implement the "Name" interface.
-     * @return A string in the following format: [prefix][object 1's
-     * name][prefix][object 2's name]...
+     * @return A string in the following format: [prefix][object 1's name][prefix][object 2's name]...
      */
     public static String listToParamString(String prefix, List<? extends Name> objects) {
 
