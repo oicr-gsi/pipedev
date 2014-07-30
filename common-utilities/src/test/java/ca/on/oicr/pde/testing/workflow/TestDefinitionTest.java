@@ -50,7 +50,8 @@ public class TestDefinitionTest {
                 + "            \"input_config\": \"workflow_test_08.ini\"\n"
                 + "        },\n"
                 + "        {\n"
-                + "            \"input_config\": \"workflow_test_09.ini\"\n"
+                + "            \"id\": \"Test1\",\n"
+                + "            \"parameters\":{\"a\":\"1\", \"b\":\"2\"}"
                 + "        }\n"
                 + "    ]\n"
                 + "}";

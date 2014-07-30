@@ -52,6 +52,7 @@ public class TestDefinition {
             this.description = description;
         }
 
+        @JsonProperty("metrics_file")
         public void setMetricsFilePath(String metricsFilePath) {
             this.metricsFilePath = metricsFilePath;
         }
@@ -98,6 +99,7 @@ public class TestDefinition {
 
     public static class Test {
 
+        private String id;
         private String description = defaults.description;
         private String metricsFilePath = defaults.metricsFilePath;
         private String metricsDirectoryPath = defaults.metricsDirectoryPath;
@@ -113,6 +115,15 @@ public class TestDefinition {
             environmentVariables = new LinkedHashMap<String, String>(defaults.enviromentVariables);
         }
 
+        public String getId() {
+            return id;
+        }
+
+        @JsonProperty("id")
+        public void setId(String id) {
+            this.id = id;
+        }
+
         public String getDescription() {
             return description;
         }
@@ -126,7 +137,7 @@ public class TestDefinition {
             return metricsFilePath;
         }
 
-        @JsonProperty("output_metrics")
+        @JsonProperty("metrics_file")
         public void setMetricsFilePath(String metricsFilePath) {
             this.metricsFilePath = metricsFilePath;
         }
@@ -215,8 +226,10 @@ public class TestDefinition {
             File metricsFile = null;
             if (isAccessible(metricsFilePath)) {
                 metricsFile = new File(metricsFilePath);
-            } else if (isAccessible(metricsFilePath + "/" + metricsDirectoryPath)) {
-                metricsFile = new File(metricsFilePath + "/" + metricsDirectoryPath);
+            } else if (isAccessible(metricsDirectoryPath + "/" + metricsFilePath)) {
+                metricsFile = new File(metricsDirectoryPath + "/" + metricsFilePath);
+            } else if (getId() != null && isAccessible(metricsDirectoryPath + "/" + getId() + ".metrics")) {
+                metricsFile = new File(metricsDirectoryPath + "/" + getId() + ".metrics");
             } else if (getIniFile() != null && isAccessible(metricsDirectoryPath + "/" + getIniFile().getName() + ".metrics")) {
                 metricsFile = new File(metricsDirectoryPath + "/" + getIniFile().getName() + ".metrics");
             } else {
