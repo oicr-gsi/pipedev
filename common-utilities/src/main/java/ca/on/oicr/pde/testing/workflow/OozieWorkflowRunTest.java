@@ -22,10 +22,10 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
     public OozieWorkflowRunTest(File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName,
             File workflowBundlePath, String workflowName, String workflowVersion, File workflowBundleBinPath,
             File workflowIni, File expectedOutput, File calculateMetricsScript, File compareMetricsScript,
-            Map<String, String> environmentVariables) throws IOException {
+            Map<String, String> environmentVariables, Map<String,String> parameters) throws IOException {
 
         super(seqwareDistribution, seqwareSettings, workingDirectory, testName, workflowBundlePath, workflowName, workflowVersion, workflowBundleBinPath,
-                workflowIni, expectedOutput, calculateMetricsScript, compareMetricsScript, environmentVariables);
+                workflowIni, expectedOutput, calculateMetricsScript, compareMetricsScript, environmentVariables, parameters);
 
     }
 
@@ -60,7 +60,7 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
     @Test(groups = "preExecution", dependsOnMethods = "installWorkflow")
     public void scheduleWorkflow() throws IOException {
 
-        workflowRunSwid = exec.workflowRunSchedule(workflowSwid, workflowIni);
+        workflowRunSwid = exec.workflowRunSchedule(workflowSwid, workflowIni, parameters);
 
         Assert.assertNotNull(workflowRunSwid);
 

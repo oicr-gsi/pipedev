@@ -25,13 +25,14 @@ public class WorkflowRunTest extends RunTestBase {
     protected final File workflowBundlePath;
     protected final String workflowName;
     protected final String workflowVersion;
+    protected final Map<String, String> parameters;
 
     protected File actualOutput;
 
     public WorkflowRunTest(File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName,
             File workflowBundlePath, String workflowName, String workflowVersion, File workflowBundleBinPath,
             File workflowIni, File expectedOutput, File calculateMetricsScript, File compareMetricsScript,
-            Map<String, String> environmentVariables) throws IOException {
+            Map<String, String> environmentVariables, Map<String, String> parameters) throws IOException {
 
         super(seqwareDistribution, seqwareSettings, workingDirectory, testName);
 
@@ -45,9 +46,9 @@ public class WorkflowRunTest extends RunTestBase {
         this.environmentVariables = environmentVariables;
         this.expectedOutput = expectedOutput;
         this.workflowOutputDirectory = new File(workingDirectory + "/output/");
-
+        this.parameters = parameters;
         this.actualOutput = new File(workingDirectory + "/" + workflowIni.getName() + ".metrics");
-        
+
         // Add all directories located within "workflowBundleBinPath" to the PATH
         environmentVariables.put("PATH", Helpers.buildPathFromDirectory(System.getenv("PATH"), workflowBundleBinPath));
 
@@ -99,6 +100,10 @@ public class WorkflowRunTest extends RunTestBase {
 
     @Test(dependsOnGroups = "preExecution", groups = "execution")
     public void executeWorkflow() throws IOException {
+
+        if (!parameters.isEmpty()) {
+            throw new RuntimeException("\"parameters\" are not supported by workflowRunLaunch().  Please report a bug.");
+        }
 
         //blocks until completed
         exec.workflowRunLaunch(workflowBundlePath, workflowIni, workflowName, workflowVersion);

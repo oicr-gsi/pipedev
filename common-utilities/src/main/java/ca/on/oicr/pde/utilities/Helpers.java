@@ -148,4 +148,15 @@ public class Helpers {
 
     }
 
+    public static boolean isAccessible(String s) {
+        if (s == null || s.isEmpty()) {
+            return false;
+        }
+        File f = FileUtils.getFile(s);
+        if (f == null) {
+            return false;
+        }
+        return f.exists() && f.isFile() && f.canRead();
+    }
+
 }
