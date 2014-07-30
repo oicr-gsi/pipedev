@@ -71,8 +71,6 @@ public class WorkflowRunTest extends RunTestBase {
                 "Seqware distribution does not exist - verify seqwareDistribution is correct in pom.xml.");
         Assert.assertTrue(FileUtils.getFile(workflowBundlePath).exists(),
                 "Bundled workflow path does not exist - verify bundledWorkflow is correct in pom.xml.");
-        Assert.assertTrue(workflowIni.exists() && workflowIni.canRead() && workflowIni.isFile(),
-                String.format("The seqware ini file [%s] is not accessible.", workflowIni));
         Assert.assertTrue(expectedOutput.exists() && expectedOutput.canRead() && expectedOutput.isFile(),
                 String.format("The output expectation file [%s] is not accessible - please generate it using calculate script.", expectedOutput));
 

@@ -90,13 +90,15 @@ public class ShellExecutor implements SeqwareExecutor {
         cmd.append(" io.seqware.cli.Main workflow schedule");
         cmd.append(" --accession ").append(workflowSwid.getSwid());
         cmd.append(" --host no");
-        cmd.append(" --ini ").append(workflowIniFile);
+        if (workflowIniFile != null) {
+            cmd.append(" --ini ").append(workflowIniFile);
+        }
         cmd.append(" --override manual_output=true");
         cmd.append(" --override output_prefix=").append(workingDirectory).append("/");
         cmd.append(" --override output_dir=").append("output");
-        
+
         //Add additional parameters from map.  Note, these paramters override entries in ini file
-        for(Entry<String,String> e:parameters.entrySet()){
+        for (Entry<String, String> e : parameters.entrySet()) {
             cmd.append(" --override ").append(e.getKey()).append("=").append(e.getValue());
         }
 
@@ -131,7 +133,9 @@ public class ShellExecutor implements SeqwareExecutor {
         cmd.append(" --provisioned-bundle-dir ").append(workflowBundle);
         cmd.append(" --workflow ").append(workflowName);
         cmd.append(" --version ").append(workflowVersion);
-        cmd.append(" --ini-files ").append(workflowIniFile);
+        if (workflowIniFile != null) {
+            cmd.append(" --ini-files ").append(workflowIniFile);
+        }
         cmd.append(" --wait");
         cmd.append(" --");
         cmd.append(" --manual_output true");
