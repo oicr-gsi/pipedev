@@ -13,8 +13,14 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.testng.Assert;
 import static com.google.common.base.Preconditions.*;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+
 
 public class Helpers {
+
+    private final static Logger log = LogManager.getRootLogger();
 
     public static File getScriptFromResource(String scriptName) throws IOException {
 
@@ -40,27 +46,26 @@ public class Helpers {
     public static String executeCommand(String id, String command, File workingDirectory, File outputFilePath,
             Map<String, String>... environmentVariables) throws IOException {
 
-        
         //TODO: if saveOutputToWorkingDirectory record to workingDirectory
         CommandLine c = new CommandLine("/bin/bash");
         c.addArgument("-c");
         c.addArgument(command, false);
 
         CommandRunner cr = new CommandRunner();
-        
+
         //Setup command to execute
         cr.setCommand(c);
-        
+
         //Setup environment variables for command's shell
         for (Map<String, String> e : environmentVariables) {
             cr.setEnvironmentVariable(e);
         }
-        
+
         //Set the initial directory the command should execute from within
         cr.setWorkingDirectory(workingDirectory);
-        
+
         //Set the path where the command's shell std out and std err should be saved to
-        if(outputFilePath!=null){
+        if (outputFilePath != null) {
             cr.setCommandOutputFile(outputFilePath);
         }
 
@@ -133,10 +138,10 @@ public class Helpers {
     public static File generateTestWorkingDirectory(File baseWorkingDirectory, String prefix, String testName, String suffix) throws IOException {
 
         checkArgument(baseWorkingDirectory != null && baseWorkingDirectory.isDirectory(), "The base working directory [%s] does not exist.", baseWorkingDirectory.getAbsolutePath());
-        
+
         File testWorkingDirectory = new File(baseWorkingDirectory + "/" + prefix + "_" + testName + "_" + suffix + "/");
-        
-        if(testWorkingDirectory.exists()){
+
+        if (testWorkingDirectory.exists()) {
             throw new IOException("The directory [" + testWorkingDirectory + "] already exists.");
         }
 
@@ -148,15 +153,36 @@ public class Helpers {
 
     }
 
-    public static boolean isAccessible(String s) {
+    public static boolean isFileAccessible(String s) {
+        
         if (s == null || s.isEmpty()) {
+            log.printf(Level.DEBUG, "Null or empty file [%s]", s);
             return false;
         }
+        
         File f = FileUtils.getFile(s);
+        
         if (f == null) {
+            log.printf(Level.DEBUG, "Null file object created from [%s]", s);
             return false;
         }
-        return f.exists() && f.isFile() && f.canRead();
+        
+        if(!f.exists()){
+            log.printf(Level.DEBUG, "File does not exist [%s]", s);
+            return false;
+        }
+        
+        if(!f.isFile()){
+            log.printf(Level.DEBUG, "Not a file [%s]", s);
+            return false;
+        }
+        
+        if(!f.canRead()){
+            log.printf(Level.DEBUG, "Can not read file [%s]", s);
+            return false;
+        }
+        
+        return true;
     }
 
 }

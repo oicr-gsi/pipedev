@@ -4,6 +4,7 @@ import ca.on.oicr.pde.testing.common.RunTestBase;
 import ca.on.oicr.pde.utilities.Helpers;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import org.testng.Assert;
 import org.testng.annotations.*;
@@ -16,7 +17,7 @@ public class WorkflowRunTest extends RunTestBase {
 
     //protected final String bundledJava;
     protected final File workflowBundleBinPath;
-    protected final File workflowIni;
+    protected final List<File> workflowInis;
     protected final File expectedOutput;
     protected final File calculateMetricsScript;
     protected final File compareMetricsScript;
@@ -31,7 +32,7 @@ public class WorkflowRunTest extends RunTestBase {
 
     public WorkflowRunTest(File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName,
             File workflowBundlePath, String workflowName, String workflowVersion, File workflowBundleBinPath,
-            File workflowIni, File expectedOutput, File calculateMetricsScript, File compareMetricsScript,
+            List<File> workflowInis, File expectedOutput, File calculateMetricsScript, File compareMetricsScript,
             Map<String, String> environmentVariables, Map<String, String> parameters) throws IOException {
 
         super(seqwareDistribution, seqwareSettings, workingDirectory, testName);
@@ -40,14 +41,14 @@ public class WorkflowRunTest extends RunTestBase {
         this.workflowName = workflowName;
         this.workflowVersion = workflowVersion;
         this.workflowBundleBinPath = workflowBundleBinPath;
-        this.workflowIni = workflowIni;
+        this.workflowInis = workflowInis;
         this.calculateMetricsScript = calculateMetricsScript;
         this.compareMetricsScript = compareMetricsScript;
         this.environmentVariables = environmentVariables;
         this.expectedOutput = expectedOutput;
         this.workflowOutputDirectory = new File(workingDirectory + "/output/");
         this.parameters = parameters;
-        this.actualOutput = new File(workingDirectory + "/" + workflowIni.getName() + ".metrics");
+        this.actualOutput = new File(workingDirectory + "/" + expectedOutput.getName());
 
         // Add all directories located within "workflowBundleBinPath" to the PATH
         environmentVariables.put("PATH", Helpers.buildPathFromDirectory(System.getenv("PATH"), workflowBundleBinPath));
@@ -104,7 +105,7 @@ public class WorkflowRunTest extends RunTestBase {
         }
 
         //blocks until completed
-        exec.workflowRunLaunch(workflowBundlePath, workflowIni, workflowName, workflowVersion);
+        exec.workflowRunLaunch(workflowBundlePath, workflowInis, workflowName, workflowVersion);
 
     }
 
