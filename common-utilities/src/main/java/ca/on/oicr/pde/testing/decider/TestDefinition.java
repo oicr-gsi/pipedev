@@ -1,6 +1,6 @@
 package ca.on.oicr.pde.testing.decider;
 
-import static ca.on.oicr.pde.utilities.Helpers.isAccessible;
+import static ca.on.oicr.pde.utilities.Helpers.isFileAccessible;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
@@ -161,13 +161,13 @@ public class TestDefinition {
         //TODO: @JsonIgnore is broken...?: public String getMetrics() throws IOException {
         public File metrics() throws IOException {
 
-            if (isAccessible(metricsFile)) {
+            if (isFileAccessible(metricsFile)) {
                 return FileUtils.getFile(metricsFile);
-            } else if (isAccessible(defaultMetricsDirectory + "/" + metricsFile)) {
+            } else if (isFileAccessible(defaultMetricsDirectory + "/" + metricsFile)) {
                 return FileUtils.getFile(defaultMetricsDirectory + "/" + metricsFile);
-            } else if (isAccessible(defaultMetricsDirectory + "/" + WordUtils.capitalizeFully(id.trim()).replaceAll("[^A-Za-z0-9]", "") + ".json")) {
+            } else if (isFileAccessible(defaultMetricsDirectory + "/" + WordUtils.capitalizeFully(id.trim()).replaceAll("[^A-Za-z0-9]", "") + ".json")) {
                 return FileUtils.getFile(defaultMetricsDirectory + "/" + WordUtils.capitalizeFully(id.trim()).replaceAll("[^A-Za-z0-9]", "") + ".json");
-            } //                else if (isAccessible(defaultMetricsDirectory + "/" + testName + ".json")) {
+            } //                else if (isFileAccessible(defaultMetricsDirectory + "/" + testName + ".json")) {
             //                return FileUtils.getFile(defaultMetricsDirectory + "/" + testName + ".json");
             //            } 
             else {
@@ -183,7 +183,7 @@ public class TestDefinition {
             if (id != null && !id.isEmpty()) {
                 return WordUtils.capitalizeFully(id.trim()).replaceAll("[^A-Za-z0-9]", "") + ".json";
             } else if (metricsFile != null && !metricsFile.isEmpty()) {
-                if (isAccessible(metricsFile)) {
+                if (isFileAccessible(metricsFile)) {
                     return FileUtils.getFile(metricsFile).getName();
                 } else {
                     return metricsFile;

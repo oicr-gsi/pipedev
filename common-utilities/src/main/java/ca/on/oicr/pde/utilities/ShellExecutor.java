@@ -7,13 +7,15 @@ import ca.on.oicr.pde.model.SeqwareAccession;
 import ca.on.oicr.pde.model.Study;
 import ca.on.oicr.pde.model.WorkflowRun;
 import ca.on.oicr.pde.parsers.SeqwareOutputParser;
+import com.google.common.base.Joiner;
 import static com.google.common.base.Preconditions.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Properties;
+import org.apache.commons.io.FileUtils;
 
 public class ShellExecutor implements SeqwareExecutor {
 
@@ -83,25 +85,33 @@ public class ShellExecutor implements SeqwareExecutor {
     }
 
     @Override
-    public SeqwareAccession workflowRunSchedule(SeqwareAccession workflowSwid, File workflowIniFile, Map<String, String> parameters) throws IOException {
+    public SeqwareAccession workflowRunSchedule(SeqwareAccession workflowSwid, List<File> workflowIniFiles, Map<String, String> parameters) throws IOException {
+
+        //Temporary fix, see parameters handling section below
+        if (!parameters.isEmpty()) {
+            File parametersFile = File.createTempFile("extra_parameters", ".ini");
+            Properties p = new Properties();
+            p.putAll(parameters);
+            p.store(FileUtils.openOutputStream(parametersFile), "");
+            workflowIniFiles.add(parametersFile);
+        }
 
         StringBuilder cmd = new StringBuilder();
         cmd.append("java -cp ").append(seqwareDistribution);
         cmd.append(" io.seqware.cli.Main workflow schedule");
         cmd.append(" --accession ").append(workflowSwid.getSwid());
         cmd.append(" --host no");
-        if (workflowIniFile != null) {
-            cmd.append(" --ini ").append(workflowIniFile);
-        }
+        cmd.append(" --ini ").append(Joiner.on(",").join(workflowIniFiles));
         cmd.append(" --override manual_output=true");
         cmd.append(" --override output_prefix=").append(workingDirectory).append("/");
         cmd.append(" --override output_dir=").append("output");
 
-        //Add additional parameters from map.  Note, these paramters override entries in ini file
-        for (Entry<String, String> e : parameters.entrySet()) {
-            cmd.append(" --override ").append(e.getKey()).append("=").append(e.getValue());
-        }
-
+//      FIXME: seqware command line cannot handle special characters.  For example, --override some_param=--the_param_to_pass_to_workflow will fail
+//      ... so parameters are treated currently as an iniFile        
+//        //Add additional parameters from map.  Note, these paramters override entries in ini file
+//        for (Entry<String, String> e : parameters.entrySet()) {
+//            cmd.append(" --override ").append(e.getKey()).append("=").append(escapeForSeqware(e.getValue()));
+//        }
         File stdOutAndErrFile = new File(loggingDirectory + "/" + "workflowRunSchedule.out");
 
         return new SeqwareAccession(SeqwareOutputParser.getSwidFromOutput(Helpers.executeCommand(id, cmd.toString(), workingDirectory, stdOutAndErrFile, environmentVariables)));
@@ -123,7 +133,7 @@ public class ShellExecutor implements SeqwareExecutor {
     }
 
     @Override
-    public void workflowRunLaunch(File workflowBundle, File workflowIniFile, String workflowName, String workflowVersion) throws IOException {
+    public void workflowRunLaunch(File workflowBundle, List<File> workflowIniFiles, String workflowName, String workflowVersion) throws IOException {
 
         StringBuilder cmd = new StringBuilder();
         cmd.append("java -jar ").append(seqwareDistribution);
@@ -133,9 +143,7 @@ public class ShellExecutor implements SeqwareExecutor {
         cmd.append(" --provisioned-bundle-dir ").append(workflowBundle);
         cmd.append(" --workflow ").append(workflowName);
         cmd.append(" --version ").append(workflowVersion);
-        if (workflowIniFile != null) {
-            cmd.append(" --ini-files ").append(workflowIniFile);
-        }
+        cmd.append(" --ini-files ").append(Joiner.on(",").join(workflowIniFiles));
         cmd.append(" --wait");
         cmd.append(" --");
         cmd.append(" --manual_output true");
@@ -144,7 +152,7 @@ public class ShellExecutor implements SeqwareExecutor {
 
         File stdOutAndErrFile = new File(loggingDirectory + "/" + "workflowRunLaunch.out");
 
-        Helpers.executeCommand(id, cmd.toString(), workingDirectory, environmentVariables);
+        Helpers.executeCommand(id, cmd.toString(), workingDirectory, stdOutAndErrFile, environmentVariables);
 
     }
 
@@ -208,6 +216,16 @@ public class ShellExecutor implements SeqwareExecutor {
 
         return result.toString();
 
+    }
+
+    //method in development to escape strings for seqware command line
+    private String escapeForSeqware(String s) {
+        String result = s;
+
+        // spaces need to be escaped from " " to "\ "
+        result = result.replaceAll(" ", "\\\\ ");
+
+        return result;
     }
 
 }

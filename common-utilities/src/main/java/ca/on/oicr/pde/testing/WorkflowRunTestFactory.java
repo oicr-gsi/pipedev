@@ -69,13 +69,23 @@ public class WorkflowRunTestFactory {
             File calculateMetricsScript = getScriptFromResource(t.getMetricsCalculateScript());
             File compareMetricsScript = getScriptFromResource(t.getMetricsCompareScript());
 
+            List<File> iniFiles = new ArrayList<File>();
+            
+            //Add a blank ini file to list (need at least one ini file for seqware command line)
+            iniFiles.add(File.createTempFile("blank", "ini"));
+
+            //Add user specified ini file if it is accessible
+            if (t.getIniFile() != null) {
+                iniFiles.add(t.getIniFile());
+            }
+
             if ("oozie".equals(schedulingSystem)) {
                 tests.add(new OozieWorkflowRunTest(seqwareDistribution, seqwareSettings, testWorkingDir, testName,
-                        workflowBundlePath, workflowName, workflowVersion, workflowBundleBinPath, t.getIniFile(), t.getMetricsFile(),
+                        workflowBundlePath, workflowName, workflowVersion, workflowBundleBinPath, iniFiles, t.getMetricsFile(),
                         calculateMetricsScript, compareMetricsScript, t.getEnvironmentVariables(), t.getParameters()));
             } else if ("pegasus".equals(schedulingSystem)) {
                 tests.add(new WorkflowRunTest(seqwareDistribution, seqwareSettings, testWorkingDir, testName,
-                        workflowBundlePath, workflowName, workflowVersion, workflowBundleBinPath, t.getIniFile(), t.getMetricsFile(),
+                        workflowBundlePath, workflowName, workflowVersion, workflowBundleBinPath, iniFiles, t.getMetricsFile(),
                         calculateMetricsScript, compareMetricsScript, t.getEnvironmentVariables(), t.getParameters()));
             } else {
                 throw new RuntimeException("Unsupported schedulingSystem type.");

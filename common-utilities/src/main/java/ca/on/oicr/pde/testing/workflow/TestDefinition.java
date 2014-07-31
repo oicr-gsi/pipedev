@@ -1,6 +1,6 @@
 package ca.on.oicr.pde.testing.workflow;
 
-import static ca.on.oicr.pde.utilities.Helpers.isAccessible;
+import static ca.on.oicr.pde.utilities.Helpers.isFileAccessible;
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -208,9 +208,9 @@ public class TestDefinition {
         @JsonIgnore
         public File getIniFile() {
             File iniFile = null;
-            if (isAccessible(iniFilePath)) {
+            if (isFileAccessible(iniFilePath)) {
                 iniFile = new File(iniFilePath);
-            } else if (isAccessible(iniDirectoryPath + "/" + iniFilePath)) {
+            } else if (isFileAccessible(iniDirectoryPath + "/" + iniFilePath)) {
                 iniFile = new File(iniDirectoryPath + "/" + iniFilePath);
             } else {
                 //there is no valid file path to the ini
@@ -224,13 +224,13 @@ public class TestDefinition {
 
             //String outputMetrics = test.get("output_metrics") == null ? inputConfig + ".metrics" : test.get("output_metrics").getTextValue();
             File metricsFile = null;
-            if (isAccessible(metricsFilePath)) {
+            if (isFileAccessible(metricsFilePath)) {
                 metricsFile = new File(metricsFilePath);
-            } else if (isAccessible(metricsDirectoryPath + "/" + metricsFilePath)) {
+            } else if (isFileAccessible(metricsDirectoryPath + "/" + metricsFilePath)) {
                 metricsFile = new File(metricsDirectoryPath + "/" + metricsFilePath);
-            } else if (getId() != null && isAccessible(metricsDirectoryPath + "/" + getId() + ".metrics")) {
+            } else if (getId() != null && isFileAccessible(metricsDirectoryPath + "/" + getId() + ".metrics")) {
                 metricsFile = new File(metricsDirectoryPath + "/" + getId() + ".metrics");
-            } else if (getIniFile() != null && isAccessible(metricsDirectoryPath + "/" + getIniFile().getName() + ".metrics")) {
+            } else if (getIniFile() != null && isFileAccessible(metricsDirectoryPath + "/" + getIniFile().getName() + ".metrics")) {
                 metricsFile = new File(metricsDirectoryPath + "/" + getIniFile().getName() + ".metrics");
             } else {
                 //no valid metrics file path
