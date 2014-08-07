@@ -233,6 +233,7 @@
                 <configuration>
                     <systemPropertyVariables>
                         <bundleDirectory>${bundleDirectory}</bundleDirectory>
+                        <bundledBinPath>${bundleDirectory}/bin/</bundledBinPath>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
