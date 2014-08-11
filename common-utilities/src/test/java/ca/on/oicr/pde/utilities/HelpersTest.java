@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.testng.annotations.Test;
 
@@ -75,6 +76,14 @@ public class HelpersTest {
 
         org.testng.Assert.assertEquals(path, initial + ":" + testDir + ":" + testDir + "/a:" + testDir + "/b:" + testDir + "/c");
 
+    }
+    
+    @Test
+    public void getResourceAsFile() throws IOException {
+        
+        File f = Helpers.getFileFromResource("helpers/test.txt");
+        Assert.assertEquals(FileUtils.readFileToString(f), "test content");
+        
     }
 
 }
