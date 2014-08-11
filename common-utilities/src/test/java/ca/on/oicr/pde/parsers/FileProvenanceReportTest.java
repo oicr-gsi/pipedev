@@ -68,6 +68,13 @@ public class FileProvenanceReportTest {
         rec1Builder.setFileSize("");
         rec1Builder.setFileDescription("provisionFile_out");
         rec1Builder.setSkip("false");
+        rec1Builder.setRootSampleName("TES_0014");
+        rec1Builder.setRootSampleSwid("9");
+        rec1Builder.setParentSampleOrganismIds("31:31:31:31:31");
+        rec1Builder.setSampleOrganismId("31");
+        rec1Builder.setSampleOrganismCode("Homo_sapiens");
+        rec1Builder.setSequencerRunPlatformId("20");
+        rec1Builder.setSequencerRunPlatformName("ILLUMINA");
         rec1 = rec1Builder.build();
         rec1Modified = rec1Builder.setSkip("invalid").build();
 
@@ -112,6 +119,13 @@ public class FileProvenanceReportTest {
         rec2Builder.setFileSize("");
         rec2Builder.setFileDescription("");
         rec2Builder.setSkip("false");
+        rec2Builder.setRootSampleName("TES_0003");
+        rec2Builder.setRootSampleSwid("99");
+        rec2Builder.setParentSampleOrganismIds("31:31:31:31:31");
+        rec2Builder.setSampleOrganismId("31");
+        rec2Builder.setSampleOrganismCode("Homo_sapiens");
+        rec2Builder.setSequencerRunPlatformId("20");
+        rec2Builder.setSequencerRunPlatformName("ILLUMINA");
         rec2 = rec2Builder.build();
 
         FileProvenanceReportRecord.Builder rec3Builder = new FileProvenanceReportRecord.Builder();
@@ -155,6 +169,13 @@ public class FileProvenanceReportTest {
         rec3Builder.setFileSize("");
         rec3Builder.setFileDescription("A longer description.");
         rec3Builder.setSkip("false");
+        rec3Builder.setRootSampleName("TES_149");
+        rec3Builder.setRootSampleSwid("999");
+        rec3Builder.setParentSampleOrganismIds("31:31:31:31:31");
+        rec3Builder.setSampleOrganismId("31");
+        rec3Builder.setSampleOrganismCode("Homo_sapiens");
+        rec3Builder.setSequencerRunPlatformId("20");
+        rec3Builder.setSequencerRunPlatformName("ILLUMINA");
         rec3 = rec3Builder.build();
 
         String reportFile = "/fileprovenance/valid.tsv";

@@ -12,6 +12,8 @@ public class Sample implements Accessionable, Attributable, Name {
 
     private String name;
     private String swid;
+    private String organismId;
+    private String organismCode;
     private Map<String, Set<String>> attributes;
 
     public Sample() {
@@ -53,6 +55,22 @@ public class Sample implements Accessionable, Attributable, Name {
 
     public void setSwid(String swid) {
         this.swid = swid;
+    }
+
+    public String getOrganismId() {
+        return organismId;
+    }
+
+    public void setOrganismId(String organismId) {
+        this.organismId = organismId;
+    }
+
+    public String getOrganismCode() {
+        return organismCode;
+    }
+
+    public void setOrganismCode(String organismCode) {
+        this.organismCode = organismCode;
     }
 
     @Override
