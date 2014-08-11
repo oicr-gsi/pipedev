@@ -16,11 +16,11 @@ public interface SeqwareExecutor {
 
     public void deciderRunSchedule(File deciderJar, SeqwareAccession workflowSwid, List<Study> studies, List<SequencerRun> sequencerRuns, List<Sample> samples, String extraArgs) throws IOException;
 
-    public SeqwareAccession workflowRunSchedule(SeqwareAccession workflowSwid, File workflowIniFile, Map<String, String> parameters) throws IOException;
+    public SeqwareAccession workflowRunSchedule(SeqwareAccession workflowSwid, List<File> workflowIniFiles, Map<String, String> parameters) throws IOException;
 
     public void workflowRunLaunch(SeqwareAccession workflowRunSwid) throws IOException;
 
-    public void workflowRunLaunch(File workflowBundle, File workflowIniFile, String workflowName, String workflowVersion) throws IOException;
+    public void workflowRunLaunch(File workflowBundle, List<File> workflowIniFiles, String workflowName, String workflowVersion) throws IOException;
 
     public void workflowRunUpdateStatus(SeqwareAccession workflowRunSwid) throws IOException;
 

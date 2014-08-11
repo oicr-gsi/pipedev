@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import net.sourceforge.seqware.common.metadata.Metadata;
 import net.sourceforge.seqware.common.metadata.MetadataFactory;
@@ -21,11 +22,11 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
 
     public OozieWorkflowRunTest(File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName,
             File workflowBundlePath, String workflowName, String workflowVersion, File workflowBundleBinPath,
-            File workflowIni, File expectedOutput, File calculateMetricsScript, File compareMetricsScript,
+            List<File> workflowInis, File expectedOutput, File calculateMetricsScript, File compareMetricsScript,
             Map<String, String> environmentVariables, Map<String,String> parameters) throws IOException {
 
         super(seqwareDistribution, seqwareSettings, workingDirectory, testName, workflowBundlePath, workflowName, workflowVersion, workflowBundleBinPath,
-                workflowIni, expectedOutput, calculateMetricsScript, compareMetricsScript, environmentVariables, parameters);
+                workflowInis, expectedOutput, calculateMetricsScript, compareMetricsScript, environmentVariables, parameters);
 
     }
 
@@ -60,7 +61,7 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
     @Test(groups = "preExecution", dependsOnMethods = "installWorkflow")
     public void scheduleWorkflow() throws IOException {
 
-        workflowRunSwid = exec.workflowRunSchedule(workflowSwid, workflowIni, parameters);
+        workflowRunSwid = exec.workflowRunSchedule(workflowSwid, workflowInis, parameters);
 
         Assert.assertNotNull(workflowRunSwid);
 
