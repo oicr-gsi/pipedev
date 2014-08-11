@@ -12,6 +12,8 @@ public class SequencerRun implements Accessionable, Attributable, Name {
 
     private String name;
     private String swid;
+    private String platformId;
+    private String platformName;
     private Map<String, Set<String>> attributes;
 
     public SequencerRun() {
@@ -53,6 +55,22 @@ public class SequencerRun implements Accessionable, Attributable, Name {
 
     public void setSwid(String swid) {
         this.swid = swid;
+    }
+
+    public String getPlatformId() {
+        return platformId;
+    }
+
+    public void setPlatformId(String platformId) {
+        this.platformId = platformId;
+    }
+
+    public String getPlatformName() {
+        return platformName;
+    }
+
+    public void setPlatformName(String platformName) {
+        this.platformName = platformName;
     }
 
     @Override

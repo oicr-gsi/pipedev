@@ -1,19 +1,30 @@
 package ca.on.oicr.pde.model;
 
+import static com.google.common.base.Preconditions.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class FileProvenanceReportRecord implements Serializable {
+
+    private static final Logger logger = LogManager.getLogger(FileProvenanceReportRecord.class.getName());
 
     private final Experiment experiment;
     private final Study study;
@@ -25,10 +36,8 @@ public class FileProvenanceReportRecord implements Serializable {
     private final WorkflowRun workflowRun;
     private final File file;
     private final Sample sample;
-    //private final List<Sample> parentSamples;
-    private final String parentSampleSwids;
-    private final String parentSampleNames;
-    private final String parentSampleAttributes;
+    private final Sample rootSample;
+    private final List<Sample> parentSamples;
 
     private final String lastModified;
     private final String skip;
@@ -45,10 +54,8 @@ public class FileProvenanceReportRecord implements Serializable {
         this.workflowRun = b.workflowRun;
         this.file = b.file;
         this.sample = b.sample;
-        //this.parentSamples = b.parentSamples;
-        this.parentSampleSwids = b.parentSampleSwids;
-        this.parentSampleNames = b.parentSampleNames;
-        this.parentSampleAttributes = b.parentSampleAttributes;
+        this.rootSample = b.rootSample;
+        this.parentSamples = b.parentSamples;
         this.lastModified = b.lastModified;
         this.skip = b.skip;
 
@@ -82,40 +89,8 @@ public class FileProvenanceReportRecord implements Serializable {
         return experiment.getAttributes();
     }
 
-    public String getParentSampleName() {
-//        String result = "";
-//        String delim = "";
-//        for (Sample s : parentSamples) {
-//            result = delim + s.getName();
-//            delim = ":";
-//        }
-//        return result;
-
-        return parentSampleNames;
-    }
-
-    public String getParentSampleSwid() {
-//        String result = "";
-//        String delim = "";
-//        for (Sample s : parentSamples) {
-//            result = delim + s.getSwid().toString();
-//            delim = ":";
-//        }
-//        return result;
-
-        return parentSampleSwids;
-    }
-
-    public String getParentSampleAttributes() {
-//        String result = "";
-//        String delim = "";
-//        for (Sample s : parentSamples) {
-//            result = delim + s.getAttributes().toString();
-//            delim = ":";
-//        }
-//        return result;
-
-        return parentSampleAttributes;
+    public List<Sample> getParentSamples() {
+        return Collections.unmodifiableList(parentSamples);
     }
 
     public String getSampleName() {
@@ -270,9 +245,6 @@ public class FileProvenanceReportRecord implements Serializable {
 
     }
 
-//    public SimpleFileProvenanceReportRecord getSimpleRecord(){
-//        
-//    }
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
@@ -307,7 +279,8 @@ public class FileProvenanceReportRecord implements Serializable {
         private WorkflowRun workflowRun;
         private File file;
         private Sample sample;
-        //private List<Sample> parentSamples;
+        private Sample rootSample;
+        private List<Sample> parentSamples;
 
         private String lastModified = "";
         private String studyTitle = "";
@@ -316,15 +289,22 @@ public class FileProvenanceReportRecord implements Serializable {
         private String experimentName = "";
         private String experimentSwid = "";
         private String experimentAttributes = "";
+        private String rootSampleName = "";
+        private String rootSampleSwid = "";
         private String parentSampleNames = "";
         private String parentSampleSwids = "";
+        private String parentSampleOrganismIds = "";
         private String parentSampleAttributes = "";
         private String sampleName = "";
         private String sampleSwid = "";
+        private String sampleOrganismId = "";
+        private String sampleOrganismCode = "";
         private String sampleAttributes = "";
         private String sequencerRunName = "";
         private String sequencerRunSwid = "";
         private String sequencerRunAttributes = "";
+        private String sequencerRunPlatformId = "";
+        private String sequencerRunPlatformName = "";
         private String laneName = "";
         private String laneNumber = "";
         private String laneSwid = "";
@@ -389,6 +369,16 @@ public class FileProvenanceReportRecord implements Serializable {
             return this;
         }
 
+        public Builder setRootSampleName(String rootSampleName) {
+            this.rootSampleName = rootSampleName;
+            return this;
+        }
+
+        public Builder setRootSampleSwid(String rootSampleSwid) {
+            this.rootSampleSwid = rootSampleSwid;
+            return this;
+        }
+
         public Builder setParentSampleName(String parentSampleName) {
             this.parentSampleNames = parentSampleName;
             return this;
@@ -396,6 +386,11 @@ public class FileProvenanceReportRecord implements Serializable {
 
         public Builder setParentSampleSwid(String parentSampleSwid) {
             this.parentSampleSwids = parentSampleSwid;
+            return this;
+        }
+
+        public Builder setParentSampleOrganismIds(String parentSampleOrganismIds) {
+            this.parentSampleOrganismIds = parentSampleOrganismIds;
             return this;
         }
 
@@ -411,6 +406,16 @@ public class FileProvenanceReportRecord implements Serializable {
 
         public Builder setSampleSwid(String sampleSwid) {
             this.sampleSwid = sampleSwid;
+            return this;
+        }
+
+        public Builder setSampleOrganismId(String sampleOrganismId) {
+            this.sampleOrganismId = sampleOrganismId;
+            return this;
+        }
+
+        public Builder setSampleOrganismCode(String sampleOrganismCode) {
+            this.sampleOrganismCode = sampleOrganismCode;
             return this;
         }
 
@@ -431,6 +436,16 @@ public class FileProvenanceReportRecord implements Serializable {
 
         public Builder setSequencerRunAttributes(String sequencerRunAttributes) {
             this.sequencerRunAttributes = sequencerRunAttributes;
+            return this;
+        }
+
+        public Builder setSequencerRunPlatformId(String sequencerRunPlatformId) {
+            this.sequencerRunPlatformId = sequencerRunPlatformId;
+            return this;
+        }
+
+        public Builder setSequencerRunPlatformName(String sequencerRunPlatformName) {
+            this.sequencerRunPlatformName = sequencerRunPlatformName;
             return this;
         }
 
@@ -557,10 +572,10 @@ public class FileProvenanceReportRecord implements Serializable {
         public FileProvenanceReportRecord build() {
 
             //Seqware attribute field formatting:  key1=value1&value2&...&valueN;key2=...;keyN=...
-            //For examole:
+            //For example:
             //key1=value1&value2&value3;key2=value1;key3=value1&value2
             String attrKeyValuePairDelimiter = ";";
-            String attrKeyValueDelimiter = "=";
+            String attrKeyValueSeparator = "=";
             String attrValueDelimiter = "&";
 
             //TODO: use factory to create these objects:
@@ -568,38 +583,41 @@ public class FileProvenanceReportRecord implements Serializable {
             experiment.setSwid(getSwid(experimentSwid));
             experiment.setName(experimentName);
             experiment.setAttributes(transformAttributeStringToMap(experimentAttributes,
-                    attrKeyValuePairDelimiter, attrKeyValueDelimiter, attrValueDelimiter));
+                    attrKeyValuePairDelimiter, attrKeyValueSeparator, attrValueDelimiter));
 
             study = new Study();
             study.setSwid(getSwid(studySwid));
             study.setTitle(studyTitle);
             study.setAttributes(transformAttributeStringToMap(studyAttributes,
-                    attrKeyValuePairDelimiter, attrKeyValueDelimiter, attrValueDelimiter));
+                    attrKeyValuePairDelimiter, attrKeyValueSeparator, attrValueDelimiter));
 
             ius = new Ius();
             ius.setSwid(getSwid(iusSwid));
             ius.setTag(iusTag);
             ius.setAttributes(transformAttributeStringToMap(iusAttributes,
-                    attrKeyValuePairDelimiter, attrKeyValueDelimiter, attrValueDelimiter));
+                    attrKeyValuePairDelimiter, attrKeyValueSeparator, attrValueDelimiter));
 
             lane = new Lane();
             lane.setSwid(getSwid(laneSwid));
             lane.setName(laneName);
             lane.setNumber(laneNumber);
             lane.setAttributes(transformAttributeStringToMap(laneAttributes,
-                    attrKeyValuePairDelimiter, attrKeyValueDelimiter, attrValueDelimiter));
+                    attrKeyValuePairDelimiter, attrKeyValueSeparator, attrValueDelimiter));
 
             sequencerRun = new SequencerRun();
             sequencerRun.setSwid(getSwid(sequencerRunSwid));
             sequencerRun.setName(sequencerRunName);
+            sequencerRun.setPlatformId(sequencerRunPlatformId);
+            sequencerRun.setPlatformName(sequencerRunPlatformName);
+
             sequencerRun.setAttributes(transformAttributeStringToMap(sequencerRunAttributes,
-                    attrKeyValuePairDelimiter, attrKeyValueDelimiter, attrValueDelimiter));
+                    attrKeyValuePairDelimiter, attrKeyValueSeparator, attrValueDelimiter));
 
             processing = new Processing();
             processing.setSwid(getSwid(processingSwid));
             processing.setAlgorithm(processingAlgorithm);
             processing.setAttributes(transformAttributeStringToMap(processingAttributes,
-                    attrKeyValuePairDelimiter, attrKeyValueDelimiter, attrValueDelimiter));
+                    attrKeyValuePairDelimiter, attrKeyValueSeparator, attrValueDelimiter));
 
             workflow = new Workflow();
             workflow.setSwid(getSwid(workflowSwid));
@@ -619,29 +637,67 @@ public class FileProvenanceReportRecord implements Serializable {
             file.setDescription(fileDescription);
             file.setPath(filePath);
             file.setAttributes(transformAttributeStringToMap(fileAttributes,
-                    attrKeyValuePairDelimiter, attrKeyValueDelimiter, attrValueDelimiter));
+                    attrKeyValuePairDelimiter, attrKeyValueSeparator, attrValueDelimiter));
 
             sample = new Sample();
             sample.setSwid(getSwid(sampleSwid));
             sample.setName(sampleName);
+            sample.setOrganismId(sampleOrganismId);
+            sample.setOrganismCode(sampleOrganismCode);
             sample.setAttributes(transformAttributeStringToMap(sampleAttributes,
-                    attrKeyValuePairDelimiter, attrKeyValueDelimiter, attrValueDelimiter));
+                    attrKeyValuePairDelimiter, attrKeyValueSeparator, attrValueDelimiter));
 
-//            parentSamples = new ArrayList<Sample>();
-//            
-//            List<String> swids = Arrays.asList(parentSampleSwid.split(":"));
-//            List<String> names = Arrays.asList(parentSampleName.split(":"));
-//            List<String> attrs = Arrays.asList(parentSampleAttributes.split(":"));
-//            for (int i = 0; i < swids.size(); i++) {
-//                
-//                Sample parent = new Sample();
-//                parent.setSwid(getSwid(swids.get(i)));
-//                parent.setName(names.get(i));
-//                parent.setAttributes(attrs.get(i));
-//
-//            }
+            rootSample = new Sample();
+            rootSample.setSwid(rootSampleSwid);
+            rootSample.setName(rootSampleName);
+
+            parentSamples = new ArrayList<Sample>();
+            parentSamples = buildParentSamples(parentSampleSwids, parentSampleNames, parentSampleOrganismIds, parentSampleAttributes);
+
             return new FileProvenanceReportRecord(this);
 
+        }
+
+        private List<Sample> buildParentSamples(String parentSampleSwids, String parentSampleNames, String parentSampleOrganismIds, String parentSampleAttributes) {
+
+            if (parentSampleSwids == null || parentSampleSwids.isEmpty()) {
+                return new ArrayList<Sample>();
+            }
+
+            List<String> swids = Arrays.asList(parentSampleSwids.split(":"));
+            Map<String, String> names = parseFileProvenanceListStructure(swids, parentSampleNames);
+            Map<String, String> organismIds = parseFileProvenanceListStructure(swids, parentSampleOrganismIds);
+            Map<String, Map<String, Set<String>>> attributes = parseFileProvenanceMapStructure(swids, parentSampleAttributes);
+
+            List<Sample> samples = new ArrayList<Sample>(swids.size());
+            for (String swid : swids) {
+                Sample s = new Sample();
+                s.setSwid(swid);
+                s.setName(names.get(swid));
+                s.setOrganismId(organismIds.get(swid));
+                s.setAttributes(attributes.get(swid));
+
+                samples.add(s);
+            }
+
+            return samples;
+        }
+
+        private Map<String, String> parseFileProvenanceListStructure(List<String> keys, String listAsString) {
+            checkNotNull(keys, "key list can not be null");
+            checkNotNull(listAsString, "listAsString can not be null");
+
+            List<String> values = Arrays.asList(listAsString.split(":")); //values are separated by colons
+            checkArgument(keys.size() == values.size(), "key list is length = %s but listAsString has %s elements. \nkey set = [%s]\nlistAsString = [%s]",
+                    keys.size(), values.size(), keys.toString(), listAsString);
+
+            //iterate through both lists - it is assumed that the lists represent pairs
+            Map<String, String> map = new HashMap<String, String>();
+            for (int i = 0; i < keys.size(); i++) {
+                map.put(keys.get(i), values.get(i));
+            }
+
+            return map;
         }
 
         private String getSwid(String swid) {
@@ -678,5 +734,49 @@ public class FileProvenanceReportRecord implements Serializable {
 
         return out;
 
+    }
+
+    public static Map<String, Map<String, Set<String>>> parseFileProvenanceMapStructure(List<String> keys, String mapAsString) {
+        //preconditions
+        checkNotNull(keys);
+        checkNotNull(mapAsString);
+        checkArgument(!keys.isEmpty());
+        checkArgument(!mapAsString.isEmpty());
+
+        Map<String, Map<String, Set<String>>> map = new HashMap<String, Map<String, Set<String>>>();
+        for (String s : keys) {
+            if (map.get(s) != null) {
+                throw new IllegalArgumentException("key list must have unique elements");
+            }
+            map.put(s, new HashMap<String, Set<String>>());
+        }
+
+        List<String> values = Arrays.asList(mapAsString.split(";")); //values are separated by semi-colons
+        //each element has this structure: parent_<attr_key>.<primary_key>=<value>
+        Pattern p = Pattern.compile("parent_(.*)\\.([0-9]*)=(.*)");
+        Matcher m;
+        for (String v : values) {
+            m = p.matcher(v);
+            m.find();
+            String attrKey = m.group(1);
+            String primaryKey = m.group(2);
+            String attrValueString = m.group(3);
+            logger.printf(Level.INFO, "key = %s, attr_key = %s, attr_value(s) = %s", primaryKey, attrKey, attrValueString);
+
+            if (map.get(primaryKey) == null) {
+                throw new IllegalArgumentException(String.format("the id [%s] (for parent attribute [%s]) does not exist in the key list", primaryKey, attrKey));
+            }
+
+            Set<String> attrValues = new TreeSet<String>(Arrays.asList(StringUtils.split(attrValueString, "&")));
+
+            //Set the attr key value pair for the given primary key
+            Set<String> previousValue = map.get(primaryKey).put(attrKey, attrValues);
+
+            if (previousValue != null) {
+                logger.printf(Level.WARN, "duplicate element detected for key = [%], attr key = [%s], attr value = [%s]", primaryKey, attrKey, attrValueString);
+            }
+        }
+
+        return map;
     }
 }

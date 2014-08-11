@@ -1,7 +1,9 @@
 package ca.on.oicr.pde.model;
 
+import com.google.common.collect.Sets;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,6 +47,36 @@ public class FileProvenanceReportRecordTest {
 
         Assert.assertEquals(actual, expected, "Parsing the attribute string failed to produce the expected map representation");
 
+    }
+
+    @Test
+    public void fileProvenanceMapRepresentationTest() {
+        List<String> keys = Arrays.asList("1", "2", "3");
+        String mapString = "parent_key1.1=1;parent_key2.1=2;parent_key1.2=3;parent_key2.2=4;parent_key1.3=5;parent_key2.3=6;parent_key3.1=7&8&9&10&11;"
+                + "parent_difficult_key.with_special... characters_and_numbers!.1.2.3.1.3=okay";
+        Map<String, Map<String, Set<String>>> actual = FileProvenanceReportRecord.parseFileProvenanceMapStructure(keys, mapString);
+
+        Map<String, Map<String, Set<String>>> expected = new HashMap<String, Map<String, Set<String>>>();
+        Map x;
+        //1
+        x = new HashMap<String, Set<String>>();
+        x.put("key1", Sets.newHashSet("1"));
+        x.put("key2", Sets.newHashSet("2"));
+        x.put("key3", Sets.newHashSet("7", "8", "9", "10", "11"));
+        expected.put("1", x);
+        //2
+        x = new HashMap<String, Set<String>>();
+        x.put("key1", Sets.newHashSet("3"));
+        x.put("key2", Sets.newHashSet("4"));
+        expected.put("2", x);
+        //3
+        x = new HashMap<String, Set<String>>();
+        x.put("key1", Sets.newHashSet("5"));
+        x.put("key2", Sets.newHashSet("6"));
+        x.put("difficult_key.with_special... characters_and_numbers!.1.2.3.1", Sets.newHashSet("okay"));
+        expected.put("3", x);
+
+        Assert.assertEquals(actual, expected);
     }
 
 }

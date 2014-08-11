@@ -1,6 +1,8 @@
 package ca.on.oicr.pde.parsers;
 
 import ca.on.oicr.pde.model.FileProvenanceReportRecord;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -54,39 +56,46 @@ public class FileProvenanceReport {
         fileProvenanceReportExpectedHeader.put("Experiment Name", 4);
         fileProvenanceReportExpectedHeader.put("Experiment SWID", 5);
         fileProvenanceReportExpectedHeader.put("Experiment Attributes", 6);
-        fileProvenanceReportExpectedHeader.put("Parent Sample Name", 7);
-        fileProvenanceReportExpectedHeader.put("Parent Sample SWID", 8);
-        fileProvenanceReportExpectedHeader.put("Parent Sample Attributes", 9);
-        fileProvenanceReportExpectedHeader.put("Sample Name", 10);
-        fileProvenanceReportExpectedHeader.put("Sample SWID", 11);
-        fileProvenanceReportExpectedHeader.put("Sample Attributes", 12);
-        fileProvenanceReportExpectedHeader.put("Sequencer Run Name", 13);
-        fileProvenanceReportExpectedHeader.put("Sequencer Run SWID", 14);
-        fileProvenanceReportExpectedHeader.put("Sequencer Run Attributes", 15);
-        fileProvenanceReportExpectedHeader.put("Lane Name", 16);
-        fileProvenanceReportExpectedHeader.put("Lane Number", 17);
-        fileProvenanceReportExpectedHeader.put("Lane SWID", 18);
-        fileProvenanceReportExpectedHeader.put("Lane Attributes", 19);
-        fileProvenanceReportExpectedHeader.put("IUS Tag", 20);
-        fileProvenanceReportExpectedHeader.put("IUS SWID", 21);
-        fileProvenanceReportExpectedHeader.put("IUS Attributes", 22);
-        fileProvenanceReportExpectedHeader.put("Workflow Name", 23);
-        fileProvenanceReportExpectedHeader.put("Workflow Version", 24);
-        fileProvenanceReportExpectedHeader.put("Workflow SWID", 25);
-        fileProvenanceReportExpectedHeader.put("Workflow Run Name", 26);
-        fileProvenanceReportExpectedHeader.put("Workflow Run Status", 27);
-        fileProvenanceReportExpectedHeader.put("Workflow Run SWID", 28);
-        fileProvenanceReportExpectedHeader.put("Processing Algorithm", 29);
-        fileProvenanceReportExpectedHeader.put("Processing SWID", 30);
-        fileProvenanceReportExpectedHeader.put("Processing Attributes", 31);
-        fileProvenanceReportExpectedHeader.put("File Meta-Type", 32);
-        fileProvenanceReportExpectedHeader.put("File SWID", 33);
-        fileProvenanceReportExpectedHeader.put("File Attributes", 34);
-        fileProvenanceReportExpectedHeader.put("File Path", 35);
-        fileProvenanceReportExpectedHeader.put("File Md5sum", 36);
-        fileProvenanceReportExpectedHeader.put("File Size", 37);
-        fileProvenanceReportExpectedHeader.put("File Description", 38);
-        fileProvenanceReportExpectedHeader.put("Skip", 39);
+        fileProvenanceReportExpectedHeader.put("Root Sample Name", 7);
+        fileProvenanceReportExpectedHeader.put("Root Sample SWID", 8);
+        fileProvenanceReportExpectedHeader.put("Parent Sample Name", 9);
+        fileProvenanceReportExpectedHeader.put("Parent Sample SWID", 10);
+        fileProvenanceReportExpectedHeader.put("Parent Sample Organism IDs", 11);
+        fileProvenanceReportExpectedHeader.put("Parent Sample Attributes", 12);
+        fileProvenanceReportExpectedHeader.put("Sample Name", 13);
+        fileProvenanceReportExpectedHeader.put("Sample SWID", 14);
+        fileProvenanceReportExpectedHeader.put("Sample Organism ID", 15);
+        fileProvenanceReportExpectedHeader.put("Sample Organism Code", 16);
+        fileProvenanceReportExpectedHeader.put("Sample Attributes", 17);
+        fileProvenanceReportExpectedHeader.put("Sequencer Run Name", 18);
+        fileProvenanceReportExpectedHeader.put("Sequencer Run SWID", 19);
+        fileProvenanceReportExpectedHeader.put("Sequencer Run Attributes", 20);
+        fileProvenanceReportExpectedHeader.put("Sequencer Run Platform ID", 21);
+        fileProvenanceReportExpectedHeader.put("Sequencer Run Platform Name", 22);
+        fileProvenanceReportExpectedHeader.put("Lane Name", 23);
+        fileProvenanceReportExpectedHeader.put("Lane Number", 24);
+        fileProvenanceReportExpectedHeader.put("Lane SWID", 25);
+        fileProvenanceReportExpectedHeader.put("Lane Attributes", 26);
+        fileProvenanceReportExpectedHeader.put("IUS Tag", 27);
+        fileProvenanceReportExpectedHeader.put("IUS SWID", 28);
+        fileProvenanceReportExpectedHeader.put("IUS Attributes", 29);
+        fileProvenanceReportExpectedHeader.put("Workflow Name", 30);
+        fileProvenanceReportExpectedHeader.put("Workflow Version", 31);
+        fileProvenanceReportExpectedHeader.put("Workflow SWID", 32);
+        fileProvenanceReportExpectedHeader.put("Workflow Run Name", 33);
+        fileProvenanceReportExpectedHeader.put("Workflow Run Status", 34);
+        fileProvenanceReportExpectedHeader.put("Workflow Run SWID", 35);
+        fileProvenanceReportExpectedHeader.put("Processing Algorithm", 36);
+        fileProvenanceReportExpectedHeader.put("Processing SWID", 37);
+        fileProvenanceReportExpectedHeader.put("Processing Attributes", 38);
+        fileProvenanceReportExpectedHeader.put("File Meta-Type", 39);
+        fileProvenanceReportExpectedHeader.put("File SWID", 40);
+        fileProvenanceReportExpectedHeader.put("File Attributes", 41);
+        fileProvenanceReportExpectedHeader.put("File Path", 42);
+        fileProvenanceReportExpectedHeader.put("File Md5sum", 43);
+        fileProvenanceReportExpectedHeader.put("File Size", 44);
+        fileProvenanceReportExpectedHeader.put("File Description", 45);
+        fileProvenanceReportExpectedHeader.put("Skip", 46);
 
         if (!fileProvenanceReportExpectedHeader.equals(header)) {
 
@@ -117,6 +126,12 @@ public class FileProvenanceReport {
     public static List<FileProvenanceReportRecord> parseFileProvenanceReport(Reader reportReader) throws IOException {
 
         return parseFileProvenanceReport(reportReader, HeaderValidationMode.STRICT);
+
+    }
+
+    public static List<FileProvenanceReportRecord> parseFileProvenanceReport(File reportFile) throws IOException {
+
+        return parseFileProvenanceReport(new FileReader(reportFile), HeaderValidationMode.STRICT);
 
     }
 
@@ -153,15 +168,22 @@ public class FileProvenanceReport {
             rec.setExperimentName(r.get("Experiment Name"));
             rec.setExperimentSwid(r.get("Experiment SWID"));
             rec.setExperimentAttributes(r.get("Experiment Attributes"));
+            rec.setRootSampleName(r.get("Root Sample Name"));
+            rec.setRootSampleSwid(r.get("Root Sample SWID"));
             rec.setParentSampleName(r.get("Parent Sample Name"));
             rec.setParentSampleSwid(r.get("Parent Sample SWID"));
+            rec.setParentSampleOrganismIds(r.get("Parent Sample Organism IDs"));
             rec.setParentSampleAttributes(r.get("Parent Sample Attributes"));
             rec.setSampleName(r.get("Sample Name"));
             rec.setSampleSwid(r.get("Sample SWID"));
+            rec.setSampleOrganismId(r.get("Sample Organism ID"));
+            rec.setSampleOrganismCode(r.get("Sample Organism Code"));
             rec.setSampleAttributes(r.get("Sample Attributes"));
             rec.setSequencerRunName(r.get("Sequencer Run Name"));
             rec.setSequencerRunSwid(r.get("Sequencer Run SWID"));
             rec.setSequencerRunAttributes(r.get("Sequencer Run Attributes"));
+            rec.setSequencerRunPlatformId(r.get("Sequencer Run Platform ID"));
+            rec.setSequencerRunPlatformName(r.get("Sequencer Run Platform Name"));
             rec.setLaneName(r.get("Lane Name"));
             rec.setLaneNumber(r.get("Lane Number"));
             rec.setLaneSwid(r.get("Lane SWID"));

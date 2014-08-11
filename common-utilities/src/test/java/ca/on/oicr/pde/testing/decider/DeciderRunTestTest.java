@@ -3,8 +3,8 @@ package ca.on.oicr.pde.testing.decider;
 import ca.on.oicr.pde.model.FileProvenanceReportRecord;
 import ca.on.oicr.pde.model.ReducedFileProvenanceReportRecord;
 import ca.on.oicr.pde.parsers.FileProvenanceReport;
+import ca.on.oicr.pde.utilities.Helpers;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 import org.testng.Assert;
@@ -66,7 +66,7 @@ public class DeciderRunTestTest {
                 + "  } ]\n"
                 + "}";
 
-        List<FileProvenanceReportRecord> fs = FileProvenanceReport.parseFileProvenanceReport(new InputStreamReader(this.getClass().getResourceAsStream("/fileprovenance/valid.tsv")));
+        List<FileProvenanceReportRecord> fs = FileProvenanceReport.parseFileProvenanceReport(Helpers.getFileFromResource("fileprovenance/valid.tsv"));
 
         WorkflowRunReport wrr = new WorkflowRunReport();
         wrr.setFiles(Arrays.asList(new ReducedFileProvenanceReportRecord(fs)));
