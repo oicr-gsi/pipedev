@@ -13,14 +13,35 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.testng.Assert;
 import static com.google.common.base.Preconditions.*;
+import com.google.common.io.Files;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 
-
 public class Helpers {
 
     private final static Logger log = LogManager.getRootLogger();
+
+    public static File getFileFromResource(String resourceFilePath) throws IOException {
+
+        File tempDir = Files.createTempDir();
+        tempDir.deleteOnExit();
+
+        File tempFile = new File(tempDir + FilenameUtils.getName(resourceFilePath));
+        tempFile.deleteOnExit();
+
+        InputStream resourceStream = Helpers.class.getClassLoader().getResourceAsStream(resourceFilePath);
+
+        if (resourceStream == null) {
+            throw new IOException("The resource [" + resourceFilePath + "] is not accessible");
+        }
+
+        FileUtils.writeStringToFile(tempFile, IOUtils.toString(resourceStream));
+
+        return tempFile;
+
+    }
 
     public static File getScriptFromResource(String scriptName) throws IOException {
 
@@ -154,34 +175,34 @@ public class Helpers {
     }
 
     public static boolean isFileAccessible(String s) {
-        
+
         if (s == null || s.isEmpty()) {
             log.printf(Level.DEBUG, "Null or empty file [%s]", s);
             return false;
         }
-        
+
         File f = FileUtils.getFile(s);
-        
+
         if (f == null) {
             log.printf(Level.DEBUG, "Null file object created from [%s]", s);
             return false;
         }
-        
-        if(!f.exists()){
+
+        if (!f.exists()) {
             log.printf(Level.DEBUG, "File does not exist [%s]", s);
             return false;
         }
-        
-        if(!f.isFile()){
+
+        if (!f.isFile()) {
             log.printf(Level.DEBUG, "Not a file [%s]", s);
             return false;
         }
-        
-        if(!f.canRead()){
+
+        if (!f.canRead()) {
             log.printf(Level.DEBUG, "Can not read file [%s]", s);
             return false;
         }
-        
+
         return true;
     }
 
