@@ -10,7 +10,7 @@ The PDE has two primary mandates:
 This repository houses the open-source workflows, deciders and utilities that are written and maintained by our group.
 
 Binaries
-________
+--------
 
 Our utilities are available from our Maven repository. Add the appropriate repository to your pom.xml.
 
