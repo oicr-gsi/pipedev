@@ -14,8 +14,8 @@ Binaries
 
 Our utilities are available from our Maven repository. Add the appropriate repository to your pom.xml.
 
-* Releases: (seqware-dependencies)[http://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies]
-* Nightly snapshots: (seqware-dependencies-snapshot)[https://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies-snapshot]
+* Releases: [seqware-dependencies](http://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies)
+* Nightly snapshots: [seqware-dependencies-snapshot](https://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies-snapshot)
 
 
 Build
