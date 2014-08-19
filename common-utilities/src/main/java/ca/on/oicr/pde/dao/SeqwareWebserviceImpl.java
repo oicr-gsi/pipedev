@@ -39,7 +39,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-public final class SeqwareWebserviceImpl extends SeqwareInterface {
+public final class SeqwareWebserviceImpl extends SeqwareService {
 
     private final static Logger log = LogManager.getLogger(SeqwareWebserviceImpl.class);
 

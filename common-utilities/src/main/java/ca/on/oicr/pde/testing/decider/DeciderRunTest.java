@@ -1,6 +1,6 @@
 package ca.on.oicr.pde.testing.decider;
 
-import ca.on.oicr.pde.dao.SeqwareInterface;
+import ca.on.oicr.pde.dao.SeqwareService;
 import ca.on.oicr.pde.model.Accessionable;
 import ca.on.oicr.pde.model.ReducedFileProvenanceReportRecord;
 import ca.on.oicr.pde.model.Sample;
@@ -39,7 +39,7 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
     private final String deciderClass;
     private final File bundledWorkflow;
 
-    SeqwareInterface seq;
+    SeqwareService seqwareService;
     SeqwareAccession workflowSwid;
 
     private final List<Study> studies = new ArrayList<Study>();
@@ -54,12 +54,12 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
 
     TestDefinition.Test testDefinition;
 
-    public DeciderRunTest(SeqwareInterface seq, File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName,
+    public DeciderRunTest(SeqwareService seqwareService, File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName,
             File deciderJar, File bundledWorkflow, String deciderClass, TestDefinition.Test definition) throws IOException {
 
         super(seqwareDistribution, seqwareSettings, workingDirectory, testName);
 
-        this.seq = seq;
+        this.seqwareService = seqwareService;
         this.deciderJar = deciderJar;
         this.bundledWorkflow = bundledWorkflow;
         this.deciderClass = deciderClass;
@@ -274,7 +274,7 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
     //TODO: move this to a separate implementation class of "Decider Report"
     private TestResult getWorkflowReport(Workflow w) {
 
-        List<WorkflowRunReportRecord> wrrs = seq.getWorkflowRunRecords(w);
+        List<WorkflowRunReportRecord> wrrs = seqwareService.getWorkflowRunRecords(w);
 
         TestResult t = new TestResult();
         t.setWorkflowRunCount(wrrs.size());
@@ -286,10 +286,10 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
             wr.setSwid(wrr.getWorkflowRunSwid());
 
             //Get the workflow run's parent accession(s) (processing accession(s))
-            List<Accessionable> parentAccessions = seq.getParentAccessions(wr);
+            List<Accessionable> parentAccessions = seqwareService.getParentAccessions(wr);
 
             //Get the workflow run's input file(s) (file accession(s))
-            List<Accessionable> inputFileAccessions = seq.getInputFileAccessions(wr);
+            List<Accessionable> inputFileAccessions = seqwareService.getInputFileAccessions(wr);
 
             //TODO: 0.13.x series deciders do not use input_files, generalize parent and input file accessions
             if (inputFileAccessions.isEmpty()) {
@@ -297,16 +297,16 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
                 inputFileAccessions = parentAccessions;
             }
 
-            t.addStudies(seq.getStudy(parentAccessions));
-            t.addSamples(seq.getSamples(parentAccessions));
-            t.addSequencerRuns(seq.getSequencerRuns(parentAccessions));
-            t.addLanes(seq.getLanes(parentAccessions));
+            t.addStudies(seqwareService.getStudy(parentAccessions));
+            t.addSamples(seqwareService.getSamples(parentAccessions));
+            t.addSequencerRuns(seqwareService.getSequencerRuns(parentAccessions));
+            t.addLanes(seqwareService.getLanes(parentAccessions));
 
-            t.addWorkflows(seq.getWorkflows(inputFileAccessions));
-            t.addProcessingAlgorithms(seq.getProcessingAlgorithms(inputFileAccessions));
-            t.addFileMetaTypes(seq.getFileMetaTypes(inputFileAccessions));
+            t.addWorkflows(seqwareService.getWorkflows(inputFileAccessions));
+            t.addProcessingAlgorithms(seqwareService.getProcessingAlgorithms(inputFileAccessions));
+            t.addFileMetaTypes(seqwareService.getFileMetaTypes(inputFileAccessions));
 
-            List<ReducedFileProvenanceReportRecord> files = seq.getFiles(inputFileAccessions);
+            List<ReducedFileProvenanceReportRecord> files = seqwareService.getFiles(inputFileAccessions);
             if (files.size() > t.getMaxInputFiles()) {
                 t.setMaxInputFiles(files.size());
             }
@@ -315,7 +315,7 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
                 t.setMinInputFiles(files.size());
             }
 
-            Map ini = seq.getWorkflowRunIni(wr);
+            Map ini = seqwareService.getWorkflowRunIni(wr);
             for (String s : testDefinition.getIniExclusions()) {
                 ini.remove(s);
             }

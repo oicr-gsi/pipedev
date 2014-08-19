@@ -1,6 +1,6 @@
 package ca.on.oicr.pde.testing;
 
-import ca.on.oicr.pde.dao.SeqwareInterface;
+import ca.on.oicr.pde.dao.SeqwareService;
 import ca.on.oicr.pde.dao.SeqwareWebserviceImpl;
 import ca.on.oicr.pde.testing.decider.DeciderRunTest;
 import ca.on.oicr.pde.testing.decider.TestDefinition;
@@ -125,8 +125,8 @@ public class DeciderRunTestFactory {
         //TODO: provide user a way to specify impl
         long startTime = System.nanoTime();
         log.printf(Level.INFO, "Starting loading of seqware metadata");
-        SeqwareInterface seq = new SeqwareWebserviceImpl(webserviceUrl, "admin@admin.com", "admin");
-        seq.update();
+        SeqwareService seqwareService = new SeqwareWebserviceImpl(webserviceUrl, "admin@admin.com", "admin");
+        seqwareService.update();
         log.printf(Level.INFO, "Completed loading of seqware metadata in %.2fs", (System.nanoTime() - startTime) / 1E9);
 
         log.debug("Starting transform of json test definition to TestDefinition objects");
@@ -154,8 +154,8 @@ public class DeciderRunTestFactory {
             File testWorkingDir = generateTestWorkingDirectory(workingDirectory, prefix, testName, testId);
             File seqwareSettings = generateSeqwareSettings(testWorkingDir, webserviceUrl, schedulingSystem, schedulingHost);
 
-            DeciderRunTest test = new DeciderRunTest(seq, seqwareDistribution, seqwareSettings, testWorkingDir, testName, deciderJar, bundledWorkflow, deciderClass, t);
-            test.setSeqwareExecutor(new ThreadedSeqwareExecutor(testId, seqwareDistribution, seqwareSettings, testWorkingDir, sharedPool, seq));
+            DeciderRunTest test = new DeciderRunTest(seqwareService, seqwareDistribution, seqwareSettings, testWorkingDir, testName, deciderJar, bundledWorkflow, deciderClass, t);
+            test.setSeqwareExecutor(new ThreadedSeqwareExecutor(testId, seqwareDistribution, seqwareSettings, testWorkingDir, sharedPool, seqwareService));
             
             tests.add(test);
 

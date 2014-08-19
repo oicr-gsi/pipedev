@@ -20,14 +20,14 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-public abstract class SeqwareInterface {
+public abstract class SeqwareService {
 
     //HashMap<String, String> seqwareSettings;
     List<FileProvenanceReportRecord> fprs;
     Map<String, List<FileProvenanceReportRecord>> swidToFpr;
     protected final Map<Workflow, List<WorkflowRunReportRecord>> wrrs;
 
-    public SeqwareInterface() {
+    public SeqwareService() {
 //        seqwareSettings = new HashMap<String, String>();
 //        MapTools.ini2Map(seqwareSettingsFile.toString(), seqwareSettings, true);
         wrrs = new HashMap<Workflow, List<WorkflowRunReportRecord>>();

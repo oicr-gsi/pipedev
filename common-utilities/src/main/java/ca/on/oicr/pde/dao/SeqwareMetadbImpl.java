@@ -17,7 +17,7 @@ import net.sourceforge.seqware.common.metadata.Metadata;
 import net.sourceforge.seqware.common.metadata.MetadataFactory;
 import net.sourceforge.seqware.common.util.maptools.MapTools;
 
-public final class SeqwareMetadbImpl extends SeqwareInterface {
+public final class SeqwareMetadbImpl extends SeqwareService {
     Metadata seqwareMetadb;
 
     public SeqwareMetadbImpl(File seqwareSettingsFile) {
