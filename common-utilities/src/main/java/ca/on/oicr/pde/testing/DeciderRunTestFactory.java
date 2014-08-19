@@ -155,7 +155,7 @@ public class DeciderRunTestFactory {
             File seqwareSettings = generateSeqwareSettings(testWorkingDir, webserviceUrl, schedulingSystem, schedulingHost);
 
             DeciderRunTest test = new DeciderRunTest(seqwareService, seqwareDistribution, seqwareSettings, testWorkingDir, testName, deciderJar, bundledWorkflow, deciderClass, t);
-            test.setSeqwareExecutor(new ThreadedSeqwareExecutor(testId, seqwareDistribution, seqwareSettings, testWorkingDir, sharedPool, seqwareService));
+            test.setSeqwareExecutor(new ThreadedSeqwareExecutor(testName, seqwareDistribution, seqwareSettings, testWorkingDir, sharedPool, seqwareService));
             
             tests.add(test);
 
