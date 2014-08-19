@@ -1,38 +1,36 @@
 package ca.on.oicr.pde.model;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class WorkflowRun implements Accessionable {
 
-    private String name;
-    private String status;
-    private String swid;
+    private static final Map<String, WorkflowRun> cache = new ConcurrentHashMap<String, WorkflowRun>();
+
+    private final String name;
+    private final String status;
+    private final String swid;
+
+    private WorkflowRun(Builder b) {
+        name = b.name;
+        status = b.status;
+        swid = b.swid;
+    }
 
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     @Override
     public String getSwid() {
         return swid;
-    }
-
-    public void setSwid(String swid) {
-        this.swid = swid;
     }
 
     @Override
@@ -55,6 +53,35 @@ public class WorkflowRun implements Accessionable {
             return false;
         }
         return EqualsBuilder.reflectionEquals(this, obj);
+    }
+
+    public static class Builder {
+
+        private String name;
+        private String status;
+        private String swid;
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public void setSwid(String swid) {
+            this.swid = swid;
+        }
+
+        public WorkflowRun build() {
+            String key = swid;
+            WorkflowRun r = cache.get(key);
+            if (r == null) {
+                r = new WorkflowRun(this);
+                cache.put(key, r);
+            }
+            return r;
+        }
     }
 
 }

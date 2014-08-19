@@ -42,9 +42,9 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
     SeqwareService seqwareService;
     SeqwareAccession workflowSwid;
 
-    private final List<Study> studies = new ArrayList<Study>();
-    private final List<SequencerRun> sequencerRuns = new ArrayList<SequencerRun>();
-    private final List<Sample> samples = new ArrayList<Sample>();
+    private final List<String> studies = new ArrayList<String>();
+    private final List<String> sequencerRuns = new ArrayList<String>();
+    private final List<String> samples = new ArrayList<String>();
 
     File actualReportFile;
     File expectedReportFile;
@@ -65,23 +65,9 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
         this.deciderClass = deciderClass;
         this.testDefinition = definition;
 
-        for (String s : testDefinition.getStudies()) {
-            Study x = new Study();
-            x.setTitle(s);
-            studies.add(x);
-        }
-
-        for (String s : testDefinition.getSamples()) {
-            Sample x = new Sample();
-            x.setName(s);
-            samples.add(x);
-        }
-
-        for (String s : testDefinition.getSequencerRuns()) {
-            SequencerRun x = new SequencerRun();
-            x.setName(s);
-            sequencerRuns.add(x);
-        }
+        studies.addAll(testDefinition.getStudies());
+        samples.addAll(testDefinition.getSamples());
+        sequencerRuns.addAll(testDefinition.getSequencerRuns());
 
         expectedReportFile = testDefinition.metrics();
 
@@ -139,9 +125,9 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
          */
         long startTime = System.nanoTime();
         log.printf(Level.INFO, "Starting clean up of %s", testName);
-        Workflow w = new Workflow();
-        w.setSwid(workflowSwid.toString());
-        seqwareExecutor.cancelWorkflowRuns(w);
+        Workflow.Builder workflowBuilder = new Workflow.Builder();
+        workflowBuilder.setSwid(workflowSwid.toString());
+        seqwareExecutor.cancelWorkflowRuns(workflowBuilder.build());
 
         log.printf(Level.INFO, "Completed clean up for [%s] in %.2fs", testName, (System.nanoTime() - startTime) / 1E9);
         
@@ -214,10 +200,9 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
 
         long startTime = System.nanoTime();
 
-        Workflow w = new Workflow();
-        w.setSwid(workflowSwid.getSwid());
-
-        actual = getWorkflowReport(w);
+        Workflow.Builder workflowBuilder = new Workflow.Builder();
+        workflowBuilder.setSwid(workflowSwid.getSwid());
+        actual = getWorkflowReport(workflowBuilder.build());
 
         actualReportFile = new File(workingDirectory.getAbsolutePath() + "/" + testDefinition.outputName());
         Assert.assertFalse(actualReportFile.exists());
@@ -282,8 +267,9 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
         for (WorkflowRunReportRecord wrr : wrrs) {
 
             //TODO: get workflow run object from workflow run report record
-            WorkflowRun wr = new WorkflowRun();
-            wr.setSwid(wrr.getWorkflowRunSwid());
+            WorkflowRun.Builder workflowRunBuilder = new WorkflowRun.Builder();
+            workflowRunBuilder.setSwid(wrr.getWorkflowRunSwid());
+            WorkflowRun wr = workflowRunBuilder.build();
 
             //Get the workflow run's parent accession(s) (processing accession(s))
             List<Accessionable> parentAccessions = seqwareService.getParentAccessions(wr);

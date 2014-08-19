@@ -67,7 +67,7 @@ public class ShellExecutor implements SeqwareExecutor {
     }
 
     @Override
-    public void deciderRunSchedule(File deciderJar, SeqwareAccession workflowSwid, List<Study> studies, List<SequencerRun> sequencerRuns, List<Sample> samples, String extraArgs) throws IOException {
+    public void deciderRunSchedule(File deciderJar, SeqwareAccession workflowSwid, List<String> studies, List<String> sequencerRuns, List<String> samples, String extraArgs) throws IOException {
 
         StringBuilder cmd = new StringBuilder();
         cmd.append("java -jar ").append(deciderJar);
@@ -205,13 +205,13 @@ public class ShellExecutor implements SeqwareExecutor {
      * @param objects A list of objects that implement the "Name" interface.
      * @return A string in the following format: [prefix][object 1's name][prefix][object 2's name]...
      */
-    public static String listToParamString(String prefix, List<? extends Name> objects) {
+    public static String listToParamString(String prefix, List<? extends String> objects) {
 
         StringBuilder result = new StringBuilder();
 
         if (objects != null && !objects.isEmpty()) {
-            for (Name o : objects) {
-                result.append(prefix).append(o.getName());
+            for (String o : objects) {
+                result.append(prefix).append(o.toString());
             }
         }
 
