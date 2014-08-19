@@ -27,7 +27,7 @@ public class FileProvenanceReportTest {
     @BeforeClass
     public void initializeObjects() {
 
-        FileProvenanceReportRecord.Builder rec1Builder = new FileProvenanceReportRecord.Builder();
+        FileProvenanceReportRecord.Builder rec1Builder = new FileProvenanceReportRecord.Builder(1);
         rec1Builder.setLastModified("2013-09-06 10:01:59.193073");
         rec1Builder.setStudyTitle("TestStudy");
         rec1Builder.setStudySwid("22717");
@@ -78,7 +78,7 @@ public class FileProvenanceReportTest {
         rec1 = rec1Builder.build();
         rec1Modified = rec1Builder.setSkip("invalid").build();
 
-        FileProvenanceReportRecord.Builder rec2Builder = new FileProvenanceReportRecord.Builder();
+        FileProvenanceReportRecord.Builder rec2Builder = new FileProvenanceReportRecord.Builder(2);
         rec2Builder.setLastModified("2013-02-04 01:46:10.061");
         rec2Builder.setStudyTitle("TestStudy");
         rec2Builder.setStudySwid("235066");
@@ -128,7 +128,7 @@ public class FileProvenanceReportTest {
         rec2Builder.setSequencerRunPlatformName("ILLUMINA");
         rec2 = rec2Builder.build();
 
-        FileProvenanceReportRecord.Builder rec3Builder = new FileProvenanceReportRecord.Builder();
+        FileProvenanceReportRecord.Builder rec3Builder = new FileProvenanceReportRecord.Builder(3);
         rec3Builder.setLastModified("2012-07-01 20:29:20.69934");
         rec3Builder.setStudyTitle("TestStudy");
         rec3Builder.setStudySwid("91");
