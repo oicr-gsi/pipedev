@@ -9,11 +9,13 @@ import java.util.Map;
 import org.testng.Assert;
 import org.testng.annotations.*;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class WorkflowRunTest extends RunTestBase {
 
-    private final static Logger log = Logger.getLogger(WorkflowRunTest.class);
+    private final static Logger log = LogManager.getLogger(WorkflowRunTest.class);
 
     //protected final String bundledJava;
     protected final File workflowBundleBinPath;
