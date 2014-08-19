@@ -52,7 +52,7 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
     @Test(groups = "preExecution")
     public void installWorkflow() throws IOException {
 
-        workflowSwid = exec.installWorkflow(workflowBundlePath);
+        workflowSwid = seqwareExecutor.installWorkflow(workflowBundlePath);
 
         Assert.assertNotNull(workflowSwid);
 
@@ -61,7 +61,7 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
     @Test(groups = "preExecution", dependsOnMethods = "installWorkflow")
     public void scheduleWorkflow() throws IOException {
 
-        workflowRunSwid = exec.workflowRunSchedule(workflowSwid, workflowInis, parameters);
+        workflowRunSwid = seqwareExecutor.workflowRunSchedule(workflowSwid, workflowInis, parameters);
 
         Assert.assertNotNull(workflowRunSwid);
 
@@ -71,7 +71,7 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
     public void executeWorkflow() throws IOException {
 
         //TODO: integrate this process into SeqwareExecutor
-        exec.workflowRunLaunch(workflowRunSwid);
+        seqwareExecutor.workflowRunLaunch(workflowRunSwid);
 
         String workflowRunStatus = "pending";
         while (Arrays.asList("running", "pending").contains(workflowRunStatus)) {
@@ -82,8 +82,8 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
                 System.out.println(ie.getStackTrace());
             }
 
-            exec.workflowRunUpdateStatus(workflowRunSwid);
-            workflowRunStatus = exec.workflowRunReport(workflowRunSwid);
+            seqwareExecutor.workflowRunUpdateStatus(workflowRunSwid);
+            workflowRunStatus = seqwareExecutor.workflowRunReport(workflowRunSwid);
 
         }
 

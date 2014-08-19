@@ -141,7 +141,7 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
         log.printf(Level.INFO, "Starting clean up of %s", testName);
         Workflow w = new Workflow();
         w.setSwid(workflowSwid.toString());
-        exec.cancelWorkflowRuns(w);
+        seqwareExecutor.cancelWorkflowRuns(w);
 
         log.printf(Level.INFO, "Completed clean up for [%s] in %.2fs", testName, (System.nanoTime() - startTime) / 1E9);
         
@@ -165,7 +165,7 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
 
         long startTime = System.nanoTime();
 
-        workflowSwid = exec.installWorkflow(bundledWorkflow);
+        workflowSwid = seqwareExecutor.installWorkflow(bundledWorkflow);
 
         Assert.assertNotNull(workflowSwid);
 
@@ -203,7 +203,7 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
             extraArgs.append(" ").append(e.getKey()).append(" ").append(e.getValue());
         }
 
-        exec.deciderRunSchedule(deciderJar, workflowSwid, studies, sequencerRuns, samples, extraArgs.toString());
+        seqwareExecutor.deciderRunSchedule(deciderJar, workflowSwid, studies, sequencerRuns, samples, extraArgs.toString());
 
         log.printf(Level.INFO, "Completed workflow run scheduling for [%s] in %.2fs", testName, (System.nanoTime() - startTime) / 1E9);
 

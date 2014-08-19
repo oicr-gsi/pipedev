@@ -10,7 +10,7 @@ public abstract class RunTestBase implements org.testng.ITest {
     protected final File seqwareSettings;
     protected final File workingDirectory;
     protected final String testName;
-    protected SeqwareExecutor exec;
+    protected SeqwareExecutor seqwareExecutor;
 
     public RunTestBase(File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName) {
 
@@ -19,7 +19,7 @@ public abstract class RunTestBase implements org.testng.ITest {
         this.workingDirectory = workingDirectory;
         this.testName = testName;
 
-        exec = new ShellExecutor(testName, seqwareDistribution, seqwareSettings, workingDirectory);
+        this.seqwareExecutor = new ShellExecutor(testName, seqwareDistribution, seqwareSettings, workingDirectory);
 
     }
 
@@ -28,8 +28,8 @@ public abstract class RunTestBase implements org.testng.ITest {
         return testName;
     }
     
-    public void setSeqwareExecutor(SeqwareExecutor seqwareService){
-        this.exec = seqwareService;
+    public void setSeqwareExecutor(SeqwareExecutor seqwareExecutor){
+        this.seqwareExecutor = seqwareExecutor;
     }
 
 }
