@@ -102,21 +102,21 @@ public final class SeqwareWebserviceImpl extends SeqwareService {
             throw new RuntimeException(ioe);
         }
 
-        swidToFpr = new HashMap<String,List<FileProvenanceReportRecord>>();
+        swidToFpr = new HashMap<String, List<FileProvenanceReportRecord>>();
         long startTime = System.nanoTime();
         log.printf(Level.INFO, "Starting update of seqware accession to file provenance record lookup map");
         for (FileProvenanceReportRecord f : fprs) {
             for (String swid : f.getSeqwareAccessions()) {
-                if(!swidToFpr.containsKey(swid)){
+                if (!swidToFpr.containsKey(swid)) {
                     List l = new LinkedList<FileProvenanceReportRecord>();
                     l.add(f);
                     swidToFpr.put(swid, l);
-                } else{
+                } else {
                     swidToFpr.get(swid).add(f);
                 }
             }
         }
-        
+
         //Calulcate some stats about the lookup table
         int numKeys = swidToFpr.keySet().size();
         int min = Integer.MAX_VALUE;
