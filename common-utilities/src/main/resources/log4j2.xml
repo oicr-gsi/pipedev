@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <!--PatternLayout pattern="%m%n"/-->
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} %p %c{1.} [%t] %m %ex%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <logger name="ca.on.oicr.pde.model.FileProvenanceReportRecord" level="off">
+            <AppenderRef ref="STDOUT"/>
+        </logger>
+        <Root level="info">
+            <AppenderRef ref="STDOUT"/>
+        </Root>
+    </Loggers>
+</Configuration>
