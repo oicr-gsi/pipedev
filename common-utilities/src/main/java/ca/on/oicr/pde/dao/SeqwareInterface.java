@@ -9,7 +9,6 @@ import ca.on.oicr.pde.model.WorkflowRun;
 import ca.on.oicr.pde.model.WorkflowRunReportRecord;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,7 +24,7 @@ public abstract class SeqwareInterface {
 
     //HashMap<String, String> seqwareSettings;
     List<FileProvenanceReportRecord> fprs;
-    Multimap<String, FileProvenanceReportRecord> swidToFpr;
+    Map<String, List<FileProvenanceReportRecord>> swidToFpr;
     protected final Map<Workflow, List<WorkflowRunReportRecord>> wrrs;
 
     public SeqwareInterface() {
@@ -40,7 +39,7 @@ public abstract class SeqwareInterface {
      * Two notable operations occur in this method:
      * 1) All input accessions that uniquely (determined by file accession) reference a file will be converted directly into a ReducedFileProvenanceReportRecord.
      * 2) Any input accessions that reference the same file (determined by file accession) will be merged into one ReducedFileProvenanceReportRecord.
-     * 
+     *
      * For example:
      * Case 1)
      *      Accession 1 --> File1 --> ReducedFile1
@@ -49,7 +48,7 @@ public abstract class SeqwareInterface {
      *      Accession 3 --> File3 \ 
      *      Accession 4 --> File3 --> ReducedFile3
      *      Accession 5 --> File3 /
-     * 
+     *
      * @param accessions a collection of objects that implement Accessionable
      * @return a list of ReducedFileProvenanceReportRecord
      */
@@ -67,12 +66,12 @@ public abstract class SeqwareInterface {
                 return f.getFileSwid();
             }
         });
-        
+
         //Convert set of FileProvenanceReportRecord to ReducedFileProvenanceReportRecord
         //If the accession only has one file, transform it into one ReducedFileProvenanceReportRecord
         //If the accession has multiple files, merge them all into one ReducedFileProvenanceReportRecord
         List<ReducedFileProvenanceReportRecord> files = new ArrayList<ReducedFileProvenanceReportRecord>();
-        for(Entry<String, Collection<FileProvenanceReportRecord>> e : filesMap.asMap().entrySet()){
+        for (Entry<String, Collection<FileProvenanceReportRecord>> e : filesMap.asMap().entrySet()) {
             files.add(new ReducedFileProvenanceReportRecord(e.getValue()));
         }
 
@@ -81,10 +80,8 @@ public abstract class SeqwareInterface {
 
     public Set<String> getStudy(List<? extends Accessionable> swids) {
         Set studies = new HashSet<String>();
-        //TODO: don't scan, lookup table...
-        //TODO: retrieve only the records needed (don't get the whole file provenance report)
-        for (FileProvenanceReportRecord fpr : fprs) {
-            if (fpr.containsSeqwareAccession(swids)) {
+        for (Accessionable swid : swids) {
+            for (FileProvenanceReportRecord fpr : swidToFpr.get(swid.getSwid())) {
                 studies.add(fpr.getStudyTitle());
             }
         }
@@ -93,10 +90,8 @@ public abstract class SeqwareInterface {
 
     public Set<String> getSequencerRuns(List<? extends Accessionable> swids) {
         Set sequencerRuns = new HashSet<String>();
-        //TODO: don't scan, lookup table...
-        //TODO: retrieve only the records needed (don't get the whole file provenance report)
-        for (FileProvenanceReportRecord fpr : fprs) {
-            if (fpr.containsSeqwareAccession(swids)) {
+        for (Accessionable swid : swids) {
+            for (FileProvenanceReportRecord fpr : swidToFpr.get(swid.getSwid())) {
                 sequencerRuns.add(fpr.getSequencerRunName());
             }
         }
@@ -105,10 +100,8 @@ public abstract class SeqwareInterface {
 
     public Set<String> getLanes(List<? extends Accessionable> swids) {
         Set lanes = new HashSet<String>();
-        //TODO: don't scan, lookup table...
-        //TODO: retrieve only the records needed (don't get the whole file provenance report)
-        for (FileProvenanceReportRecord fpr : fprs) {
-            if (fpr.containsSeqwareAccession(swids)) {
+        for (Accessionable swid : swids) {
+            for (FileProvenanceReportRecord fpr : swidToFpr.get(swid.getSwid())) {
                 lanes.add(fpr.getLaneName());
             }
         }
@@ -117,10 +110,8 @@ public abstract class SeqwareInterface {
 
     public Set<String> getSamples(List<? extends Accessionable> swids) {
         Set samples = new HashSet<String>();
-        //TODO: don't scan, lookup table...
-        //TODO: retrieve only the records needed (don't get the whole file provenance report)
-        for (FileProvenanceReportRecord fpr : fprs) {
-            if (fpr.containsSeqwareAccession(swids)) {
+        for (Accessionable swid : swids) {
+            for (FileProvenanceReportRecord fpr : swidToFpr.get(swid.getSwid())) {
                 samples.add(fpr.getSampleName());
             }
         }
@@ -129,10 +120,8 @@ public abstract class SeqwareInterface {
 
     public Set<String> getProcessingAlgorithms(List<? extends Accessionable> swids) {
         Set processingAlgorithms = new HashSet<String>();
-        //TODO: don't scan, lookup table...
-        //TODO: retrieve only the records needed (don't get the whole file provenance report)
-        for (FileProvenanceReportRecord fpr : fprs) {
-            if (fpr.containsSeqwareAccession(swids)) {
+        for (Accessionable swid : swids) {
+            for (FileProvenanceReportRecord fpr : swidToFpr.get(swid.getSwid())) {
                 processingAlgorithms.add(fpr.getProcessingAlgorithm());
             }
         }
@@ -141,10 +130,8 @@ public abstract class SeqwareInterface {
 
     public Set<String> getFileMetaTypes(List<? extends Accessionable> swids) {
         Set fileTypes = new HashSet<String>();
-        //TODO: don't scan, lookup table...
-        //TODO: retrieve only the records needed (don't get the whole file provenance report)
-        for (FileProvenanceReportRecord fpr : fprs) {
-            if (fpr.containsSeqwareAccession(swids)) {
+        for (Accessionable swid : swids) {
+            for (FileProvenanceReportRecord fpr : swidToFpr.get(swid.getSwid())) {
                 fileTypes.add(fpr.getFileMetaType());
             }
         }
@@ -153,21 +140,17 @@ public abstract class SeqwareInterface {
 
     public Set<String> getStudy(Accessionable swid) {
         Set studies = new HashSet<String>();
-        //TODO: don't scan, lookup table...
-        //TODO: retrieve only the records needed (don't get the whole file provenance report)
-        for (FileProvenanceReportRecord fpr : fprs) {
-            if (fpr.containsSeqwareAccession(swid)) {
-                studies.add(fpr.getStudyTitle()); //TODO: get study object?
-            }
+        for (FileProvenanceReportRecord fpr : swidToFpr.get(swid.getSwid())) {
+            studies.add(fpr.getStudyTitle());
         }
         return studies;
     }
 
     public Set<String> getWorkflows(List<? extends Accessionable> swids) {
         Set workflows = new HashSet<String>();
-        for (FileProvenanceReportRecord fpr : fprs) {
-            if (fpr.containsSeqwareAccession(swids)) {
-                workflows.add(fpr.getWorkflowName()); //TODO: get study object?
+        for (Accessionable swid : swids) {
+            for (FileProvenanceReportRecord fpr : swidToFpr.get(swid.getSwid())) {
+                workflows.add(fpr.getWorkflowName());
             }
         }
         return workflows;
