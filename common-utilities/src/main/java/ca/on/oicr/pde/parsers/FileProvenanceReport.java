@@ -7,18 +7,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class FileProvenanceReport {
 
-    private final static Logger log = Logger.getLogger(FileProvenanceReport.class);
+    private final static Logger log = LogManager.getLogger(FileProvenanceReport.class);
 
     public static class ValidationException extends RuntimeException {
 
@@ -139,11 +141,10 @@ public class FileProvenanceReport {
 
         CSVFormat csvFormat = CSVFormat.RFC4180.withHeader().withDelimiter('\t');
 
-        CSVParser p = new CSVParser(reportReader, csvFormat);
-
+        CSVParser parser = new CSVParser(reportReader, csvFormat);
         // This will throw a runtime exception (ValidationException) if the headers to not match the expected header format
         try {
-            validateHeader(p.getHeaderMap());
+            validateHeader(parser.getHeaderMap());
         } catch (ValidationException ve) {
             if (HeaderValidationMode.STRICT.equals(mode)) {
                 throw ve;
@@ -156,10 +157,10 @@ public class FileProvenanceReport {
 
         // Build a list of FileProvenanceRecord from tsv stream reader
         log.debug("Starting transform of file provenance csv to FileProvenanceRecord objects");
-        List ls = new ArrayList<FileProvenanceReportRecord>();
-        for (CSVRecord r : p) {
+        List ls = new LinkedList<FileProvenanceReportRecord>();
+        for (CSVRecord r : parser) {
 
-            FileProvenanceReportRecord.Builder rec = new FileProvenanceReportRecord.Builder();
+            FileProvenanceReportRecord.Builder rec = new FileProvenanceReportRecord.Builder(r.getRecordNumber());
 
             rec.setLastModified(r.get("Last Modified"));
             rec.setStudyTitle(r.get("Study Title"));
@@ -210,6 +211,10 @@ public class FileProvenanceReport {
             rec.setSkip(r.get("Skip"));
 
             ls.add(rec.build());
+
+            if (r.getRecordNumber() % 10000 == 0) {
+                log.printf(Level.INFO, "Processing record %s", r.getRecordNumber());
+            }
 
         }
         log.debug("Completed transform of file provenance csv to FileProvenanceRecord objects");

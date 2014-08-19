@@ -42,6 +42,11 @@ public class FileProvenanceReportRecord implements Serializable {
     private final String lastModified;
     private final String skip;
 
+    public enum ValidationMode {
+
+        STRICT, SKIP;
+    }
+
     private FileProvenanceReportRecord(Builder b) {
 
         this.experiment = b.experiment;
@@ -99,6 +104,14 @@ public class FileProvenanceReportRecord implements Serializable {
 
     public String getSampleSwid() {
         return sample.getSwid();
+    }
+
+    public String getRootSampleName() {
+        return rootSample.getName();
+    }
+
+    public String getRootSampleSwid() {
+        return rootSample.getSwid();
     }
 
     public Map<String, Set<String>> getSampleAttributes() {
@@ -269,6 +282,7 @@ public class FileProvenanceReportRecord implements Serializable {
 
     public static class Builder {
 
+        //local model variables
         private Experiment experiment;
         private Study study;
         private Ius ius;
@@ -282,6 +296,11 @@ public class FileProvenanceReportRecord implements Serializable {
         private Sample rootSample;
         private List<Sample> parentSamples;
 
+        //required processing information
+        private final long recordNumber;
+        private ValidationMode validationMode = ValidationMode.SKIP;
+
+        //record info
         private String lastModified = "";
         private String studyTitle = "";
         private String studySwid = "";
@@ -330,8 +349,13 @@ public class FileProvenanceReportRecord implements Serializable {
         private String fileDescription = "";
         private String skip = "";
 
-        public Builder() {
+        public Builder(long recordNumber) {
+            this.recordNumber = recordNumber;
+        }
 
+        public Builder setValidationMode(ValidationMode validationMode) {
+            this.validationMode = validationMode;
+            return this;
         }
 
         public Builder setLastModified(String lastModified) {
@@ -665,9 +689,44 @@ public class FileProvenanceReportRecord implements Serializable {
             }
 
             List<String> swids = Arrays.asList(parentSampleSwids.split(":"));
-            Map<String, String> names = parseFileProvenanceListStructure(swids, parentSampleNames);
-            Map<String, String> organismIds = parseFileProvenanceListStructure(swids, parentSampleOrganismIds);
-            Map<String, Map<String, Set<String>>> attributes = parseFileProvenanceMapStructure(swids, parentSampleAttributes);
+            Map<String, String> names;
+            Map<String, String> organismIds;
+            Map<String, Map<String, Set<String>>> attributes;
+            try {
+                names = parseFileProvenanceListStructure(swids, parentSampleNames);
+            } catch (IllegalArgumentException iae) {
+                logger.printf(Level.ERROR, "Record number %s, \"Parent Sample Names\" is invalid. Expected %s parent sample names, but found [%s].",
+                        recordNumber, swids.size(), parentSampleNames);
+                logger.printf(Level.DEBUG, "Record number %s exception: {\n%s\n}", recordNumber, iae.getMessage());
+                if (validationMode.equals(ValidationMode.SKIP)) {
+                    names = Collections.EMPTY_MAP;
+                } else {
+                    throw (iae);
+                }
+            }
+            try {
+                organismIds = parseFileProvenanceListStructure(swids, parentSampleOrganismIds);
+            } catch (IllegalArgumentException iae) {
+                logger.printf(Level.ERROR, "Record number %s, \"Parent Sample Organism Ids\" is invalid. Expected %s parent sample organism ids, but found [%s].",
+                        recordNumber, swids.size(), parentSampleOrganismIds);
+                logger.printf(Level.DEBUG, "Record number %s exception: {\n%s\n}", recordNumber, iae.getMessage());
+                if (validationMode.equals(ValidationMode.SKIP)) {
+                    organismIds = Collections.EMPTY_MAP;
+                } else {
+                    throw (iae);
+                }
+            }
+            try {
+                attributes = parseFileProvenanceMapStructure(swids, parentSampleAttributes);
+            } catch (IllegalArgumentException iae) {
+                logger.printf(Level.ERROR, "Record number %s, \"Parent Sample Atrributes\" is invalid [%s].", recordNumber, parentSampleAttributes);
+                logger.printf(Level.DEBUG, "Record number %s exception: {\n%s\n}", recordNumber, iae.getMessage());
+                if (validationMode.equals(ValidationMode.SKIP)) {
+                    attributes = Collections.EMPTY_MAP;
+                } else {
+                    throw (iae);
+                }
+            }
 
             List<Sample> samples = new ArrayList<Sample>(swids.size());
             for (String swid : swids) {
@@ -681,23 +740,6 @@ public class FileProvenanceReportRecord implements Serializable {
             }
 
             return samples;
-        }
-
-        private Map<String, String> parseFileProvenanceListStructure(List<String> keys, String listAsString) {
-            checkNotNull(keys, "key list can not be null");
-            checkNotNull(listAsString, "listAsString can not be null");
-
-            List<String> values = Arrays.asList(listAsString.split(":")); //values are separated by colons
-            checkArgument(keys.size() == values.size(), "key list is length = %s but listAsString has %s elements. \nkey set = [%s]\nlistAsString = [%s]",
-                    keys.size(), values.size(), keys.toString(), listAsString);
-
-            //iterate through both lists - it is assumed that the lists represent pairs
-            Map<String, String> map = new HashMap<String, String>();
-            for (int i = 0; i < keys.size(); i++) {
-                map.put(keys.get(i), values.get(i));
-            }
-
-            return map;
         }
 
         private String getSwid(String swid) {
@@ -736,19 +778,51 @@ public class FileProvenanceReportRecord implements Serializable {
 
     }
 
+    public static Map<String, String> parseFileProvenanceListStructure(List<String> keys, String listAsString) {
+        checkNotNull(keys, "key list can not be null");
+        checkNotNull(listAsString, "listAsString can not be null");
+
+        Map<String, String> map = new HashMap<String, String>();
+        List<String> values;
+        if (listAsString.isEmpty()) {
+            String[] tmp = new String[keys.size()];
+            Arrays.fill(tmp, "");
+            values = Arrays.asList(tmp);
+        } else {
+            values = Arrays.asList(listAsString.split(":")); //values are separated by colons
+        }
+
+        checkArgument(keys.size() == values.size(), "key list is length = %s but listAsString has %s elements. \nkey set = [%s]\nlistAsString = [%s]",
+                keys.size(), values.size(), keys.toString(), listAsString);
+
+        //iterate through both lists - it is assumed that the lists represent pairs
+        for (int i = 0; i < keys.size(); i++) {
+            String previousValue = map.put(keys.get(i), values.get(i));
+            if (previousValue != null) {
+                throw new IllegalArgumentException("key list must have unique elements");
+            }
+        }
+
+        return map;
+    }
+
     public static Map<String, Map<String, Set<String>>> parseFileProvenanceMapStructure(List<String> keys, String mapAsString) {
         //preconditions
         checkNotNull(keys);
         checkNotNull(mapAsString);
         checkArgument(!keys.isEmpty());
-        checkArgument(!mapAsString.isEmpty());
 
         Map<String, Map<String, Set<String>>> map = new HashMap<String, Map<String, Set<String>>>();
         for (String s : keys) {
-            if (map.get(s) != null) {
+            Map<String, Set<String>> previousValue = map.put(s, new HashMap<String, Set<String>>());
+            if (previousValue != null) {
                 throw new IllegalArgumentException("key list must have unique elements");
             }
-            map.put(s, new HashMap<String, Set<String>>());
+        }
+
+        //return early, no elements to parse
+        if (mapAsString.isEmpty()) {
+            return map;
         }
 
         List<String> values = Arrays.asList(mapAsString.split(";")); //values are separated by semi-colons
@@ -757,11 +831,13 @@ public class FileProvenanceReportRecord implements Serializable {
         Matcher m;
         for (String v : values) {
             m = p.matcher(v);
-            m.find();
+            if (!m.find()) {
+                throw new IllegalArgumentException(String.format("the string [%s] does not match the required pattern \"parent_<key>.<id>=<value\"", v));
+            }
             String attrKey = m.group(1);
             String primaryKey = m.group(2);
             String attrValueString = m.group(3);
-            logger.printf(Level.INFO, "key = %s, attr_key = %s, attr_value(s) = %s", primaryKey, attrKey, attrValueString);
+            logger.printf(Level.DEBUG, "key = %s, attr_key = %s, attr_value(s) = %s", primaryKey, attrKey, attrValueString);
 
             if (map.get(primaryKey) == null) {
                 throw new IllegalArgumentException(String.format("the id [%s] (for parent attribute [%s]) does not exist in the key list", primaryKey, attrKey));
@@ -773,7 +849,9 @@ public class FileProvenanceReportRecord implements Serializable {
             Set<String> previousValue = map.get(primaryKey).put(attrKey, attrValues);
 
             if (previousValue != null) {
-                logger.printf(Level.WARN, "duplicate element detected for key = [%], attr key = [%s], attr value = [%s]", primaryKey, attrKey, attrValueString);
+                throw new IllegalArgumentException(String.format("duplicate attribute key detected for key = [%], attr key = [%s], "
+                        + "new attr value = [%s], old attr value = [%s]", primaryKey, attrKey, attrValueString, previousValue));
+                //logger.printf(Level.WARN, "duplicate element detected for key = [%], attr key = [%s], attr value = [%s]", primaryKey, attrKey, attrValueString);
             }
         }
 
