@@ -105,7 +105,7 @@ public class WorkflowRunTest extends RunTestBase {
         }
 
         //blocks until completed
-        exec.workflowRunLaunch(workflowBundlePath, workflowInis, workflowName, workflowVersion);
+        seqwareExecutor.workflowRunLaunch(workflowBundlePath, workflowInis, workflowName, workflowVersion);
 
     }
 
