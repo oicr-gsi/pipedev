@@ -10,7 +10,7 @@ public abstract class RunTestBase implements org.testng.ITest {
     protected final File seqwareSettings;
     protected final File workingDirectory;
     protected final String testName;
-    protected final SeqwareExecutor exec;
+    protected SeqwareExecutor exec;
 
     public RunTestBase(File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName) {
 
@@ -25,9 +25,11 @@ public abstract class RunTestBase implements org.testng.ITest {
 
     @Override
     public String getTestName() {
-
         return testName;
-
+    }
+    
+    public void setSeqwareExecutor(SeqwareExecutor seqwareService){
+        this.exec = seqwareService;
     }
 
 }

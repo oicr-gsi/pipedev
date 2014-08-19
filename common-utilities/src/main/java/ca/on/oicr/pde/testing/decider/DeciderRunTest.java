@@ -23,14 +23,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.testng.Assert;
 import org.testng.annotations.*;
 import org.testng.annotations.Test;
 
 public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
 
-    private final static Logger log = Logger.getLogger(DeciderRunTest.class);
+    private final static Logger log = LogManager.getLogger(DeciderRunTest.class);
     private final static List<File> reports = Collections.synchronizedList(new ArrayList<File>());
 
     private final File deciderJar;
@@ -82,14 +84,14 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
         }
 
         expectedReportFile = testDefinition.metrics();
-        
+
         if (expectedReportFile != null) {
-            log.warn("Found a metrics file: [" + expectedReportFile.getAbsolutePath() +"].");
+            log.warn("Found a metrics file: [" + expectedReportFile.getAbsolutePath() + "].");
             try {
                 expected = TestResult.buildFromJson(expectedReportFile);
             } catch (IOException ioe) {
-                log.error("There was a problem loading the metrics file: [" + expectedReportFile.getAbsolutePath() + "]." +
-                "\nThe exception output:\n" + ioe.toString() + "\nContinuing with test but comparision step will fail.");
+                log.error("There was a problem loading the metrics file: [" + expectedReportFile.getAbsolutePath() + "]."
+                        + "\nThe exception output:\n" + ioe.toString() + "\nContinuing with test but comparision step will fail.");
                 expected = null;
             }
         } else {
@@ -135,15 +137,14 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
          * workflow bundle. So each decider run test has a unique workflow swid.
          * TODO: Simplify this when the pde-seqware API is complete
          */
+        long startTime = System.nanoTime();
+        log.printf(Level.INFO, "Starting clean up of %s", testName);
         Workflow w = new Workflow();
         w.setSwid(workflowSwid.toString());
-        List<WorkflowRunReportRecord> wrrrs = seq.getWorkflowRunRecords(w);
-        for (WorkflowRunReportRecord wrrr : wrrrs) {
-            WorkflowRun wr = new WorkflowRun();
-            wr.setSwid(wrrr.getWorkflowRunSwid());
-            exec.cancelWorkflowRun(wr);
-        }
+        exec.cancelWorkflowRuns(w);
 
+        log.printf(Level.INFO, "Completed clean up for [%s] in %.2fs", testName, (System.nanoTime() - startTime) / 1E9);
+        
     }
 
     @AfterSuite
@@ -162,9 +163,13 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
     @Test(groups = "preExecution")
     public void installWorkflow() throws IOException {
 
+        long startTime = System.nanoTime();
+
         workflowSwid = exec.installWorkflow(bundledWorkflow);
 
         Assert.assertNotNull(workflowSwid);
+
+        log.printf(Level.INFO, "Completed installing workflow bundle for [%s] in %.2fs", testName, (System.nanoTime() - startTime) / 1E9);
 
     }
 
@@ -190,7 +195,8 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
     @Test(dependsOnGroups = "preExecution", groups = "execution")
     public void executeDecider() throws IOException, InstantiationException, ClassNotFoundException, IllegalAccessException {
 
-        log.warn(testName + " starting execution");
+        long startTime = System.nanoTime();
+        log.printf(Level.INFO, "Starting execution of %s test", testName);
 
         StringBuilder extraArgs = new StringBuilder();
         for (Entry<String, String> e : testDefinition.getParameters().entrySet()) {
@@ -199,12 +205,14 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
 
         exec.deciderRunSchedule(deciderJar, workflowSwid, studies, sequencerRuns, samples, extraArgs.toString());
 
-        log.warn(testName + " execution complete");
+        log.printf(Level.INFO, "Completed workflow run scheduling for [%s] in %.2fs", testName, (System.nanoTime() - startTime) / 1E9);
 
     }
 
     @Test(dependsOnGroups = "execution", groups = "postExecution")
     public void calculateWorkflowRunReport() throws JsonProcessingException, IOException {
+
+        long startTime = System.nanoTime();
 
         Workflow w = new Workflow();
         w.setSwid(workflowSwid.getSwid());
@@ -218,10 +226,14 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
 
         reports.add(actualReportFile);
 
+        log.printf(Level.INFO, "Completed generating workflow run report for [%s] in %.2fs", testName, (System.nanoTime() - startTime) / 1E9);
+
     }
 
     @Test(dependsOnGroups = "execution", dependsOnMethods = "calculateWorkflowRunReport", groups = "postExecution")
     public void compareWorkflowRunReport() throws JsonProcessingException, IOException {
+
+        long startTime = System.nanoTime();
 
         Assert.assertNotNull(expected, "no expected output to compare to.");
 
@@ -231,6 +243,8 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
         Assert.assertTrue(compareReports(actual, expected),
                 "There are differences between reports:\nExpected: " + expectedReportFile + "\nActual: " + actualReportFile);
         //+ "\nExpected object:\n" + expected.toString() + "\nActual object:\n" + actual.toString());
+
+        log.printf(Level.INFO, "Completed comparing workflow run reports for [%s] in %.2fs", testName, (System.nanoTime() - startTime) / 1E9);
 
     }
 
