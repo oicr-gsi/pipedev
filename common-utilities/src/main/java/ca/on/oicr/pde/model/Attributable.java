@@ -7,8 +7,6 @@ public interface Attributable {
 
     public Map<String,Set<String>> getAttributes();
 
-    public void setAttributes(Map<String,Set<String>> attributes);
-    
     public Set<String> getAttribute(String key);
     
 }

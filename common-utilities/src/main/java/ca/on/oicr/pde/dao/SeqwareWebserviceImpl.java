@@ -186,10 +186,9 @@ public final class SeqwareWebserviceImpl extends SeqwareService {
 
         List files = new ArrayList<File>();
         for (String s : fileAccessions) {
-            //TODO: use a factory to get File
-            File f = new File();
-            f.setSwid(s);
-            files.add(f);
+            File.Builder fileBuilder = new File.Builder();
+            fileBuilder.setSwid(s);
+            files.add(fileBuilder.build());
         }
 
         return files;

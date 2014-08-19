@@ -593,87 +593,96 @@ public class FileProvenanceReportRecord implements Serializable {
             return this;
         }
 
+        //Seqware attribute field formatting:  key1=value1&value2&...&valueN;key2=...;keyN=...
+        //For example:
+        //key1=value1&value2&value3;key2=value1;key3=value1&value2
+        private static final String attrKeyValuePairDelimiter = ";";
+        private static final String attrKeyValueSeparator = "=";
+        private static final String attrValueDelimiter = "&";
+
         public FileProvenanceReportRecord build() {
 
-            //Seqware attribute field formatting:  key1=value1&value2&...&valueN;key2=...;keyN=...
-            //For example:
-            //key1=value1&value2&value3;key2=value1;key3=value1&value2
-            String attrKeyValuePairDelimiter = ";";
-            String attrKeyValueSeparator = "=";
-            String attrValueDelimiter = "&";
-
-            //TODO: use factory to create these objects:
-            experiment = new Experiment();
-            experiment.setSwid(getSwid(experimentSwid));
-            experiment.setName(experimentName);
-            experiment.setAttributes(transformAttributeStringToMap(experimentAttributes,
+            Experiment.Builder experimentBuilder = new Experiment.Builder();
+            experimentBuilder.setSwid(getSwid(experimentSwid));
+            experimentBuilder.setName(experimentName);
+            experimentBuilder.setAttributes(transformAttributeStringToMap(experimentAttributes,
                     attrKeyValuePairDelimiter, attrKeyValueSeparator, attrValueDelimiter));
+            experiment = experimentBuilder.build();
 
-            study = new Study();
-            study.setSwid(getSwid(studySwid));
-            study.setTitle(studyTitle);
-            study.setAttributes(transformAttributeStringToMap(studyAttributes,
+            Study.Builder studyBuilder = new Study.Builder();
+            studyBuilder.setSwid(getSwid(studySwid));
+            studyBuilder.setTitle(studyTitle);
+            studyBuilder.setAttributes(transformAttributeStringToMap(studyAttributes,
                     attrKeyValuePairDelimiter, attrKeyValueSeparator, attrValueDelimiter));
+            study = studyBuilder.build();
 
-            ius = new Ius();
-            ius.setSwid(getSwid(iusSwid));
-            ius.setTag(iusTag);
-            ius.setAttributes(transformAttributeStringToMap(iusAttributes,
+            Ius.Builder iusBuilder = new Ius.Builder();
+            iusBuilder.setSwid(getSwid(iusSwid));
+            iusBuilder.setTag(iusTag);
+            iusBuilder.setAttributes(transformAttributeStringToMap(iusAttributes,
                     attrKeyValuePairDelimiter, attrKeyValueSeparator, attrValueDelimiter));
+            ius = iusBuilder.build();
 
-            lane = new Lane();
-            lane.setSwid(getSwid(laneSwid));
-            lane.setName(laneName);
-            lane.setNumber(laneNumber);
-            lane.setAttributes(transformAttributeStringToMap(laneAttributes,
+            Lane.Builder laneBuilder = new Lane.Builder();
+            laneBuilder.setSwid(getSwid(laneSwid));
+            laneBuilder.setName(laneName);
+            laneBuilder.setNumber(laneNumber);
+            laneBuilder.setAttributes(transformAttributeStringToMap(laneAttributes,
                     attrKeyValuePairDelimiter, attrKeyValueSeparator, attrValueDelimiter));
+            lane = laneBuilder.build();
 
-            sequencerRun = new SequencerRun();
-            sequencerRun.setSwid(getSwid(sequencerRunSwid));
-            sequencerRun.setName(sequencerRunName);
-            sequencerRun.setPlatformId(sequencerRunPlatformId);
-            sequencerRun.setPlatformName(sequencerRunPlatformName);
-
-            sequencerRun.setAttributes(transformAttributeStringToMap(sequencerRunAttributes,
+            SequencerRun.Builder sequencerRunBuilder = new SequencerRun.Builder();
+            sequencerRunBuilder.setSwid(getSwid(sequencerRunSwid));
+            sequencerRunBuilder.setName(sequencerRunName);
+            sequencerRunBuilder.setPlatformId(sequencerRunPlatformId);
+            sequencerRunBuilder.setPlatformName(sequencerRunPlatformName);
+            sequencerRunBuilder.setAttributes(transformAttributeStringToMap(sequencerRunAttributes,
                     attrKeyValuePairDelimiter, attrKeyValueSeparator, attrValueDelimiter));
+            sequencerRun = sequencerRunBuilder.build();
 
-            processing = new Processing();
-            processing.setSwid(getSwid(processingSwid));
-            processing.setAlgorithm(processingAlgorithm);
-            processing.setAttributes(transformAttributeStringToMap(processingAttributes,
+            Processing.Builder processingBuilder = new Processing.Builder();
+            processingBuilder.setSwid(getSwid(processingSwid));
+            processingBuilder.setAlgorithm(processingAlgorithm);
+            processingBuilder.setAttributes(transformAttributeStringToMap(processingAttributes,
                     attrKeyValuePairDelimiter, attrKeyValueSeparator, attrValueDelimiter));
+            processing = processingBuilder.build();
 
-            workflow = new Workflow();
-            workflow.setSwid(getSwid(workflowSwid));
-            workflow.setName(workflowName);
-            workflow.setVersion(workflowVersion);
+            Workflow.Builder workflowBuilder = new Workflow.Builder();
+            workflowBuilder.setSwid(getSwid(workflowSwid));
+            workflowBuilder.setName(workflowName);
+            workflowBuilder.setVersion(workflowVersion);
+            workflow = workflowBuilder.build();
 
-            workflowRun = new WorkflowRun();
-            workflowRun.setSwid(getSwid(workflowRunSwid));
-            workflowRun.setName(workflowRunName);
-            workflowRun.setStatus(workflowRunStatus);
+            WorkflowRun.Builder workflowRunBuilder = new WorkflowRun.Builder();
+            workflowRunBuilder.setSwid(getSwid(workflowRunSwid));
+            workflowRunBuilder.setName(workflowRunName);
+            workflowRunBuilder.setStatus(workflowRunStatus);
+            workflowRun = workflowRunBuilder.build();
 
-            file = new File();
-            file.setSwid(getSwid(fileSwid));
-            file.setMetaType(fileMetaType);
-            file.setSize(fileSize);
-            file.setMd5sum(fileMd5sum);
-            file.setDescription(fileDescription);
-            file.setPath(filePath);
-            file.setAttributes(transformAttributeStringToMap(fileAttributes,
+            File.Builder fileBuilder = new File.Builder();
+            fileBuilder.setSwid(getSwid(fileSwid));
+            fileBuilder.setMetaType(fileMetaType);
+            fileBuilder.setSize(fileSize);
+            fileBuilder.setMd5sum(fileMd5sum);
+            fileBuilder.setDescription(fileDescription);
+            fileBuilder.setPath(filePath);
+            fileBuilder.setAttributes(transformAttributeStringToMap(fileAttributes,
                     attrKeyValuePairDelimiter, attrKeyValueSeparator, attrValueDelimiter));
+            file = fileBuilder.build();
 
-            sample = new Sample();
-            sample.setSwid(getSwid(sampleSwid));
-            sample.setName(sampleName);
-            sample.setOrganismId(sampleOrganismId);
-            sample.setOrganismCode(sampleOrganismCode);
-            sample.setAttributes(transformAttributeStringToMap(sampleAttributes,
+            Sample.Builder sampleBuilder = new Sample.Builder();
+            sampleBuilder.setSwid(getSwid(sampleSwid));
+            sampleBuilder.setName(sampleName);
+            sampleBuilder.setOrganismId(sampleOrganismId);
+            sampleBuilder.setOrganismCode(sampleOrganismCode);
+            sampleBuilder.setAttributes(transformAttributeStringToMap(sampleAttributes,
                     attrKeyValuePairDelimiter, attrKeyValueSeparator, attrValueDelimiter));
+            sample = sampleBuilder.build();
 
-            rootSample = new Sample();
-            rootSample.setSwid(rootSampleSwid);
-            rootSample.setName(rootSampleName);
+            Sample.Builder rootSampleBuilder = new Sample.Builder();
+            rootSampleBuilder.setSwid(rootSampleSwid);
+            rootSampleBuilder.setName(rootSampleName);
+            rootSample = rootSampleBuilder.build();
 
             parentSamples = new ArrayList<Sample>();
             parentSamples = buildParentSamples(parentSampleSwids, parentSampleNames, parentSampleOrganismIds, parentSampleAttributes);
@@ -730,13 +739,12 @@ public class FileProvenanceReportRecord implements Serializable {
 
             List<Sample> samples = new ArrayList<Sample>(swids.size());
             for (String swid : swids) {
-                Sample s = new Sample();
-                s.setSwid(swid);
-                s.setName(names.get(swid));
-                s.setOrganismId(organismIds.get(swid));
-                s.setAttributes(attributes.get(swid));
-
-                samples.add(s);
+                Sample.Builder sampleBuilder = new Sample.Builder();
+                sampleBuilder.setSwid(swid);
+                sampleBuilder.setName(names.get(swid));
+                sampleBuilder.setOrganismId(organismIds.get(swid));
+                sampleBuilder.setAttributes(attributes.get(swid));
+                samples.add(sampleBuilder.build());
             }
 
             return samples;

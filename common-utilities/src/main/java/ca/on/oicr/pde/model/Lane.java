@@ -4,19 +4,29 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class Lane implements Accessionable, Attributable, Name {
 
-    private String name;
-    private String number;
-    private String swid;
-    private Map<String, Set<String>> attributes;
+    private static final Map<String, Lane> cache = new ConcurrentHashMap<String, Lane>();
 
-    public Lane() {
-        attributes = Collections.EMPTY_MAP;
+    private final String name;
+    private final String number;
+    private final String swid;
+    private final Map<String, Set<String>> attributes;
+
+    private Lane(Builder b) {
+        name = b.name;
+        number = b.number;
+        swid = b.swid;
+        if (b.attributes == null) {
+            attributes = Collections.EMPTY_MAP;
+        } else {
+            attributes = new HashMap(b.attributes);
+        }
     }
 
     @Override
@@ -24,16 +34,8 @@ public class Lane implements Accessionable, Attributable, Name {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getNumber() {
         return number;
-    }
-
-    public void setNumber(String number) {
-        this.number = number;
     }
 
     @Override
@@ -42,26 +44,13 @@ public class Lane implements Accessionable, Attributable, Name {
     }
 
     @Override
-    public void setAttributes(Map<String, Set<String>> attributes) {
-
-        this.attributes = attributes;
-
-    }
-
-    @Override
     public Set<String> getAttribute(String key) {
-
         return this.attributes.get(key);
-
     }
 
     @Override
     public String getSwid() {
         return swid;
-    }
-
-    public void setSwid(String swid) {
-        this.swid = swid;
     }
 
     @Override
@@ -84,6 +73,41 @@ public class Lane implements Accessionable, Attributable, Name {
             return false;
         }
         return EqualsBuilder.reflectionEquals(this, obj);
+    }
+
+    public static class Builder {
+
+        private String name;
+        private String number;
+        private String swid;
+        private Map<String, Set<String>> attributes;
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public void setNumber(String number) {
+            this.number = number;
+        }
+
+        public void setSwid(String swid) {
+            this.swid = swid;
+        }
+
+        public void setAttributes(Map<String, Set<String>> attributes) {
+            this.attributes = attributes;
+        }
+
+        public Lane build() {
+            String key = swid;
+            Lane r = cache.get(key);
+            if (r == null) {
+                r = new Lane(this);
+                cache.put(key, r);
+            }
+            return r;
+        }
+
     }
 
 }
