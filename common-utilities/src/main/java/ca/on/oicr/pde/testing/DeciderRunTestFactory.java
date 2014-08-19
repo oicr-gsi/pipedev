@@ -1,10 +1,11 @@
 package ca.on.oicr.pde.testing;
 
-import ca.on.oicr.pde.dao.SeqwareInterface;
+import ca.on.oicr.pde.dao.SeqwareService;
 import ca.on.oicr.pde.dao.SeqwareWebserviceImpl;
 import ca.on.oicr.pde.testing.decider.DeciderRunTest;
 import ca.on.oicr.pde.testing.decider.TestDefinition;
 import static ca.on.oicr.pde.utilities.Helpers.*;
+import ca.on.oicr.pde.utilities.ThreadedSeqwareExecutor;
 import com.jcabi.manifests.Manifests;
 import java.io.File;
 import java.io.IOException;
@@ -14,16 +15,20 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.io.InputStream;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.WordUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Parameters;
 
 public class DeciderRunTestFactory {
 
-    private final static Logger log = Logger.getLogger(DeciderRunTestFactory.class);
+    private final static Logger log = LogManager.getLogger(DeciderRunTestFactory.class);
 
     private final File seqwareDistribution;
     private final File bundledWorkflow;
@@ -118,14 +123,19 @@ public class DeciderRunTestFactory {
         log.warn(td);
 
         //TODO: provide user a way to specify impl
-        log.debug("Start loading information required by all tests");
-        SeqwareInterface seq = new SeqwareWebserviceImpl(webserviceUrl, "admin@admin.com", "admin");
-        seq.update();
-        log.debug("Completed loading information required by all tests");
+        long startTime = System.nanoTime();
+        log.printf(Level.INFO, "Starting loading of seqware metadata");
+        SeqwareService seqwareService = new SeqwareWebserviceImpl(webserviceUrl, "admin@admin.com", "admin");
+        seqwareService.update();
+        log.printf(Level.INFO, "Completed loading of seqware metadata in %.2fs", (System.nanoTime() - startTime) / 1E9);
 
         log.debug("Starting transform of json test definition to TestDefinition objects");
         List<DeciderRunTest> tests = new ArrayList<DeciderRunTest>();
         int count = 0;
+        
+        //Setup a shared thread pool for all tests to use
+        ExecutorService sharedPool = Executors.newFixedThreadPool(50);
+        
         for (TestDefinition.Test t : td.tests) {
 
             //Build test name
@@ -144,13 +154,16 @@ public class DeciderRunTestFactory {
             File testWorkingDir = generateTestWorkingDirectory(workingDirectory, prefix, testName, testId);
             File seqwareSettings = generateSeqwareSettings(testWorkingDir, webserviceUrl, schedulingSystem, schedulingHost);
 
-            tests.add(new DeciderRunTest(seq, seqwareDistribution, seqwareSettings, testWorkingDir, testName, deciderJar, bundledWorkflow, deciderClass, t));
+            DeciderRunTest test = new DeciderRunTest(seqwareService, seqwareDistribution, seqwareSettings, testWorkingDir, testName, deciderJar, bundledWorkflow, deciderClass, t);
+            test.setSeqwareExecutor(new ThreadedSeqwareExecutor(testName, seqwareDistribution, seqwareSettings, testWorkingDir, sharedPool, seqwareService));
+            
+            tests.add(test);
 
         }
         log.debug("Completed transform of json test definition to TestDefinition objects");
 
         log.warn("Completed loading test definitions, tests will start now");
-        
+
         return tests.toArray();
 
     }

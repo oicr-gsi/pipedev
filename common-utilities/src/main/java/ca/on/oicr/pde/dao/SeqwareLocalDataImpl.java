@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-public class SeqwareLocalDataImpl extends SeqwareInterface {
+public class SeqwareLocalDataImpl extends SeqwareService {
     File fileProvenanceReport;
     File workflowRunReport;
 

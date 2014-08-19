@@ -4,6 +4,7 @@ import ca.on.oicr.pde.model.Sample;
 import ca.on.oicr.pde.model.SequencerRun;
 import ca.on.oicr.pde.model.SeqwareAccession;
 import ca.on.oicr.pde.model.Study;
+import ca.on.oicr.pde.model.Workflow;
 import ca.on.oicr.pde.model.WorkflowRun;
 import java.io.File;
 import java.io.IOException;
@@ -27,5 +28,7 @@ public interface SeqwareExecutor {
     public String workflowRunReport(SeqwareAccession workflowRunSwid) throws IOException;
 
     public void cancelWorkflowRun(WorkflowRun wr) throws IOException;
+
+    public void cancelWorkflowRuns(Workflow w) throws IOException;
 
 }

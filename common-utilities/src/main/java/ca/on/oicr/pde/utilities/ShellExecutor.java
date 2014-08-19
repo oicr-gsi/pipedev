@@ -5,6 +5,7 @@ import ca.on.oicr.pde.model.Sample;
 import ca.on.oicr.pde.model.SequencerRun;
 import ca.on.oicr.pde.model.SeqwareAccession;
 import ca.on.oicr.pde.model.Study;
+import ca.on.oicr.pde.model.Workflow;
 import ca.on.oicr.pde.model.WorkflowRun;
 import ca.on.oicr.pde.parsers.SeqwareOutputParser;
 import com.google.common.base.Joiner;
@@ -19,12 +20,12 @@ import org.apache.commons.io.FileUtils;
 
 public class ShellExecutor implements SeqwareExecutor {
 
-    private final File workingDirectory;
-    private final File seqwareDistribution;
-    private final File seqwareSettings;
-    private final Map<String, String> environmentVariables;
-    private final String id;
-    private final File loggingDirectory;
+    protected final File workingDirectory;
+    protected final File seqwareDistribution;
+    protected final File seqwareSettings;
+    protected final Map<String, String> environmentVariables;
+    protected final String id;
+    protected final File loggingDirectory;
 
     public ShellExecutor(String id, File seqwareDistrubution, File seqwareSettings, File workingDirectory) {
 
@@ -226,6 +227,11 @@ public class ShellExecutor implements SeqwareExecutor {
         result = result.replaceAll(" ", "\\\\ ");
 
         return result;
+    }
+
+    @Override
+    public void cancelWorkflowRuns(Workflow w) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

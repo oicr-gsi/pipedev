@@ -8,12 +8,16 @@ import ca.on.oicr.pde.model.WorkflowRun;
 import ca.on.oicr.pde.model.WorkflowRunReportRecord;
 import ca.on.oicr.pde.parsers.FileProvenanceReport;
 import ca.on.oicr.pde.parsers.WorkflowRunReport;
-import com.google.common.collect.HashMultimap;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -28,14 +32,16 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-public final class SeqwareWebserviceImpl extends SeqwareInterface {
+public final class SeqwareWebserviceImpl extends SeqwareService {
 
-    private final static Logger log = Logger.getLogger(SeqwareWebserviceImpl.class);
+    private final static Logger log = LogManager.getLogger(SeqwareWebserviceImpl.class);
 
     //private final DefaultHttpClient httpClient;
     private final String restUrl;
@@ -88,22 +94,53 @@ public final class SeqwareWebserviceImpl extends SeqwareInterface {
     protected void updateFileProvenanceRecords() {
 
         try {
-            log.debug("Starting update of local file provenance record store");
+            long startTime = System.nanoTime();
+            log.printf(Level.INFO, "Starting download and parsing of file provenance report");
             fprs = FileProvenanceReport.parseFileProvenanceReport(getHttpResponse(restUrl + "/reports/file-provenance"), FileProvenanceReport.HeaderValidationMode.SKIP);
-            log.debug("Completed update of local file provenance record store");
+            log.printf(Level.INFO, "Completed download and parsing of file provenance report in %.2fs", (System.nanoTime() - startTime) / 1E9);
         } catch (IOException ioe) {
             throw new RuntimeException(ioe);
         }
 
-        swidToFpr = HashMultimap.create();
-        log.debug("Starting update of seqware accession to file provenance record map");
+        swidToFpr = new HashMap<String,List<FileProvenanceReportRecord>>();
+        long startTime = System.nanoTime();
+        log.printf(Level.INFO, "Starting update of seqware accession to file provenance record lookup map");
         for (FileProvenanceReportRecord f : fprs) {
             for (String swid : f.getSeqwareAccessions()) {
-                swidToFpr.put(swid, f);
+                if(!swidToFpr.containsKey(swid)){
+                    List l = new LinkedList<FileProvenanceReportRecord>();
+                    l.add(f);
+                    swidToFpr.put(swid, l);
+                } else{
+                    swidToFpr.get(swid).add(f);
+                }
             }
         }
-        log.debug("Completed update of seqware accession to file provenance record map");
+        
+        //Calulcate some stats about the lookup table
+        int numKeys = swidToFpr.keySet().size();
+        int min = Integer.MAX_VALUE;
+        int max = Integer.MIN_VALUE;
+        BigDecimal numRecs = BigDecimal.valueOf(numKeys);
+        BigDecimal avg = BigDecimal.ZERO;
+        int size;
+        for (Entry<String, List<FileProvenanceReportRecord>> e : swidToFpr.entrySet()) {
+            if (e.getValue() == null || e.getValue().isEmpty()) {
+                size = 0;
+            } else {
+                size = e.getValue().size();
+                avg = avg.add(BigDecimal.valueOf(size).divide(numRecs, MathContext.DECIMAL128));
+            }
 
+            if (size < min) {
+                min = size;
+            }
+            if (size > max) {
+                max = size;
+            }
+        }
+        log.printf(Level.INFO, "Number of keys = %s, min/max/avg records per key = %s/%s/%.2f", numKeys, min, max, avg.doubleValue());
+        log.printf(Level.INFO, "Completed update of seqware accession to file provenance record lookup map in %.2fs", (System.nanoTime() - startTime) / 1E9);
     }
 
     @Override
