@@ -101,7 +101,7 @@ public class FileProvenanceReport {
 
         if (!fileProvenanceReportExpectedHeader.equals(header)) {
 
-            log.warn("Expected header:\n" + fileProvenanceReportExpectedHeader.toString() + "\nActual header:\n" + header.toString());
+            log.printf(Level.WARN, "Expected header:\n%s\nActual header:\n%s", fileProvenanceReportExpectedHeader.toString(),  header.toString());
             throw new ValidationException("FileProvenanceReport headers differ from expected format.");
 
         }
@@ -156,7 +156,6 @@ public class FileProvenanceReport {
         }
 
         // Build a list of FileProvenanceRecord from tsv stream reader
-        log.debug("Starting transform of file provenance csv to FileProvenanceRecord objects");
         List ls = new LinkedList<FileProvenanceReportRecord>();
         for (CSVRecord r : parser) {
 
@@ -217,7 +216,6 @@ public class FileProvenanceReport {
             }
 
         }
-        log.debug("Completed transform of file provenance csv to FileProvenanceRecord objects");
 
         return ls;
 
