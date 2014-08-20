@@ -21,7 +21,7 @@ import org.apache.logging.log4j.LogManager;
 
 public class Helpers {
 
-    private final static Logger log = LogManager.getRootLogger();
+    private final static Logger log = LogManager.getLogger(Helpers.class);
 
     public static File getFileFromResource(String resourceFilePath) throws IOException {
 
@@ -90,7 +90,8 @@ public class Helpers {
             cr.setCommandOutputFile(outputFilePath);
         }
 
-        System.out.println(id + "{\n" + "Executing (with initial directory: " + workingDirectory + "):\n" + command.toString() + "\n}");
+        log.printf(Level.INFO, "[%s] is executing a bash shell command:\nCommand: [%s]\nWorking directory: [%s]\nStd out/err file: [%s]",
+                id, command, workingDirectory, outputFilePath);
 
         CommandRunner.CommandResult r = cr.runCommand();
         Assert.assertTrue(r.getExitCode() == 0,
@@ -112,7 +113,7 @@ public class Helpers {
         command.append(" ").append(schedulingHost);
         command.append(" ").append(UUID.randomUUID());
 
-        return new File(executeCommand("", command.toString(), workingDirectory));
+        return new File(executeCommand("generateSeqwareSettings()", command.toString(), workingDirectory));
 
     }
 
