@@ -94,40 +94,39 @@ public class TestCaseReporter implements IReporter {
 
         String separator = StringUtils.repeat("=", 80);
         System.out.println(separator);
+        
+        //Iterate over all test suites (eg, testng.xml)
         for (ISuite suite : suites) {
             print(0, "Test suite = [%s]", suite.getName());
+            
+            //Get the results for the test suite
             for (ISuiteResult sr : suite.getResults().values()) {
                 ITestContext tc = sr.getTestContext();
-                print(1, "Test context = [%s]", tc.getName());
+                print(1, "Test context = [%s]", tc.getName()); //
 
+                //Iterate over all test case results.  Aggregate failed, skipped, and succeeded tests by test name (@ITest's getName()).
                 for (Entry<String, Collection<ITestResult>> e : groupResults(tc.getPassedTests(), tc.getFailedTests(), tc.getSkippedTests()).entrySet()) {
-                    print(2, "Test case = [%s]", e.getKey());
-                    List<ITestResult> rs = new ArrayList<ITestResult>(e.getValue());
-                    Collections.sort(rs, new Comparator<ITestResult>() {
+                    print(2, "Test case = [%s]", e.getKey()); //test case name
+                    List<ITestResult> rs = new ArrayList<ITestResult>(e.getValue()); //get all tests for the test case (ie, all tests with the same @ITest getName()
+                    Collections.sort(rs, new Comparator<ITestResult>() { //sort the list of tests by their start time
                         @Override
                         public int compare(ITestResult o1, ITestResult o2) {
                             return Long.valueOf(o1.getStartMillis()).compareTo(o2.getStartMillis());
                         }
                     });
+                    
+                    //Iterate over all test results for the test case
                     for (ITestResult tr : rs) {
                         print(3, "group = %s, method = [%s], execution time = [%.2fs], status = [%s]",
                                 Arrays.toString(tr.getMethod().getGroups()), tr.getMethod().getMethodName(),
                                 (tr.getEndMillis() - tr.getStartMillis()) / 1000D, TestNGStatuses.valueOf(tr.getStatus()));
 
+                        //If there was an error for the test case, print the output
                         if (!tr.isSuccess()) {
                             print(4, tr.getThrowable().getMessage());
                         }
                     }
                 }
-
-//                System.out.println("Passed tests for suite '" + suite.getName()
-//                        + "' is:" + tc.getPassedTests().getAllResults().size());
-//                System.out.println("Failed tests for suite '" + suite.getName()
-//                        + "' is:"
-//                        + tc.getFailedTests().getAllResults().size());
-//                System.out.println("Skipped tests for suite '" + suite.getName()
-//                        + "' is:"
-//                        + tc.getSkippedTests().getAllResults().size());
             }
             System.out.println(separator);
         }
