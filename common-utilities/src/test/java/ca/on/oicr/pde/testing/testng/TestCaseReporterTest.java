@@ -7,7 +7,7 @@ import org.testng.Assert;
 import org.testng.ITestContext;
 import org.testng.TestListenerAdapter;
 import org.testng.TestNG;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.testng.xml.XmlClass;
 import org.testng.xml.XmlSuite;
@@ -18,7 +18,7 @@ public class TestCaseReporterTest {
     TestNG t;
     TestListenerAdapter tla;
 
-    @BeforeTest
+    @BeforeMethod
     public void setupTestNg(ITestContext context) {
         t = new TestNG();
         t.setOutputDirectory(context.getOutputDirectory());
@@ -81,7 +81,7 @@ public class TestCaseReporterTest {
         Assert.assertEquals(tc.getSkippedTests().size(), 0);
         Assert.assertEquals(tc.getPassedTests().size(), 0);
 
-        Assert.assertEquals(t.getStatus(), 0);
+        Assert.assertEquals(t.getStatus(), 1);
 
     }
 
