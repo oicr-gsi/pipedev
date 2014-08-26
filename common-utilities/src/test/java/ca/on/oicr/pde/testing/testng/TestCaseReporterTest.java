@@ -15,13 +15,14 @@ import org.testng.xml.XmlTest;
 public class TestCaseReporterTest {
 
     @Test
-    public void test() {
+    public void test(ITestContext context) {
 
         int numberOfTestCases = 10;
         int numberOfTestMethods = 2;
 
         //Setup test runner
         TestNG t = new TestNG();
+        t.setOutputDirectory(context.getOutputDirectory());
         TestListenerAdapter tla = new TestListenerAdapter();
         t.addListener(tla);
 
