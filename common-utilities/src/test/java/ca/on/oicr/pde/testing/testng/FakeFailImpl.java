@@ -18,7 +18,7 @@ public class FakeFailImpl implements ITest{
     
     @Test(groups = {"fake"})
     public void fakeFailure() {
-        Assert.assertTrue(false, "There was a fake failure.");
+        Assert.assertTrue(false, "There was a fake failure.\nExtra information regarding the failure.");
     }
 
     @Override

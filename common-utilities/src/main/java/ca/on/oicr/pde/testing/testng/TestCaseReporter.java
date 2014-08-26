@@ -81,12 +81,12 @@ public class TestCaseReporter implements IReporter {
         return new TreeMap(groupedResults.asMap());
     }
 
-    String padding = "   ";
+    String padding = "  ";
     private void print(int level, String out, Object... args) {
         String prefix = StringUtils.repeat(padding, level);
         List<Object> argsList = new LinkedList<Object>(Arrays.asList(args));
         argsList.add(0, prefix);
-        System.out.format("%s" + out + "%n", argsList.toArray());
+        System.out.format("%s" + out.replaceAll("\n", "\n" + prefix) + "%n", argsList.toArray());
     }
 
     @Override
