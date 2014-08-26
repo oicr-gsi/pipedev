@@ -1,6 +1,5 @@
 package ca.on.oicr.pde.testing.decider;
 
-import ca.on.oicr.pde.testing.decider.TestDefinition;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.IOException;
@@ -10,9 +9,9 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-public class TestDefinitionTest {
+public class DeciderRunTestDefinitionTest {
 
-    TestDefinition td;
+    DeciderRunTestDefinition td;
 
     @BeforeTest
     public void setup() throws IOException {
@@ -56,7 +55,7 @@ public class TestDefinitionTest {
                 + "    ]\n"
                 + "}";
 
-        td = TestDefinition.buildFromJson(jsonDoc);
+        td = DeciderRunTestDefinition.buildFromJson(jsonDoc);
         System.out.println(td);
 
         ObjectMapper m = new ObjectMapper();
@@ -75,8 +74,8 @@ public class TestDefinitionTest {
     public void checkParameterOverride() throws IOException {
 
         //Check that parameter overrides are working:
-        TestDefinition.Test test = null;
-        for (TestDefinition.Test t : td.tests) {
+        DeciderRunTestDefinition.Test test = null;
+        for (DeciderRunTestDefinition.Test t : td.tests) {
             if (t.getId().equals("parameter override test")) {
                 test = t;
             }
@@ -96,8 +95,8 @@ public class TestDefinitionTest {
     public void checkParameterAddition() throws IOException {
 
         //Check that parameter additions are working:
-        TestDefinition.Test test = null;
-        for (TestDefinition.Test t : td.tests) {
+        DeciderRunTestDefinition.Test test = null;
+        for (DeciderRunTestDefinition.Test t : td.tests) {
             if (t.getId().equals("parameter addition test")) {
                 test = t;
             }

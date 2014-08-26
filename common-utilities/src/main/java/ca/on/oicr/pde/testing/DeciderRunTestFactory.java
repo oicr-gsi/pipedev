@@ -3,7 +3,7 @@ package ca.on.oicr.pde.testing;
 import ca.on.oicr.pde.dao.SeqwareService;
 import ca.on.oicr.pde.dao.SeqwareWebserviceImpl;
 import ca.on.oicr.pde.testing.decider.DeciderRunTest;
-import ca.on.oicr.pde.testing.decider.TestDefinition;
+import ca.on.oicr.pde.testing.decider.DeciderRunTestDefinition;
 import static ca.on.oicr.pde.utilities.Helpers.*;
 import ca.on.oicr.pde.utilities.ThreadedSeqwareExecutor;
 import ca.on.oicr.pde.utilities.Timer;
@@ -114,9 +114,9 @@ public class DeciderRunTestFactory {
             throw new RuntimeException(ioe);
         }
 
-        TestDefinition td;
+        DeciderRunTestDefinition td;
         try {
-            td = TestDefinition.buildFromJson(tdString);
+            td = DeciderRunTestDefinition.buildFromJson(tdString);
         } catch (IOException ioe) {
             log.error("Error deserializing test definition:", ioe);
             throw new RuntimeException(ioe);
@@ -134,7 +134,7 @@ public class DeciderRunTestFactory {
         //Setup a shared thread pool for all tests to use
         ExecutorService sharedPool = Executors.newFixedThreadPool(50);
 
-        for (TestDefinition.Test t : td.tests) {
+        for (DeciderRunTestDefinition.Test t : td.tests) {
 
             //Build test name
             StringBuilder b = new StringBuilder();

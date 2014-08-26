@@ -10,8 +10,6 @@ import ca.on.oicr.pde.model.WorkflowRunReportRecord;
 import ca.on.oicr.pde.testing.common.RunTestBase;
 import ca.on.oicr.pde.utilities.Timer;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.base.Joiner;
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -49,15 +46,15 @@ public class DeciderRunTest extends RunTestBase {
     File actualReportFile;
     File expectedReportFile;
 
-    TestResult actual;
-    TestResult expected;
+    DeciderRunTestReport actual;
+    DeciderRunTestReport expected;
 
-    TestDefinition.Test testDefinition;
+    DeciderRunTestDefinition.Test testDefinition;
 
     private Timer executionTimer;
 
     public DeciderRunTest(SeqwareService seqwareService, File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName,
-            File deciderJar, File bundledWorkflow, String deciderClass, TestDefinition.Test definition) throws IOException {
+            File deciderJar, File bundledWorkflow, String deciderClass, DeciderRunTestDefinition.Test definition) throws IOException {
 
         super(seqwareDistribution, seqwareSettings, workingDirectory, testName);
 
@@ -75,7 +72,7 @@ public class DeciderRunTest extends RunTestBase {
 
         if (expectedReportFile != null) {
             try {
-                expected = TestResult.buildFromJson(expectedReportFile);
+                expected = DeciderRunTestReport.buildFromJson(expectedReportFile);
             } catch (IOException ioe) {
                 log.printf(Level.WARN, "[%s] There was a problem loading the metrics file: [%s].\n"
                         + "The exception output:\n%s\nContinuing with test but comparision step will fail.",
@@ -134,7 +131,6 @@ public class DeciderRunTest extends RunTestBase {
         seqwareExecutor.cancelWorkflowRuns(workflow);
         log.printf(Level.INFO, "[%s] Completed clean up in %s", testName, timer.stop());
 
-        
         log.printf(Level.INFO, "[%s] Test summary:\nRun time: %s\nWorking directory: %s",
                 testName, executionTimer.stop(), workingDirectory);
 
@@ -150,7 +146,7 @@ public class DeciderRunTest extends RunTestBase {
 
     @Test(groups = "preExecution")
     public void initializeEnvironment() throws IOException {
-        
+
     }
 
     @Test(groups = "preExecution")
@@ -196,12 +192,12 @@ public class DeciderRunTest extends RunTestBase {
         Timer timer = Timer.start();
         Workflow.Builder workflowBuilder = new Workflow.Builder();
         workflowBuilder.setSwid(workflowSwid.getSwid());
-        actual = getWorkflowReport(workflowBuilder.build());
+        actual = generateReport(workflowBuilder.build());
 
         actualReportFile = new File(workingDirectory.getAbsolutePath() + "/" + testDefinition.outputName());
         Assert.assertFalse(actualReportFile.exists());
 
-        FileUtils.write(actualReportFile, testResultToJson(actual));
+        FileUtils.write(actualReportFile, actual.toJson());
 
         reports.add(actualReportFile);
 
@@ -212,18 +208,20 @@ public class DeciderRunTest extends RunTestBase {
     public void compareWorkflowRunReport() throws JsonProcessingException, IOException {
         Timer timer = Timer.start();
 
-        Assert.assertNotNull(expected, String.format("[%s] no expected output to compare to.", testName));
+        Assert.assertNotNull(expected, "There is no expected output to compare to");
 
         List<String> problems = validateReport(actual);
         Assert.assertTrue(problems.isEmpty(), problems.toString());
 
-        Assert.assertTrue(compareReports(actual, expected),
-                "There are differences between reports:\nExpected: " + expectedReportFile + "\nActual: " + actualReportFile);
+        if (!actual.equals(expected)) {
+            Assert.fail(String.format("There are differences between decider runs:%nExpected run report: %s%nActual run report: %s%n%s",
+                    expectedReportFile, actualReportFile, DeciderRunTestReport.diffReportSummary(actual, expected, 3)));
+        }
 
         log.printf(Level.INFO, "[%s] Completed comparing workflow run reports in %s", testName, timer.stop());
     }
 
-    private List<String> validateReport(TestResult t) {
+    private List<String> validateReport(DeciderRunTestReport t) {
         List<String> problems = new ArrayList<String>();
 
         if (t.getWorkflowRunCount().equals(Integer.valueOf("0"))) {
@@ -233,20 +231,11 @@ public class DeciderRunTest extends RunTestBase {
         return problems;
     }
 
-    public static <T> boolean compareReports(T actual, T expected) {
-        //Node root = ObjectDifferFactory.getInstance().compare(actual, expected);
-        //log.warn("root categories: " + root.getCategories());
-        //log.warn(root.getChildren());
-        //diff is not working root.visit(new PrintingVisitor(actual, expected));
-        //return (!root.hasChanges());
-        return actual.equals(expected);
-    }
-
     //TODO: move this to a separate implementation class of "Decider Report"
-    private TestResult getWorkflowReport(Workflow w) {
+    private DeciderRunTestReport generateReport(Workflow w) {
         List<WorkflowRunReportRecord> wrrs = seqwareService.getWorkflowRunRecords(w);
 
-        TestResult t = new TestResult();
+        DeciderRunTestReport t = new DeciderRunTestReport();
         t.setWorkflowRunCount(wrrs.size());
 
         for (WorkflowRunReportRecord wrr : wrrs) {
@@ -301,14 +290,6 @@ public class DeciderRunTest extends RunTestBase {
         }
 
         return t;
-
-    }
-
-    public static String testResultToJson(TestResult t) throws IOException {
-
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        return mapper.writeValueAsString(t);
 
     }
 
