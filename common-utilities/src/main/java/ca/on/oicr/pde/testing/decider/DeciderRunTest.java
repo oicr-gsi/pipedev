@@ -29,6 +29,7 @@ import org.testng.Assert;
 import org.testng.annotations.*;
 import org.testng.annotations.Test;
 
+@Listeners({ca.on.oicr.pde.testing.testng.TestCaseReporter.class})
 public class DeciderRunTest extends RunTestBase {
 
     private final Logger log = LogManager.getLogger(DeciderRunTest.class);

@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
+@Listeners({ca.on.oicr.pde.testing.testng.TestCaseReporter.class})
 public class WorkflowRunTest extends RunTestBase {
 
     private final static Logger log = LogManager.getLogger(WorkflowRunTest.class);
