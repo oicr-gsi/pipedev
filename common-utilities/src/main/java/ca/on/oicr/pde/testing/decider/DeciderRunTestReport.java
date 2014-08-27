@@ -172,6 +172,49 @@ public class DeciderRunTestReport {
         return EqualsBuilder.reflectionEquals(this, obj);
     }
 
+    public static String diffHeader(DeciderRunTestReport actual, DeciderRunTestReport expected) {
+
+        StringBuilder sb = new StringBuilder();
+
+        if (expected.getWorkflowRunCount().intValue() != actual.getWorkflowRunCount().intValue()) {
+            sb.append(String.format("Workflow run count changed from %s to %s%n", expected.getWorkflowRunCount(), actual.getWorkflowRunCount()));
+        }
+        if (expected.studies.size() != actual.studies.size()) {
+            sb.append(String.format("Study set size changed from %s to %s%n", expected.studies.size(), actual.studies.size()));
+        }
+        if (expected.sequencerRuns.size() != actual.sequencerRuns.size()) {
+            sb.append(String.format("Sequencer run set size changed from %s to %s%n", expected.sequencerRuns.size(), actual.sequencerRuns.size()));
+        }
+        if (expected.lanes.size() != actual.lanes.size()) {
+            sb.append(String.format("Lane set size changed from %s to %s%n", expected.lanes.size(), actual.lanes.size()));
+        }
+        if (expected.samples.size() != actual.samples.size()) {
+            sb.append(String.format("Sample set size changed from %s to %s%n", expected.samples.size(), actual.samples.size()));
+        }
+        if (expected.workflows.size() != actual.workflows.size()) {
+            sb.append(String.format("Workflow set size changed from %s to %s%n", expected.workflows.size(), actual.workflows.size()));
+        }
+        if (expected.processingAlgorithms.size() != actual.processingAlgorithms.size()) {
+            sb.append(String.format("Processing algorithm set size changed from %s to %s%n", expected.processingAlgorithms.size(), actual.processingAlgorithms.size()));
+        }
+        if (expected.fileMetaTypes.size() != actual.fileMetaTypes.size()) {
+            sb.append(String.format("File metatype set size changed from %s to %s%n", expected.fileMetaTypes.size(), actual.fileMetaTypes.size()));
+        }
+        if (expected.maxInputFiles.intValue() != actual.maxInputFiles.intValue()) {
+            sb.append(String.format("Max input files changed from %s to %s%n", expected.maxInputFiles, actual.maxInputFiles));
+        }
+        if (expected.minInputFiles.intValue() != actual.minInputFiles.intValue()) {
+            sb.append(String.format("Min input files changed from %s to %s%n", expected.minInputFiles, actual.minInputFiles));
+        }
+
+        //Remove last new line character
+        if (sb.length() != 0) {
+            sb.setLength(sb.length() - 1);
+        }
+
+        return sb.toString();
+    }
+
     public String toJson() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);

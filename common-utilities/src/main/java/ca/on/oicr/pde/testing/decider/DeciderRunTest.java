@@ -132,8 +132,9 @@ public class DeciderRunTest extends RunTestBase {
         seqwareExecutor.cancelWorkflowRuns(workflow);
         log.printf(Level.INFO, "[%s] Completed clean up in %s", testName, timer.stop());
 
-        log.printf(Level.INFO, "[%s] Test summary:\nRun time: %s\nWorking directory: %s",
-                testName, executionTimer.stop(), workingDirectory);
+        //Test case summary info
+        log.printf(Level.INFO, "[%s] Total run time: %s",testName, executionTimer.stop());
+        log.printf(Level.INFO, "[%s] Working directory: %s", testName, workingDirectory);
 
     }
 
@@ -215,14 +216,22 @@ public class DeciderRunTest extends RunTestBase {
         Assert.assertTrue(problems.isEmpty(), problems.toString());
 
         if (!actual.equals(expected)) {
-            Assert.fail(String.format("There are differences between decider runs:%n"
-                    + "Expected run report: %s%n"
-                    + "Actual run report: %s%n"
-                    + "%s",
-                    expectedReportFile,
-                    actualReportFile,
-                    ObjectDiff.diffReportSummary(actual.getWorkflowRuns(), expected.getWorkflowRuns(), 3))
-            );
+            StringBuilder sb = new StringBuilder();
+            sb.append("There are differences between decider runs:\n");
+            sb.append("Expected run report: ").append(expectedReportFile).append("\n");
+            sb.append("Actual run report: ").append(actualReportFile).append("\n");
+
+            //Build the summary report
+            String headerSummary = DeciderRunTestReport.diffHeader(actual, expected);
+            if (!headerSummary.isEmpty()) {
+                sb.append("Change summary:\n");
+                sb.append(headerSummary);
+            } else {
+                sb.append(ObjectDiff.diffReportSummary(actual, expected, 3));
+            }
+
+            //Don't print a testng message, only print our string
+            Assert.fail(sb.toString());
         }
 
         log.printf(Level.INFO, "[%s] Completed comparing workflow run reports in %s", testName, timer.stop());
