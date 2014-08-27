@@ -1,6 +1,7 @@
 package ca.on.oicr.pde.testing.decider;
 
 import ca.on.oicr.pde.dao.SeqwareService;
+import ca.on.oicr.pde.diff.ObjectDiff;
 import ca.on.oicr.pde.model.Accessionable;
 import ca.on.oicr.pde.model.ReducedFileProvenanceReportRecord;
 import ca.on.oicr.pde.model.SeqwareAccession;
@@ -214,8 +215,14 @@ public class DeciderRunTest extends RunTestBase {
         Assert.assertTrue(problems.isEmpty(), problems.toString());
 
         if (!actual.equals(expected)) {
-            Assert.fail(String.format("There are differences between decider runs:%nExpected run report: %s%nActual run report: %s%n%s",
-                    expectedReportFile, actualReportFile, DeciderRunTestReport.diffReportSummary(actual, expected, 3)));
+            Assert.fail(String.format("There are differences between decider runs:%n"
+                    + "Expected run report: %s%n"
+                    + "Actual run report: %s%n"
+                    + "%s",
+                    expectedReportFile,
+                    actualReportFile,
+                    ObjectDiff.diffReportSummary(actual.getWorkflowRuns(), expected.getWorkflowRuns(), 3))
+            );
         }
 
         log.printf(Level.INFO, "[%s] Completed comparing workflow run reports in %s", testName, timer.stop());

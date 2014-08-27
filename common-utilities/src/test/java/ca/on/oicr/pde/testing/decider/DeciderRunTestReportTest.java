@@ -1,5 +1,6 @@
 package ca.on.oicr.pde.testing.decider;
 
+import ca.on.oicr.pde.diff.ObjectDiff;
 import ca.on.oicr.pde.model.FileProvenanceReportRecord;
 import ca.on.oicr.pde.model.ReducedFileProvenanceReportRecord;
 import ca.on.oicr.pde.parsers.FileProvenanceReport;
@@ -110,7 +111,7 @@ public class DeciderRunTestReportTest {
         DeciderRunTestReport actual = DeciderRunTestReport.buildFromJson(actualJson);
         DeciderRunTestReport expected = DeciderRunTestReport.buildFromJson(expectedJson);
 
-        Assert.assertTrue(actual.equals(expected), DeciderRunTestReport.diffReports(actual, expected).toString());
+        Assert.assertTrue(actual.equals(expected), ObjectDiff.diff(actual, expected).toString());
 
     }
 
@@ -165,7 +166,7 @@ public class DeciderRunTestReportTest {
             w.setFiles(rs);
         }
 
-        Assert.assertTrue(actual.equals(expected), "Differences = " + DeciderRunTestReport.diffReports(actual, expected).toString());
+        Assert.assertTrue(actual.equals(expected), "Differences = " + ObjectDiff.diff(actual, expected).toString());
 
         Assert.assertEquals(actual.toJson(), expected.toJson());
 
@@ -343,7 +344,7 @@ public class DeciderRunTestReportTest {
 
         Assert.assertNotEquals(actual, expected);
 
-        Map differences = DeciderRunTestReport.diffReports(actual, expected);
+        Map differences = ObjectDiff.diff(actual, expected);
         System.out.println(differences.toString());
 
         //There should be 3 changes
@@ -353,7 +354,7 @@ public class DeciderRunTestReportTest {
         Assert.assertNotEquals(actual.toJson(), expected.toJson());
 
         //Change summary tests
-        String summary = DeciderRunTestReport.diffReportSummary(actual, expected, 2);
+        String summary = ObjectDiff.diffReportSummary(actual, expected, 2);
         System.out.println(summary);
         Assert.assertEquals(summary, "There are 3 changes:\n"
                 + "'/maxInputFiles' has changed from [ 2 ] to [ 3 ]\n"

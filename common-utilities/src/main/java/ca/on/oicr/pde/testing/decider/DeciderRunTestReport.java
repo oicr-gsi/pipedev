@@ -3,18 +3,11 @@ package ca.on.oicr.pde.testing.decider;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import de.danielbechler.diff.ObjectDifferFactory;
-import de.danielbechler.diff.node.Node;
-import de.danielbechler.diff.path.PropertyPath;
-import de.danielbechler.diff.visitor.PrintingVisitor;
-import de.danielbechler.diff.visitor.ToMapPrintingVisitor;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -179,62 +172,10 @@ public class DeciderRunTestReport {
         return EqualsBuilder.reflectionEquals(this, obj);
     }
 
-    public static Map<PropertyPath, String> diffReports(DeciderRunTestReport actual, DeciderRunTestReport expected) {
-        Node root = ObjectDifferFactory.getInstance().compare(actual, expected);
-        MinimalToMapPrintingVisitor v = new MinimalToMapPrintingVisitor(actual, expected);
-        root.visit(v);
-        return v.getMessages();
-    }
-
-    public static String diffReportSummary(DeciderRunTestReport actual, DeciderRunTestReport expected, int maxChangesToPrint) {
-
-        //Get changes
-        Map<PropertyPath, String> differences = diffReports(actual, expected);
-
-        //Build summary
-        StringBuilder sb = new StringBuilder();
-        switch (differences.size()) {
-            case 0:
-                sb.append("There are no changes");
-                break;
-            case 1:
-                sb.append("There is 1 change:");
-                break;
-            default:
-                sb.append(String.format("There are %s changes:", differences.size()));
-                break;
-        }
-        int count = 0;
-        for (Entry<PropertyPath, String> e : differences.entrySet()) {
-            if (++count > maxChangesToPrint) {
-                sb.append("\n... ").append(differences.size() - maxChangesToPrint).append(" more");
-                break;
-            }
-            sb.append("\n").append(e.getValue());
-        }
-        return sb.toString();
-    }
-
     public String toJson() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         return mapper.writeValueAsString(this);
-    }
-
-    private static class MinimalToMapPrintingVisitor extends ToMapPrintingVisitor {
-
-        public MinimalToMapPrintingVisitor(final Object working, final Object base) {
-            super(working, base);
-        }
-
-        @Override
-        protected String differenceToString(final Node node, final Object base, final Object modified) {
-            String text = super.differenceToString(node, base, modified);
-            text = text.replaceAll("Property at path ", "");
-            getMessages().put(node.getPropertyPath(), text);
-            return text;
-        }
-
     }
 
 }
