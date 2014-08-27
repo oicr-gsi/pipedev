@@ -79,7 +79,7 @@ public class ThreadedSeqwareExecutor extends ShellExecutor {
             //Execute the cancel task (blocks until complete)
             io.seqware.WorkflowRuns.submitCancel(workflowRunSwid);
 
-            log.printf(Level.INFO, "Workflow run = %s has been cancelled.", workflowRunSwid);
+            log.printf(Level.DEBUG, "Workflow run [%s] has been cancelled.", workflowRunSwid);
         }
     }
 

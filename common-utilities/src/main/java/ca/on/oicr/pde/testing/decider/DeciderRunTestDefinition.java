@@ -16,7 +16,7 @@ import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
-public class TestDefinition {
+public class DeciderRunTestDefinition {
 
     private static String defaultDescription = "";
     private static String defaultMetricsDirectory = "";
@@ -26,40 +26,40 @@ public class TestDefinition {
     private static Set<String> defaultSequencerRuns = new HashSet<String>();
     private static Set<String> defaultSamples = new HashSet<String>();
 
-    public Collection<TestDefinition.Test> tests;
+    public Collection<DeciderRunTestDefinition.Test> tests;
 
-    public static TestDefinition buildFromJson(String json) throws IOException {
+    public static DeciderRunTestDefinition buildFromJson(String json) throws IOException {
         ObjectMapper m = new ObjectMapper();
         m.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        return m.readValue(json, TestDefinition.class);
+        return m.readValue(json, DeciderRunTestDefinition.class);
     }
 
     public void setDefaultDescription(String defaultDescription) {
-        TestDefinition.defaultDescription = defaultDescription;
+        DeciderRunTestDefinition.defaultDescription = defaultDescription;
     }
 
     public void setDefaultMetricsDirectory(String defaultMetricsDirectory) {
-        TestDefinition.defaultMetricsDirectory = defaultMetricsDirectory;
+        DeciderRunTestDefinition.defaultMetricsDirectory = defaultMetricsDirectory;
     }
 
     public void setDefaultParameters(Map<String, String> defaultParameters) {
-        TestDefinition.defaultParameters = defaultParameters;
+        DeciderRunTestDefinition.defaultParameters = defaultParameters;
     }
 
     public void setDefaultStudies(Set<String> defaultStudies) {
-        TestDefinition.defaultStudies = defaultStudies;
+        DeciderRunTestDefinition.defaultStudies = defaultStudies;
     }
 
     public void setDefaultSequencerRuns(Set<String> defaultSequencerRuns) {
-        TestDefinition.defaultSequencerRuns = defaultSequencerRuns;
+        DeciderRunTestDefinition.defaultSequencerRuns = defaultSequencerRuns;
     }
 
     public void setDefaultSamples(Set<String> defaultSamples) {
-        TestDefinition.defaultSamples = defaultSamples;
+        DeciderRunTestDefinition.defaultSamples = defaultSamples;
     }
 
     public void setDefaultIniExclusions(Set<String> defaultIniExclusions) {
-        TestDefinition.defaultIniExclusions = defaultIniExclusions;
+        DeciderRunTestDefinition.defaultIniExclusions = defaultIniExclusions;
     }
 
     public static class Test {

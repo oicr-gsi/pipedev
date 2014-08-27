@@ -3,9 +3,10 @@ package ca.on.oicr.pde.testing;
 import ca.on.oicr.pde.dao.SeqwareService;
 import ca.on.oicr.pde.dao.SeqwareWebserviceImpl;
 import ca.on.oicr.pde.testing.decider.DeciderRunTest;
-import ca.on.oicr.pde.testing.decider.TestDefinition;
+import ca.on.oicr.pde.testing.decider.DeciderRunTestDefinition;
 import static ca.on.oicr.pde.utilities.Helpers.*;
 import ca.on.oicr.pde.utilities.ThreadedSeqwareExecutor;
+import ca.on.oicr.pde.utilities.Timer;
 import com.jcabi.manifests.Manifests;
 import java.io.File;
 import java.io.IOException;
@@ -86,10 +87,10 @@ public class DeciderRunTestFactory {
 
         if (System.getProperty("testDefinition") != null) {
             testDefinitionFilePath = System.getProperty("testDefinition");
-            log.warn("test definition has been defined as a jvm argument");
+            log.printf(Level.WARN, "test defintion has been overridden by jvm argument");
         }
 
-        log.warn("test definition path=[" + testDefinitionFilePath + "]");
+        log.printf(Level.INFO, "test definition path [%s]", testDefinitionFilePath);
 
         //TODO: below is temporary workaround to allow the user to override the test definition via the command line (eg, mvn -DtestDefinition=/tmp/a.json ...)
         // refactor create tests into a separate function, create command line tool as a different way to execute test?
@@ -113,30 +114,27 @@ public class DeciderRunTestFactory {
             throw new RuntimeException(ioe);
         }
 
-        TestDefinition td;
+        DeciderRunTestDefinition td;
         try {
-            td = TestDefinition.buildFromJson(tdString);
+            td = DeciderRunTestDefinition.buildFromJson(tdString);
         } catch (IOException ioe) {
             log.error("Error deserializing test definition:", ioe);
             throw new RuntimeException(ioe);
         }
-        log.warn(td);
 
         //TODO: provide user a way to specify impl
-        long startTime = System.nanoTime();
-        log.printf(Level.INFO, "Starting loading of seqware metadata");
+        Timer timer = Timer.start();
         SeqwareService seqwareService = new SeqwareWebserviceImpl(webserviceUrl, "admin@admin.com", "admin");
         seqwareService.update();
-        log.printf(Level.INFO, "Completed loading of seqware metadata in %.2fs", (System.nanoTime() - startTime) / 1E9);
+        log.printf(Level.INFO, "Completed loading of seqware metadata in %s", timer.stop());
 
-        log.debug("Starting transform of json test definition to TestDefinition objects");
         List<DeciderRunTest> tests = new ArrayList<DeciderRunTest>();
         int count = 0;
-        
+
         //Setup a shared thread pool for all tests to use
         ExecutorService sharedPool = Executors.newFixedThreadPool(50);
-        
-        for (TestDefinition.Test t : td.tests) {
+
+        for (DeciderRunTestDefinition.Test t : td.tests) {
 
             //Build test name
             StringBuilder b = new StringBuilder();
@@ -156,13 +154,10 @@ public class DeciderRunTestFactory {
 
             DeciderRunTest test = new DeciderRunTest(seqwareService, seqwareDistribution, seqwareSettings, testWorkingDir, testName, deciderJar, bundledWorkflow, deciderClass, t);
             test.setSeqwareExecutor(new ThreadedSeqwareExecutor(testName, seqwareDistribution, seqwareSettings, testWorkingDir, sharedPool, seqwareService));
-            
+
             tests.add(test);
 
         }
-        log.debug("Completed transform of json test definition to TestDefinition objects");
-
-        log.warn("Completed loading test definitions, tests will start now");
 
         return tests.toArray();
 

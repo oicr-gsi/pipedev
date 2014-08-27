@@ -8,6 +8,7 @@ import ca.on.oicr.pde.model.WorkflowRun;
 import ca.on.oicr.pde.model.WorkflowRunReportRecord;
 import ca.on.oicr.pde.parsers.FileProvenanceReport;
 import ca.on.oicr.pde.parsers.WorkflowRunReport;
+import ca.on.oicr.pde.utilities.Timer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -94,17 +95,12 @@ public final class SeqwareWebserviceImpl extends SeqwareService {
     protected void updateFileProvenanceRecords() {
 
         try {
-            long startTime = System.nanoTime();
-            log.printf(Level.INFO, "Starting download and parsing of file provenance report");
             fprs = FileProvenanceReport.parseFileProvenanceReport(getHttpResponse(restUrl + "/reports/file-provenance"), FileProvenanceReport.HeaderValidationMode.SKIP);
-            log.printf(Level.INFO, "Completed download and parsing of file provenance report in %.2fs", (System.nanoTime() - startTime) / 1E9);
         } catch (IOException ioe) {
             throw new RuntimeException(ioe);
         }
 
         swidToFpr = new HashMap<String, List<FileProvenanceReportRecord>>();
-        long startTime = System.nanoTime();
-        log.printf(Level.INFO, "Starting update of seqware accession to file provenance record lookup map");
         for (FileProvenanceReportRecord f : fprs) {
             for (String swid : f.getSeqwareAccessions()) {
                 if (!swidToFpr.containsKey(swid)) {
@@ -139,8 +135,7 @@ public final class SeqwareWebserviceImpl extends SeqwareService {
                 max = size;
             }
         }
-        log.printf(Level.INFO, "Number of keys = %s, min/max/avg records per key = %s/%s/%.2f", numKeys, min, max, avg.doubleValue());
-        log.printf(Level.INFO, "Completed update of seqware accession to file provenance record lookup map in %.2fs", (System.nanoTime() - startTime) / 1E9);
+        log.printf(Level.INFO, "%s file provenance records, %s unique keys, %s/%s/%.2f (min/max/avg) records per key", fprs.size(), numKeys, min, max, avg.doubleValue());
     }
 
     @Override

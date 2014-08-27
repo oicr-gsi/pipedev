@@ -1,19 +1,16 @@
 package ca.on.oicr.pde.testing.decider;
 
 import ca.on.oicr.pde.dao.SeqwareService;
+import ca.on.oicr.pde.diff.ObjectDiff;
 import ca.on.oicr.pde.model.Accessionable;
 import ca.on.oicr.pde.model.ReducedFileProvenanceReportRecord;
-import ca.on.oicr.pde.model.Sample;
-import ca.on.oicr.pde.model.SequencerRun;
 import ca.on.oicr.pde.model.SeqwareAccession;
-import ca.on.oicr.pde.model.Study;
 import ca.on.oicr.pde.model.Workflow;
 import ca.on.oicr.pde.model.WorkflowRun;
 import ca.on.oicr.pde.model.WorkflowRunReportRecord;
 import ca.on.oicr.pde.testing.common.RunTestBase;
+import ca.on.oicr.pde.utilities.Timer;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.base.Joiner;
 import java.io.File;
 import java.io.IOException;
@@ -30,9 +27,10 @@ import org.testng.Assert;
 import org.testng.annotations.*;
 import org.testng.annotations.Test;
 
-public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
+@Listeners({ca.on.oicr.pde.testing.testng.TestCaseReporter.class})
+public class DeciderRunTest extends RunTestBase {
 
-    private final static Logger log = LogManager.getLogger(DeciderRunTest.class);
+    private final Logger log = LogManager.getLogger(DeciderRunTest.class);
     private final static List<File> reports = Collections.synchronizedList(new ArrayList<File>());
 
     private final File deciderJar;
@@ -49,13 +47,15 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
     File actualReportFile;
     File expectedReportFile;
 
-    TestResult actual;
-    TestResult expected;
+    DeciderRunTestReport actual;
+    DeciderRunTestReport expected;
 
-    TestDefinition.Test testDefinition;
+    DeciderRunTestDefinition.Test testDefinition;
+
+    private Timer executionTimer;
 
     public DeciderRunTest(SeqwareService seqwareService, File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName,
-            File deciderJar, File bundledWorkflow, String deciderClass, TestDefinition.Test definition) throws IOException {
+            File deciderJar, File bundledWorkflow, String deciderClass, DeciderRunTestDefinition.Test definition) throws IOException {
 
         super(seqwareDistribution, seqwareSettings, workingDirectory, testName);
 
@@ -72,16 +72,16 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
         expectedReportFile = testDefinition.metrics();
 
         if (expectedReportFile != null) {
-            log.warn("Found a metrics file: [" + expectedReportFile.getAbsolutePath() + "].");
             try {
-                expected = TestResult.buildFromJson(expectedReportFile);
+                expected = DeciderRunTestReport.buildFromJson(expectedReportFile);
             } catch (IOException ioe) {
-                log.error("There was a problem loading the metrics file: [" + expectedReportFile.getAbsolutePath() + "]."
-                        + "\nThe exception output:\n" + ioe.toString() + "\nContinuing with test but comparision step will fail.");
+                log.printf(Level.WARN, "[%s] There was a problem loading the metrics file: [%s].\n"
+                        + "The exception output:\n%s\nContinuing with test but comparision step will fail.",
+                        testName, expectedReportFile.getAbsolutePath(), ioe.toString());
                 expected = null;
             }
         } else {
-            log.error("Metrics does not exist, skipping comparison step");
+            log.printf(Level.WARN, "[%s] Missing an expected output metrics file. Skipping comparison step", testName);
         }
 
     }
@@ -94,6 +94,8 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
     @BeforeClass
     public void beforeEachRunTest() throws IOException {
 
+        log.printf(Level.INFO, "[%s] Starting run test", testName);
+        executionTimer = Timer.start();
         Assert.assertNotNull(seqwareDistribution,
                 "Seqware distribution path is not set - set seqwareDistribution in pom.xml.");
         Assert.assertNotNull(workingDirectory,
@@ -118,19 +120,22 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
     @AfterClass
     public void afterEachRunTest() throws IOException {
 
+        Workflow.Builder workflowBuilder = new Workflow.Builder();
+        workflowBuilder.setSwid(workflowSwid.toString());
+        Workflow workflow = workflowBuilder.build();
+
         /* Cancel all submitted workflow runs
          * Each decider test run installs a separate instance of its associated
          * workflow bundle. So each decider run test has a unique workflow swid.
-         * TODO: Simplify this when the pde-seqware API is complete
          */
-        long startTime = System.nanoTime();
-        log.printf(Level.INFO, "Starting clean up of %s", testName);
-        Workflow.Builder workflowBuilder = new Workflow.Builder();
-        workflowBuilder.setSwid(workflowSwid.toString());
-        seqwareExecutor.cancelWorkflowRuns(workflowBuilder.build());
+        Timer timer = Timer.start();
+        seqwareExecutor.cancelWorkflowRuns(workflow);
+        log.printf(Level.INFO, "[%s] Completed clean up in %s", testName, timer.stop());
 
-        log.printf(Level.INFO, "Completed clean up for [%s] in %.2fs", testName, (System.nanoTime() - startTime) / 1E9);
-        
+        //Test case summary info
+        log.printf(Level.INFO, "[%s] Total run time: %s",testName, executionTimer.stop());
+        log.printf(Level.INFO, "[%s] Working directory: %s", testName, workingDirectory);
+
     }
 
     @AfterSuite
@@ -148,15 +153,10 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
 
     @Test(groups = "preExecution")
     public void installWorkflow() throws IOException {
-
-        long startTime = System.nanoTime();
-
+        Timer timer = Timer.start();
         workflowSwid = seqwareExecutor.installWorkflow(bundledWorkflow);
-
-        Assert.assertNotNull(workflowSwid);
-
-        log.printf(Level.INFO, "Completed installing workflow bundle for [%s] in %.2fs", testName, (System.nanoTime() - startTime) / 1E9);
-
+        Assert.assertNotNull(workflowSwid, "Installation of the workflow bundle failed");
+        log.printf(Level.INFO, "[%s] Completed installing workflow bundle in %s", testName, timer.stop());
     }
 
 //    @Test(groups = "preExecution", expectedExceptions = Exception.class)
@@ -180,61 +180,64 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
 //    }
     @Test(dependsOnGroups = "preExecution", groups = "execution")
     public void executeDecider() throws IOException, InstantiationException, ClassNotFoundException, IllegalAccessException {
-
-        long startTime = System.nanoTime();
-        log.printf(Level.INFO, "Starting execution of %s test", testName);
-
+        Timer timer = Timer.start();
         StringBuilder extraArgs = new StringBuilder();
         for (Entry<String, String> e : testDefinition.getParameters().entrySet()) {
             extraArgs.append(" ").append(e.getKey()).append(" ").append(e.getValue());
         }
-
         seqwareExecutor.deciderRunSchedule(deciderJar, workflowSwid, studies, sequencerRuns, samples, extraArgs.toString());
-
-        log.printf(Level.INFO, "Completed workflow run scheduling for [%s] in %.2fs", testName, (System.nanoTime() - startTime) / 1E9);
-
+        log.printf(Level.INFO, "[%s] Completed workflow run scheduling in %s", testName, timer.stop());
     }
 
     @Test(dependsOnGroups = "execution", groups = "postExecution")
     public void calculateWorkflowRunReport() throws JsonProcessingException, IOException {
-
-        long startTime = System.nanoTime();
-
+        Timer timer = Timer.start();
         Workflow.Builder workflowBuilder = new Workflow.Builder();
         workflowBuilder.setSwid(workflowSwid.getSwid());
-        actual = getWorkflowReport(workflowBuilder.build());
+        actual = generateReport(workflowBuilder.build());
 
         actualReportFile = new File(workingDirectory.getAbsolutePath() + "/" + testDefinition.outputName());
         Assert.assertFalse(actualReportFile.exists());
 
-        FileUtils.write(actualReportFile, testResultToJson(actual));
+        FileUtils.write(actualReportFile, actual.toJson());
 
         reports.add(actualReportFile);
 
-        log.printf(Level.INFO, "Completed generating workflow run report for [%s] in %.2fs", testName, (System.nanoTime() - startTime) / 1E9);
-
+        log.printf(Level.INFO, "[%s] Completed generating workflow run report in %s", testName, timer.stop());
     }
 
     @Test(dependsOnGroups = "execution", dependsOnMethods = "calculateWorkflowRunReport", groups = "postExecution")
     public void compareWorkflowRunReport() throws JsonProcessingException, IOException {
+        Timer timer = Timer.start();
 
-        long startTime = System.nanoTime();
-
-        Assert.assertNotNull(expected, "no expected output to compare to.");
+        Assert.assertNotNull(expected, "There is no expected output to compare to");
 
         List<String> problems = validateReport(actual);
         Assert.assertTrue(problems.isEmpty(), problems.toString());
 
-        Assert.assertTrue(compareReports(actual, expected),
-                "There are differences between reports:\nExpected: " + expectedReportFile + "\nActual: " + actualReportFile);
-        //+ "\nExpected object:\n" + expected.toString() + "\nActual object:\n" + actual.toString());
+        if (!actual.equals(expected)) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("There are differences between decider runs:\n");
+            sb.append("Expected run report: ").append(expectedReportFile).append("\n");
+            sb.append("Actual run report: ").append(actualReportFile).append("\n");
 
-        log.printf(Level.INFO, "Completed comparing workflow run reports for [%s] in %.2fs", testName, (System.nanoTime() - startTime) / 1E9);
+            //Build the summary report
+            String headerSummary = DeciderRunTestReport.diffHeader(actual, expected);
+            if (!headerSummary.isEmpty()) {
+                sb.append("Change summary:\n");
+                sb.append(headerSummary);
+            } else {
+                sb.append(ObjectDiff.diffReportSummary(actual, expected, 3));
+            }
 
+            //Don't print a testng message, only print our string
+            Assert.fail(sb.toString());
+        }
+
+        log.printf(Level.INFO, "[%s] Completed comparing workflow run reports in %s", testName, timer.stop());
     }
 
-    private List<String> validateReport(TestResult t) {
-
+    private List<String> validateReport(DeciderRunTestReport t) {
         List<String> problems = new ArrayList<String>();
 
         if (t.getWorkflowRunCount().equals(Integer.valueOf("0"))) {
@@ -242,26 +245,13 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
         }
 
         return problems;
-
-    }
-
-    public static <T> boolean compareReports(T actual, T expected) {
-
-        //Node root = ObjectDifferFactory.getInstance().compare(actual, expected);
-        //log.warn("root categories: " + root.getCategories());
-        //log.warn(root.getChildren());
-        //diff is not working root.visit(new PrintingVisitor(actual, expected));
-        //return (!root.hasChanges());
-        return actual.equals(expected);
-
     }
 
     //TODO: move this to a separate implementation class of "Decider Report"
-    private TestResult getWorkflowReport(Workflow w) {
-
+    private DeciderRunTestReport generateReport(Workflow w) {
         List<WorkflowRunReportRecord> wrrs = seqwareService.getWorkflowRunRecords(w);
 
-        TestResult t = new TestResult();
+        DeciderRunTestReport t = new DeciderRunTestReport();
         t.setWorkflowRunCount(wrrs.size());
 
         for (WorkflowRunReportRecord wrr : wrrs) {
@@ -279,7 +269,8 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
 
             //TODO: 0.13.x series deciders do not use input_files, generalize parent and input file accessions
             if (inputFileAccessions.isEmpty()) {
-                log.warn("overriding input file accessions with parent accessions, workflow run swid=[" + wr.getSwid() + "]");
+                log.printf(Level.WARN, "[%s] Overriding input file accessions with parent accessions, workflow run swid=[%s]",
+                        testName, wr.getSwid());
                 inputFileAccessions = parentAccessions;
             }
 
@@ -315,14 +306,6 @@ public class DeciderRunTest extends RunTestBase implements org.testng.ITest {
         }
 
         return t;
-
-    }
-
-    public static String testResultToJson(TestResult t) throws IOException {
-
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        return mapper.writeValueAsString(t);
 
     }
 
