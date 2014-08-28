@@ -5,7 +5,7 @@
 
     <groupId>ca.on.oicr.pde</groupId>
     <artifactId>workflow-utilities</artifactId>
-    <version>1.3</version>
+    <version>1.4-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>workflow-utilities</name>
@@ -14,7 +14,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <seqware-version>1.0.14</seqware-version>
+        <seqware-version>1.0.17</seqware-version>
         <skipITs>true</skipITs>
     </properties>
 
