@@ -95,6 +95,8 @@ public class FileAttributes {
      * one value associated with a key. Multiple values are returned as a
      * comma-separated string
      *
+     * @param key the Lims enum value
+     * @param searchString specific search value that must be present for the Lims value to be returned
      * @return the full value of the Lims attribute. Returns null if a) the key
      * does not exist or b) the key does not contain the given attribute.
      *

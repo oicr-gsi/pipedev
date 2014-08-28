@@ -15,6 +15,23 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
+ * A utility class to parse the rsconfig.xml file format into an Rsconfig object. The Rsconfig object is used to map reference (template
+ * type + resequencing type pair) to their config key-value pairs. A typical rsconfig file will be in the following format:
+ * <pre>
+ * {@code
+ * <references>
+ *   <resequencing_type id="">
+ *     <template_type>WG</template_type>
+ *     <interval_file>/path/to/file0.bed</interval_file>
+ *   </resequencing_type>
+ *   <resequencing_type id="Type1">
+ *     <template_type>EX</template_type>
+ *     <interval_file>/path/to/file1.bed</interval_file>
+ *   </resequencing_type>
+ *   ...
+ * </references>
+ * }
+ * </pre>
  *
  * @author mlaszloffy
  */
@@ -25,10 +42,44 @@ public class Rsconfig {
     private Rsconfig() {
     }
 
+    /**
+     * An object representation of the rsconfig.xml file format.
+     *
+     * The rsconfig.xml file is expected to be in the format of:
+     * <pre>
+     * {@code
+     * <references>
+     *   <resequencing_type id="">
+     *     <template_type>WG</template_type>
+     *     <interval_file>/path/to/file0.bed</interval_file>
+     *   </resequencing_type>
+     *   <resequencing_type id="Type1">
+     *     <template_type>EX</template_type>
+     *     <interval_file>/path/to/file1.bed</interval_file>
+     *   </resequencing_type>
+     *   ...
+     * </references>
+     * }
+     * </pre>
+     *
+     * @param rsconfigPath Path to the rsconfig.xml file
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     * @throws InvalidFileFormatException
+     */
     public Rsconfig(File rsconfigPath) throws ParserConfigurationException, SAXException, IOException, InvalidFileFormatException {
         references = loadRsconfig(rsconfigPath);
     }
 
+    /**
+     * Get a the config key value for the specific reference type (template type + resequencing type).
+     *
+     * @param templateType reference template type
+     * @param resequencingType reference resequencing type
+     * @param configKey the reference config value
+     * @return the reference's config value
+     */
     public String get(String templateType, String resequencingType, String configKey) {
         String value = null;
         Reference r = references.get(Reference.getKey(templateType, resequencingType));

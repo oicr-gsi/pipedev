@@ -95,6 +95,10 @@ public enum Lims {
         this.attribute = attribute;
     }
 
+    /**
+     * Get the Geospiza string representation of the Lims enum.
+     * @return Geospiza Lims string
+     */
     public String getAttributeTitle() {
         return attribute;
     }
