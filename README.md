@@ -31,19 +31,19 @@ Afterwards, they will be available in your local Maven repository.
 <dependency>
     <groupId>ca.on.oicr.pde</groupId>
     <artifactId>common-utilities</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.0</version>
 </dependency>
 
 <dependency>
     <groupId>ca.on.oicr.pde</groupId>
     <artifactId>decider-utilities</artifactId>
-    <version>1.4.3-SNAPSHOT</version>
+    <version>1.4.3</version>
 </dependency>
 
 <dependency>
     <groupId>ca.on.oicr.pde</groupId>
     <artifactId>workflow-utilities</artifactId>
-    <version>1.3-SNAPSHOT</version>
+    <version>1.3</version>
 </dependency>
 ```
 
