@@ -244,6 +244,7 @@ public class OicrModule extends Module {
      * Clean up files that aren't needed after this module finishes.
      *
      * clean_up is optional
+     * @return a ReturnValue object
      */
     @Override
     public ReturnValue clean_up() {

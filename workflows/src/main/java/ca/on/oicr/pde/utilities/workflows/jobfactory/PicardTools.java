@@ -17,18 +17,17 @@ public class PicardTools {
     }
 
     /**
-     * Marks duplicates in a BAM or SAM file. Validation stringency is set to
-     * SILENT.
+     * Marks duplicates in a BAM or SAM file. Validation stringency is set to SILENT.
      *
+     * @param java the path to java
      * @param markDuplicatesJar the location of the MarkDuplicates.jar
      * @param memoryMb the amount of memory to give to the process in MB
      * @param input the path of the SAM/BAM file to analyze
      * @param output the full path of the output BAM file location
      * @param metricsFile the path where duplication metrics will be written
-     * @param tmpDir the temporary directory where the processing will take
-     * place
-     * @param sortOrder the order to sort the resulting bam file
-     * @return the Job with the command
+     * @param tmpDir the temporary directory where the processing will take place
+     * @param otherParams any other params to MarkDuplicates
+     * @return the Job with the command and max memory set
      */
     public Job markDuplicates(String java, String markDuplicatesJar, int memoryMb, String tmpDir,
             String input, String output, String metricsFile, String otherParams) {
@@ -45,18 +44,20 @@ public class PicardTools {
     }
 
     /**
-     * Merges SAM or BAM files together. Also sorts the final BAM in the given
-     * order and creates an index. Validation stringency is set to SILENT.
+     * Merges SAM or BAM files together. Also sorts the final BAM in the given order and creates an index. Validation stringency is set to
+     * SILENT.
      *
+     * @param java the path to java
      * @param mergeBamFilesJar the location of the MergeSamFiles.jar
      * @param memoryMb the amount of memory to give to the process in MB
      * @param output the full path of the output BAM file location
      * @param sortOrder the order to sort the BAM file, e.g. coordinate
      * @param assumeSorted whether the input files are sorted or not
-     * @param tmpDir the temporary directory where the processing will take
-     * place
+     * @param useThreading
+     * @param otherParams any other params to MergeSamFiles
+     * @param tmpDir the temporary directory where the processing will take place
      * @param input the path(s) of the SAM/BAM files to process
-     * @return the Job with the command
+     * @return the Job with the command and max memory set
      */
     public Job mergeSamFiles(String java, String mergeBamFilesJar, int memoryMb, String tmpDir,
             String sortOrder, boolean assumeSorted, boolean useThreading, String otherParams,
@@ -87,17 +88,16 @@ public class PicardTools {
     }
 
     /**
-     * Merges SAM or BAM files together. Also: sorts in coordinate order,
-     * creates a BAM index, uses threading to speed up execution, and assumes
-     * the input files are also sorted.
+     * Merges SAM or BAM files together. Also: sorts in coordinate order, creates a BAM index, uses threading to speed up execution, and
+     * assumes the input files are also sorted.
      *
+     * @param java the path to java
      * @param mergeBamFilesJar the location of the MergeSamFiles.jar
      * @param memoryMb the amount of memory to give to the process in MB
-     * @param tmpDir the temporary directory where the processing will take
-     * place
+     * @param tmpDir the temporary directory where the processing will take place
      * @param output the full path of the output BAM file location
      * @param input the path(s) of the SAM/BAM files to process
-     * @return
+     * @return the Job with the command and max memory set
      */
     public Job mergeSamFiles(String java, String mergeBamFilesJar, int memoryMb,
             String tmpDir, String output, String... input) {
