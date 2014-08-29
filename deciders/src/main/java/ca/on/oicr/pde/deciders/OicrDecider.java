@@ -12,95 +12,75 @@ import net.sourceforge.seqware.common.util.Log;
 import net.sourceforge.seqware.pipeline.deciders.BasicDecider;
 
 /**
- * <p> An implementation of SeqWare's BasicDecider that simplifies the logic in
- * BasicDecider and provides OICR-specific functionality. OicrDecider and
- * accessory classes have a number of functions that depend on metadata
- * originating from the Geospiza LIMS and conventions defined in-house. This
- * document explains some of these assumptions and also lays out the methods to
- * use this class, since it differs significantly from BasicDecider. </p>
+ * <p>
+ * An implementation of SeqWare's BasicDecider that simplifies the logic in BasicDecider and provides OICR-specific functionality.
+ * OicrDecider and accessory classes have a number of functions that depend on metadata originating from the Geospiza LIMS and conventions
+ * defined in-house. This document explains some of these assumptions and also lays out the methods to use this class, since it differs
+ * significantly from BasicDecider. </p>
  *
- * <p> Most of the benefit of BasicDecider is in additional methods that hide
- * the low-level details from the implementor. You no longer need detailed
- * knowledge about the formatting of Geospiza attributes in order to implement a
- * decider, for example. </p>
+ * <p>
+ * Most of the benefit of BasicDecider is in additional methods that hide the low-level details from the implementor. You no longer need
+ * detailed knowledge about the formatting of Geospiza attributes in order to implement a decider, for example. </p>
  *
- * <h1>Arguments</h1> <ul> <li>--check-file-exists : Only launch on the file if
- * the file exists. By default, SeqWare will launch on any file path, because it
- * can take advantage of remote files in S3 or ftp. At OICR, it is unlikely that
- * we will use these remote paths (the cluster is not internet accessible
- * anyway) and we occasionally have files that are listed in the metadata
- * database that do not exist. <li>--skip-status-check : If enabled, will skip
- * the check for the status of the workflow run. By default, we do not include
- * files from failed workflow runs. This flag turns that checking off. This flag
- * has no effect on sequencer runs, lanes, IUSes or any downstream products
- * marked with a 'skip' flag. </ul>
+ * <h1>Arguments</h1> <ul> <li>--check-file-exists : Only launch on the file if the file exists. By default, SeqWare will launch on any file
+ * path, because it can take advantage of remote files in S3 or ftp. At OICR, it is unlikely that we will use these remote paths (the
+ * cluster is not internet accessible anyway) and we occasionally have files that are listed in the metadata database that do not exist.
+ * <li>--skip-status-check : If enabled, will skip the check for the status of the workflow run. By default, we do not include files from
+ * failed workflow runs. This flag turns that checking off. This flag has no effect on sequencer runs, lanes, IUSes or any downstream
+ * products marked with a 'skip' flag. </ul>
  *
  * <h1>Extending OicrDecider</h1>
  *
- * <p> OicrDecider should be extended in order to take advantage of the expanded
- * arguments and simplified implementation. See each method for more details
- * about implementation. All overridden methods should call super.method() in
- * order get the full benefit of this class. </p>
+ * <p>
+ * OicrDecider should be extended in order to take advantage of the expanded arguments and simplified implementation. See each method for
+ * more details about implementation. All overridden methods should call super.method() in order get the full benefit of this class. </p>
  *
- * <p>The following is a brief guide to the methods available when extending
- * OicrDecider. These methods are called in the order presented below. Note that
- * not all methods need to be overridden in order to make a functioning decider;
- * those highly recommended are marked with a *.</p>
+ * <p>
+ * The following is a brief guide to the methods available when extending OicrDecider. These methods are called in the order presented
+ * below. Note that not all methods need to be overridden in order to make a functioning decider; those highly recommended are marked with a
+ * *.</p>
  *
  *
  * <ol>
  *
- * <li>*{@link #OicrDecider() Constructor} : Add all new arguments to the
- * decider in this method.
+ * <li>*{@link #OicrDecider() Constructor} : Add all new arguments to the decider in this method.
  *
- * <li>*{@link #init()} : the first method where the command-line arguments are
- * available to store, parse, test and store. Return a {@link ReturnValue} with
- * a non success exit status if an argument is incorrect.
+ * <li>*{@link #init()} : the first method where the command-line arguments are available to store, parse, test and store. Return a
+ * {@link ReturnValue} with a non success exit status if an argument is incorrect.
  *
- * <li> {@link #separateFiles(List, String)} : override this method to modify
- * the list of files (i.e. ReturnValues) before they are split into different
- * groups.
+ * <li> {@link #separateFiles(List, String)} : override this method to modify the list of files (i.e. ReturnValues) before they are split
+ * into different groups.
  *
- * <li> {@link #handleGroupByAttribute(String)} : override this method to change
- * how files are grouped together. The String passed into the method is the
- * unmodified group identifier (the value retrieved from a file with the group
- * set by {@link #setGroupBy(Group, boolean)}. You can use this method to modify
- * it as desired. Files with the identical String returned from this method will
- * be grouped and run together in one workflow run.
+ * <li> {@link #handleGroupByAttribute(String)} : override this method to change how files are grouped together. The String passed into the
+ * method is the unmodified group identifier (the value retrieved from a file with the group set by {@link #setGroupBy(Group, boolean)}. You
+ * can use this method to modify it as desired. Files with the identical String returned from this method will be grouped and run together
+ * in one workflow run.
  *
- * <li> *checkFileDetails: Override one of these methods to filter files based
- * on their metadata information.
+ * <li> *checkFileDetails: Override one of these methods to filter files based on their metadata information.
  *
- * <ul><li>The BasicDecider {@link #checkFileDetails(ReturnValue, FileMetadata)}
- * method uses {@link ReturnValue} and {@link FileMetadata}. {@code ReturnValue}
- * has a list of attributes that contain the metadata for the file in question.
- * These attributes can be retrieved using {@link FindAllTheFiles.Header}
- * objects. A {@code ReturnValue} represents one processing event in a previous
- * workflow run and thereby can represent more than one file. The accompanying {@code FileMetadata}
- * is the specific file that the method is evaluating at that time.
+ * <ul><li>The BasicDecider {@link #checkFileDetails(ReturnValue, FileMetadata)} method uses {@link ReturnValue} and {@link FileMetadata}.
+ * {@code ReturnValue} has a list of attributes that contain the metadata for the file in question. These attributes can be retrieved using
+ * {@link FindAllTheFiles.Header} objects. A {@code ReturnValue} represents one processing event in a previous workflow run and thereby can
+ * represent more than one file. The accompanying {@code FileMetadata} is the specific file that the method is evaluating at that time.
  * Lims-specific attributes are somewhat difficult to retrieve with this system.
  *
- * <li>The OicrDecider {@link #checkFileDetails(FileAttributes) } method uses {@link FileAttributes}
- * instead, which simplifies the mechanism to retrieve commonly used metadata
- * (e.g. donor, library sample name, sequencer run name) and Geospiza
- * LIMS-specific attributes. See {@link FileAttributes} for more information.
+ * <li>The OicrDecider {@link #checkFileDetails(FileAttributes) } method uses {@link FileAttributes} instead, which simplifies the mechanism
+ * to retrieve commonly used metadata (e.g. donor, library sample name, sequencer run name) and Geospiza LIMS-specific attributes. See
+ * {@link FileAttributes} for more information.
  * </ul>
  *
- * <li> {@link #doFinalCheck(String,String)} : parse a group of files that will
- * be run together and do a final check to confirm that they should launch.
+ * <li> {@link #doFinalCheck(String,String)} : parse a group of files that will be run together and do a final check to confirm that they
+ * should launch.
  *
- * <li> *Customize each workflow run : Override one of the following methods to
- * appropriately parameterize each workflow run using the files involved.
+ * <li> *Customize each workflow run : Override one of the following methods to appropriately parameterize each workflow run using the files
+ * involved.
  *
- * <ul><li>The BasicDecider {@link #modifyIniFile(String, String)} has you
- * return a Map which represents the INI file for the workflow.
+ * <ul><li>The BasicDecider {@link #modifyIniFile(String, String)} has you return a Map which represents the INI file for the workflow.
  *
- * <li>The OicrDecider {@link #customizeRun(WorkflowRun)} hides the process of
- * creating an INI file and instead allows you to configure a {@link WorkflowRun}
- * object. The intention of this method was to a) provide easy access to file
- * metadata and b) simplify the creation of a one-step workflow by providing
- * convenience methods to specify the script, memory, and params. New properties
- * for the INI are added to the WorkflowRun.</ul>
+ * <li>The OicrDecider {@link #customizeRun(WorkflowRun)} hides the process of creating an INI file and instead allows you to configure a
+ * {@link WorkflowRun} object. The intention of this method was to a) provide easy access to file metadata and b) simplify the creation of a
+ * one-step workflow by providing convenience methods to specify the script, memory, and params. New properties for the INI are added to the
+ * WorkflowRun.</ul>
  *
  * </ol>
  *
@@ -123,19 +103,16 @@ public class OicrDecider extends BasicDecider {
     private WorkflowRun run;
 
     /**
-     * <p>Sets up the decider arguments and global variables. Any arguments
-     * intended to be used on the command line should be added using either The
-     * constructor runs before the arguments are parsed from the command
-     * line.SeqWare uses the JOpt package to parse command line parameters.
-     * OicrDecider builds on top of that. There are several mechanisms you can
-     * use to pull arguments from the command line.<p>
+     * <p>
+     * Sets up the decider arguments and global variables. Any arguments intended to be used on the command line should be added using
+     * either The constructor runs before the arguments are parsed from the command line.SeqWare uses the JOpt package to parse command line
+     * parameters. OicrDecider builds on top of that. There are several mechanisms you can use to pull arguments from the command line.<p>
      *
-     * <ul><li>Flags: You add can flags to the decider by using
-     * {@link #parser parser}{@code .accepts(String argument, String description)}
+     * <ul><li>Flags: You add can flags to the decider by using {@link #parser parser}{@code .accepts(String argument, String description)}
      * and retrieve them in later methods using {@link #options options}{@code .has(argument)}.
-     * <li>Parameters: If your argument takes a parameter, you can use the
-     * convenience method {@link #defineArgument(String, String, boolean) defineArgument}
-     * and retrieve the argument later with {@link #getArgument(String) getArgument}
+     * <li>Parameters: If your argument takes a parameter, you can use the convenience method
+     * {@link #defineArgument(String, String, boolean) defineArgument} and retrieve the argument later with
+     * {@link #getArgument(String) getArgument}
      * </ul>
      *
      */
@@ -155,13 +132,10 @@ public class OicrDecider extends BasicDecider {
     /**
      * Define an argument for the Decider to use on the command line.
      *
-     * @param command the argument to use. Single letters will use -, and more
-     * characters will use --
-     * @param description the description of the argument to give when giving
-     * help
-     * @param required whether or not the argument is required for the decider
-     * to function. The presence of this argument is tested in the {@link #init() init}
-     * method, which will throw an exception if the argument is not present.
+     * @param command the argument to use. Single letters will use -, and more characters will use --
+     * @param description the description of the argument to give when giving help
+     * @param required whether or not the argument is required for the decider to function. The presence of this argument is tested in the
+     * {@link #init() init} method, which will throw an exception if the argument is not present.
      */
     protected final void defineArgument(String command, String description, boolean required) {
         parser.accepts(command, description).withRequiredArg();
@@ -171,18 +145,15 @@ public class OicrDecider extends BasicDecider {
     }
 
     /**
-     * Get the argument provided on the command line. If the argument was not
-     * provided, this method will return an empty String. You can test for the
-     * presence of your argument using  {@link #options options}{@code .has(argument)}
-     * and retrieve it using {@link #options options}{@code .valueOf(argument))}
+     * Get the argument provided on the command line. If the argument was not provided, this method will return an empty String. You can
+     * test for the presence of your argument using {@link #options options}{@code .has(argument)} and retrieve it using {@link #options options}{@code .valueOf(argument))}
      *
      *
      * {@inheritDoc}
      *
      *
      * @param arg an argument previously defined by 'defineArgument'.
-     * @return the value provided on the command line, or empty string if none
-     * provided.
+     * @return the value provided on the command line, or empty string if none provided.
      */
     protected String getArgument(String arg) {
         Object o = options.valueOf(arg);
@@ -195,8 +166,7 @@ public class OicrDecider extends BasicDecider {
     }
 
     /**
-     * Initializes the decider using arguments on the command line. Any
-     * arguments defined as 'required' by {@link #defineArgument(java.lang.String, java.lang.String, boolean)
+     * Initializes the decider using arguments on the command line. Any arguments defined as 'required' by {@link #defineArgument(java.lang.String, java.lang.String, boolean)
      * } are tested for in this method.
      *
      * @return {@link ReturnValue} with an appropriate exit status.
@@ -292,6 +262,13 @@ public class OicrDecider extends BasicDecider {
         return toReturn;
     }
 
+    /**
+     * Helper method that determines if a date string is after a reference date.
+     *
+     * @param dateString the date to check against a reference date
+     * @param afterDate the reference date
+     * @return true if dateString is after "afterDate", false otherwise
+     */
     public boolean isAfterDate(String dateString, Date afterDate) {
 
         try {
@@ -305,6 +282,13 @@ public class OicrDecider extends BasicDecider {
         return false;
     }
 
+    /**
+     * Helper method that determines if a date string is before a reference date.
+     *
+     * @param dateString the date to check against a reference date
+     * @param beforeDate the reference date
+     * @return true if dateString is before "beforeDate", false otherwise
+     */
     public boolean isBeforeDate(String dateString, Date beforeDate) {
 
         try {
@@ -368,7 +352,7 @@ public class OicrDecider extends BasicDecider {
     public ReturnValue customizeRun(WorkflowRun run) {
 
         return new ReturnValue();
-        
+
     }
 
     /**
@@ -379,7 +363,7 @@ public class OicrDecider extends BasicDecider {
 
         //Get default ini file
         run.addProperty(super.modifyIniFile(commaSeparatedFilePaths, commaSeparatedParentAccessions));
-        
+
         //Common decider ini modifications
         run.addProperty("output_prefix", getArgument("output-path").isEmpty()
                 ? "" : (getArgument("output-path").endsWith("/") ? getArgument("output-path") : getArgument("output-path").concat("/")), "./");
@@ -396,44 +380,34 @@ public class OicrDecider extends BasicDecider {
     }
 
     /**
-     * Sets how to group files together. When a group is chosen, all of the
-     * files that have been generated for that group will be grouped together
-     * and then filtered by meta-type. Grouping is either specific according to
-     * distinct identifier or general by name.
+     * Sets how to group files together. When a group is chosen, all of the files that have been generated for that group will be grouped
+     * together and then filtered by meta-type. Grouping is either specific according to distinct identifier or general by name.
      *
-     * <p>Specific grouping is achieved by setting 'groupSimilar' to false. The
-     * unique identifier will be used for all groups. For example: if you use
-     * Group.STUDY, all of the files produced by a specific study will be
-     * included in one workflow run, but if there is another study by the same
-     * name, it will not be grouped together.</p>
+     * <p>
+     * Specific grouping is achieved by setting 'groupSimilar' to false. The unique identifier will be used for all groups. For example: if
+     * you use Group.STUDY, all of the files produced by a specific study will be included in one workflow run, but if there is another
+     * study by the same name, it will not be grouped together.</p>
      *
-     * <p>In contrast, general grouping is achieved by setting 'groupSimilar' to
-     * true. The name of the entity will be used to group items together.
-     * Continuing the example above, all of the studies with a particular name
-     * will be grouped together. Depending on the Group, the decider may have
-     * different behavior.</p>
+     * <p>
+     * In contrast, general grouping is achieved by setting 'groupSimilar' to true. The name of the entity will be used to group items
+     * together. Continuing the example above, all of the studies with a particular name will be grouped together. Depending on the Group,
+     * the decider may have different behavior.</p>
      *
-     * <p>When 'groupSimilar' is toggled on, the categories will group as
-     * follows:</p>
+     * <p>
+     * When 'groupSimilar' is toggled on, the categories will group as follows:</p>
      *
      * <ul> <li> Group.STUDY : Files produced by studies with the same name.
-     * <li> Group.EXPERIMENT : experiments with the same name. <li> Group.DONOR
-     * : Files produced from a single donor. A donor 'name' in this instance is
-     * an identifier like ABCD_0001. This is a common grouping strategy since a
-     * single donor may participate in different studies with different analysis
-     * types (e.g. RNA or DNA) <li> Group.LIBRARY : Files produced from a single
-     * donor library. This flag is often unnecessary because it's unlikely that
-     * the same library name will exist in more than one study. <li>
-     * Group.BARCODE : Files produced with a particular barcode at sequencing
-     * time. This is not recommended except in QC workflows. <li> Group.LANE :
-     * Files produced by a particular lane number. This is not recommended
-     * except in QC workflows. <li> Group.SEQUENCER_RUN : Files produced by
-     * sequencer runs with the same name. <li> Group.FILE : Files with the same
-     * absolute file path </ul>
+     * <li> Group.EXPERIMENT : experiments with the same name. <li> Group.DONOR : Files produced from a single donor. A donor 'name' in this
+     * instance is an identifier like ABCD_0001. This is a common grouping strategy since a single donor may participate in different
+     * studies with different analysis types (e.g. RNA or DNA) <li> Group.LIBRARY : Files produced from a single donor library. This flag is
+     * often unnecessary because it's unlikely that the same library name will exist in more than one study. <li>
+     * Group.BARCODE : Files produced with a particular barcode at sequencing time. This is not recommended except in QC workflows. <li>
+     * Group.LANE : Files produced by a particular lane number. This is not recommended except in QC workflows. <li> Group.SEQUENCER_RUN :
+     * Files produced by sequencer runs with the same name. <li> Group.FILE : Files with the same absolute file path </ul>
      *
      *
-     * @param groupBy one of Group.STUDY, Group.EXPERIMENT, Group.DONOR,
-     * Group.LIBRARY, Group.BARCODE, Group.LANE, Group.SEQUENCER_RUN, Group.FILE
+     * @param groupBy one of Group.STUDY, Group.EXPERIMENT, Group.DONOR, Group.LIBRARY, Group.BARCODE, Group.LANE, Group.SEQUENCER_RUN,
+     * Group.FILE
      * @param groupSimilar whether or not to group items with identical names
      */
     public void setGroupBy(Group groupBy, boolean groupSimilar) {
@@ -445,18 +419,28 @@ public class OicrDecider extends BasicDecider {
         }
     }
 
+    /**
+     * Get the number of expected files per workflow run group.
+     *
+     * @return number of files, or Integer.MIN_VALUE if not set.
+     */
     public int getNumberOfFilesPerGroup() {
         return numberOfFilesPerGroup;
     }
 
+    /**
+     * Set the number of expected files per workflow run group. This is used by {@link #doFinalCheck(java.lang.String, java.lang.String)} to
+     * determine if the workflow run input file set is valid.
+     *
+     * @param expectedNumberOfFiles
+     */
     public void setNumberOfFilesPerGroup(int expectedNumberOfFiles) {
         this.numberOfFilesPerGroup = expectedNumberOfFiles;
     }
 
     /**
-     * Escape special characters in a string to html code. Takes a string as
-     * input and converts all characters not contained in the regex [0-9A-Za-z
-     * _-] to their corresponding html code.
+     * Escape special characters in a string to html code. Takes a string as input and converts all characters not contained in the regex
+     * [0-9A-Za-z _-] to their corresponding html code.
      *
      * @param input string to be escaped
      * @return the input string with special characters escaped
@@ -486,18 +470,17 @@ public class OicrDecider extends BasicDecider {
     }
 
     /**
-     * <p>Creates a new file name from the input files given to it. The new
-     * filename contains, in order: the donor, the tissue origin, the tissue
-     * type, the library type, the library size, the library template type, and
-     * the IUS ids. Duplicate values are only listed once, and multiple values
-     * are separated by hyphens.</p>
+     * <p>
+     * Creates a new file name from the input files given to it. The new filename contains, in order: the donor, the tissue origin, the
+     * tissue type, the library type, the library size, the library template type, and the IUS ids. Duplicate values are only listed once,
+     * and multiple values are separated by hyphens.</p>
      *
-     * <p>E.g. Two files ABCD_0001_Ly_R_420_EX.bam and ABCD_0001_Pa_P_369_EX.bam
-     * produce combined file name
+     * <p>
+     * E.g. Two files ABCD_0001_Ly_R_420_EX.bam and ABCD_0001_Pa_P_369_EX.bam produce combined file name
      * ABCD_0001_Ly-Pa_P-R_369-420_EX_ius12345-12346.</p>
      *
-     * <p>This method uses the metadata associated with the file, not the
-     * filename itself, in order to determine these values.</p>
+     * <p>
+     * This method uses the metadata associated with the file, not the filename itself, in order to determine these values.</p>
      *
      * @param inputFiles the list of files from WorkflowRun.getFiles();
      * @see WorkflowRun#getFiles()
@@ -552,9 +535,11 @@ public class OicrDecider extends BasicDecider {
     }
 
     /**
-     * A utility function that seraches for patterns in a file path in order to
-     * identify mate in paired-end sequencing data (or report that mate info is
-     * unavailable if no pattern detected)
+     * A utility function that searches for patterns in a file path in order to identify mate in paired-end sequencing data (or report that
+     * mate info is unavailable if no pattern detected).
+     *
+     * @param filePath file path to identify if mate 1 or 2
+     * @return 1 if mate 1, 2 if mate 2, 0 if not able to find mate value
      */
     public static int idMate(String filePath) {
         int[] indexes = {0, 1};
@@ -570,10 +555,11 @@ public class OicrDecider extends BasicDecider {
     }
 
     /**
-     * Uses idMate to put read1 and read2 files into order and return the set.
-     * Tests to make sure that the read names as well as the list of reads are
-     * sensible. If it encounters a problem, it returns the same set you passed
-     * in originally along with printing a warning.
+     * Uses idMate to put read1 and read2 files into order and return the set. Tests to make sure that the read names as well as the list of
+     * reads are sensible. If it encounters a problem, it returns the same set you passed in originally along with printing a warning.
+     *
+     * @param files input files to be sorted
+     * @return sorted array of files
      */
     public FileAttributes[] arrangeFastqs(FileAttributes[] files) {
         FileAttributes[] inputs = new FileAttributes[files.length];

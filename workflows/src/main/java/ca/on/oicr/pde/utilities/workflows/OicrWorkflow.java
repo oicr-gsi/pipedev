@@ -15,7 +15,17 @@ import net.sourceforge.seqware.pipeline.workflowV2.model.SqwFile;
  */
 public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
 
+    /**
+     * A workflow model ReturnValue that can be used to track the errors and state during workflow model construction. See the <b>Module
+     * Status Values</b> section of <a
+     * href="http://seqware.github.io/docs/16-module-conventions/">http://seqware.github.io/docs/16-module-conventions/</a> for more
+     * information).
+     */
     protected ReturnValue ret = new ReturnValue();
+
+    /**
+     * A map of job names to job objects.
+     */
     protected Map<String, Job> jobs = new HashMap<String, Job>();
 
     /**
@@ -28,7 +38,8 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
      * <code>input_files=/u/me/in1.txt,/u/me/in2.txt</code>
      *
      * <p>
-     * If you call this method with the string "input_files", it would return a String array with the contents {"/u/me/in1.txt","u/me/in2.txt"}.</p>
+     * If you call this method with the string "input_files", it would return a String array with the contents
+     * {"/u/me/in1.txt","u/me/in2.txt"}.</p>
      *
      *
      * @param identifier the name of the property in the INI file that has the comma-separated input files
@@ -48,9 +59,10 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
 
     /**
      * <p>
-     * Provisions input files to the current working directory in the workflow. Takes a property name from the INI file, splits it on commas, and creates a
-     * SqwFile object for each absolute path. Creating a SqwFile object means that the file will be provisioned, or symlinked into the current working directory
-     * when the workflow executes. Also saves each file to a map that can be retrieved with this.getFiles().</p>
+     * Provisions input files to the current working directory in the workflow. Takes a property name from the INI file, splits it on
+     * commas, and creates a SqwFile object for each absolute path. Creating a SqwFile object means that the file will be provisioned, or
+     * symlinked into the current working directory when the workflow executes. Also saves each file to a map that can be retrieved with
+     * this.getFiles().</p>
      *
      * @param identifier the name of the property in the INI file that has the comma-separated input files
      * @return an array of SqwFile objects
@@ -58,7 +70,7 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
     protected SqwFile[] provisionInputFiles(String identifier) {
         String[] files = getInputFiles(identifier);
         Random random = new Random(System.currentTimeMillis());
-	int start = random.nextInt(10000);
+        int start = random.nextInt(10000);
         SqwFile[] pFiles = new SqwFile[files.length];
         for (int i = 0; i < files.length; i++) {
             SqwFile file = this.createFile("file_in_" + start++);
@@ -70,8 +82,8 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
     }
 
     /**
-     * Retrieves the value of a property from the INI file. Implemented in OicrWorkflow to catch any Exceptions thrown, set the ReturnValue to
-     * ReturnValue.INVALIDPARAMETERS, and print the stacktrace.
+     * Retrieves the value of a property from the INI file. Implemented in OicrWorkflow to catch any Exceptions thrown, set the ReturnValue
+     * to ReturnValue.INVALIDPARAMETERS, and print the stacktrace.
      *
      * @param key the name of the INI property
      * @return The value of the property named by "key"
@@ -91,8 +103,8 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
     }
 
     /**
-     * Retrieves the value of a property from the INI file or returns the user specified default value. Implemented in OicrWorkflow to catch any Exceptions
-     * thrown, set the ReturnValue to ReturnValue.INVALIDPARAMETERS, and print the stacktrace.
+     * Retrieves the value of a property from the INI file or returns the user specified default value. Implemented in OicrWorkflow to catch
+     * any Exceptions thrown, set the ReturnValue to ReturnValue.INVALIDPARAMETERS, and print the stacktrace.
      *
      * @param key the name of the INI property to retrieve
      * @param defaultValue the property value that will be returned if the property key/value is not set in the INI
@@ -115,8 +127,8 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
     }
 
     /**
-     * Creates a new BashJob with the given title plus an incremented integer and adds the title and Job to a map of jobs that can be retrieved by
-     * this.getJobs().
+     * Creates a new BashJob with the given title plus an incremented integer and adds the title and Job to a map of jobs that can be
+     * retrieved by this.getJobs().
      *
      * @see #getJobs()
      * @param jobTitle the name of the job in the workflow
@@ -147,8 +159,8 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
 
     /**
      * <p>
-     * Adds the output files from the INI property named "output_files" to the given job as outputs. The format of the output_files property is the
-     * following:</p>
+     * Adds the output files from the INI property named "output_files" and the specified directory to the given job as outputs. The format of the output_files property
+     * is the following:</p>
      *
      * <code>output_files=/u/me/out1.txt::txt/plain,/u/me/out2.txt::txt/plain</code>
      *
@@ -156,10 +168,12 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
      * In this example there are two output files both of meta-type txt/plain.</p>
      *
      * <p>
-     * Alternatively you can create each output file individually using this.createOutputFile(String,String) and assign them manually to a job.</p>
+     * Alternatively you can create each output file individually using this.createOutputFile(String,String) and assign them manually to a
+     * job.</p>
      *
      * @param endJob the job that produces the output files.
-     * @param directory the directory where the file is located
+     * @param directory the directory where the file is located.
+     * @throws java.lang.Exception
      */
     protected void defineOutputFiles(Job endJob, String directory) throws Exception {
         if (directory == null) {
@@ -186,14 +200,24 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
             }
         }
     }
-    
+
+    /**
+     * Adds the output files from the INI property named "output_files" to the given job as outputs.
+     * 
+     * The {@code output_files} must include the directory where the files will be located.
+     * 
+     * @see OicrWorkflow#defineOutputFiles(net.sourceforge.seqware.pipeline.workflowV2.model.Job, java.lang.String) 
+     * 
+     * @param endJob the job that produces the output files.
+     * @throws Exception
+     */
     protected void defineOutputFiles(Job endJob) throws Exception {
         defineOutputFiles(endJob, "");
     }
 
     /**
-     * Defines an output file with the filetype "plain/txt" located at the given path in the working directory. The manual_output INI property is checked in
-     * order to determine whether to set the final path with a random integer or not.
+     * Defines an output file with the filetype "plain/txt" located at the given path in the working directory. The manual_output INI
+     * property is checked in order to determine whether to set the final path with a random integer or not.
      *
      * @deprecated Use createOutputFile(String, String, boolean) instead
      * @param name Not used
@@ -209,14 +233,15 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
     }
 
     /**
-     * Defines an output file with the given meta-type located at the given path in the working directory. The final location of the file is either in the
-     * directory defined by output_prefix and output_dir in the INI file for manualOutput, or at
+     * Defines an output file with the given meta-type located at the given path in the working directory. The final location of the file is
+     * either in the directory defined by output_prefix and output_dir in the INI file for manualOutput, or at
      * output_prefix/output_dir/WorkflowName_WorkflowVersion/[randomNumber].
      *
      * @param workingPath
      * @param metatype
      * @param manualOutput
-     * @return a SqwFile with the source path of the file in the working directory and the provisioned path of the file in the permanent location
+     * @return a SqwFile with the source path of the file in the working directory and the provisioned path of the file in the permanent
+     * location
      */
     protected SqwFile createOutputFile(String workingPath, String metatype, boolean manualOutput) {
         SqwFile file = new SqwFile();

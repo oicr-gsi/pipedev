@@ -20,8 +20,7 @@ public class GATK2 {
     }
 
     /**
-     * Creates the interval file to use for realignment in the indelRealigner
-     * step using GATK's RealignerTargetCreator.
+     * Creates the interval file to use for realignment in the indelRealigner step using GATK's RealignerTargetCreator.
      *
      * @param java the path to java
      * @param gatk the location of the GenomeAnalysisTK.jar
@@ -61,17 +60,16 @@ public class GATK2 {
     }
 
     /**
-     * Realigns a BAM file around the given intervals generated in the
-     * realignerTargetCreator method using GATK's IndelRealigner.
+     * Realigns a BAM file around the given intervals generated in the realignerTargetCreator method using GATK's IndelRealigner.
      *
      * @param chromosome the chromosome to realign
      * @param java the path to java
      * @param memoryMb the amount of memory to give the job in MB
      * @param gatk the location of the GenomeAnalysisTK.jar
      * @param refFasta the human genome reference
-     * @param intervalFile the interval file with the locations to be realigned
-     * (generated with realignerTargetCreator)
+     * @param intervalFile the interval file with the locations to be realigned (generated with realignerTargetCreator)
      * @param inputFile the input BAM file
+     * @param goldIndelsVcf the path of the dbSNP VCF file
      * @param outputFile the output BAM file
      * @param tmpDir the path of the temp dir where the processing will occur
      * @param otherParams any other params to apply to IndelRealigner
@@ -103,8 +101,7 @@ public class GATK2 {
     }
 
     /**
-     * Calculates the base quality recalibration scores using GATK's
-     * BaseRecalibrator. This file can subsequently be applied with
+     * Calculates the base quality recalibration scores using GATK's BaseRecalibrator. This file can subsequently be applied with
      * applyBaseRecalibration (PrintReads).
      *
      * @param java the path to java
@@ -112,8 +109,7 @@ public class GATK2 {
      * @param memoryMb the amount of memory to give the job in MB
      * @param tmpDir the path of the temp dir where the processing will occur
      * @param refFasta the human genome reference
-     * @param knownSitesVcfs Gold standard VCF files (e.g. dbSNP, 1000G, Mills
-     * Devine indels)
+     * @param knownSitesVcfs Gold standard VCF files (e.g. dbSNP, 1000G, Mills Devine indels)
      * @param inputFiles the input BAM files
      * @param recalFile the output recalibration file
      * @param otherParams any other params to apply to BaseRecalibrator
@@ -145,8 +141,7 @@ public class GATK2 {
     }
 
     /**
-     * Applies the recalibration file calculated by BaseRecalibrator to the
-     * given chromosome using GATK PrintReads.
+     * Applies the recalibration file calculated by BaseRecalibrator to the given chromosome using GATK PrintReads.
      *
      * @param java the path to java
      * @param memoryMb the amount of memory to give the job in MB
@@ -158,7 +153,7 @@ public class GATK2 {
      * @param inputFile the input BAM file
      * @param outputFile the output BAM file
      * @param otherParams any other params to apply to Printreads
-     * @return a Job with the command
+     * @return the Job with the command and max memory set
      */
     public Job applyBaseRecalibration(String java, String gatk, int memoryMb, String tmpDir,
             String refFasta, String chromosome, String recalFile, String inputFile,
@@ -226,8 +221,8 @@ public class GATK2 {
 
         job.getCommand().addArgument(command);
 	if (outputMode !=null) {
-	    job.getCommand().addArgument(String.format("--output_mode %s", outputMode));
-	}
+            job.getCommand().addArgument(String.format("--output_mode %s", outputMode));
+        }
         if (chromosome != null) {
             job.getCommand().addArgument(String.format("-L %s", chromosome));
         }
@@ -242,25 +237,24 @@ public class GATK2 {
     }
 
     /**
-     * DBsnp is provided to annotate variants during calling:
-     * http://www.broadinstitute.org/gatk/guide/article?id=1247
+     * DBsnp is provided to annotate variants during calling: http://www.broadinstitute.org/gatk/guide/article?id=1247
      *
-     * @param java
-     * @param gatk
-     * @param memoryMb
-     * @param tmpDir
-     * @param refFasta
-     * @param chromosome
+     * @param java the path to java
+     * @param gatk the location of the GenomeAnalysisTK.jar
+     * @param memoryMb the amount of memory to give the job in MB
+     * @param tmpDir the path of the temp dir where the processing will occur
+     * @param refFasta the human genome reference
+     * @param chromosome the chromosome to realign
      * @param ploidy
      * @param genotypeLikelihoodModel
      * @param standEmitConf
      * @param standCallConf
      * @param gatkKey
      * @param dbSnp
-     * @param inputFile
-     * @param outputFile
+     * @param inputFile the path of the input BAM file
+     * @param outputFile the path of the output file
      * @param otherParams any other parameters to send to UnifiedGenotyper
-     * @return  the Job with the command and the max memory set
+     * @return the Job with the command and the max memory set
      */
     public Job unifiedGenotyper(String java, String gatk, int memoryMb, String tmpDir,
             String refFasta, String chromosome, int ploidy, String genotypeLikelihoodModel,
@@ -280,7 +274,6 @@ public class GATK2 {
                 + "--dbsnp %s ",
                 java, memoryMb - 2000, tmpDir, gatk, refFasta, inputFile, ploidy,
                 genotypeLikelihoodModel, standEmitConf, standCallConf, outputFile, dbSnp);
-
 
         job.getCommand().addArgument(command);
         if (chromosome != null) {
