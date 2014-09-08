@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Queue;
 import junit.framework.Assert;
 import junit.framework.TestCase;
-import org.apache.oozie.action.sge.JobStatus;
+import io.seqware.oozie.action.sge.JobStatus;
 
 /**
  *
@@ -263,4 +263,89 @@ public class SgeJobPollTest extends TestCase {
         poller.runMe();
         Assert.assertFalse("Poller did not find failed running and/or finished jobs", poller.isSuccessful());
     }
+
+    public void testAdditionalJobsSuccess() throws Exception {
+        System.out.println("testAdditionalJobsSuccess");
+        SgeOfflinePoll poller = new SgeOfflinePoll(new String[]{"--unique-job-string", "1234", "--output-file", "/tmp/log.txt"});
+        Map<Integer, String> jobs = new HashMap<Integer, String>();
+        jobs.put(1357, "Job1-1234");
+        jobs.put(85950395, "Job2-1234");
+        poller.setJobs(jobs);
+
+        Map<Integer, String> finjobs = new HashMap<Integer, String>();
+        finjobs.put(46745678, "Job0-1234");
+        poller.setFinjobs(finjobs);
+
+
+	Map<Integer,String> addJobs = new HashMap<Integer, String>();
+	addJobs.put(1098765, "Job4-1234");
+	poller.setAdditionalJobs(addJobs);
+
+
+        Map<String, Queue<JobStatus>> status = new HashMap<String, Queue<JobStatus>>();
+        poller.addEntry(status, "1357", JobStatus.RUNNING, JobStatus.RUNNING, JobStatus.SUCCESSFUL);
+        poller.addEntry(status, "85950395", JobStatus.RUNNING, JobStatus.SUCCESSFUL);
+        poller.addEntry(status, "46745678", JobStatus.SUCCESSFUL);
+	poller.addEntry(status, "1098765", JobStatus.SUCCESSFUL);
+        poller.setStatus(status);
+
+        poller.runMe();
+        Assert.assertTrue("Poller did not find finished jobs", poller.isSuccessful());
+    }
+
+
+    public void testAdditionalJobsFail() throws Exception {
+        System.out.println("testAdditionalJobsFail");
+        SgeOfflinePoll poller = new SgeOfflinePoll(new String[]{"--unique-job-string", "1234", "--output-file", "/tmp/log.txt"});
+        Map<Integer, String> jobs = new HashMap<Integer, String>();
+        jobs.put(1357, "Job1-1234");
+        jobs.put(85950395, "Job2-1234");
+        poller.setJobs(jobs);
+
+        Map<Integer, String> finjobs = new HashMap<Integer, String>();
+        finjobs.put(46745678, "Job0-1234");
+        poller.setFinjobs(finjobs);
+
+
+        Map<Integer,String> addJobs = new HashMap<Integer, String>();
+        addJobs.put(1098765, "Job4-1234");
+        poller.setAdditionalJobs(addJobs);
+
+
+        Map<String, Queue<JobStatus>> status = new HashMap<String, Queue<JobStatus>>();
+        poller.addEntry(status, "1357", JobStatus.RUNNING, JobStatus.RUNNING, JobStatus.SUCCESSFUL);
+        poller.addEntry(status, "85950395", JobStatus.RUNNING, JobStatus.SUCCESSFUL);
+        poller.addEntry(status, "46745678", JobStatus.SUCCESSFUL);
+        poller.addEntry(status, "1098765", JobStatus.RUNNING, JobStatus.EXIT_ERROR);
+        poller.setStatus(status);
+
+        poller.runMe();
+        Assert.assertFalse("Poller did not find failed jobs", poller.isSuccessful());
+    }
+
+    public void testLostJobsSuccess() throws Exception {
+        System.out.println("testLostJobsSuccess");
+        SgeOfflinePoll poller = new SgeOfflinePoll(new String[]{"--unique-job-string", "1234", "--output-file", "/tmp/log.txt"});
+        Map<Integer, String> jobs = new HashMap<Integer, String>();
+        jobs.put(1357, "Job1-1234");
+        jobs.put(85950395, "Job2-1234");
+        poller.setJobs(jobs);
+
+        Map<Integer, String> finjobs = new HashMap<Integer, String>();
+        finjobs.put(46745678, "Job0-1234");
+        poller.setFinjobs(finjobs);
+
+
+
+        Map<String, Queue<JobStatus>> status = new HashMap<String, Queue<JobStatus>>();
+        poller.addEntry(status, "1357", JobStatus.RUNNING, JobStatus.RUNNING, JobStatus.SUCCESSFUL);
+        poller.addEntry(status, "85950395", JobStatus.RUNNING, JobStatus.LOST, JobStatus.LOST,JobStatus.LOST,JobStatus.LOST,JobStatus.SUCCESSFUL);
+        poller.addEntry(status, "46745678", JobStatus.SUCCESSFUL);
+        poller.setStatus(status);
+
+        poller.runMe();
+        Assert.assertTrue("Poller did not treat lost job properly", poller.isSuccessful());
+    }
+
+
 }

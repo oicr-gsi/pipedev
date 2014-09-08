@@ -8,7 +8,8 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
-import org.apache.oozie.action.sge.JobStatus;
+import java.util.Collections;
+import io.seqware.oozie.action.sge.JobStatus;
 
 /**
  * For testing the polling functionality. JUnit does not work with Timer and
@@ -20,7 +21,10 @@ public class SgeOfflinePoll extends SgeJobPoll {
 
     private Map<Integer, String> jobs;
     private Map<Integer, String> finjobs;
+    private Map<Integer, String> additionalJobs;
     private Map<String, Queue<JobStatus>> status;
+    private int iteration=0;
+
 
     public Map<String, Queue<JobStatus>> getStatus() {
         return status;
@@ -30,14 +34,26 @@ public class SgeOfflinePoll extends SgeJobPoll {
         this.status = status;
     }
 
+    public void setAdditionalJobs( Map<Integer,String> addJobs) {
+	this.additionalJobs = addJobs;
+    }
+
     public SgeOfflinePoll(String[] args) {
         super(args);
+	additionalJobs = Collections.EMPTY_MAP;
         setPollInterval(50);
     }
 
     @Override
     protected Map<Integer, String> findRunningJobs(String jobString) {
-        return jobs;
+	Map<Integer,String> j = Collections.EMPTY_MAP;
+	if (iteration == 0) {
+	    j = jobs;
+	} else if (iteration == 1) {
+	    j = additionalJobs;
+	}
+	iteration++;
+        return j;
     }
 
     @Override

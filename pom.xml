@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ca.on.oicr.pde.utilities</groupId>
-    <artifactId>sge-poll</artifactId>
-    <version>1.0</version>
+    <artifactId>sge-job-monitor</artifactId>
+    <version>1.2</version>
     <packaging>jar</packaging>
 
     <name>sge-poll</name>
@@ -66,9 +66,9 @@
             <version>1.1</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.oozie</groupId>
+            <groupId>io.seqware</groupId>
             <artifactId>oozie-sge</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.2</version>
         </dependency>
         <dependency>
             <groupId>net.sf.jopt-simple</groupId>
@@ -76,4 +76,13 @@
             <version>4.5</version>
         </dependency>
     </dependencies>
+
+    <repositories>
+	<repository>
+            <id>seqware-dependencies.seqwaremaven.oicr.on.ca</id>
+            <name>seqwaremaven.oicr.on.ca-seqware-dependencies</name>
+	    <url>http://seqwaremaven.oicr.on.ca/artifactory/seqware-dependencies</url>
+        </repository>
+    </repositories>
+
 </project>

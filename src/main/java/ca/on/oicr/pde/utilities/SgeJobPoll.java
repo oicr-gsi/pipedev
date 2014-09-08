@@ -11,9 +11,9 @@ import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import org.apache.commons.exec.CommandLine;
-import org.apache.oozie.action.sge.Invoker;
-import org.apache.oozie.action.sge.JobStatus;
-import org.apache.oozie.action.sge.StatusChecker;
+import io.seqware.oozie.action.sge.Invoker;
+import io.seqware.oozie.action.sge.JobStatus;
+import io.seqware.oozie.action.sge.StatusChecker;
 
 /**
  * <p>Monitors the status of jobs submitted to the SGE cluster. Searches in both
@@ -36,7 +36,6 @@ public class SgeJobPoll {
 
     private StringBuilder stderr = new StringBuilder();
     private StringBuilder stdout = new StringBuilder();
-    private Map<Integer, String> jobs;
     private OptionSet options;
 //    private String[] parameters;
     private Collection<String> jobIds;
@@ -166,18 +165,30 @@ public class SgeJobPoll {
         System.out.println("Finding jobs");
         String string = (String) options.valueOf("unique-job-string");
         outPrintln("Starting polling on jobs with extension ", string);
-        jobs = findRunningJobs(string);
+	Map<Integer, String> jobs = findRunningJobs(string);
         outPrintln("Number of running jobs:" + jobs.keySet().size());
         jobs.putAll(findFinishedJobs(string));
         outPrintln("Number of running + finished jobs:", String.valueOf(jobs.keySet().size()));
-        for (Integer i : jobs.keySet()) {
+	for (Integer i : jobs.keySet()) {
             String id = String.valueOf(i);
-            this.jobIds.add(id);
-            this.mappedJobs.put(id, new String[]{jobs.get(i), ""});
+	    this.jobIds.add(id);
+	    this.mappedJobs.put(id, new String[]{jobs.get(i), ""});
         }
         if (jobs.isEmpty()) {
             errPrintln("No jobs were found with string ", string);
             throw new SgePollException("No running jobs were found with string " + string);
+        }
+    }
+
+    private void addRunningJobs() throws SgePollException {
+	System.out.println("Finding running jobs");
+	String string = (String) options.valueOf("unique-job-string");
+	Map<Integer, String> jobs = findRunningJobs(string);
+        outPrintln("Number of still running jobs:" + jobs.keySet().size());
+	for (Integer i : jobs.keySet()) {
+            String id = String.valueOf(i);
+	    this.jobIds.add(id);
+	    this.mappedJobs.put(id, new String[]{jobs.get(i), ""});
         }
     }
 
@@ -373,12 +384,23 @@ public class SgeJobPoll {
 
     }
 
-    private void run() {
+    private void run() throws SgePollException {
         System.out.println(new java.util.Date().toString() + ": Running");
+	
+        while (!jobIds.isEmpty()) {
+	    monitorCurrentJobs();
+	    addRunningJobs();
+        }
+	outPrintln("No more jobs!");
+        cancel();
+        finish();
+
+    }
+
+    private void monitorCurrentJobs() {
         Collection<String> tempJobIds = new HashSet<String>(jobIds);
         for (String jobId : tempJobIds) {
             JobStatus status = checkStatus(jobId);
-
             if (status == JobStatus.RUNNING) {
                 continue;
             } else if (status == JobStatus.LOST) {
@@ -390,13 +412,7 @@ public class SgeJobPoll {
             }
             outPrintln(new Date().toString(), ": Job ", jobId, " status ", status.name());
             jobIds.remove(jobId);
-
-        }
-        if (jobIds.isEmpty()) {
-            outPrintln("No more jobs!");
-            cancel();
-            finish();
-        }
+        }  
     }
 
     private void cancel() {
