@@ -335,7 +335,8 @@ public class SgeJobPoll {
         Map<Integer, String> jobToName = new HashMap<Integer, String>();
         String listOfJobs;
         try {
-            listOfJobs = runACommand(jobFinder + " -j *" + jobString);
+            listOfJobs = runACommand(jobFinder + " -j *" + jobString+"*");
+	    System.out.println(listOfJobs);
         } catch (SgePollException e) {
             return jobToName;
         }
@@ -358,7 +359,7 @@ public class SgeJobPoll {
             }
 
         }
-
+	System.out.println("New jobs: "+jobToName.keySet().size());
         return jobToName;
     }
 

@@ -107,7 +107,7 @@ public class SgeJobPollTest extends TestCase {
         System.out.println("testParseQacctJobs");
 
 
-        String[] qacctFiles = {"qacct9615552", "qacct9616062"};
+        String[] qacctFiles = {"qacct9615552", "qacct9616062", "qacct76949030"};
         final StringBuilder[] qacct = new StringBuilder[qacctFiles.length];
         Arrays.fill(qacct, new StringBuilder());
 
@@ -140,12 +140,14 @@ public class SgeJobPollTest extends TestCase {
             @Override
             protected String runACommand(String st) throws SgePollException {
                 if (st.contains("*")) {
-                    return qacct[0].toString() + qacct[1].toString();
+                    return qacct[0].toString() + qacct[1].toString() + qacct[2].toString();
                 } else if (st.contains("9615552")) {
                     return qacct[0].toString();
                 } else if (st.contains("9616062")) {
                     return qacct[1].toString();
-                } else {
+                } else if (st.contains("76949030")) {
+		    return qacct[2].toString();
+		} else {
                     Assert.fail("");
                     throw new SgePollException("No idea what you're asking for!");
                 }
@@ -153,9 +155,10 @@ public class SgeJobPollTest extends TestCase {
         };
         
         Map<Integer, String> jobs = errorPoller.findFinishedJobs("1234");
-        Assert.assertEquals("Wrong number of jobs!", 2, jobs.size());
+        Assert.assertEquals("Wrong number of jobs!", 3, jobs.size());
         Assert.assertNotNull("Job doesn't exist", jobs.get(9615552));
         Assert.assertNotNull("Job doesn't exist", jobs.get(9616062));
+	Assert.assertNotNull("Job doesn't exist", jobs.get(76949030));
 
     }
 
