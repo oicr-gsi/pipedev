@@ -7,13 +7,12 @@
     <parent>
         <groupId>ca.on.oicr.pde</groupId>
         <artifactId>common</artifactId>
-        <version>2014.1.0</version>
-        <relativePath>./common-parent-pom.xml</relativePath>
+        <version>2014.2.0</version>
     </parent>
     
     <groupId>ca.on.oicr.pde.workflows</groupId>
     <artifactId>workflows</artifactId>
-    <version>2014.1.0</version>
+    <version>2014.2.0</version>
     <packaging>pom</packaging>
     <url>http://maven.apache.org</url>
     
@@ -21,6 +20,7 @@
         <skipBundleTest>true</skipBundleTest>
         <bundleDirectory>${project.build.directory}/Workflow_Bundle_${workflow-directory-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-directory-name}/${project.version}</bundleDirectory>
         <seqwareDistribution>${bundleDirectory}/lib/seqware-distribution-${seqware-version}-full.jar</seqwareDistribution>
+        <display-name>workflow_${project.artifactId}_${project.version}</display-name>
         <final-name>Workflow_${project.artifactId}_${project.version}_SeqWare_${seqware-version}</final-name>
     </properties>
     
@@ -191,7 +191,7 @@
                     </execution>
                     <execution>
                         <id>unpack-dependencies</id>
-                        <phase>package</phase>
+                        <phase>process-test-resources</phase>
                         <goals>
                             <goal>unpack-dependencies</goal>
                         </goals>
@@ -218,14 +218,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.16</version>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -280,7 +272,7 @@
                 <executions>
                     <execution>
                         <id>recursive_executable</id>
-                        <phase>package</phase>
+                        <phase>process-test-resources</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
