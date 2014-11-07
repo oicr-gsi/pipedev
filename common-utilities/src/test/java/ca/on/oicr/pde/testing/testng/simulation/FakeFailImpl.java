@@ -1,4 +1,4 @@
-package ca.on.oicr.pde.testing.testng;
+package ca.on.oicr.pde.testing.testng.simulation;
 
 import org.testng.Assert;
 import org.testng.ITest;

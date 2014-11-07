@@ -75,7 +75,8 @@ public class TestCaseReporter implements IReporter {
         Multimap<String, ITestResult> groupedResults = LinkedListMultimap.create();
         for (IResultMap rm : results) {
             for (ITestResult tr : rm.getAllResults()) {
-                groupedResults.put(tr.getTestName(), tr);
+                String testName = tr.getMethod().getTestClass().getTestName();
+                groupedResults.put(testName, tr);
             }
         }
         return new TreeMap(groupedResults.asMap());
@@ -123,7 +124,13 @@ public class TestCaseReporter implements IReporter {
 
                         //If there was an error for the test case, print the output
                         if (!tr.isSuccess()) {
-                            print(4, tr.getThrowable().getMessage());
+                            String errorMessage = null;
+                            if (tr.getThrowable() != null) {
+                                errorMessage = tr.getThrowable().getMessage();
+                            }
+                            if (errorMessage != null) {
+                                print(4, tr.getThrowable().getMessage());
+                            }
                         }
                     }
                 }
