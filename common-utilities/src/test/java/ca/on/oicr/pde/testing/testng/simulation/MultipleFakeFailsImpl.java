@@ -1,8 +1,12 @@
 package ca.on.oicr.pde.testing.testng.simulation;
 
+import java.util.LinkedList;
+import java.util.List;
 import org.testng.Assert;
 import org.testng.ITest;
+import org.testng.annotations.Factory;
 import org.testng.annotations.Listeners;
+import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 /**
@@ -14,32 +18,51 @@ import org.testng.annotations.Test;
  *
  */
 @Listeners({ca.on.oicr.pde.testing.testng.TestCaseReporter.class})
-public class MultipleFakeFailsImpl implements ITest {
+public class MultipleFakeFailsImpl {
 
-    @Test(groups = {"level1"})
-    public void successlTestLevel1_1() {
-        Assert.assertTrue(true);
+    @Factory
+    @Parameters({"numberOfTests"})
+    public Object[] testCaseGenerator(int testCount) {
+        List<Object> tests = new LinkedList<Object>();
+        for (int i = 0; i < testCount; i++) {
+            tests.add(new MultipleFakeFailsImpl.TestClass(i));
+        }
+        return tests.toArray();
     }
 
-    @Test(groups = {"level2"}, dependsOnGroups = "level1")
-    public void successTestLevel2_1() {
-        Assert.assertTrue(true);
-    }
+    public static class TestClass implements ITest {
 
-    @Test(groups = {"level3"}, dependsOnGroups = "level2")
-    public void failureTestLevel3_1() {
-        Assert.assertTrue(false, "There was a fake failure.\nExtra information regarding the failure.");
-    }
+        private final int testId;
 
-    //should be skipped
-    @Test(groups = {"level4"}, dependsOnGroups = "level3")
-    public void successTestLevel4_1() {
-        Assert.assertTrue(true);
-    }
+        public TestClass(int id) {
+            this.testId = id;
+        }
 
-    @Override
-    public String getTestName() {
-        return "Test name";
+        @Test(groups = {"level1"})
+        public void successlTestLevel1_1() {
+            Assert.assertTrue(true);
+        }
+
+        @Test(groups = {"level2"}, dependsOnGroups = "level1")
+        public void successTestLevel2_1() {
+            Assert.assertTrue(true);
+        }
+
+        @Test(groups = {"level3"}, dependsOnGroups = "level2")
+        public void failureTestLevel3_1() {
+            Assert.assertTrue(false, "There was a fake failure.\nExtra information regarding the failure.");
+        }
+
+        //should be skipped
+        @Test(groups = {"level4"}, dependsOnGroups = "level3")
+        public void successTestLevel4_1() {
+            Assert.assertTrue(true);
+        }
+
+        @Override
+        public String getTestName() {
+            return "Test name " + testId;
+        }
     }
 
 }
