@@ -101,6 +101,7 @@ public class OicrDecider extends BasicDecider {
     private Date beforeDate = null;
     private SimpleDateFormat format;
     private WorkflowRun run;
+    private boolean isFailed = false;
 
     /**
      * <p>
@@ -173,6 +174,8 @@ public class OicrDecider extends BasicDecider {
      */
     @Override
     public ReturnValue init() {
+        ReturnValue ret = new ReturnValue();
+        
         if (options.has("help")) {
             System.err.println(get_syntax());
             ret.setExitStatus(ReturnValue.RETURNEDHELPMSG);
@@ -373,10 +376,24 @@ public class OicrDecider extends BasicDecider {
         ReturnValue ignoredReturnValue = customizeRun(run);
         if (ignoredReturnValue.getExitStatus() != ReturnValue.SUCCESS) {
             Log.error("This decider is using customizeRun to abort workflow runs - this functionality is not supported.  Please submit a bug.");
-            super.ret = ignoredReturnValue;
+            setFinalStatusToFailed();
         }
 
         return run.getIniFile();
+    }
+    
+    @Override
+    public ReturnValue do_summary(){
+        //decider run failed somewhere, but some how the decider did not terminate - set the exit code to non-zero
+        ReturnValue rv = new ReturnValue();
+        if(isFailed){
+            rv.setReturnValue(ReturnValue.FAILURE);
+        }
+        return rv;
+    }
+    
+    private void setFinalStatusToFailed(){
+        isFailed = true;
     }
 
     /**
