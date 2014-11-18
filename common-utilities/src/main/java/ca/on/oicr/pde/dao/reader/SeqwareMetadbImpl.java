@@ -1,4 +1,4 @@
-package ca.on.oicr.pde.dao;
+package ca.on.oicr.pde.dao.reader;
 
 import ca.on.oicr.pde.model.Accessionable;
 import ca.on.oicr.pde.model.Workflow;
@@ -14,53 +14,68 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import net.sourceforge.seqware.common.metadata.Metadata;
-import net.sourceforge.seqware.common.metadata.MetadataFactory;
 import net.sourceforge.seqware.common.util.maptools.MapTools;
 
-public final class SeqwareMetadbImpl extends SeqwareService {
-    Metadata seqwareMetadb;
+/**
+ *
+ * @author mlaszloffy
+ */
+public final class SeqwareMetadbImpl extends SeqwareReadService {
+    
+    private Metadata seqwareMetadb;
 
+    /**
+     *
+     * @param seqwareSettingsFile
+     */
     public SeqwareMetadbImpl(File seqwareSettingsFile) {
-        super();
-        //seqwareMetadb = MetadataFactory.get(seqwareSettings);
         updateFileProvenanceRecords();
     }
 
     @Override
-    protected void updateFileProvenanceRecords() {
+    public void updateFileProvenanceRecords() {
         try {
             Writer w = new StringWriter();
             seqwareMetadb.fileProvenanceReport(Collections.EMPTY_MAP, w);
-            fprs = FileProvenanceReport.parseFileProvenanceReport(new StringReader(w.toString()), FileProvenanceReport.HeaderValidationMode.SKIP);
+            fileProvenanceReportRecords = FileProvenanceReport.parseFileProvenanceReport(new StringReader(w.toString()), FileProvenanceReport.HeaderValidationMode.SKIP);
         } catch (IOException ioe) {
             throw new RuntimeException(ioe);
         }
     }
 
+    /**
+     *
+     * @param workflow
+     */
     @Override
-    protected void updateWorkflowRunRecords(Workflow workflow) {
+    public void updateWorkflowRunRecords(Workflow workflow) {
         try {
             String report = seqwareMetadb.getWorkflowRunReport(Integer.parseInt(workflow.getSwid()), null, null);
-            wrrs.put(workflow, WorkflowRunReport.parseWorkflowRunReport(new StringReader(report)));
+            workflowToWorkflowRunReportRecords.put(workflow, WorkflowRunReport.parseWorkflowRunReport(new StringReader(report)));
         } catch (IOException ioe) {
             throw new RuntimeException(ioe);
         }
     }
 
+    /**
+     *
+     * @param workflowRun
+     * @return
+     */
     @Override
     public Map<String, String> getWorkflowRunIni(WorkflowRun workflowRun) {
         net.sourceforge.seqware.common.model.WorkflowRun wr = seqwareMetadb.getWorkflowRun(Integer.parseInt(workflowRun.getSwid()));
         return MapTools.iniString2Map(wr.getIniFile());
     }
 
-    @Override
-    public void update() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
+    /**
+     *
+     * @param workflowRun
+     * @return
+     */
     @Override
     protected List<Accessionable> getWorkflowRunInputFiles(WorkflowRun workflowRun) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }

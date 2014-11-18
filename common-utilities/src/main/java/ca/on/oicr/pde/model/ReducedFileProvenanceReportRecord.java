@@ -1,5 +1,6 @@
 package ca.on.oicr.pde.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.TreeMultimap;
@@ -34,6 +35,7 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
     private Multimap<String, Set<String>> processingAttributes;
     private Set<String> fileMetaType;
     private Multimap<String, Set<String>> fileAttributes;
+    private boolean skip = false;
     private int fileHash = 0;
 
     private static final Comparator stringComparator = new Comparator<String>() {
@@ -95,6 +97,7 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
             this.processingAttributes.putAll(Multimaps.forMap(f.getProcessingAttributes()));
             this.fileMetaType.add(f.getFileMetaType());
             this.fileAttributes.putAll(Multimaps.forMap(f.getFileAttributes()));
+            this.skip = this.skip == true ? skip : Boolean.valueOf(f.getSkip());
             this.fileHash = f.getFilePath().hashCode();
         }
     }
@@ -238,6 +241,11 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
         for (Entry<String, Collection<TreeSet<String>>> e : processingAttributes.entrySet()) {
             this.processingAttributes.putAll(e.getKey(), e.getValue());
         }
+    }
+
+    @JsonIgnore
+    public Boolean getSkip() {
+        return skip;
     }
 
     public Set getFileMetaType() {

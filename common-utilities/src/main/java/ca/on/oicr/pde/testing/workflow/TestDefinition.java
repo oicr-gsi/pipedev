@@ -63,13 +63,13 @@ public class TestDefinition {
         }
 
         //@JsonProperty("defaultMetricsCalculateScript, metrics_calculate")
-        @JsonProperty("metrics_calculate")
+                @JsonProperty("metrics_calculate")
         public void setMetricsCalculateScript(String metricsCalculateScript) {
             this.metricsCalculateScript = metricsCalculateScript;
         }
 
         //@JsonProperty("defaultMetricsCompareScript, metrics_compare")
-        @JsonProperty("metrics_compare")
+                @JsonProperty("metrics_compare")
         public void setMetricsCompareScript(String metricsCompareScript) {
             this.metricsCompareScript = metricsCompareScript;
         }

@@ -1,13 +1,10 @@
-package ca.on.oicr.pde.utilities;
+package ca.on.oicr.pde.dao.executor;
 
-import ca.on.oicr.pde.model.Name;
-import ca.on.oicr.pde.model.Sample;
-import ca.on.oicr.pde.model.SequencerRun;
 import ca.on.oicr.pde.model.SeqwareAccession;
-import ca.on.oicr.pde.model.Study;
 import ca.on.oicr.pde.model.Workflow;
 import ca.on.oicr.pde.model.WorkflowRun;
 import ca.on.oicr.pde.parsers.SeqwareOutputParser;
+import ca.on.oicr.pde.utilities.Helpers;
 import com.google.common.base.Joiner;
 import static com.google.common.base.Preconditions.*;
 import java.io.File;
@@ -33,7 +30,8 @@ public class ShellExecutor implements SeqwareExecutor {
         this.seqwareDistribution = checkNotNull(seqwareDistrubution);
         this.id = checkNotNull(id);
         checkNotNull(workingDirectory);
-        checkArgument(workingDirectory.exists() && workingDirectory.isDirectory(), "The working directory %s is invalid", workingDirectory.getAbsolutePath());
+        checkArgument(workingDirectory.exists() && workingDirectory.isDirectory(),
+                "The working directory %s is invalid", workingDirectory.getAbsolutePath());
         this.workingDirectory = workingDirectory;
 
         this.environmentVariables = new HashMap<String, String>();
@@ -43,7 +41,8 @@ public class ShellExecutor implements SeqwareExecutor {
         File javaTmpDir = new File(workingDirectory + "/" + "javaTmp");
         javaTmpDir.mkdir();
         environmentVariables.put("_JAVA_OPTIONS", System.getenv("_JAVA_OPTIONS") == null
-                ? "-Djava.io.tmpdir=" + javaTmpDir.getAbsolutePath() : System.getenv("_JAVA_OPTIONS") + " " + "-Djava.io.tmpdir=" + javaTmpDir.getAbsolutePath());
+                ? "-Djava.io.tmpdir=" + javaTmpDir.getAbsolutePath()
+                : System.getenv("_JAVA_OPTIONS") + " " + "-Djava.io.tmpdir=" + javaTmpDir.getAbsolutePath());
 
         // Setup an output/logging directory for command output
         loggingDirectory = new File(workingDirectory + "/" + "logs");
@@ -62,17 +61,19 @@ public class ShellExecutor implements SeqwareExecutor {
 
         File stdOutAndErrFile = new File(loggingDirectory + "/" + "installWorkflow.out");
 
-        return new SeqwareAccession(SeqwareOutputParser.getSwidFromOutput(Helpers.executeCommand(id, cmd.toString(), workingDirectory, stdOutAndErrFile, environmentVariables)));
+        return new SeqwareAccession(SeqwareOutputParser.getSwidFromOutput(
+                Helpers.executeCommand(id, cmd.toString(), workingDirectory, stdOutAndErrFile, environmentVariables)));
 
     }
 
     @Override
-    public void deciderRunSchedule(File deciderJar, SeqwareAccession workflowSwid, List<String> studies, List<String> sequencerRuns, List<String> samples, String extraArgs) throws IOException {
+    public void deciderRunSchedule(File deciderJar, Workflow workflow, List<String> studies, List<String> sequencerRuns, 
+            List<String> samples, String extraArgs) throws IOException {
 
         StringBuilder cmd = new StringBuilder();
         cmd.append("java -jar ").append(deciderJar);
         //cmd.append(" --plugin ").append(o.getClass().getCanonicalName()).append(" -- "); //need to add the decider jar to this shells classpath
-        cmd.append(" --wf-accession ").append(workflowSwid.getSwid());
+        cmd.append(" --wf-accession ").append(workflow.getSwid());
         cmd.append(listToParamString(" --study-name ", studies));
         cmd.append(listToParamString(" --sequencer-run-name ", sequencerRuns));
         cmd.append(listToParamString(" --sample-name ", samples));
@@ -86,7 +87,8 @@ public class ShellExecutor implements SeqwareExecutor {
     }
 
     @Override
-    public SeqwareAccession workflowRunSchedule(SeqwareAccession workflowSwid, List<File> workflowIniFiles, Map<String, String> parameters) throws IOException {
+    public SeqwareAccession workflowRunSchedule(SeqwareAccession workflowSwid, List<File> workflowIniFiles, 
+            Map<String, String> parameters) throws IOException {
 
         //Temporary fix, see parameters handling section below
         if (!parameters.isEmpty()) {
@@ -115,7 +117,8 @@ public class ShellExecutor implements SeqwareExecutor {
 //        }
         File stdOutAndErrFile = new File(loggingDirectory + "/" + "workflowRunSchedule.out");
 
-        return new SeqwareAccession(SeqwareOutputParser.getSwidFromOutput(Helpers.executeCommand(id, cmd.toString(), workingDirectory, stdOutAndErrFile, environmentVariables)));
+        return new SeqwareAccession(SeqwareOutputParser.getSwidFromOutput(
+                Helpers.executeCommand(id, cmd.toString(), workingDirectory, stdOutAndErrFile, environmentVariables)));
 
     }
 
@@ -134,7 +137,8 @@ public class ShellExecutor implements SeqwareExecutor {
     }
 
     @Override
-    public void workflowRunLaunch(File workflowBundle, List<File> workflowIniFiles, String workflowName, String workflowVersion) throws IOException {
+    public void workflowRunLaunch(File workflowBundle, List<File> workflowIniFiles, String workflowName, 
+            String workflowVersion) throws IOException {
 
         StringBuilder cmd = new StringBuilder();
         cmd.append("java -jar ").append(seqwareDistribution);
@@ -181,7 +185,8 @@ public class ShellExecutor implements SeqwareExecutor {
 
         File stdOutAndErrFile = new File(loggingDirectory + "/" + "workflowRunReport.out");
 
-        return SeqwareOutputParser.getWorkflowRunStatusFromOutput(Helpers.executeCommand(id, cmd.toString(), workingDirectory, stdOutAndErrFile, environmentVariables));
+        return SeqwareOutputParser.getWorkflowRunStatusFromOutput(
+                Helpers.executeCommand(id, cmd.toString(), workingDirectory, stdOutAndErrFile, environmentVariables));
 
     }
 
@@ -199,12 +204,6 @@ public class ShellExecutor implements SeqwareExecutor {
 
     }
 
-    /**
-     *
-     * @param prefix The string to prefix each <code>objects</code> "Name" representation
-     * @param objects A list of objects that implement the "Name" interface.
-     * @return A string in the following format: [prefix][object 1's name][prefix][object 2's name]...
-     */
     public static String listToParamString(String prefix, List<? extends String> objects) {
 
         StringBuilder result = new StringBuilder();
@@ -231,7 +230,12 @@ public class ShellExecutor implements SeqwareExecutor {
 
     @Override
     public void cancelWorkflowRuns(Workflow w) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void deciderRunSchedule(String decider, Workflow workflow, String... deciderArgs) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }

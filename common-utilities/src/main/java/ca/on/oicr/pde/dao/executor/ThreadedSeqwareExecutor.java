@@ -1,6 +1,6 @@
-package ca.on.oicr.pde.utilities;
+package ca.on.oicr.pde.dao.executor;
 
-import ca.on.oicr.pde.dao.SeqwareService;
+import ca.on.oicr.pde.dao.reader.SeqwareReadService;
 import ca.on.oicr.pde.model.Workflow;
 import ca.on.oicr.pde.model.WorkflowRun;
 import ca.on.oicr.pde.model.WorkflowRunReportRecord;
@@ -19,11 +19,11 @@ import org.apache.logging.log4j.Logger;
 public class ThreadedSeqwareExecutor extends ShellExecutor {
 
     private final ExecutorService sharedPool;
-    private final SeqwareService seqwareService;
+    private final SeqwareReadService seqwareService;
     private final static Logger log = LogManager.getLogger(ThreadedSeqwareExecutor.class);
 
-    public ThreadedSeqwareExecutor(String id, File seqwareDistrubution, File seqwareSettings, File workingDirectory, ExecutorService sharedPool, SeqwareService seqwareService) {
-
+    public ThreadedSeqwareExecutor(String id, File seqwareDistrubution, File seqwareSettings, File workingDirectory, 
+            ExecutorService sharedPool, SeqwareReadService seqwareService) {
         super(id, seqwareDistrubution, seqwareSettings, workingDirectory);
 
         this.sharedPool = sharedPool;

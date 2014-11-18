@@ -49,7 +49,7 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
 //        //TODO: verify scheduling host is accessible
 //        
 //    }
-    @Test(groups = "preExecution")
+        @Test(groups = "preExecution")
     public void installWorkflow() throws IOException {
 
         workflowSwid = seqwareExecutor.installWorkflow(workflowBundlePath);

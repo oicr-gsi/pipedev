@@ -149,7 +149,7 @@ public class DeciderRunTestReportTest {
                     .build());
             fs.add(r);
         }
-        WorkflowRunReport expectedWR = new WorkflowRunReport();
+        DeciderRunTestReport.WorkflowRunReport expectedWR = new DeciderRunTestReport.WorkflowRunReport();
         expectedWR.setWorkflowIni(ImmutableMap.<String, String>builder().put("prop1", "val1").build());
         expectedWR.setFiles(fs);
 
@@ -159,7 +159,7 @@ public class DeciderRunTestReportTest {
         DeciderRunTestReport actual = DeciderRunTestReport.buildFromJson(expected.toJson());
 
         //Shuffle workflow run file list order
-        for (WorkflowRunReport w : actual.getWorkflowRuns()) {
+        for (DeciderRunTestReport.WorkflowRunReport w : actual.getWorkflowRuns()) {
             List<ReducedFileProvenanceReportRecord> rs = new ArrayList<ReducedFileProvenanceReportRecord>(w.getFiles());
             Collections.shuffle(rs);
             w.getFiles().clear();
@@ -316,7 +316,7 @@ public class DeciderRunTestReportTest {
 
         List<FileProvenanceReportRecord> fs = FileProvenanceReport.parseFileProvenanceReport(Helpers.getFileFromResource("fileprovenance/valid.tsv"));
 
-        WorkflowRunReport wrr = new WorkflowRunReport();
+        DeciderRunTestReport.WorkflowRunReport wrr = new DeciderRunTestReport.WorkflowRunReport();
         wrr.setFiles(Arrays.asList(new ReducedFileProvenanceReportRecord(fs)));
 
         DeciderRunTestReport t = new DeciderRunTestReport();
@@ -360,6 +360,22 @@ public class DeciderRunTestReportTest {
                 + "'/maxInputFiles' has changed from [ 2 ] to [ 3 ]\n"
                 + "'/minInputFiles' has changed from [ 1 ] to [ 2 ]\n"
                 + "... 1 more");
+    }
+
+    @Test
+    public void testWorkflowRunReportCompare() {
+
+        FileProvenanceReportRecord f1 = new FileProvenanceReportRecord.Builder(1).setExperimentName("Test1").setFilePath("/tmp/1").setFileSwid("1").build();
+        FileProvenanceReportRecord f2 = new FileProvenanceReportRecord.Builder(2).setExperimentName("Test2").setFilePath("/tmp/2").setFileSwid("2").build();
+
+        DeciderRunTestReport.WorkflowRunReport expected = new DeciderRunTestReport.WorkflowRunReport();
+        expected.setFiles(Arrays.asList(new ReducedFileProvenanceReportRecord(f1), new ReducedFileProvenanceReportRecord(f2)));
+
+        DeciderRunTestReport.WorkflowRunReport actual = new DeciderRunTestReport.WorkflowRunReport();
+        actual.setFiles(Arrays.asList(new ReducedFileProvenanceReportRecord(f2), new ReducedFileProvenanceReportRecord(f1)));
+
+        Assert.assertEquals(actual, expected);
+
     }
 
 }

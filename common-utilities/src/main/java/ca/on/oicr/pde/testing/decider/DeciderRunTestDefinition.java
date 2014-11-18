@@ -156,7 +156,6 @@ public class DeciderRunTestDefinition {
             return ToStringBuilder.reflectionToString(this);
         }
 
-
         @JsonIgnore
         //TODO: @JsonIgnore is broken...?: public String getMetrics() throws IOException {
         public File metrics() throws IOException {

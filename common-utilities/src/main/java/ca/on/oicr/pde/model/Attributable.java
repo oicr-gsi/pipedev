@@ -5,8 +5,10 @@ import java.util.Set;
 
 public interface Attributable {
 
-    public Map<String,Set<String>> getAttributes();
+    public Map<String, Set<String>> getAttributes();
 
     public Set<String> getAttribute(String key);
-    
+
+    public String getTableName();
+
 }

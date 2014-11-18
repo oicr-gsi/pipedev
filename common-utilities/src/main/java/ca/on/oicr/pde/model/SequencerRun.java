@@ -9,7 +9,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public class SequencerRun implements Accessionable, Attributable, Name {
+public class SequencerRun implements SeqwareObject, Name {
 
     private static final Map<String, SequencerRun> cache = new ConcurrentHashMap<String, SequencerRun>();
 
@@ -57,6 +57,11 @@ public class SequencerRun implements Accessionable, Attributable, Name {
 
     public String getPlatformName() {
         return platformName;
+    }
+
+    @Override
+    public String getTableName() {
+        return "sequencer-run";
     }
 
     @Override
@@ -119,6 +124,10 @@ public class SequencerRun implements Accessionable, Attributable, Name {
             return r;
         }
 
+    }
+
+    public static void clearCache() {
+        cache.clear();
     }
 
 }
