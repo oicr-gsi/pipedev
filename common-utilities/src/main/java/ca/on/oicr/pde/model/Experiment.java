@@ -9,7 +9,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public class Experiment implements Accessionable, Attributable {
+public class Experiment implements SeqwareObject {
 
     private static final Map<String, Experiment> cache = new ConcurrentHashMap<String, Experiment>();
 
@@ -44,6 +44,11 @@ public class Experiment implements Accessionable, Attributable {
     @Override
     public String getSwid() {
         return swid;
+    }
+
+    @Override
+    public String getTableName() {
+        return "experiment";
     }
 
     @Override
@@ -97,4 +102,9 @@ public class Experiment implements Accessionable, Attributable {
         }
 
     }
+
+    public static void clearCache() {
+        cache.clear();
+    }
+
 }

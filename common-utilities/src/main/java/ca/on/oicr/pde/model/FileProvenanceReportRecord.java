@@ -44,7 +44,7 @@ public class FileProvenanceReportRecord implements Serializable {
 
     public enum ValidationMode {
 
-        STRICT, SKIP;
+        STR, STRICT, SKIP;
     }
 
     private FileProvenanceReportRecord(Builder b) {
@@ -488,7 +488,7 @@ public class FileProvenanceReportRecord implements Serializable {
             return this;
         }
 
-        public Builder setLaneAttributes(String laneAttributes) {
+         public Builder setLaneAttributes(String laneAttributes) {
             this.laneAttributes = laneAttributes;
             return this;
         }

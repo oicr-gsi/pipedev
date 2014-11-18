@@ -9,7 +9,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public class Lane implements Accessionable, Attributable, Name {
+public class Lane implements SeqwareObject, Name {
 
     private static final Map<String, Lane> cache = new ConcurrentHashMap<String, Lane>();
 
@@ -51,6 +51,11 @@ public class Lane implements Accessionable, Attributable, Name {
     @Override
     public String getSwid() {
         return swid;
+    }
+
+    @Override
+    public String getTableName() {
+        return "lane";
     }
 
     @Override
@@ -108,6 +113,10 @@ public class Lane implements Accessionable, Attributable, Name {
             return r;
         }
 
+    }
+
+    public static void clearCache() {
+        cache.clear();
     }
 
 }

@@ -1,7 +1,7 @@
 package ca.on.oicr.pde.testing.common;
 
-import ca.on.oicr.pde.utilities.SeqwareExecutor;
-import ca.on.oicr.pde.utilities.ShellExecutor;
+import ca.on.oicr.pde.dao.executor.SeqwareExecutor;
+import ca.on.oicr.pde.dao.executor.ShellExecutor;
 import java.io.File;
 
 public abstract class RunTestBase implements org.testng.ITest {

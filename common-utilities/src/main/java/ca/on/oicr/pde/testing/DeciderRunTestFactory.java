@@ -1,11 +1,11 @@
 package ca.on.oicr.pde.testing;
 
-import ca.on.oicr.pde.dao.SeqwareService;
-import ca.on.oicr.pde.dao.SeqwareWebserviceImpl;
+import ca.on.oicr.pde.dao.reader.SeqwareReadService;
+import ca.on.oicr.pde.dao.reader.SeqwareWebserviceImpl;
 import ca.on.oicr.pde.testing.decider.DeciderRunTest;
 import ca.on.oicr.pde.testing.decider.DeciderRunTestDefinition;
 import static ca.on.oicr.pde.utilities.Helpers.*;
-import ca.on.oicr.pde.utilities.ThreadedSeqwareExecutor;
+import ca.on.oicr.pde.dao.executor.ThreadedSeqwareExecutor;
 import ca.on.oicr.pde.utilities.Timer;
 import com.jcabi.manifests.Manifests;
 import java.io.File;
@@ -124,7 +124,7 @@ public class DeciderRunTestFactory {
 
         //TODO: provide user a way to specify impl
         Timer timer = Timer.start();
-        SeqwareService seqwareService = new SeqwareWebserviceImpl(webserviceUrl, "admin@admin.com", "admin");
+        SeqwareReadService seqwareService = new SeqwareWebserviceImpl(webserviceUrl, "admin@admin.com", "admin");
         seqwareService.update();
         log.printf(Level.INFO, "Completed loading of seqware metadata in %s", timer.stop());
 
@@ -162,5 +162,5 @@ public class DeciderRunTestFactory {
         return tests.toArray();
 
     }
-
+    
 }

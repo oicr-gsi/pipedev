@@ -1,19 +1,29 @@
 package ca.on.oicr.pde.testing.decider;
 
+import ca.on.oicr.pde.dao.reader.SeqwareReadService;
+import ca.on.oicr.pde.model.Accessionable;
+import ca.on.oicr.pde.model.ReducedFileProvenanceReportRecord;
+import ca.on.oicr.pde.model.Workflow;
+import ca.on.oicr.pde.model.WorkflowRun;
+import ca.on.oicr.pde.model.WorkflowRunReportRecord;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.logging.log4j.Level;
 
 public class DeciderRunTestReport {
 
@@ -43,7 +53,7 @@ public class DeciderRunTestReport {
         workflowRuns = new ArrayList<WorkflowRunReport>();
     }
 
-    public static DeciderRunTestReport buildFromJson(java.io.File jsonPath) throws IOException {
+    public static DeciderRunTestReport buildFromJson(File jsonPath) throws IOException {
 
         ObjectMapper m = new ObjectMapper();
         m.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
@@ -219,6 +229,103 @@ public class DeciderRunTestReport {
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         return mapper.writeValueAsString(this);
+    }
+
+    public static DeciderRunTestReport generateReport(SeqwareReadService srs, Workflow workflow, Collection<String> iniExclusions) {
+        List<WorkflowRunReportRecord> wrrs = srs.getWorkflowRunRecords(workflow);
+
+        DeciderRunTestReport t = new DeciderRunTestReport();
+        t.setWorkflowRunCount(wrrs.size());
+
+        for (WorkflowRunReportRecord wrr : wrrs) {
+
+            //TODO: get workflow run object from workflow run report record
+            WorkflowRun.Builder workflowRunBuilder = new WorkflowRun.Builder();
+            workflowRunBuilder.setSwid(wrr.getWorkflowRunSwid());
+            WorkflowRun wr = workflowRunBuilder.build();
+
+            //Get the workflow run's parent accession(s) (processing accession(s))
+            List<Accessionable> parentAccessions = srs.getParentAccessions(wr);
+
+            //Get the workflow run's input file(s) (file accession(s))
+            List<Accessionable> inputFileAccessions = srs.getInputFileAccessions(wr);
+
+            t.addStudies(srs.getStudy(parentAccessions));
+            t.addSamples(srs.getSamples(parentAccessions));
+            t.addSequencerRuns(srs.getSequencerRuns(parentAccessions));
+            t.addLanes(srs.getLanes(parentAccessions));
+            t.addWorkflows(srs.getWorkflows(inputFileAccessions));
+            t.addProcessingAlgorithms(srs.getProcessingAlgorithms(inputFileAccessions));
+            t.addFileMetaTypes(srs.getFileMetaTypes(inputFileAccessions));
+
+            List<ReducedFileProvenanceReportRecord> files = srs.getFiles(inputFileAccessions);
+            if (files.size() > t.getMaxInputFiles()) {
+                t.setMaxInputFiles(files.size());
+            }
+
+            if (files.size() < t.getMinInputFiles()) {
+                t.setMinInputFiles(files.size());
+            }
+
+            Map ini = srs.getWorkflowRunIni(wr);
+            for (String s : iniExclusions) {
+                ini.remove(s);
+            }
+
+            WorkflowRunReport x = new WorkflowRunReport();
+            x.setWorkflowIni(ini);
+            x.setFiles(files);
+
+            t.addWorkflowRun(x);
+
+        }
+
+        return t;
+    }
+
+    public static class WorkflowRunReport implements Comparable<WorkflowRunReport> {
+
+        Map workflowIni = new TreeMap<String, String>();
+        List<ReducedFileProvenanceReportRecord> files = new ArrayList<ReducedFileProvenanceReportRecord>();
+
+        public Map getWorkflowIni() {
+            return workflowIni;
+        }
+
+        public void setWorkflowIni(Map<String, String> workflowIni) {
+            this.workflowIni = new TreeMap<String, String>(workflowIni);
+        }
+
+        public List<ReducedFileProvenanceReportRecord> getFiles() {
+            Collections.sort(files);
+            return files;
+        }
+
+        public void setFiles(List<ReducedFileProvenanceReportRecord> files) {
+            this.files.addAll(files);
+            Collections.sort(this.files);
+        }
+
+        @Override
+        public String toString() {
+            return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        }
+
+        @Override
+        public int hashCode() {
+            return HashCodeBuilder.reflectionHashCode(this);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return EqualsBuilder.reflectionEquals(this, obj);
+        }
+
+        @Override
+        public int compareTo(WorkflowRunReport o) {
+            //TODO: optimize
+            return this.toString().compareTo(o.toString());
+        }
     }
 
 }

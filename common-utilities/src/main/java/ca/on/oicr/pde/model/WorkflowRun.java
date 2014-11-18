@@ -84,4 +84,8 @@ public class WorkflowRun implements Accessionable {
         }
     }
 
+    public static void clearCache() {
+        cache.clear();
+    }
+
 }

@@ -5,7 +5,7 @@
 
     <groupId>ca.on.oicr.pde</groupId>
     <artifactId>decider-utilities</artifactId>
-    <version>1.5-SNAPSHOT</version>
+    <version>1.6-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>decider-utilities</name>
@@ -14,7 +14,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <seqware-version>1.0.17</seqware-version>
+        <seqware-client-version>1.1.0-alpha.5</seqware-client-version>
     </properties>
 
     <build>
@@ -68,7 +68,7 @@
         <dependency>
             <groupId>com.github.seqware</groupId>
             <artifactId>seqware-distribution</artifactId>
-            <version>${seqware-version}</version>
+            <version>${seqware-client-version}</version>
             <classifier>full</classifier>
             <scope>provided</scope>
         </dependency>

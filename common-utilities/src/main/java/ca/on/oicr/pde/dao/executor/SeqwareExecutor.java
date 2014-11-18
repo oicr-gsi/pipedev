@@ -1,9 +1,6 @@
-package ca.on.oicr.pde.utilities;
+package ca.on.oicr.pde.dao.executor;
 
-import ca.on.oicr.pde.model.Sample;
-import ca.on.oicr.pde.model.SequencerRun;
 import ca.on.oicr.pde.model.SeqwareAccession;
-import ca.on.oicr.pde.model.Study;
 import ca.on.oicr.pde.model.Workflow;
 import ca.on.oicr.pde.model.WorkflowRun;
 import java.io.File;
@@ -15,7 +12,7 @@ public interface SeqwareExecutor {
 
     public SeqwareAccession installWorkflow(File workflowPath) throws IOException;
 
-    public void deciderRunSchedule(File deciderJar, SeqwareAccession workflowSwid, List<String> studies, List<String> sequencerRuns, List<String> samples, String extraArgs) throws IOException;
+    public void deciderRunSchedule(File deciderJar, Workflow workflow, List<String> studies, List<String> sequencerRuns, List<String> samples, String extraArgs) throws IOException;
 
     public SeqwareAccession workflowRunSchedule(SeqwareAccession workflowSwid, List<File> workflowIniFiles, Map<String, String> parameters) throws IOException;
 
@@ -30,5 +27,7 @@ public interface SeqwareExecutor {
     public void cancelWorkflowRun(WorkflowRun wr) throws IOException;
 
     public void cancelWorkflowRuns(Workflow w) throws IOException;
+    
+    public void deciderRunSchedule(String decider, Workflow workflow, String... deciderArgs) throws IOException;
 
 }

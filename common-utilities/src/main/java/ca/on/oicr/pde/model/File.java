@@ -9,7 +9,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public class File implements Accessionable, Attributable {
+public class File implements SeqwareObject {
 
     private static final Map<String, File> cache = new ConcurrentHashMap<String, File>();
 
@@ -68,6 +68,11 @@ public class File implements Accessionable, Attributable {
 
     public String getDescription() {
         return description;
+    }
+
+    @Override
+    public String getTableName() {
+        return "file";
     }
 
     @Override
@@ -140,6 +145,10 @@ public class File implements Accessionable, Attributable {
             return r;
         }
 
+    }
+
+    public static void clearCache() {
+        cache.clear();
     }
 
 }

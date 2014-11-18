@@ -1,13 +1,9 @@
 package ca.on.oicr.pde.testing.decider;
 
-import ca.on.oicr.pde.dao.SeqwareService;
+import ca.on.oicr.pde.dao.reader.SeqwareReadService;
 import ca.on.oicr.pde.diff.ObjectDiff;
-import ca.on.oicr.pde.model.Accessionable;
-import ca.on.oicr.pde.model.ReducedFileProvenanceReportRecord;
 import ca.on.oicr.pde.model.SeqwareAccession;
 import ca.on.oicr.pde.model.Workflow;
-import ca.on.oicr.pde.model.WorkflowRun;
-import ca.on.oicr.pde.model.WorkflowRunReportRecord;
 import ca.on.oicr.pde.testing.common.RunTestBase;
 import ca.on.oicr.pde.utilities.Timer;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -17,7 +13,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
@@ -37,8 +32,8 @@ public class DeciderRunTest extends RunTestBase {
     private final String deciderClass;
     private final File bundledWorkflow;
 
-    SeqwareService seqwareService;
-    SeqwareAccession workflowSwid;
+    private SeqwareReadService seqwareService;
+    private Workflow workflow;
 
     private final List<String> studies = new ArrayList<String>();
     private final List<String> sequencerRuns = new ArrayList<String>();
@@ -54,7 +49,7 @@ public class DeciderRunTest extends RunTestBase {
 
     private Timer executionTimer;
 
-    public DeciderRunTest(SeqwareService seqwareService, File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName,
+    public DeciderRunTest(SeqwareReadService seqwareService, File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName,
             File deciderJar, File bundledWorkflow, String deciderClass, DeciderRunTestDefinition.Test definition) throws IOException {
 
         super(seqwareDistribution, seqwareSettings, workingDirectory, testName);
@@ -120,10 +115,6 @@ public class DeciderRunTest extends RunTestBase {
     @AfterClass
     public void afterEachRunTest() throws IOException {
 
-        Workflow.Builder workflowBuilder = new Workflow.Builder();
-        workflowBuilder.setSwid(workflowSwid.toString());
-        Workflow workflow = workflowBuilder.build();
-
         /* Cancel all submitted workflow runs
          * Each decider test run installs a separate instance of its associated
          * workflow bundle. So each decider run test has a unique workflow swid.
@@ -133,7 +124,7 @@ public class DeciderRunTest extends RunTestBase {
         log.printf(Level.INFO, "[%s] Completed clean up in %s", testName, timer.stop());
 
         //Test case summary info
-        log.printf(Level.INFO, "[%s] Total run time: %s",testName, executionTimer.stop());
+        log.printf(Level.INFO, "[%s] Total run time: %s", testName, executionTimer.stop());
         log.printf(Level.INFO, "[%s] Working directory: %s", testName, workingDirectory);
 
     }
@@ -154,8 +145,11 @@ public class DeciderRunTest extends RunTestBase {
     @Test(groups = "preExecution")
     public void installWorkflow() throws IOException {
         Timer timer = Timer.start();
-        workflowSwid = seqwareExecutor.installWorkflow(bundledWorkflow);
-        Assert.assertNotNull(workflowSwid, "Installation of the workflow bundle failed");
+        Workflow.Builder b = new Workflow.Builder();
+        b.setSwid(seqwareExecutor.installWorkflow(bundledWorkflow).getSwid());
+        workflow = b.build();
+
+        Assert.assertNotNull(workflow.getSwid(), "Installation of the workflow bundle failed");
         log.printf(Level.INFO, "[%s] Completed installing workflow bundle in %s", testName, timer.stop());
     }
 
@@ -185,16 +179,15 @@ public class DeciderRunTest extends RunTestBase {
         for (Entry<String, String> e : testDefinition.getParameters().entrySet()) {
             extraArgs.append(" ").append(e.getKey()).append(" ").append(e.getValue());
         }
-        seqwareExecutor.deciderRunSchedule(deciderJar, workflowSwid, studies, sequencerRuns, samples, extraArgs.toString());
+        seqwareExecutor.deciderRunSchedule(deciderJar, workflow, studies, sequencerRuns, samples, extraArgs.toString());
         log.printf(Level.INFO, "[%s] Completed workflow run scheduling in %s", testName, timer.stop());
     }
 
     @Test(dependsOnGroups = "execution", groups = "postExecution")
     public void calculateWorkflowRunReport() throws JsonProcessingException, IOException {
         Timer timer = Timer.start();
-        Workflow.Builder workflowBuilder = new Workflow.Builder();
-        workflowBuilder.setSwid(workflowSwid.getSwid());
-        actual = generateReport(workflowBuilder.build());
+
+        actual = DeciderRunTestReport.generateReport(seqwareService, workflow, testDefinition.getIniExclusions());
 
         actualReportFile = new File(workingDirectory.getAbsolutePath() + "/" + testDefinition.outputName());
         Assert.assertFalse(actualReportFile.exists());
@@ -246,67 +239,5 @@ public class DeciderRunTest extends RunTestBase {
 
         return problems;
     }
-
-    //TODO: move this to a separate implementation class of "Decider Report"
-    private DeciderRunTestReport generateReport(Workflow w) {
-        List<WorkflowRunReportRecord> wrrs = seqwareService.getWorkflowRunRecords(w);
-
-        DeciderRunTestReport t = new DeciderRunTestReport();
-        t.setWorkflowRunCount(wrrs.size());
-
-        for (WorkflowRunReportRecord wrr : wrrs) {
-
-            //TODO: get workflow run object from workflow run report record
-            WorkflowRun.Builder workflowRunBuilder = new WorkflowRun.Builder();
-            workflowRunBuilder.setSwid(wrr.getWorkflowRunSwid());
-            WorkflowRun wr = workflowRunBuilder.build();
-
-            //Get the workflow run's parent accession(s) (processing accession(s))
-            List<Accessionable> parentAccessions = seqwareService.getParentAccessions(wr);
-
-            //Get the workflow run's input file(s) (file accession(s))
-            List<Accessionable> inputFileAccessions = seqwareService.getInputFileAccessions(wr);
-
-            //TODO: 0.13.x series deciders do not use input_files, generalize parent and input file accessions
-            if (inputFileAccessions.isEmpty()) {
-                log.printf(Level.WARN, "[%s] Overriding input file accessions with parent accessions, workflow run swid=[%s]",
-                        testName, wr.getSwid());
-                inputFileAccessions = parentAccessions;
-            }
-
-            t.addStudies(seqwareService.getStudy(parentAccessions));
-            t.addSamples(seqwareService.getSamples(parentAccessions));
-            t.addSequencerRuns(seqwareService.getSequencerRuns(parentAccessions));
-            t.addLanes(seqwareService.getLanes(parentAccessions));
-
-            t.addWorkflows(seqwareService.getWorkflows(inputFileAccessions));
-            t.addProcessingAlgorithms(seqwareService.getProcessingAlgorithms(inputFileAccessions));
-            t.addFileMetaTypes(seqwareService.getFileMetaTypes(inputFileAccessions));
-
-            List<ReducedFileProvenanceReportRecord> files = seqwareService.getFiles(inputFileAccessions);
-            if (files.size() > t.getMaxInputFiles()) {
-                t.setMaxInputFiles(files.size());
-            }
-
-            if (files.size() < t.getMinInputFiles()) {
-                t.setMinInputFiles(files.size());
-            }
-
-            Map ini = seqwareService.getWorkflowRunIni(wr);
-            for (String s : testDefinition.getIniExclusions()) {
-                ini.remove(s);
-            }
-
-            WorkflowRunReport x = new WorkflowRunReport();
-            x.setWorkflowIni(ini);
-            x.setFiles(files);
-
-            t.addWorkflowRun(x);
-
-        }
-
-        return t;
-
-    }
-
+    
 }

@@ -14,7 +14,13 @@ import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.testng.Assert;
 import static com.google.common.base.Preconditions.*;
 import com.google.common.io.Files;
+import com.jcabi.manifests.Manifests;
+import java.io.Serializable;
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -50,7 +56,8 @@ public class Helpers {
         script.deleteOnExit();
 
         InputStream resourceStream = Helpers.class.getClassLoader().getResourceAsStream(scriptName);
-        Assert.assertNotNull(resourceStream, String.format("Script resource [%s] was not found - verify that script exists as a resource.", scriptName));
+        Assert.assertNotNull(resourceStream,
+                String.format("Script resource [%s] was not found - verify that script exists as a resource.", scriptName));
 
         FileUtils.writeStringToFile(script, IOUtils.toString(resourceStream));
 
@@ -58,10 +65,22 @@ public class Helpers {
 
     }
 
-    public static String executeCommand(String id, String command, File workingDirectory, Map<String, String>... environmentVariables) throws IOException {
+    public static String getStringFromResource(String resourceFilePath) throws IOException {
 
+        InputStream resourceStream = Helpers.class.getResourceAsStream(resourceFilePath);
+
+        if (resourceStream == null) {
+            throw new IOException("The resource [" + resourceFilePath + "] is not accessible");
+        }
+
+        String result = IOUtils.toString(resourceStream);
+
+        return result;
+    }
+
+    public static String executeCommand(String id, String command, File workingDirectory,
+            Map<String, String>... environmentVariables) throws IOException {
         return executeCommand(id, command, workingDirectory, null, environmentVariables);
-
     }
 
     public static String executeCommand(String id, String command, File workingDirectory, File outputFilePath,
@@ -102,7 +121,8 @@ public class Helpers {
 
     }
 
-    public static File generateSeqwareSettings(File workingDirectory, String webserviceUrl, String schedulingSystem, String schedulingHost) throws IOException {
+    public static File generateSeqwareSettings(File workingDirectory, String webserviceUrl, String schedulingSystem,
+            String schedulingHost) throws IOException {
 
         //TODO: implement this in java
         StringBuilder command = new StringBuilder();
@@ -157,9 +177,11 @@ public class Helpers {
 
     }
 
-    public static File generateTestWorkingDirectory(File baseWorkingDirectory, String prefix, String testName, String suffix) throws IOException {
+    public static File generateTestWorkingDirectory(File baseWorkingDirectory, String prefix, String testName,
+            String suffix) throws IOException {
 
-        checkArgument(baseWorkingDirectory != null && baseWorkingDirectory.isDirectory(), "The base working directory [%s] does not exist.", baseWorkingDirectory.getAbsolutePath());
+        checkArgument(baseWorkingDirectory != null && baseWorkingDirectory.isDirectory(),
+                "The base working directory [%s] does not exist.", baseWorkingDirectory.getAbsolutePath());
 
         File testWorkingDirectory = new File(baseWorkingDirectory + "/" + prefix + "_" + testName + "_" + suffix + "/");
 
@@ -205,6 +227,40 @@ public class Helpers {
         }
 
         return true;
+    }
+
+    public static <T> T deepCopy(T object) {
+        return (T) SerializationUtils.deserialize(SerializationUtils.serialize((Serializable) object));
+    }
+
+    public static File getBundledWorkflow() {
+        File bundledWorkflow = null;
+
+        //try to load config.properties
+        Configuration config = null;
+        try {
+            config = new PropertiesConfiguration("config.properties");
+        } catch (ConfigurationException ce) {
+            //do nothing, try the next steps
+        }
+
+        //try to retrieve the workflow bundle path
+        if (config != null) {
+            String tmp = config.getString("workflow_bundle_path");
+            if (tmp != null && !tmp.isEmpty()) {
+                bundledWorkflow = new File(tmp);
+            }
+        }
+
+        if (Manifests.exists("Workflow-Bundle-Path") && !Manifests.read("Workflow-Bundle-Path").isEmpty()) {
+            bundledWorkflow = new File(Manifests.read("Workflow-Bundle-Path"));
+        }
+
+        if (System.getProperty("bundledWorkflow") != null && !System.getProperty("bundledWorkflow").isEmpty()) {
+            bundledWorkflow = getRequiredSystemPropertyAsFile("bundledWorkflow");
+        }
+
+        return bundledWorkflow;
     }
 
 }
