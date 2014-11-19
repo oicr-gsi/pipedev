@@ -5,8 +5,6 @@ import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.testng.Assert;
 import org.testng.ITestContext;
 import org.testng.TestListenerAdapter;
@@ -56,25 +54,7 @@ public class TestCaseReporterTest {
         testCase.setParameters(params);
         testCase.setXmlClasses(Arrays.asList(new XmlClass(ca.on.oicr.pde.testing.testng.simulation.FakeImpl.class)));
 
-        //capture std out/err
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintStream ps = new PrintStream(baos);
-        PrintStream out = System.out;
-        PrintStream err = System.err;
-        System.setOut(ps);
-        System.setErr(ps);
-
-        //Execute test suite
-        t.setXmlSuites(Arrays.asList(testSuite));
-        t.run();
-
-        //reset std out/err
-        System.out.flush();
-        System.err.flush();
-        System.setOut(out);
-        System.setErr(err);
-
-        String actualReportOutput = baos.toString();
+        String actualReportOutput = executeTestSuite(testSuite);
 
         ITestContext tc = tla.getTestContexts().get(0);
         Assert.assertEquals(tla.getTestContexts().size(), 1, "The assumption that there is only one test listener no longer holds");
@@ -143,25 +123,7 @@ public class TestCaseReporterTest {
         testCase.setName("Fake test context name");
         testCase.setXmlClasses(Arrays.asList(new XmlClass(ca.on.oicr.pde.testing.testng.simulation.FakeFailImpl.class)));
 
-        //capture std out/err
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintStream ps = new PrintStream(baos);
-        PrintStream out = System.out;
-        PrintStream err = System.err;
-        System.setOut(ps);
-        System.setErr(ps);
-
-        //Execute test suite
-        t.setXmlSuites(Arrays.asList(testSuite));
-        t.run();
-
-        //reset std out/err
-        System.out.flush();
-        System.err.flush();
-        System.setOut(out);
-        System.setErr(err);
-
-        String actualReportOutput = normalizeOutput(baos.toString());
+        String actualReportOutput = executeTestSuite(testSuite);
 
         ITestContext tc = tla.getTestContexts().get(0);
         Assert.assertEquals(tla.getTestContexts().size(), 1, "The assumption that there is only one test listener no longer holds");
@@ -208,25 +170,7 @@ public class TestCaseReporterTest {
         testCase.setXmlClasses(Arrays.asList(new XmlClass(ca.on.oicr.pde.testing.testng.simulation.MultipleFakeFailsImpl.class)));
         testCase.setParameters(params);
 
-        //capture std out/err
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintStream ps = new PrintStream(baos);
-        PrintStream out = System.out;
-        PrintStream err = System.err;
-        System.setOut(ps);
-        System.setErr(ps);
-
-        //Execute test suite
-        t.setXmlSuites(Arrays.asList(testSuite));
-        t.run();
-
-        //reset std out/err
-        System.out.flush();
-        System.err.flush();
-        System.setOut(out);
-        System.setErr(err);
-
-        String actualReportOutput = baos.toString();
+        String actualReportOutput = executeTestSuite(testSuite);
 
         ITestContext tc = tla.getTestContexts().get(0);
         Assert.assertEquals(tla.getTestContexts().size(), 1, "The assumption that there is only one test listener no longer holds");
@@ -270,8 +214,30 @@ public class TestCaseReporterTest {
     }
 
     private String normalizeOutput(final String output) {
-         String newOutput = output.replaceAll("(.*execution time = \\[)([^\\]]*)(\\].*)", "$1X.XXs$3");
-         return newOutput;
+        String newOutput = output.replaceAll("(.*execution time = \\[)([^\\]]*)(\\].*)", "$1X.XXs$3");
+        return newOutput;
+    }
+
+    private String executeTestSuite(XmlSuite testSuite) {
+        //capture std out/err
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(baos);
+        PrintStream out = System.out;
+        PrintStream err = System.err;
+        System.setOut(ps);
+        System.setErr(ps);
+
+        //Execute test suite
+        t.setXmlSuites(Arrays.asList(testSuite));
+        t.run();
+
+        //reset std out/err
+        System.out.flush();
+        System.err.flush();
+        System.setOut(out);
+        System.setErr(err);
+
+        return baos.toString();
     }
 
 }
