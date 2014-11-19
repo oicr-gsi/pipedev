@@ -5,15 +5,15 @@
     <modelVersion>4.0.0</modelVersion>
     
     <parent>
-        <groupId>ca.on.oicr.pde</groupId>
+        <groupId>ca.on.oicr.pde.config</groupId>
         <artifactId>common</artifactId>
-        <version>2014.1.0</version>
-        <relativePath>./common-parent-pom.xml</relativePath>
+        <version>2014.3.0-SNAPSHOT</version>
+        <relativePath>common-parent-pom.xml</relativePath>
     </parent>
     
-    <groupId>ca.on.oicr.pde.workflows</groupId>
+    <groupId>ca.on.oicr.pde.config</groupId>
     <artifactId>workflows</artifactId>
-    <version>2014.1.0</version>
+    <version>2014.3.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <url>http://maven.apache.org</url>
     
@@ -21,6 +21,7 @@
         <skipBundleTest>true</skipBundleTest>
         <bundleDirectory>${project.build.directory}/Workflow_Bundle_${workflow-directory-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-directory-name}/${project.version}</bundleDirectory>
         <seqwareDistribution>${bundleDirectory}/lib/seqware-distribution-${seqware-version}-full.jar</seqwareDistribution>
+        <display-name>workflow_${project.artifactId}_${project.version}</display-name>
         <final-name>Workflow_${project.artifactId}_${project.version}_SeqWare_${seqware-version}</final-name>
     </properties>
     
