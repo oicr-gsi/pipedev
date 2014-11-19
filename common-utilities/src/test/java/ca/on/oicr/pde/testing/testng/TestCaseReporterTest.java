@@ -1,11 +1,12 @@
 package ca.on.oicr.pde.testing.testng;
 
-import ca.on.oicr.pde.diff.ObjectDiff;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.testng.Assert;
 import org.testng.ITestContext;
 import org.testng.TestListenerAdapter;
@@ -129,7 +130,7 @@ public class TestCaseReporterTest {
                 + "================================================================================\n"
                 + "";
 
-        Assert.assertEquals(actualReportOutput.trim(), expectedReportOutput.trim(), "The test report is different from what was expected.");
+        Assert.assertEquals(normalizeOutput(actualReportOutput), normalizeOutput(expectedReportOutput), "The test report is different from what was expected.");
     }
 
     @Test
@@ -160,7 +161,7 @@ public class TestCaseReporterTest {
         System.setOut(out);
         System.setErr(err);
 
-        String actualReportOutput = baos.toString();
+        String actualReportOutput = normalizeOutput(baos.toString());
 
         ITestContext tc = tla.getTestContexts().get(0);
         Assert.assertEquals(tla.getTestContexts().size(), 1, "The assumption that there is only one test listener no longer holds");
@@ -190,7 +191,7 @@ public class TestCaseReporterTest {
                 + "================================================================================\n"
                 + "";
 
-        Assert.assertEquals(actualReportOutput.trim(), expectedReportOutput.trim(), "The test report is different from what was expected.");
+        Assert.assertEquals(normalizeOutput(actualReportOutput), normalizeOutput(expectedReportOutput), "The test report is different from what was expected.");
     }
 
     @Test
@@ -225,7 +226,7 @@ public class TestCaseReporterTest {
         System.setOut(out);
         System.setErr(err);
 
-        String actualOutput = baos.toString();
+        String actualReportOutput = baos.toString();
 
         ITestContext tc = tla.getTestContexts().get(0);
         Assert.assertEquals(tla.getTestContexts().size(), 1, "The assumption that there is only one test listener no longer holds");
@@ -236,7 +237,7 @@ public class TestCaseReporterTest {
 
         Assert.assertEquals(t.getStatus(), 3, "Test status should be \"has failed\" (1) and \"has skipped\" (2).");
 
-        String expectedOutput = "[TestNG] Running:\n"
+        String expectedReportOutput = "[TestNG] Running:\n"
                 + "  Command line suite\n"
                 + "\n"
                 + "\n"
@@ -265,7 +266,12 @@ public class TestCaseReporterTest {
                 + "================================================================================\n"
                 + "";
 
-        Assert.assertEquals(actualOutput.trim(), expectedOutput.trim(), "The test report is different from what was expected.");
+        Assert.assertEquals(normalizeOutput(actualReportOutput), normalizeOutput(expectedReportOutput), "The test report is different from what was expected.");
+    }
+
+    private String normalizeOutput(final String output) {
+         String newOutput = output.replaceAll("(.*execution time = \\[)([^\\]]*)(\\].*)", "$1X.XXs$3");
+         return newOutput;
     }
 
 }
