@@ -47,4 +47,27 @@ Afterwards, they will be available in your local Maven repository.
 </dependency>
 ```
 
+To install our parent poms:
 
+```bash
+mvn install:install -f config/config-modules.xml
+```
+To use the workflow parent pom, add the following to your workflow's pom.xml:
+
+```html
+<parent>
+    <groupId>ca.on.oicr.pde.config</groupId>
+    <artifactId>workflows</artifactId>
+    <version>2014.3.0</version>
+</parent>
+```
+
+To use the decider parent pom, add the following to your decider's pom.xml:
+
+```html
+<parent>
+    <groupId>ca.on.oicr.pde.config</groupId>
+    <artifactId>deciders</artifactId>
+    <version>2014.3.0</version>
+</parent>
+```
