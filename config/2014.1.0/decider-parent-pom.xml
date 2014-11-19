@@ -7,17 +7,17 @@
     <parent>
         <groupId>ca.on.oicr.pde</groupId>
         <artifactId>common</artifactId>
-        <version>2014.2.0</version>
+        <version>2014.1.0</version>
+        <relativePath>common-parent-pom.xml</relativePath>
     </parent>
     
     <groupId>ca.on.oicr.pde.deciders</groupId>
     <artifactId>deciders</artifactId>
-    <version>2014.2.0</version>
+    <version>2014.1.0</version>
     <packaging>pom</packaging>
     <url>http://maven.apache.org</url>
 
     <properties>
-        <display-name>decider_${project.artifactId}_${project.version}</display-name>
         <final-name>Decider_${project.version}_${project.artifactId}_${workflow-version}_SeqWare_${seqware-version}</final-name>
         <final-jar-location>/.mounts/labs/PDE/jenkins/deciders</final-jar-location>
         <seqwareDistribution>${project.build.directory}/dependency/seqware-distribution-${seqware-version}-full.jar</seqwareDistribution>
