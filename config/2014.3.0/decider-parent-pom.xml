@@ -27,9 +27,8 @@
     <dependencies>
         <dependency>
             <groupId>com.github.seqware</groupId>
-            <artifactId>seqware-distribution</artifactId>
+            <artifactId>seqware-pipeline</artifactId>
             <version>${seqware-version}</version>
-            <classifier>full</classifier>
         </dependency>
         <dependency>
             <groupId>ca.on.oicr.pde</groupId>
@@ -46,6 +45,12 @@
                 <filtering>true</filtering>
             </resource>
         </resources>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -118,6 +123,17 @@
                     <suiteXmlFiles>
                         <suiteXmlFile>${testSuite}</suiteXmlFile>
                     </suiteXmlFiles>
+                    <printSummary>false</printSummary>
+                    <properties>
+                        <property>
+                            <name>usedefaultlisteners</name>
+                            <key>false</key>
+                        </property>
+                        <property>
+                            <name>listener</name>
+                            <value>ca.on.oicr.pde.testing.testng.TestCaseReporter</value>
+                        </property>
+                    </properties>
                 </configuration>
             </plugin>
             <plugin>
