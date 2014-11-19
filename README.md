@@ -58,7 +58,7 @@ To use the workflow parent pom, add the following to your workflow's pom.xml:
 <parent>
     <groupId>ca.on.oicr.pde.config</groupId>
     <artifactId>workflows</artifactId>
-    <version>2014.3.0</version>
+    <version>2014.3.0-SNAPSHOT</version>
 </parent>
 ```
 
@@ -68,6 +68,6 @@ To use the decider parent pom, add the following to your decider's pom.xml:
 <parent>
     <groupId>ca.on.oicr.pde.config</groupId>
     <artifactId>deciders</artifactId>
-    <version>2014.3.0</version>
+    <version>2014.3.0-SNAPSHOT</version>
 </parent>
 ```
