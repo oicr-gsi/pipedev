@@ -12,10 +12,18 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <skipITs>true</skipITs>
+
         <seqware-client-version>1.1.0-alpha.5</seqware-client-version>
         <seqware-server-version>1.1.0-alpha.5</seqware-server-version>
-        <seqwareWar>${project.build.directory}/wars/webservice.war</seqwareWar>
+        
+        <seqwareWar>${com.github.seqware:seqware-webservice:war}</seqwareWar>
+
+        <skipITs>true</skipITs>
+        
+        <dbHost></dbHost>
+        <dbPort></dbPort>
+        <dbUser></dbUser>
+        <dbPass></dbPass>
     </properties>
     
     <dependencies>
@@ -151,6 +159,12 @@
         </dependency>
         <dependency>
             <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-webservice</artifactId>
+            <version>[${seqware-server-version}]</version>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>com.github.seqware</groupId>
             <artifactId>seqware-pipeline</artifactId>
             <version>[${seqware-client-version}]</version>
         </dependency>
@@ -261,23 +275,39 @@
             </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.16</version>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.18</version>
                 <configuration>
-                    <skip>${skipITs}</skip>
-                    <includes>
-                        <include>**/*IT.java</include>
-                    </includes>
-                    <systemPropertyVariables>
-                        <dbFile>${dbFile}</dbFile>
-                        <dbPatchDir>${dbPatchDir}</dbPatchDir>
-                        <dbHost>${dbHost}</dbHost>
-                        <dbPort>${dbPort}</dbPort>
-                        <dbUser>${dbUser}</dbUser>
-                        <dbPass>${dbPass}</dbPass>
-                        <seqwareWebserviceDir>${seqwareWebserviceDir}</seqwareWebserviceDir>
-                    </systemPropertyVariables>
+                    <excludes>
+                        <exclude>**/*IT.java</exclude>
+                    </excludes>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <phase>integration-test</phase>
+                        <configuration>
+                            <skip>${skipITs}</skip>
+                            <excludes>
+                                <exclude>none</exclude>
+                            </excludes>
+                            <includes>
+                                <include>**/*IT.java</include>
+                            </includes>
+                            <systemPropertyVariables>
+                                <!--<dbFile>${dbFile}</dbFile>
+                                <dbPatchDir>${dbPatchDir}</dbPatchDir>-->
+                                <dbHost>${dbHost}</dbHost>
+                                <dbPort>${dbPort}</dbPort>
+                                <dbUser>${dbUser}</dbUser>
+                                <dbPass>${dbPass}</dbPass>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -308,31 +338,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.8</version>
-                
+                <version>2.9</version>
                 <executions>
                     <execution>
-                        <id>copy</id>
-                        <phase>package</phase>
                         <goals>
-                            <goal>copy</goal>
+                            <goal>properties</goal>
                         </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>com.github.seqware</groupId>
-                                    <artifactId>seqware-webservice</artifactId>
-                                    <version>${seqware-server-version}</version>
-                                    <type>war</type>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>${project.build.directory}/wars/</outputDirectory>
-                                    <destFileName>webservice.war</destFileName>
-                                </artifactItem>
-                            </artifactItems>
-                            <!--              <outputDirectory>${project.build.directory}/wars</outputDirectory>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>true</overWriteSnapshots>-->
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

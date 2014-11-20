@@ -20,6 +20,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import static org.testng.Assert.*;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
@@ -35,13 +36,27 @@ public class RegressionTestStudyIT {
 
     public RegressionTestStudyIT() {
 
-        r = new RegressionTestStudy("localhost", "54321", "seqware", "seqware");
+    }
+
+    @BeforeClass
+    public void setup() {
+        String dbHost = System.getProperty("dbHost");
+        String dbPort = System.getProperty("dbPort");
+        String dbUser = System.getProperty("dbUser");
+        String dbPassword = System.getProperty("dbPassword");
+
+        assertNotNull(dbHost, "Set dbHost (-DdbHost=xxxxxx) to a test postgresql db host name");
+        assertNotNull(dbPort, "Set dbPort (-DdbPort=xxxxxx) to a test postgresql db port");
+        assertNotNull(dbUser, "Set dbUser (-DdbUser=xxxxxx) to a test postgresql db user name");
+        assertNotNull(dbPassword, "Set dbPassword (-DdbPassword=xxxxxx) to a test postgresql db password");
+
+        r = new RegressionTestStudy(dbHost, dbPort, dbUser, dbPassword);
         seqwareWriter = r.getSeqwareWriteService();
         seqwareReader = r.getSeqwareReadService();
     }
 
     @Test
-    public void testSomeMethod() throws MalformedURLException, InterruptedException, ExecutionException {
+    public void attachFilesToTestStudy() throws MalformedURLException, InterruptedException, ExecutionException {
 
         Map<String, SeqwareObject> os = r.getSeqwareObjects();
 
@@ -58,7 +73,7 @@ public class RegressionTestStudyIT {
 
         //TODO: file provenance report update - the reader service should be doing this explicitly
         seqwareWriter.updateFileReport();
-        
+
         //refresh local seqware file provenance report info
         seqwareReader.update();
 
@@ -77,10 +92,9 @@ public class RegressionTestStudyIT {
         }
 
         //sequencer 1 has 8 samples, sequencer 2 has 12 samples, sequencer 3 has 2 samples
-        
         //each sample has 100 files... (8 + 12 + 2) * 100 = 2200 files expected
         assertEquals(files.size(), 2200);
-        
+
         //ius 13 and 18 (from sequencer run 2), lane 4 of sequencer run 2, and all of sequencer run 3 are skipped
         //2200 - 6 * 100 = 1600
         assertEquals(okayCount, 1600);

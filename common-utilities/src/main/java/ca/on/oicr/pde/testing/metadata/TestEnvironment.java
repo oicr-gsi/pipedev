@@ -6,8 +6,10 @@ import ca.on.oicr.pde.dao.reader.SeqwareReadService;
 import ca.on.oicr.pde.dao.reader.SeqwareWebserviceImpl;
 import ca.on.oicr.pde.dao.executor.PluginExecutor;
 import ca.on.oicr.pde.dao.executor.SeqwareExecutor;
+import static com.google.common.base.Preconditions.*;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.sql.SQLException;
 import java.util.Map;
 import javax.naming.NamingException;
@@ -34,33 +36,59 @@ public class TestEnvironment {
     }
 
     public TestEnvironment(String host, String port, String user, String password, boolean keepDatabase) {
+        checkNotNull(host);
+        checkNotNull(port);
+        checkNotNull(user);
+        checkNotNull(password);
+
         this.keepDatabase = keepDatabase;
+
         try {
             db = new SeqwareTestDatabase(host, Integer.parseInt(port), user, password);
-            ws = new SeqwareTestWebservice(db);
-            sc = new SeqwareTestConfiguration(ws);
-            writeService = new SeqwareWebservice(sc.getSeqwareConfig());
-            readService = new SeqwareWebserviceImpl("http://" + ws.getHost() + ":" + ws.getPort() + "/", ws.getUser(), ws.getPassword());
-            execService = new PluginExecutor(sc.getSeqwareConfig());
-        } catch (NumberFormatException e) {
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (ServletException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalStateException e) {
-            throw new RuntimeException(e);
-        } catch (NamingException e) {
-            throw new RuntimeException(e);
-        } catch (ConfigurationException e) {
-            throw new RuntimeException(e);
+        } catch (ClassNotFoundException ex) {
+            throw new RuntimeException(ex);
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
+
+        try {
+            ws = new SeqwareTestWebservice(db);
+        } catch (ClassNotFoundException ex) {
+            throw new RuntimeException(ex);
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        } catch (InterruptedException ex) {
+            throw new RuntimeException(ex);
+        } catch (ServletException ex) {
+            throw new RuntimeException(ex);
+        } catch (IllegalStateException ex) {
+            throw new RuntimeException(ex);
+        } catch (NamingException ex) {
+            throw new RuntimeException(ex);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        } catch (ConfigurationException ex) {
+            throw new RuntimeException(ex);
+        }
+
+        try {
+            sc = new SeqwareTestConfiguration(ws);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+
+        writeService = new SeqwareWebservice(sc.getSeqwareConfig());
+
+        try {
+            readService = new SeqwareWebserviceImpl("http://" + ws.getHost() + ":" + ws.getPort() + "/", ws.getUser(), ws.getPassword());
+        } catch (MalformedURLException ex) {
+            throw new RuntimeException(ex);
+        }
+
+        execService = new PluginExecutor(sc.getSeqwareConfig());
+        
     }
 
     public SeqwareWriteService getWriteService() {
