@@ -31,15 +31,16 @@ public class TestEnvironment {
 
     private final boolean keepDatabase;
 
-    public TestEnvironment(String host, String port, String user, String password) {
-        this(host, port, user, password, false);
+    public TestEnvironment(String host, String port, String user, String password, File seqwareWar) {
+        this(host, port, user, password, false, seqwareWar);
     }
 
-    public TestEnvironment(String host, String port, String user, String password, boolean keepDatabase) {
+    public TestEnvironment(String host, String port, String user, String password, boolean keepDatabase, File seqwareWar) {
         checkNotNull(host);
         checkNotNull(port);
         checkNotNull(user);
         checkNotNull(password);
+        checkNotNull(seqwareWar);
 
         this.keepDatabase = keepDatabase;
 
@@ -54,7 +55,7 @@ public class TestEnvironment {
         }
 
         try {
-            ws = new SeqwareTestWebservice(db);
+            ws = new SeqwareTestWebservice(db, seqwareWar);
         } catch (ClassNotFoundException ex) {
             throw new RuntimeException(ex);
         } catch (SQLException ex) {
@@ -88,7 +89,7 @@ public class TestEnvironment {
         }
 
         execService = new PluginExecutor(sc.getSeqwareConfig());
-        
+
     }
 
     public SeqwareWriteService getWriteService() {

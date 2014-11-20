@@ -1,13 +1,12 @@
 package ca.on.oicr.pde.testing.metadata;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.sql.SQLException;
 import javax.naming.NamingException;
 import javax.servlet.ServletException;
-import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -29,12 +28,12 @@ public class SeqwareTestWebservice {
     private final PGPoolingDataSource pg;
     private final WebAppContext appContext;
 
-    public SeqwareTestWebservice(SeqwareTestDatabase db) throws ClassNotFoundException, SQLException, InterruptedException, 
+    public SeqwareTestWebservice(SeqwareTestDatabase db, File seqwareWar) throws ClassNotFoundException, SQLException, InterruptedException, 
             ServletException, MalformedURLException, IllegalStateException, NamingException, IOException, ConfigurationException {
-        this(db.getHost(), db.getPort(), db.getUser(), db.getPassword(), db.getDatabaseName());
+        this(db.getHost(), db.getPort(), db.getUser(), db.getPassword(), db.getDatabaseName(), seqwareWar);
     }
 
-    public SeqwareTestWebservice(String dbHost, int dbPort, String dbUser, String dbPassword, String dbName) throws SQLException, 
+    public SeqwareTestWebservice(String dbHost, int dbPort, String dbUser, String dbPassword, String dbName, File seqwareWar) throws SQLException, 
             InterruptedException, ServletException, MalformedURLException, IllegalStateException, NamingException, IOException, ConfigurationException {
 
         port = RandomUtils.nextInt(2000, 65000);
@@ -47,9 +46,7 @@ public class SeqwareTestWebservice {
         pg.setPortNumber(dbPort);
         pg.setMaxConnections(10);
         
-        Configuration config = new PropertiesConfiguration("config.properties");
-
-        appContext = new WebAppContext(config.getString("seqwareWar"), "/");
+        appContext = new WebAppContext(seqwareWar.getAbsolutePath(), "/");
 
         webservice = new Server(port);
         webservice.setHandler(appContext);

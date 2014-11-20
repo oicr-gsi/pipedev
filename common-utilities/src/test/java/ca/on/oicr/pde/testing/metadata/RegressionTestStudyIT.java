@@ -7,6 +7,7 @@ import ca.on.oicr.pde.model.SeqwareAccession;
 import ca.on.oicr.pde.model.SeqwareObject;
 import ca.on.oicr.pde.model.Workflow;
 import ca.on.oicr.pde.dao.writer.SeqwareWriteService.FileInfo;
+import java.io.File;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,12 +46,18 @@ public class RegressionTestStudyIT {
         String dbUser = System.getProperty("dbUser");
         String dbPassword = System.getProperty("dbPassword");
 
-        assertNotNull(dbHost, "Set dbHost (-DdbHost=xxxxxx) to a test postgresql db host name");
-        assertNotNull(dbPort, "Set dbPort (-DdbPort=xxxxxx) to a test postgresql db port");
-        assertNotNull(dbUser, "Set dbUser (-DdbUser=xxxxxx) to a test postgresql db user name");
-        assertNotNull(dbPassword, "Set dbPassword (-DdbPassword=xxxxxx) to a test postgresql db password");
+        assertNotNull(dbHost, "Set dbHost (-DdbHost=xxxxxx) to a test postgresql db host name.");
+        assertNotNull(dbPort, "Set dbPort (-DdbPort=xxxxxx) to a test postgresql db port.");
+        assertNotNull(dbUser, "Set dbUser (-DdbUser=xxxxxx) to a test postgresql db user name.");
+        assertNotNull(dbPassword, "Set dbPassword (-DdbPassword=xxxxxx) to a test postgresql db password.");
 
-        r = new RegressionTestStudy(dbHost, dbPort, dbUser, dbPassword);
+        String seqwareWarPath = System.getProperty("seqwareWar");
+        assertNotNull(seqwareWarPath, "The seqware webservice war is not set.");
+
+        File seqwareWar = new File(seqwareWarPath);
+        assertTrue(seqwareWar.exists(), "The seqware webservice war is not accessible.");
+
+        r = new RegressionTestStudy(dbHost, dbPort, dbUser, dbPassword, seqwareWar);
         seqwareWriter = r.getSeqwareWriteService();
         seqwareReader = r.getSeqwareReadService();
     }

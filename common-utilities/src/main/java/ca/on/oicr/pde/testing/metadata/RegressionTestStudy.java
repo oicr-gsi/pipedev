@@ -24,9 +24,9 @@ public class RegressionTestStudy {
     private final TestEnvironment te;
     private final Map<String, SeqwareObject> objects;
 
-    public RegressionTestStudy(String host, String port, String user, String password) {
+    public RegressionTestStudy(String host, String port, String user, String password, File seqwareWar) {
 
-        te = new TestEnvironment(host, port, user, password);
+        te = new TestEnvironment(host, port, user, password, seqwareWar);
         SeqwareWriteService writeService = te.getWriteService();
 
         objects = new HashMap<String, SeqwareObject>();
