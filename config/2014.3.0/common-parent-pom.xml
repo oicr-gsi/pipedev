@@ -12,18 +12,22 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <seqware-version>1.1.0-alpha.5</seqware-version>
-        <final-name>Decider_${project.version}_${project.artifactId}_${workflow-version}_SeqWare_${seqware-version}</final-name>
-        <skipITs>true</skipITs>
-        <testSuite>src/test/resources/development.xml</testSuite>
-        <skipBundleTest>true</skipBundleTest>
-        <bundleDirectory>${project.build.directory}/Workflow_Bundle_${workflow-directory-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-directory-name}/${project.version}</bundleDirectory>
         <jre-version>1.7.0_51</jre-version>
-        
+
+        <common-display-name>${project.artifactId}_${project.version}_SeqWare_${seqware-version}</common-display-name>
+
+        <seqware-version>1.1.0-alpha.5</seqware-version>
         <workflow-utilities-version>1.6-SNAPSHOT</workflow-utilities-version>
         <decider-utilities-version>1.6-SNAPSHOT</decider-utilities-version>
         <common-utilities-version>1.6-SNAPSHOT</common-utilities-version>
 
+        <skipITs>true</skipITs>
+        <skipBundleTest>true</skipBundleTest>
+        <testSuite>src/test/resources/development.xml</testSuite>
+
+        <schedulingSystem>oozie</schedulingSystem>
+        <bundleDirectory>${project.build.directory}/Workflow_Bundle_${workflow-directory-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-directory-name}/${project.version}</bundleDirectory>
+        <workingDirectory>${user.home}/_testing/</workingDirectory>
     </properties>
     
     <dependencies>
@@ -40,6 +44,23 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+    
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.18</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>2.18</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
     
     <repositories>
         <repository>

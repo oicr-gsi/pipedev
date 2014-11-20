@@ -18,11 +18,9 @@
     <url>http://maven.apache.org</url>
     
     <properties>
-        <skipBundleTest>true</skipBundleTest>
-        <bundleDirectory>${project.build.directory}/Workflow_Bundle_${workflow-directory-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-directory-name}/${project.version}</bundleDirectory>
-        <seqwareDistribution>${bundleDirectory}/lib/seqware-distribution-${seqware-version}-full.jar</seqwareDistribution>
-        <display-name>workflow_${project.artifactId}_${project.version}</display-name>
+        <display-name>Workflow_${common-display-name}</display-name>
         <final-name>Workflow_${project.artifactId}_${project.version}_SeqWare_${seqware-version}</final-name>
+        <seqwareDistribution>${bundleDirectory}/lib/seqware-distribution-${seqware-version}-full.jar</seqwareDistribution>
     </properties>
     
     <dependencies>
@@ -97,8 +95,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -223,7 +221,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.17</version>
                 <configuration>
                     <systemPropertyVariables>
                         <bundleDirectory>${bundleDirectory}</bundleDirectory>
@@ -234,7 +231,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.16</version>
                 <!--<dependencies>
                     <dependency>
                         <groupId>org.apache.maven.surefire</groupId>
