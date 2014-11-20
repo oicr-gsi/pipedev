@@ -304,6 +304,7 @@
                                 <dbPort>${dbPort}</dbPort>
                                 <dbUser>${dbUser}</dbUser>
                                 <dbPass>${dbPass}</dbPass>
+                                <seqwareWar>${seqwareWar}</seqwareWar>
                             </systemPropertyVariables>
                         </configuration>
                     </execution>
