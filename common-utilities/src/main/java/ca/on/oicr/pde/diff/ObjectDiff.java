@@ -1,21 +1,22 @@
 package ca.on.oicr.pde.diff;
 
-import de.danielbechler.diff.ObjectDifferFactory;
-import de.danielbechler.diff.node.Node;
-import de.danielbechler.diff.path.PropertyPath;
+import de.danielbechler.diff.ObjectDifferBuilder;
+import de.danielbechler.diff.node.DiffNode;
+import de.danielbechler.diff.path.NodePath;
+
 import java.util.Map;
 
 public class ObjectDiff {
 
     public static <T> Map diff(T actual, T expected) {
-        Node root = ObjectDifferFactory.getInstance().compare(actual, expected);
+        DiffNode root = ObjectDifferBuilder.buildDefault().compare(actual, expected);
         MinimalToMapPrintingVisitor v = new MinimalToMapPrintingVisitor(actual, expected);
         root.visit(v);
         return v.getMessages();
     }
 
     public static <T> String diffReportSummary(T actual, T expected, int maxChangesToPrint) {
-        Map<PropertyPath, String> differences = ObjectDiff.diff(actual, expected);
+        Map<NodePath, String> differences = ObjectDiff.diff(actual, expected);
         StringBuilder sb = new StringBuilder();
         switch (differences.size()) {
             case 0:
@@ -29,7 +30,7 @@ public class ObjectDiff {
                 break;
         }
         int count = 0;
-        for (Map.Entry<PropertyPath, String> e : differences.entrySet()) {
+        for (Map.Entry<NodePath, String> e : differences.entrySet()) {
             if (++count > maxChangesToPrint) {
                 sb.append("\n... ").append(differences.size() - maxChangesToPrint).append(" more");
                 break;

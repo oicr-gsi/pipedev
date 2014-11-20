@@ -90,14 +90,15 @@ public class FileProvenanceReport {
         fileProvenanceReportExpectedHeader.put("Processing Algorithm", 36);
         fileProvenanceReportExpectedHeader.put("Processing SWID", 37);
         fileProvenanceReportExpectedHeader.put("Processing Attributes", 38);
-        fileProvenanceReportExpectedHeader.put("File Meta-Type", 39);
-        fileProvenanceReportExpectedHeader.put("File SWID", 40);
-        fileProvenanceReportExpectedHeader.put("File Attributes", 41);
-        fileProvenanceReportExpectedHeader.put("File Path", 42);
-        fileProvenanceReportExpectedHeader.put("File Md5sum", 43);
-        fileProvenanceReportExpectedHeader.put("File Size", 44);
-        fileProvenanceReportExpectedHeader.put("File Description", 45);
-        fileProvenanceReportExpectedHeader.put("Skip", 46);
+        fileProvenanceReportExpectedHeader.put("Processing Status", 39);
+        fileProvenanceReportExpectedHeader.put("File Meta-Type", 40);
+        fileProvenanceReportExpectedHeader.put("File SWID", 41);
+        fileProvenanceReportExpectedHeader.put("File Attributes", 42);
+        fileProvenanceReportExpectedHeader.put("File Path", 43);
+        fileProvenanceReportExpectedHeader.put("File Md5sum", 44);
+        fileProvenanceReportExpectedHeader.put("File Size", 45);
+        fileProvenanceReportExpectedHeader.put("File Description", 46);
+        fileProvenanceReportExpectedHeader.put("Skip", 47);
 
         if (!fileProvenanceReportExpectedHeader.equals(header)) {
 
@@ -200,6 +201,7 @@ public class FileProvenanceReport {
             rec.setProcessingAlgorithm(r.get("Processing Algorithm"));
             rec.setProcessingSwid(r.get("Processing SWID"));
             rec.setProcessingAttributes(r.get("Processing Attributes"));
+            rec.setProcessingStatus(r.get("Processing Status"));
             rec.setFileMetaType(r.get("File Meta-Type"));
             rec.setFileSwid(r.get("File SWID"));
             rec.setFileAttributes(r.get("File Attributes"));

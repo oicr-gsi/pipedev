@@ -18,10 +18,16 @@
     <url>http://maven.apache.org</url>
 
     <properties>
-        <display-name>decider_${project.artifactId}_${project.version}</display-name>
+        <display-name>Decider_${common-display-name}</display-name>
         <final-name>Decider_${project.version}_${project.artifactId}_${workflow-version}_SeqWare_${seqware-version}</final-name>
-        <final-jar-location>/.mounts/labs/PDE/jenkins/deciders</final-jar-location>
         <seqwareDistribution>${project.build.directory}/dependency/seqware-distribution-${seqware-version}-full.jar</seqwareDistribution>
+        
+        <skipNewITs>true</skipNewITs>
+        
+        <dbHost></dbHost>
+        <dbPort></dbPort>
+        <dbUser></dbUser>
+        <dbPass></dbPass>
     </properties>
             
     <dependencies>
@@ -57,8 +63,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -106,35 +112,82 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.16</version>
+                <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <skip>${skipITs}</skip>
-                    <systemPropertyVariables>
-                        <deciderJar>${project.build.directory}/${final-name}-jar-with-dependencies.jar</deciderJar>
-                        <deciderClass>${main-class}</deciderClass>
-                        <deciderName>${project.artifactId}</deciderName>
-                        <deciderVersion>${project.version}</deciderVersion>
-                        <seqwareDistribution>${seqwareDistribution}</seqwareDistribution>
-                        <workingDirectory>${workingDirectory}</workingDirectory>
-                        <schedulingSystem>${schedulingSystem}</schedulingSystem>
-                        <schedulingHost>${schedulingHost}</schedulingHost>
-                    </systemPropertyVariables>
-                    <suiteXmlFiles>
-                        <suiteXmlFile>${testSuite}</suiteXmlFile>
-                    </suiteXmlFiles>
-                    <printSummary>false</printSummary>
-                    <properties>
-                        <property>
-                            <name>usedefaultlisteners</name>
-                            <key>false</key>
-                        </property>
-                        <property>
-                            <name>listener</name>
-                            <value>ca.on.oicr.pde.testing.testng.TestCaseReporter</value>
-                        </property>
-                    </properties>
+                    <excludes>
+                        <exclude>**/*IT.java</exclude>
+                    </excludes>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <phase>integration-test</phase>
+                        <configuration>
+                            <skip>${skipITs}</skip>
+                            <skip>${skipNewITs}</skip>
+                            <excludes>
+                                <exclude>none</exclude>
+                            </excludes>
+                            <includes>
+                                <include>**/*IT.java</include>
+                            </includes>
+                            <systemPropertyVariables>
+                                <dbHost>${dbHost}</dbHost>
+                                <dbPort>${dbPort}</dbPort>
+                                <dbUser>${dbUser}</dbUser>
+                                <dbPass>${dbPass}</dbPass>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/*</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>run-test</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                        <phase>integration-test</phase>
+                        <configuration>
+                            <skip>${skipITs}</skip>
+                            <systemPropertyVariables>
+                                <deciderJar>${project.build.directory}/${final-name}-jar-with-dependencies.jar</deciderJar>
+                                <deciderClass>${main-class}</deciderClass>
+                                <deciderName>${project.artifactId}</deciderName>
+                                <deciderVersion>${project.version}</deciderVersion>
+                                <seqwareDistribution>${seqwareDistribution}</seqwareDistribution>
+                                <workingDirectory>${workingDirectory}</workingDirectory>
+                                <schedulingSystem>${schedulingSystem}</schedulingSystem>
+                                <schedulingHost>${schedulingHost}</schedulingHost>
+                            </systemPropertyVariables>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>${testSuite}</suiteXmlFile>
+                            </suiteXmlFiles>
+                            <printSummary>false</printSummary>
+                            <properties>
+                                <property>
+                                    <name>usedefaultlisteners</name>
+                                    <key>false</key>
+                                </property>
+                                <property>
+                                    <name>listener</name>
+                                    <value>ca.on.oicr.pde.testing.testng.TestCaseReporter</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>

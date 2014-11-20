@@ -29,6 +29,7 @@ public class SeqwareTestDatabase {
         this.password = password;
         this.databaseName = "testing" + "_" + DateTime.now().toString(DateTimeFormat.forPattern("MMdd_HHmmss")) + "_" + RandomStringUtils.randomAlphanumeric(6).toLowerCase();
 
+        //load the postgres driver
         Class.forName("org.postgresql.Driver");
 
         //create the test database
@@ -39,7 +40,7 @@ public class SeqwareTestDatabase {
         //populate the test database
         Connection dbConnection = DriverManager.getConnection("jdbc:postgresql://" + host + ":" + port + "/" + databaseName, user, password);
         Statement db = dbConnection.createStatement();
-        db.execute(Helpers.getStringFromResource("/io/seqware/metadb/util/seqware_meta_db.sql"));
+        db.execute(Helpers.getStringFromResource("/io/seqware/metadb/util/seqware_meta_db.sql").replaceAll("OWNER TO seqware;", "OWNER TO " + this.user + ";"));
         db.execute(Helpers.getStringFromResource("/io/seqware/metadb/util/seqware_meta_db_data.sql"));
         db.close();
         dbConnection.close();

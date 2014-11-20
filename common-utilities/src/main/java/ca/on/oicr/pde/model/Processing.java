@@ -16,6 +16,7 @@ public class Processing implements SeqwareObject {
     private final String algorithm;
     private final String swid;
     private final Map<String, Set<String>> attributes;
+    private final String status;
 
     public Processing(Builder b) {
         algorithm = b.algorithm;
@@ -25,6 +26,7 @@ public class Processing implements SeqwareObject {
         } else {
             attributes = new HashMap(b.attributes);
         }
+        status = b.status;
     }
 
     public String getAlgorithm() {
@@ -44,6 +46,10 @@ public class Processing implements SeqwareObject {
     @Override
     public String getSwid() {
         return swid;
+    }
+
+    public String getStatus() {
+        return status;
     }
 
     @Override
@@ -78,6 +84,7 @@ public class Processing implements SeqwareObject {
         private String algorithm;
         private String swid;
         private Map<String, Set<String>> attributes;
+        private String status;
 
         public void setAlgorithm(String algorithm) {
             this.algorithm = algorithm;
@@ -89,6 +96,10 @@ public class Processing implements SeqwareObject {
 
         public void setAttributes(Map<String, Set<String>> attributes) {
             this.attributes = attributes;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
         }
 
         public Processing build() {

@@ -193,6 +193,10 @@ public class FileProvenanceReportRecord implements Serializable {
     public Map<String, Set<String>> getProcessingAttributes() {
         return processing.getAttributes();
     }
+    
+        public String getProcessingStatus() {
+        return processing.getStatus();
+    }
 
     public String getFileMetaType() {
         return file.getMetaType();
@@ -340,6 +344,7 @@ public class FileProvenanceReportRecord implements Serializable {
         private String processingAlgorithm = "";
         private String processingSwid = "";
         private String processingAttributes = "";
+        private String processingStatus = "";
         private String fileMetaType = "";
         private String fileSwid = "";
         private String fileAttributes = "";
@@ -488,7 +493,7 @@ public class FileProvenanceReportRecord implements Serializable {
             return this;
         }
 
-         public Builder setLaneAttributes(String laneAttributes) {
+        public Builder setLaneAttributes(String laneAttributes) {
             this.laneAttributes = laneAttributes;
             return this;
         }
@@ -550,6 +555,11 @@ public class FileProvenanceReportRecord implements Serializable {
 
         public Builder setProcessingAttributes(String processingAttributes) {
             this.processingAttributes = processingAttributes;
+            return this;
+        }
+
+        public Builder setProcessingStatus(String processingStatus) {
+            this.processingStatus = processingStatus;
             return this;
         }
 
