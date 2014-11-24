@@ -52,7 +52,7 @@ public class RegressionTestStudyIT {
         assertNotNull(dbPassword, "Set dbPassword (-DdbPassword=xxxxxx) to a test postgresql db password.");
 
         String seqwareWarPath = System.getProperty("seqwareWar");
-        assertNotNull(seqwareWarPath, "The seqware webservice war is not set.");
+	assertNotNull(seqwareWarPath, "The seqware webservice war is not set.");
 
         File seqwareWar = new File(seqwareWarPath);
         assertTrue(seqwareWar.exists(), "The seqware webservice war is not accessible.");
