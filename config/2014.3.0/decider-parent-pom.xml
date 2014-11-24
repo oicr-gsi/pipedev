@@ -18,16 +18,13 @@
     <url>http://maven.apache.org</url>
 
     <properties>
-        <display-name>Decider_${common-display-name}</display-name>
+        <display-name>decider_${project.artifactId}_${project.version}</display-name>
         <final-name>Decider_${project.version}_${project.artifactId}_${workflow-version}_SeqWare_${seqware-version}</final-name>
+        <final-jar-location>/.mounts/labs/PDE/jenkins/deciders</final-jar-location>
         <seqwareDistribution>${project.build.directory}/dependency/seqware-distribution-${seqware-version}-full.jar</seqwareDistribution>
+        <seqwareWar>${com.github.seqware:seqware-webservice:war}</seqwareWar>
         
-        <skipNewITs>true</skipNewITs>
-        
-        <dbHost></dbHost>
-        <dbPort></dbPort>
-        <dbUser></dbUser>
-        <dbPass></dbPass>
+        <skipRunITs>true</skipRunITs>
     </properties>
             
     <dependencies>
@@ -70,8 +67,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.7</version>
+                <version>2.9</version>
                 <executions>
+                    <execution>
+                        <goals>
+                            <goal>properties</goal>
+                        </goals>
+                    </execution>
                     <execution>
                         <id>copy-dependencies</id>
                         <phase>package</phase>
@@ -112,47 +114,33 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
+                <artifactId>maven-failsafe-plugin</artifactId>
                 <configuration>
-                    <excludes>
-                        <exclude>**/*IT.java</exclude>
-                    </excludes>
+                    <skip>${skipITs}</skip>
+                    <systemPropertyVariables>
+                        <dbHost>${dbHost}</dbHost>
+                        <dbPort>${dbPort}</dbPort>
+                        <dbUser>${dbUser}</dbUser>
+                        <dbPass>${dbPass}</dbPass>
+                        <seqwareWar>${seqwareWar}</seqwareWar>
+                        <deciderJar>${project.build.directory}/${final-name}-jar-with-dependencies.jar</deciderJar>
+                        <deciderClass>${main-class}</deciderClass>
+                        <deciderName>${project.artifactId}</deciderName>
+                        <deciderVersion>${project.version}</deciderVersion>
+                        <seqwareDistribution>${seqwareDistribution}</seqwareDistribution>
+                        <workingDirectory>${workingDirectory}</workingDirectory>
+                        <schedulingSystem>${schedulingSystem}</schedulingSystem>
+                        <schedulingHost>${schedulingHost}</schedulingHost>
+                    </systemPropertyVariables>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>integration-test</id>
+                        <id>integration tests</id>
                         <goals>
-                            <goal>test</goal>
+                            <goal>integration-test</goal>
                         </goals>
                         <phase>integration-test</phase>
-                        <configuration>
-                            <skip>${skipITs}</skip>
-                            <skip>${skipNewITs}</skip>
-                            <excludes>
-                                <exclude>none</exclude>
-                            </excludes>
-                            <includes>
-                                <include>**/*IT.java</include>
-                            </includes>
-                            <systemPropertyVariables>
-                                <dbHost>${dbHost}</dbHost>
-                                <dbPort>${dbPort}</dbPort>
-                                <dbUser>${dbUser}</dbUser>
-                                <dbPass>${dbPass}</dbPass>
-                            </systemPropertyVariables>
-                        </configuration>
                     </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>**/*</exclude>
-                    </excludes>
-                </configuration>
-                <executions>
                     <execution>
                         <id>run-test</id>
                         <goals>
@@ -160,17 +148,7 @@
                         </goals>
                         <phase>integration-test</phase>
                         <configuration>
-                            <skip>${skipITs}</skip>
-                            <systemPropertyVariables>
-                                <deciderJar>${project.build.directory}/${final-name}-jar-with-dependencies.jar</deciderJar>
-                                <deciderClass>${main-class}</deciderClass>
-                                <deciderName>${project.artifactId}</deciderName>
-                                <deciderVersion>${project.version}</deciderVersion>
-                                <seqwareDistribution>${seqwareDistribution}</seqwareDistribution>
-                                <workingDirectory>${workingDirectory}</workingDirectory>
-                                <schedulingSystem>${schedulingSystem}</schedulingSystem>
-                                <schedulingHost>${schedulingHost}</schedulingHost>
-                            </systemPropertyVariables>
+                            <skip>${skipRunITs}</skip>
                             <suiteXmlFiles>
                                 <suiteXmlFile>${testSuite}</suiteXmlFile>
                             </suiteXmlFiles>

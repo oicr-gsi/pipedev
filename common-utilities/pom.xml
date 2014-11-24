@@ -23,7 +23,7 @@
         <dbHost></dbHost>
         <dbPort></dbPort>
         <dbUser></dbUser>
-        <dbPass></dbPass>
+        <dbPassword></dbPassword>
     </properties>
     
     <dependencies>
@@ -275,40 +275,20 @@
             </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
+                <artifactId>maven-failsafe-plugin</artifactId>
                 <version>2.18</version>
                 <configuration>
-                    <excludes>
-                        <exclude>**/*IT.java</exclude>
-                    </excludes>
+                    <skip>${skipITs}</skip>
+                    <systemPropertyVariables>
+                        <!--<dbFile>${dbFile}</dbFile>
+                        <dbPatchDir>${dbPatchDir}</dbPatchDir>-->
+                        <dbHost>${dbHost}</dbHost>
+                        <dbPort>${dbPort}</dbPort>
+                        <dbUser>${dbUser}</dbUser>
+                        <dbPassword>${dbPassword}</dbPassword>
+                        <seqwareWar>${seqwareWar}</seqwareWar>
+                    </systemPropertyVariables>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>integration-test</id>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                        <phase>integration-test</phase>
-                        <configuration>
-                            <skip>${skipITs}</skip>
-                            <excludes>
-                                <exclude>none</exclude>
-                            </excludes>
-                            <includes>
-                                <include>**/*IT.java</include>
-                            </includes>
-                            <systemPropertyVariables>
-                                <!--<dbFile>${dbFile}</dbFile>
-                                <dbPatchDir>${dbPatchDir}</dbPatchDir>-->
-                                <dbHost>${dbHost}</dbHost>
-                                <dbPort>${dbPort}</dbPort>
-                                <dbUser>${dbUser}</dbUser>
-                                <dbPass>${dbPass}</dbPass>
-                                <seqwareWar>${seqwareWar}</seqwareWar>
-                            </systemPropertyVariables>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
