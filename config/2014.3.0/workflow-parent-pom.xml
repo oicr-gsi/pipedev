@@ -18,9 +18,17 @@
     <url>http://maven.apache.org</url>
     
     <properties>
-        <display-name>Workflow_${common-display-name}</display-name>
-        <final-name>Workflow_${project.artifactId}_${project.version}_SeqWare_${seqware-version}</final-name>
+        <jre-version>1.7.0_51</jre-version>
+        
+        <display-name>workflow_${project.artifactId}_${project.version}_${seqware-version}</display-name>
         <seqwareDistribution>${bundleDirectory}/lib/seqware-distribution-${seqware-version}-full.jar</seqwareDistribution>
+        
+        <skipITs>true</skipITs>
+        <skipBundleTest>true</skipBundleTest>
+        <testSuite>src/test/resources/development.xml</testSuite>
+        <schedulingSystem>oozie</schedulingSystem>
+        <bundleDirectory>${project.build.directory}/Workflow_Bundle_${workflow-directory-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-directory-name}/${project.version}</bundleDirectory>
+        <workingDirectory>${user.home}/_testing/</workingDirectory>
     </properties>
     
     <dependencies>
@@ -29,6 +37,24 @@
             <artifactId>seqware-distribution</artifactId>
             <version>${seqware-version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>ca.on.oicr.pde</groupId>
+            <artifactId>workflow-utilities</artifactId>
+            <version>1.6-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>ca.on.oicr.pde</groupId>
+            <artifactId>common-utilities</artifactId>
+            <version>1.6-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.8.8</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.seqware</groupId>
@@ -51,12 +77,6 @@
             <version>${seqware-version}</version>
             <scope>provided</scope>
         </dependency>-->
-        <dependency>
-            <groupId>ca.on.oicr.pde</groupId>
-            <artifactId>workflow-utilities</artifactId>
-            <version>${workflow-utilities-version}</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
     
     <build>
@@ -93,7 +113,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
@@ -102,7 +121,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>properties-maven-plugin</artifactId>
-                <version>1.0-alpha-2</version>
                 <executions>
                     <execution>
                         <id>properties-maven-plugin-execution</id>
@@ -119,8 +137,8 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.5</version>
                 <executions>
                     <execution>
                         <id>copy-resources</id>
@@ -167,7 +185,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.4</version>
                 <executions>
                     <execution>
                         <id>copy</id>
@@ -231,18 +248,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <!--<dependencies>
-                    <dependency>
-                        <groupId>org.apache.maven.surefire</groupId>
-                        <artifactId>surefire-junit47</artifactId>
-                        <version>2.16</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.apache.maven.surefire</groupId>
-                        <artifactId>surefire-testng</artifactId>
-                        <version>2.16</version>
-                    </dependency>
-                </dependencies>-->
                 <configuration>
                     <skip>${skipITs}</skip>
                     <systemPropertyVariables>                    
@@ -257,15 +262,44 @@
                         <schedulingSystem>${schedulingSystem}</schedulingSystem>
                         <schedulingHost>${schedulingHost}</schedulingHost>
                     </systemPropertyVariables>
-                    <suiteXmlFiles>
-                        <suiteXmlFile>${testSuite}</suiteXmlFile>
-                    </suiteXmlFiles>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>integration tests</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                        <phase>integration-test</phase>
+                    </execution>
+                    <execution>
+                        <id>run-test</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                        <phase>integration-test</phase>
+                        <configuration>
+                            <skip>${skipRunITs}</skip>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>${testSuite}</suiteXmlFile>
+                            </suiteXmlFiles>
+                            <printSummary>false</printSummary>
+                            <properties>
+                                <property>
+                                    <name>usedefaultlisteners</name>
+                                    <key>false</key>
+                                </property>
+                                <property>
+                                    <name>listener</name>
+                                    <value>ca.on.oicr.pde.testing.testng.TestCaseReporter</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>1.2.1</version>
                 <executions>
                     <execution>
                         <id>recursive_executable</id>
@@ -295,12 +329,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>2.4.1</version>
             </plugin> 
             <plugin>
                 <groupId>com.pyx4j</groupId>
                 <artifactId>maven-junction-plugin</artifactId>
-                <version>1.0.3</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -322,7 +354,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.4</version>
                 <configuration>
                     <archive>
                         <manifestEntries>
