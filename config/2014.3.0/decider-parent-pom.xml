@@ -18,13 +18,12 @@
     <url>http://maven.apache.org</url>
 
     <properties>
-        <display-name>decider_${project.artifactId}_${project.version}</display-name>
-        <final-name>Decider_${project.version}_${project.artifactId}_${workflow-version}_SeqWare_${seqware-version}</final-name>
-        <final-jar-location>/.mounts/labs/PDE/jenkins/deciders</final-jar-location>
+        <display-name>decider_${project.artifactId}_${project.version}_${seqware-version}</display-name>
         <seqwareDistribution>${project.build.directory}/dependency/seqware-distribution-${seqware-version}-full.jar</seqwareDistribution>
-        <seqwareWar>${com.github.seqware:seqware-webservice:war}</seqwareWar>
         
+        <skipITs>true</skipITs>
         <skipRunITs>true</skipRunITs>
+        <seqwareWar>${com.github.seqware:seqware-webservice:war}</seqwareWar>
     </properties>
             
     <dependencies>
@@ -36,12 +35,24 @@
         <dependency>
             <groupId>ca.on.oicr.pde</groupId>
             <artifactId>decider-utilities</artifactId>
-            <version>${decider-utilities-version}</version>
+            <version>1.6-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>ca.on.oicr.pde</groupId>
+            <artifactId>common-utilities</artifactId>
+            <version>1.6-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.8.8</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     
     <build>
-        <finalName>${final-name}</finalName>
+        <finalName>Decider_${project.version}_${project.artifactId}_${workflow-version}_SeqWare_${seqware-version}</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -58,7 +69,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
@@ -67,7 +77,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.9</version>
                 <executions>
                     <execution>
                         <goals>
@@ -87,8 +96,8 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.4</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -170,7 +179,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>wagon-maven-plugin</artifactId>
-                <version>1.0-beta-5</version>
                 <executions>
                     <execution>
                         <id>upload-jar</id>
