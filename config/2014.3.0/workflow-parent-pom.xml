@@ -141,8 +141,7 @@
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>copy-resources</id>
-                        <!-- here the phase you need -->
+                        <id>copy-resources-no-filter</id>
                         <phase>validate</phase>
                         <goals>
                             <goal>copy-resources</goal>
@@ -153,9 +152,28 @@
                                 <resource>
                                     <directory>workflow</directory>
                                     <excludes>
-                                        <exclude>workflow.ftl</exclude>
-                                        <exclude>workflow.ini</exclude>
+                                        <exclude>config/*</exclude>
+                                        <exclude>metadata.xml</exclude>
                                     </excludes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-resources-and-filter</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${bundleDirectory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>workflow</directory>
+                                    <includes>
+                                        <include>config/*</include>
+                                        <include>metadata.xml</include>
+                                    </includes>
                                     <filtering>true</filtering>
                                 </resource>
                             </resources>
