@@ -24,6 +24,7 @@
         <seqwareDistribution>${bundleDirectory}/lib/seqware-distribution-${seqware-version}-full.jar</seqwareDistribution>
         
         <skipITs>true</skipITs>
+        <skipRunITs>true</skipRunITs>
         <skipBundleTest>true</skipBundleTest>
         <testSuite>src/test/resources/development.xml</testSuite>
         <schedulingSystem>oozie</schedulingSystem>
