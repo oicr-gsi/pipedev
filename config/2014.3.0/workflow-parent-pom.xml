@@ -21,15 +21,19 @@
         <jre-version>1.7.0_51</jre-version>
         
         <display-name>workflow_${project.artifactId}_${project.version}_${seqware-version}</display-name>
-        <seqwareDistribution>${bundleDirectory}/lib/seqware-distribution-${seqware-version}-full.jar</seqwareDistribution>
         
         <skipITs>true</skipITs>
         <skipRunITs>true</skipRunITs>
         <skipBundleTest>true</skipBundleTest>
+        
+        <!-- default testng test suite -->
         <testSuite>src/test/resources/development.xml</testSuite>
+        
+        <!-- properties used by tests -->
         <schedulingSystem>oozie</schedulingSystem>
-        <bundleDirectory>${project.build.directory}/Workflow_Bundle_${workflow-directory-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-directory-name}/${project.version}</bundleDirectory>
+        <seqwareDistribution>${bundleDirectory}/lib/seqware-distribution-${seqware-version}-full.jar</seqwareDistribution>
         <workingDirectory>${user.home}/_testing/</workingDirectory>
+        <bundleDirectory>${project.build.directory}/Workflow_Bundle_${workflow-directory-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-directory-name}/${project.version}</bundleDirectory>
     </properties>
     
     <dependencies>

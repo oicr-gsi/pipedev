@@ -19,10 +19,17 @@
 
     <properties>
         <display-name>decider_${project.artifactId}_${project.version}_${seqware-version}</display-name>
-        <seqwareDistribution>${project.build.directory}/dependency/seqware-distribution-${seqware-version}-full.jar</seqwareDistribution>
-        
+
         <skipITs>true</skipITs>
         <skipRunITs>true</skipRunITs>
+        
+        <!-- default testng test suite -->
+        <testSuite>src/test/resources/development.xml</testSuite>
+        
+        <!-- properties used by tests -->
+        <schedulingSystem>oozie</schedulingSystem>
+        <seqwareDistribution>${project.build.directory}/dependency/seqware-distribution-${seqware-version}-full.jar</seqwareDistribution>
+        <workingDirectory>${user.home}/_testing/</workingDirectory>
         <seqwareWar>${com.github.seqware:seqware-webservice:war}</seqwareWar>
     </properties>
             
@@ -203,8 +210,11 @@
                         <deciderClass>${main-class}</deciderClass>
                         <deciderName>${project.artifactId}</deciderName>
                         <deciderVersion>${project.version}</deciderVersion>
+                        
+                        <!-- required to create seqware settings -->
                         <seqwareDistribution>${seqwareDistribution}</seqwareDistribution>
                         <workingDirectory>${workingDirectory}</workingDirectory>
+                        <webserviceUrl>${webserviceUrl}</webserviceUrl>
                         <schedulingSystem>${schedulingSystem}</schedulingSystem>
                         <schedulingHost>${schedulingHost}</schedulingHost>
                     </systemPropertyVariables>
