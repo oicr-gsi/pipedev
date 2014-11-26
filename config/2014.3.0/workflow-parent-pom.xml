@@ -21,15 +21,19 @@
         <jre-version>1.7.0_51</jre-version>
         
         <display-name>workflow_${project.artifactId}_${project.version}_${seqware-version}</display-name>
-        <seqwareDistribution>${bundleDirectory}/lib/seqware-distribution-${seqware-version}-full.jar</seqwareDistribution>
         
         <skipITs>true</skipITs>
         <skipRunITs>true</skipRunITs>
         <skipBundleTest>true</skipBundleTest>
+        
+        <!-- default testng test suite -->
         <testSuite>src/test/resources/development.xml</testSuite>
+        
+        <!-- properties used by tests -->
         <schedulingSystem>oozie</schedulingSystem>
-        <bundleDirectory>${project.build.directory}/Workflow_Bundle_${workflow-directory-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-directory-name}/${project.version}</bundleDirectory>
+        <seqwareDistribution>${bundleDirectory}/lib/seqware-distribution-${seqware-version}-full.jar</seqwareDistribution>
         <workingDirectory>${user.home}/_testing/</workingDirectory>
+        <bundleDirectory>${project.build.directory}/Workflow_Bundle_${workflow-directory-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-directory-name}/${project.version}</bundleDirectory>
     </properties>
     
     <dependencies>
@@ -266,16 +270,57 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-required-run-test-properties</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${skipITs}</skip>
+                            <skip>${skipRunITs}</skip>
+                            <rules>
+                                <requireProperty>
+                                    <property>seqwareDistribution</property>
+                                    <message>seqwareDistribution property is missing</message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>workingDirectory</property>
+                                    <message>workingDirectory property is missing</message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>webserviceUrl</property>
+                                    <message>webserviceUrl property is missing</message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>schedulingSystem</property>
+                                    <message>schedulingSystem property is missing</message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>schedulingHost</property>
+                                    <message>schedulingHost property is missing</message>
+                                </requireProperty>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <configuration>
                     <skip>${skipITs}</skip>
                     <systemPropertyVariables>                    
                         <bundledJava>${bundleDirectory}/bin/jre1.7.0_40/bin/java</bundledJava>
                         <bundledBinPath>${bundleDirectory}/bin/</bundledBinPath>
-                        <seqwareDistribution>${seqwareDistribution}</seqwareDistribution>
                         <bundledWorkflow>${project.build.directory}/Workflow_Bundle_${workflow-directory-name}_${project.version}_SeqWare_${seqware-version}/</bundledWorkflow>
                         <workflowName>${workflow-directory-name}</workflowName>
                         <workflowVersion>${project.version}</workflowVersion>
+                        
+                        <!-- required to create seqware settings -->
+                        <seqwareDistribution>${seqwareDistribution}</seqwareDistribution>
                         <workingDirectory>${workingDirectory}</workingDirectory>
                         <webserviceUrl>${webserviceUrl}</webserviceUrl>
                         <schedulingSystem>${schedulingSystem}</schedulingSystem>
