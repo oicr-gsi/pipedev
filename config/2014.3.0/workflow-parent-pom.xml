@@ -38,17 +38,31 @@
     
     <dependencies>
         <dependency>
-            <groupId>com.github.seqware</groupId>
-            <artifactId>seqware-distribution</artifactId>
-            <version>${seqware-version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>ca.on.oicr.pde</groupId>
             <artifactId>workflow-utilities</artifactId>
             <version>1.6-SNAPSHOT</version>
-            <scope>provided</scope>
         </dependency>
+        
+        <!-- common workflow dependencies -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.3.2</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>18.0</version>
+        </dependency>
+        
+        <!-- test dependencies -->
         <dependency>
             <groupId>ca.on.oicr.pde</groupId>
             <artifactId>common-utilities</artifactId>
@@ -61,27 +75,20 @@
             <version>6.8.8</version>
             <scope>test</scope>
         </dependency>
+        
+        <!-- workflow dependencies that are required only at runtime -->
         <dependency>
             <groupId>io.seqware</groupId>
             <artifactId>seqware-bin-linux-x86-64-jre-7.0.51</artifactId>
             <version>1.0.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.sourceforge.seqware</groupId>
             <artifactId>seqware-bin-linux-x86-64-perl-5.14.1</artifactId>
             <version>1.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>net.sourceforge.seqware</groupId>
-            <artifactId>seqware-bin-noarch-pegasus-dirmanager</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        <!--        <dependency>
-            <groupId>com.github.seqware</groupId>
-            <artifactId>seqware-pipeline</artifactId>
-            <version>${seqware-version}</version>
             <scope>provided</scope>
-        </dependency>-->
+        </dependency>
     </dependencies>
     
     <build>
@@ -197,7 +204,7 @@
                                 <resource>
                                     <directory>${project.build.directory}/classes</directory>
                                     <includes>
-                                        <include> **/*</include>
+                                        <include>**/*</include>
                                     </includes>
                                 </resource>
                             </resources>
@@ -229,8 +236,8 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>unpack-dependencies</id>
-                        <phase>process-test-resources</phase>
+                        <id>unpack-dependencies-to-be-provided</id>
+                        <!--                        <phase>process-test-resources</phase>-->
                         <goals>
                             <goal>unpack-dependencies</goal>
                         </goals>
@@ -238,14 +245,12 @@
                             <outputDirectory>${bundleDirectory}/bin</outputDirectory>
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>true</overWriteSnapshots>
-                            <includeScope>runtime</includeScope>
-                            <excludeScope>provided</excludeScope>
-                            <excludeArtifactIds>workflow-utilities</excludeArtifactIds>
+                            <includeScope>provided</includeScope>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>unpack-oicr-dependencies</id>
-                        <phase>package</phase>
+                        <id>unpack-dependencies-needed-for-compile</id>
+                        <!--                        <phase>package</phase>-->
                         <goals>
                             <goal>unpack-dependencies</goal>
                         </goals>
@@ -253,7 +258,7 @@
                             <outputDirectory>${bundleDirectory}/classes</outputDirectory>
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>true</overWriteSnapshots>
-                            <includeArtifactIds>workflow-utilities</includeArtifactIds>
+                            <includeScope>compile</includeScope>
                         </configuration>
                     </execution>
                 </executions>
@@ -390,10 +395,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-            </plugin> 
             <plugin>
                 <groupId>com.pyx4j</groupId>
                 <artifactId>maven-junction-plugin</artifactId>

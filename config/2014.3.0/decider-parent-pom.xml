@@ -28,12 +28,17 @@
         
         <!-- properties used by tests -->
         <schedulingSystem>oozie</schedulingSystem>
-        <seqwareDistribution>${project.build.directory}/dependency/seqware-distribution-${seqware-version}-full.jar</seqwareDistribution>
+        <seqwareDistribution>${com.github.seqware:seqware-distribution:jar:full}</seqwareDistribution>
         <workingDirectory>${user.home}/_testing/</workingDirectory>
         <seqwareWar>${com.github.seqware:seqware-webservice:war}</seqwareWar>
     </properties>
             
     <dependencies>
+        <dependency>
+            <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-common</artifactId>
+            <version>${seqware-version}</version>
+        </dependency>
         <dependency>
             <groupId>com.github.seqware</groupId>
             <artifactId>seqware-pipeline</artifactId>
@@ -48,6 +53,19 @@
             <groupId>ca.on.oicr.pde</groupId>
             <artifactId>common-utilities</artifactId>
             <version>1.6-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>18.0</version>
+        </dependency>
+        
+        <!-- test dependencies -->
+        <dependency>
+            <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-distribution</artifactId>
+            <version>${seqware-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -89,16 +107,6 @@
                         <goals>
                             <goal>properties</goal>
                         </goals>
-                    </execution>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <includeArtifactIds>seqware-distribution,decider-utilities</includeArtifactIds>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

@@ -32,7 +32,7 @@
     </properties>
     
     <prerequisites>
-        <maven>3.0.5</maven>
+        <maven>3.2.1</maven>
     </prerequisites>
     
     <build>
@@ -106,6 +106,23 @@
             </plugins>
         </pluginManagement>
     </build>
+    
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.github.seqware</groupId>
+                <artifactId>seqware-pipeline</artifactId>
+                <version>${seqware-version}</version>
+                <!-- the dependencies below are provided by the seqware distribution jar -->
+                <exclusions>
+                    <exclusion>
+                        <groupId>*</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     
     <repositories>
         <repository>
