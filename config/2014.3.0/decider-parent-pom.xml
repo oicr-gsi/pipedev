@@ -123,6 +123,73 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-required-db-properties</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${skipITs}</skip>
+                            <rules>
+                                <requireProperty>
+                                    <property>dbHost</property>
+                                    <message>dbHost property is missing</message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>dbPort</property>
+                                    <message>dbPort property is missing</message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>dbUser</property>
+                                    <message>dbUser property is missing</message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>dbPassword</property>
+                                    <message>dbPassword property is missing</message>
+                                </requireProperty>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>enforce-required-run-test-properties</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${skipITs}</skip>
+                            <skip>${skipRunITs}</skip>
+                            <rules>
+                                <requireProperty>
+                                    <property>seqwareDistribution</property>
+                                    <message>seqwareDistribution property is missing</message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>workingDirectory</property>
+                                    <message>workingDirectory property is missing</message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>webserviceUrl</property>
+                                    <message>webserviceUrl property is missing</message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>schedulingSystem</property>
+                                    <message>schedulingSystem property is missing</message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>schedulingHost</property>
+                                    <message>schedulingHost property is missing</message>
+                                </requireProperty>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <configuration>
                     <skip>${skipITs}</skip>
