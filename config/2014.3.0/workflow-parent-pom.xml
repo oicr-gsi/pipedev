@@ -20,7 +20,7 @@
     <properties>
         <jre-version>1.7.0_51</jre-version>
         
-        <display-name>workflow_${project.artifactId}_${project.version}_${seqware-version}</display-name>
+        <display-name>workflow_${project.artifactId}</display-name>
         
         <skipITs>true</skipITs>
         <skipRunITs>true</skipRunITs>

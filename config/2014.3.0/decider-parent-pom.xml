@@ -18,7 +18,7 @@
     <url>http://maven.apache.org</url>
 
     <properties>
-        <display-name>decider_${project.artifactId}_${project.version}_${seqware-version}</display-name>
+        <display-name>decider_${project.artifactId}</display-name>
 
         <skipITs>true</skipITs>
         <skipRunITs>true</skipRunITs>
