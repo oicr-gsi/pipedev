@@ -1,6 +1,7 @@
 package ca.on.oicr.pde.testing.decider;
 
 import static ca.on.oicr.pde.utilities.Helpers.isFileAccessible;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
@@ -14,7 +15,6 @@ import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.codehaus.jackson.annotate.JsonIgnore;
 
 public class DeciderRunTestDefinition {
 

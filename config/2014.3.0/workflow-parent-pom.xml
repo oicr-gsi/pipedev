@@ -20,7 +20,7 @@
     <properties>
         <jre-version>1.7.0_51</jre-version>
         
-        <display-name>workflow_${project.artifactId}_${project.version}_${seqware-version}</display-name>
+        <display-name>workflow_${project.artifactId}</display-name>
         
         <skipITs>true</skipITs>
         <skipRunITs>true</skipRunITs>
@@ -42,7 +42,28 @@
             <artifactId>workflow-utilities</artifactId>
             <version>1.6-SNAPSHOT</version>
         </dependency>
-        
+        <dependency>
+            <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-pipeline</artifactId>
+            <version>${seqware-version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-common</artifactId>
+            <version>${seqware-version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <!-- common workflow dependencies -->
         <dependency>
             <groupId>commons-io</groupId>
@@ -154,7 +175,7 @@
                 <executions>
                     <execution>
                         <id>copy-resources-no-filter</id>
-                        <phase>validate</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -173,7 +194,7 @@
                     </execution>
                     <execution>
                         <id>copy-resources-and-filter</id>
-                        <phase>validate</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -193,7 +214,6 @@
                     </execution>
                     <execution>
                         <id>copy-classes</id>
-                        <!-- here the phase you need -->
                         <phase>package</phase>
                         <goals>
                             <goal>copy-resources</goal>
@@ -217,8 +237,8 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>copy</id>
-                        <phase>package</phase>
+                        <id>copy-seqware-distribution</id>
+                        <phase>process-sources</phase>
                         <goals>
                             <goal>copy</goal>
                         </goals>
@@ -237,7 +257,7 @@
                     </execution>
                     <execution>
                         <id>unpack-dependencies-to-be-provided</id>
-                        <!--                        <phase>process-test-resources</phase>-->
+                        <phase>process-sources</phase>
                         <goals>
                             <goal>unpack-dependencies</goal>
                         </goals>
@@ -250,7 +270,7 @@
                     </execution>
                     <execution>
                         <id>unpack-dependencies-needed-for-compile</id>
-                        <!--                        <phase>package</phase>-->
+                        <phase>process-sources</phase>
                         <goals>
                             <goal>unpack-dependencies</goal>
                         </goals>
@@ -259,6 +279,8 @@
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>true</overWriteSnapshots>
                             <includeScope>compile</includeScope>
+                            <excludeArtifactIds>seqware-pipeline,seqware-common</excludeArtifactIds>
+                            <excludeTypes>zip</excludeTypes>
                         </configuration>
                     </execution>
                 </executions>
@@ -335,10 +357,11 @@
                 <executions>
                     <execution>
                         <id>integration tests</id>
+                        <phase>integration-test</phase>
                         <goals>
                             <goal>integration-test</goal>
                         </goals>
-                        <phase>integration-test</phase>
+
                     </execution>
                     <execution>
                         <id>run-test</id>
@@ -372,7 +395,7 @@
                 <executions>
                     <execution>
                         <id>recursive_executable</id>
-                        <phase>process-test-resources</phase>
+                        <phase>process-sources</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
