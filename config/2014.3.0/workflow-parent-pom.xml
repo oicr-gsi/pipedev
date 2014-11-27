@@ -279,6 +279,8 @@
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>true</overWriteSnapshots>
                             <includeScope>compile</includeScope>
+                            <excludeArtifactIds>seqware-pipeline,seqware-common</excludeArtifactIds>
+                            <excludeTypes>zip</excludeTypes>
                         </configuration>
                     </execution>
                 </executions>
