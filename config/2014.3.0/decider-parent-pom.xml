@@ -34,7 +34,7 @@
     </properties>
             
     <dependencies>
-        <dependency>
+        <!--<dependency>
             <groupId>com.github.seqware</groupId>
             <artifactId>seqware-common</artifactId>
             <version>${seqware-version}</version>
@@ -43,7 +43,7 @@
             <groupId>com.github.seqware</groupId>
             <artifactId>seqware-pipeline</artifactId>
             <version>${seqware-version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>ca.on.oicr.pde</groupId>
             <artifactId>decider-utilities</artifactId>
