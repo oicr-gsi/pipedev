@@ -42,7 +42,28 @@
             <artifactId>workflow-utilities</artifactId>
             <version>1.6-SNAPSHOT</version>
         </dependency>
-        
+        <dependency>
+            <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-pipeline</artifactId>
+            <version>${seqware-version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-common</artifactId>
+            <version>${seqware-version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <!-- common workflow dependencies -->
         <dependency>
             <groupId>commons-io</groupId>
