@@ -19,14 +19,27 @@
         <seqwareWar>${com.github.seqware:seqware-webservice:war}</seqwareWar>
 
         <skipITs>true</skipITs>
-        
-        <dbHost></dbHost>
-        <dbPort></dbPort>
-        <dbUser></dbUser>
-        <dbPassword></dbPassword>
     </properties>
     
     <dependencies>
+        <dependency>
+            <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-meta-db</artifactId>
+            <version>[${seqware-server-version}]</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-webservice</artifactId>
+            <version>[${seqware-server-version}]</version>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-distribution</artifactId>
+            <version>${seqware-client-version}</version>
+            <classifier>full</classifier>
+        </dependency>
+        
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
@@ -152,39 +165,6 @@
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>9.1-901-1.jdbc4</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.seqware</groupId>
-            <artifactId>seqware-meta-db</artifactId>
-            <version>[${seqware-server-version}]</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.seqware</groupId>
-            <artifactId>seqware-webservice</artifactId>
-            <version>[${seqware-server-version}]</version>
-            <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>com.github.seqware</groupId>
-            <artifactId>seqware-pipeline</artifactId>
-            <version>[${seqware-client-version}]</version>
-<!--            <exclusions>
-                <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>-->
-        </dependency>
-        <dependency>
-            <groupId>com.github.seqware</groupId>
-            <artifactId>seqware-common</artifactId>
-            <version>[${seqware-client-version}]</version>
-<!--            <exclusions>
-                <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>-->
         </dependency>
         <dependency>
             <groupId>joda-time</groupId>
