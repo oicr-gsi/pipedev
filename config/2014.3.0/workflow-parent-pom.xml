@@ -38,33 +38,17 @@
     
     <dependencies>
         <dependency>
+            <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-distribution</artifactId>
+            <version>${seqware-version}</version>
+            <classifier>full</classifier>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>ca.on.oicr.pde</groupId>
             <artifactId>workflow-utilities</artifactId>
             <version>1.6-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>com.github.seqware</groupId>
-            <artifactId>seqware-pipeline</artifactId>
-            <version>${seqware-version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.github.seqware</groupId>
-            <artifactId>seqware-common</artifactId>
-            <version>${seqware-version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!-- common workflow dependencies -->
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
@@ -95,20 +79,6 @@
             <artifactId>testng</artifactId>
             <version>6.8.8</version>
             <scope>test</scope>
-        </dependency>
-        
-        <!-- workflow dependencies that are required only at runtime -->
-        <dependency>
-            <groupId>io.seqware</groupId>
-            <artifactId>seqware-bin-linux-x86-64-jre-7.0.51</artifactId>
-            <version>1.0.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.sourceforge.seqware</groupId>
-            <artifactId>seqware-bin-linux-x86-64-perl-5.14.1</artifactId>
-            <version>1.0.0</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
     
@@ -256,20 +226,32 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>unpack-dependencies-to-be-provided</id>
+                        <id>unpack-common-dependencies</id>
                         <phase>process-sources</phase>
                         <goals>
-                            <goal>unpack-dependencies</goal>
+                            <goal>unpack</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${bundleDirectory}/bin</outputDirectory>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>true</overWriteSnapshots>
-                            <includeScope>provided</includeScope>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>io.seqware</groupId>
+                                    <artifactId>seqware-bin-linux-x86-64-jre-7.0.51</artifactId>
+                                    <version>1.0.0</version>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${bundleDirectory}/bin</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>net.sourceforge.seqware</groupId>
+                                    <artifactId>seqware-bin-linux-x86-64-perl-5.14.1</artifactId>
+                                    <version>1.0.0</version>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${bundleDirectory}/bin</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>unpack-dependencies-needed-for-compile</id>
+                        <id>unpack-runtime-dependencies</id>
                         <phase>process-sources</phase>
                         <goals>
                             <goal>unpack-dependencies</goal>
@@ -279,10 +261,40 @@
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>true</overWriteSnapshots>
                             <includeScope>compile</includeScope>
-                            <excludeArtifactIds>seqware-pipeline,seqware-common</excludeArtifactIds>
-                            <excludeTypes>zip</excludeTypes>
+                            <!--only include runtime and compile scope jar dependencies--> 
+                            <includeScope>runtime</includeScope>
+                            <includeTypes>jar</includeTypes>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>unpack-provided-dependencies</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${bundleDirectory}/bin</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>true</overWriteSnapshots>
+                            <includeScope>provided</includeScope>
+                            <excludeArtifactIds>seqware-distribution</excludeArtifactIds>
+                            <!--<includeTypes>zip,tar.gz,gz</includeTypes>-->
+                        </configuration>
+                    </execution>
+                    <!--<execution>
+                        <id>copy-provided-jar-dependencies</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${bundleDirectory}/lib</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>true</overWriteSnapshots>
+                            <includeScope>provided</includeScope>
+                            <includeTypes>jar</includeTypes>
+                        </configuration>
+                    </execution>-->
                 </executions>
             </plugin>
             <plugin>
@@ -341,6 +353,7 @@
                     <skip>${skipITs}</skip>
                     <systemPropertyVariables>                    
                         <bundledJava>${bundleDirectory}/bin/jre1.7.0_40/bin/java</bundledJava>
+                        <bundleDirectory>${bundleDirectory}</bundleDirectory>
                         <bundledBinPath>${bundleDirectory}/bin/</bundledBinPath>
                         <bundledWorkflow>${project.build.directory}/Workflow_Bundle_${workflow-directory-name}_${project.version}_SeqWare_${seqware-version}/</bundledWorkflow>
                         <workflowName>${workflow-directory-name}</workflowName>
@@ -361,7 +374,6 @@
                         <goals>
                             <goal>integration-test</goal>
                         </goals>
-
                     </execution>
                     <execution>
                         <id>run-test</id>

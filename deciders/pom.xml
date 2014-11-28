@@ -60,19 +60,17 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-distribution</artifactId>
+            <version>${seqware-client-version}</version>
+            <classifier>full</classifier>
+        </dependency>
+        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>6.8.8</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.github.seqware</groupId>
-            <artifactId>seqware-distribution</artifactId>
-            <version>${seqware-client-version}</version>
-            <classifier>full</classifier>
-            <scope>provided</scope>
-        </dependency>
-
     </dependencies>
 
     <repositories>
