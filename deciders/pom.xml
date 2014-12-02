@@ -61,9 +61,8 @@
     <dependencies>
         <dependency>
             <groupId>com.github.seqware</groupId>
-            <artifactId>seqware-distribution</artifactId>
+            <artifactId>seqware-pipeline</artifactId>
             <version>${seqware-client-version}</version>
-            <classifier>full</classifier>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>

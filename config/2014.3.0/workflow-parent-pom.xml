@@ -39,9 +39,8 @@
     <dependencies>
         <dependency>
             <groupId>com.github.seqware</groupId>
-            <artifactId>seqware-distribution</artifactId>
+            <artifactId>seqware-pipeline</artifactId>
             <version>${seqware-version}</version>
-            <classifier>full</classifier>
             <scope>provided</scope>
         </dependency>
         <dependency>
