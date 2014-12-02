@@ -259,8 +259,7 @@
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>true</overWriteSnapshots>
                             <includeScope>provided</includeScope>
-                            <excludeArtifactIds>seqware-distribution</excludeArtifactIds>
-                            <!--<includeTypes>zip,tar.gz,gz</includeTypes>-->
+                            <includeTypes>zip,tar.gz,gz</includeTypes>
                         </configuration>
                     </execution>
                     <!--<execution>
