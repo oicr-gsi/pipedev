@@ -174,10 +174,6 @@
                             <skip>${skipRunITs}</skip>
                             <rules>
                                 <requireProperty>
-                                    <property>seqwareDistribution</property>
-                                    <message>seqwareDistribution property is missing</message>
-                                </requireProperty>
-                                <requireProperty>
                                     <property>workingDirectory</property>
                                     <message>workingDirectory property is missing</message>
                                 </requireProperty>
