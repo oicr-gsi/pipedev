@@ -206,7 +206,7 @@
                         <dbUser>${dbUser}</dbUser>
                         <dbPass>${dbPass}</dbPass>
                         <seqwareWar>${seqwareWar}</seqwareWar>
-                        <deciderJar>${project.build.directory}/${final-name}-jar-with-dependencies.jar</deciderJar>
+                        <deciderJar>${project.build.directory}/${project.build.finalName}-jar-with-dependencies.jar</deciderJar>
                         <deciderClass>${main-class}</deciderClass>
                         <deciderName>${project.artifactId}</deciderName>
                         <deciderVersion>${project.version}</deciderVersion>
