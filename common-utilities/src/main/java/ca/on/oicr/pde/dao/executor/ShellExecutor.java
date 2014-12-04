@@ -77,7 +77,6 @@ public class ShellExecutor implements SeqwareExecutor {
         cmd.append(listToParamString(" --study-name ", studies));
         cmd.append(listToParamString(" --sequencer-run-name ", sequencerRuns));
         cmd.append(listToParamString(" --sample-name ", samples));
-        cmd.append(" --schedule");
         cmd.append(extraArgs);
 
         File stdOutAndErrFile = new File(loggingDirectory + "/" + "deciderRunSchedule.out");
