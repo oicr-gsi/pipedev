@@ -394,7 +394,7 @@
                 <executions>
                     <execution>
                         <id>recursive_executable</id>
-                        <phase>process-sources</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
