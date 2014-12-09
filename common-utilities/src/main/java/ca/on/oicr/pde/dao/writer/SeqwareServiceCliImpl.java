@@ -15,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -152,7 +153,7 @@ public class SeqwareServiceCliImpl implements SeqwareWriteService {
     }
 
     @Override
-    public String createWorkflowRun(Workflow workflow, List<? extends SeqwareObject> parents, List<FileInfo> files) {
+    public String createWorkflowRun(Workflow workflow, Collection<? extends SeqwareObject> parents, List<FileInfo> files) {
         List<String> params = new ArrayList(Arrays.asList(
                 "--workflow-accession", sanitize(workflow.getSwid())
         ));

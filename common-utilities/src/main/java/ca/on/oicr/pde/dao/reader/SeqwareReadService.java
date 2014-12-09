@@ -100,8 +100,20 @@ public abstract class SeqwareReadService {
             filesToBeProcessed.addAll(accessionToFileProvenanceReportRecords.get(s.getSwid()));
         }
 
-        //Parition filesToBeProcessed by file swid
-        ImmutableListMultimap<String, FileProvenanceReportRecord> filesMap = Multimaps.index(filesToBeProcessed, new Function<FileProvenanceReportRecord, String>() {
+        return convert(filesToBeProcessed);
+    }
+
+    public List<ReducedFileProvenanceReportRecord> getAllFiles() {
+        return convert(fileProvenanceReportRecords);
+    }
+    
+    public Collection<FileProvenanceReportRecord> getFileRecords(Accessionable accession){
+        return accessionToFileProvenanceReportRecords.get(accession.getSwid());
+    }
+
+    private List<ReducedFileProvenanceReportRecord> convert(List<FileProvenanceReportRecord> records) {
+        //Parition file provenance report records by file swid
+        ImmutableListMultimap<String, FileProvenanceReportRecord> filesMap = Multimaps.index(records, new Function<FileProvenanceReportRecord, String>() {
             @Override
             public String apply(FileProvenanceReportRecord f) {
                 return f.getFileSwid();
@@ -111,7 +123,7 @@ public abstract class SeqwareReadService {
         //Convert set of FileProvenanceReportRecord to ReducedFileProvenanceReportRecord
         //If the accession only has one file, transform it into one ReducedFileProvenanceReportRecord
         //If the accession has multiple files, merge them all into one ReducedFileProvenanceReportRecord
-        List<ReducedFileProvenanceReportRecord> files = new ArrayList<ReducedFileProvenanceReportRecord>();
+        List<ReducedFileProvenanceReportRecord> files = new ArrayList<>();
         for (Entry<String, Collection<FileProvenanceReportRecord>> e : filesMap.asMap().entrySet()) {
             files.add(new ReducedFileProvenanceReportRecord(e.getValue()));
         }
@@ -291,7 +303,7 @@ public abstract class SeqwareReadService {
 
         updateFileProvenanceRecords();
         //TODO: updateWorkflowRunRecords();
-        
+
     }
 
     /**

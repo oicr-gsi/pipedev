@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -20,11 +21,12 @@ public class DeciderRunTestDefinition {
 
     private static String defaultDescription = "";
     private static String defaultMetricsDirectory = "";
-    private static Map<String, String> defaultParameters = new LinkedHashMap<String, String>();
-    private static Set<String> defaultIniExclusions = new HashSet<String>();
-    private static Set<String> defaultStudies = new HashSet<String>();
-    private static Set<String> defaultSequencerRuns = new HashSet<String>();
-    private static Set<String> defaultSamples = new HashSet<String>();
+    private static String defaultMetricsResources = "";
+    private static Map<String, String> defaultParameters = new LinkedHashMap<>();
+    private static Set<String> defaultIniExclusions = new HashSet<>();
+    private static Set<String> defaultStudies = new HashSet<>();
+    private static Set<String> defaultSequencerRuns = new HashSet<>();
+    private static Set<String> defaultSamples = new HashSet<>();
 
     public Collection<DeciderRunTestDefinition.Test> tests;
 
@@ -40,6 +42,10 @@ public class DeciderRunTestDefinition {
 
     public void setDefaultMetricsDirectory(String defaultMetricsDirectory) {
         DeciderRunTestDefinition.defaultMetricsDirectory = defaultMetricsDirectory;
+    }
+
+    public void setDefaultMetricsResources(String defaultMetricsResources) {
+        DeciderRunTestDefinition.defaultMetricsResources = defaultMetricsResources;
     }
 
     public void setDefaultParameters(Map<String, String> defaultParameters) {
@@ -71,14 +77,15 @@ public class DeciderRunTestDefinition {
         private Set<String> samples = defaultSamples;
         private final Map<String, String> parameters;
         private String metricsDirectory = defaultMetricsDirectory;
+        private String metricsResources = defaultMetricsResources;
         private String metricsFile;
         private Set<String> iniExclusions = defaultIniExclusions;
 
-        public Test(){
-            parameters = new LinkedHashMap<String,String>();
+        public Test() {
+            parameters = new LinkedHashMap<String, String>();
             parameters.putAll(defaultParameters);
         }
-        
+
         public String getId() {
             return id;
         }
@@ -135,6 +142,14 @@ public class DeciderRunTestDefinition {
             this.metricsDirectory = metricsDirectory;
         }
 
+        public String getMetricsResources() {
+            return metricsResources;
+        }
+
+        public void setMetricsResources(String metricsResources) {
+            this.metricsResources = metricsResources;
+        }
+
         public String getMetricsFile() {
             return metricsFile;
         }
@@ -157,22 +172,37 @@ public class DeciderRunTestDefinition {
         }
 
         @JsonIgnore
-        //TODO: @JsonIgnore is broken...?: public String getMetrics() throws IOException {
-        public File metrics() throws IOException {
+        public File getMetrics() throws IOException {
 
-            if (isFileAccessible(metricsFile)) {
-                return FileUtils.getFile(metricsFile);
-            } else if (isFileAccessible(defaultMetricsDirectory + "/" + metricsFile)) {
-                return FileUtils.getFile(defaultMetricsDirectory + "/" + metricsFile);
-            } else if (isFileAccessible(defaultMetricsDirectory + "/" + WordUtils.capitalizeFully(id.trim()).replaceAll("[^A-Za-z0-9]", "") + ".json")) {
-                return FileUtils.getFile(defaultMetricsDirectory + "/" + WordUtils.capitalizeFully(id.trim()).replaceAll("[^A-Za-z0-9]", "") + ".json");
-            } //                else if (isFileAccessible(defaultMetricsDirectory + "/" + testName + ".json")) {
-            //                return FileUtils.getFile(defaultMetricsDirectory + "/" + testName + ".json");
-            //            } 
-            else {
-                return null;
+            String path;
+            URL resource;
+
+            path = metricsFile;
+            if (isFileAccessible(path)) {
+                return FileUtils.getFile(path);
             }
 
+            resource = getClass().getResource(metricsResources + "/" + metricsFile);
+            if (resource != null && isFileAccessible(resource.getPath())) {
+                return FileUtils.getFile(resource.getPath());
+            }
+
+            resource = getClass().getResource(metricsResources + "/" + WordUtils.capitalizeFully(id.trim()).replaceAll("[^A-Za-z0-9]", "") + ".json");
+            if (resource != null && isFileAccessible(resource.getPath())) {
+                return FileUtils.getFile(resource.getPath());
+            }
+
+            path = metricsDirectory + "/" + metricsFile;
+            if (isFileAccessible(path)) {
+                return FileUtils.getFile(path);
+            }
+
+            path = metricsDirectory + "/" + WordUtils.capitalizeFully(id.trim()).replaceAll("[^A-Za-z0-9]", "") + ".json";
+            if (isFileAccessible(path)) {
+                return FileUtils.getFile(path);
+            }
+
+            return null;
         }
 
         @JsonIgnore

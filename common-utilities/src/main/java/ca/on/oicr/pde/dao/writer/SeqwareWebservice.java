@@ -16,6 +16,7 @@ import io.seqware.common.model.SequencerRunStatus;
 import io.seqware.common.model.WorkflowRunStatus;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import net.sourceforge.seqware.common.metadata.Metadata;
@@ -157,14 +158,14 @@ public class SeqwareWebservice implements SeqwareWriteService {
     }
 
     @Override
-    public String createWorkflowRun(Workflow workflow, List<? extends SeqwareObject> parents, List<FileInfo> fileInfo) {
+    public String createWorkflowRun(Workflow workflow, Collection<? extends SeqwareObject> parents, List<FileInfo> files) {
 
         checkNotNull(workflow);
         checkNotNull(parents);
-        checkNotNull(fileInfo);
+        checkNotNull(files);
 
         ArrayList<FileMetadata> files2 = new ArrayList<FileMetadata>();
-        for (FileInfo f : fileInfo) {
+        for (FileInfo f : files) {
             FileMetadata fm = new FileMetadata(f.getFilePath(), f.getType(), f.getMetaType(), null);
             files2.add(fm);
         }

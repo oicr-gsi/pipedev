@@ -66,6 +66,50 @@ public class FileProvenanceReportRecord implements Serializable {
 
     }
 
+    public Experiment getExperiment() {
+        return experiment;
+    }
+
+    public Study getStudy() {
+        return study;
+    }
+
+    public Ius getIus() {
+        return ius;
+    }
+
+    public Lane getLane() {
+        return lane;
+    }
+
+    public SequencerRun getSequencerRun() {
+        return sequencerRun;
+    }
+
+    public Processing getProcessing() {
+        return processing;
+    }
+
+    public Workflow getWorkflow() {
+        return workflow;
+    }
+
+    public WorkflowRun getWorkflowRun() {
+        return workflowRun;
+    }
+
+    public File getFile() {
+        return file;
+    }
+
+    public Sample getSample() {
+        return sample;
+    }
+
+    public Sample getRootSample() {
+        return rootSample;
+    }
+
     public String getLastModified() {
         return lastModified;
     }
