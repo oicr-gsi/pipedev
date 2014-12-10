@@ -36,13 +36,13 @@ import org.testng.xml.XmlSuite;
  * Example report:
  *
  * Test suite = [Default Suite]
- *   Test context = [Command line test 5614e690-20f6-4d42-8ba0-6ad6d97164e8]
- *      Test case = [Fake test case 0]
- *         group = [], method = [sleepTest], execution time = [1.00s], status = [SUCCESS]
- *         group = [], method = [sleepTest], execution time = [1.00s], status = [SUCCESS]
- *      Test case = [Fake test case 1]
- *         group = [], method = [sleepTest], execution time = [1.00s], status = [SUCCESS]
- *         group = [], method = [sleepTest], execution time = [1.00s], status = [SUCCESS]
+ * __Test context = [Command line test 5614e690-20f6-4d42-8ba0-6ad6d97164e8]
+ * ____Test case = [Fake test case 0]
+ * ______group = [], method = [sleepTest], execution time = [1.00s], status = [SUCCESS]
+ * ______group = [], method = [sleepTest], execution time = [1.00s], status = [SUCCESS]
+ * ____Test case = [Fake test case 1]
+ * ______group = [], method = [sleepTest], execution time = [1.00s], status = [SUCCESS]
+ * ______group = [], method = [sleepTest], execution time = [1.00s], status = [SUCCESS]
  */
 public class TestCaseReporter implements IReporter {
 
