@@ -30,6 +30,19 @@ public class TestCaseReporterTest {
     }
 
     @Test
+    public void multilineStringTest() {
+        Assert.assertEquals(TestCaseReporter.formatAndIndent(1, "%s", "a\nb\nc"), "  a\n  b\n  c");
+        Assert.assertEquals(TestCaseReporter.formatAndIndent(1, "%s\nx=[%s]", "a\nb\nc", "100"), "  a\n  b\n  c\n  x=[100]");
+    }
+
+    @Test
+    public void floatOutputTest() {
+        Assert.assertEquals(TestCaseReporter.formatAndIndent(1, "%.2f", 0.0), "  0.00");
+        Assert.assertEquals(TestCaseReporter.formatAndIndent(1, "%.2f", 0f), "  0.00");
+        Assert.assertEquals(TestCaseReporter.formatAndIndent(1, "%.2f", 0.00499999), "  0.00");
+    }
+
+    @Test
     public void testCaseReporterTestOnTestSuccesses() {
 
         int numberOfTestCases = 10;
