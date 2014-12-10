@@ -157,7 +157,7 @@ public class FileProvenanceReport {
         }
 
         // Build a list of FileProvenanceRecord from tsv stream reader
-        List ls = new LinkedList<FileProvenanceReportRecord>();
+        List ls = new LinkedList<>();
         for (CSVRecord r : parser) {
 
             FileProvenanceReportRecord.Builder rec = new FileProvenanceReportRecord.Builder(r.getRecordNumber());

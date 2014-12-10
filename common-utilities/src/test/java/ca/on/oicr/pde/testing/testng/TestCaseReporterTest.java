@@ -61,7 +61,7 @@ public class TestCaseReporterTest {
 
         XmlTest testCase = new XmlTest(testSuite);
         testCase.setName("Fake test context name");
-        Map<String, String> params = new HashMap<String, String>();
+        Map<String, String> params = new HashMap<>();
         params.put("numberOfTests", Integer.toString(numberOfTestCases));
         params.put("numberOfTestMethods", Integer.toString(numberOfTestMethods));
         testCase.setParameters(params);
@@ -175,7 +175,7 @@ public class TestCaseReporterTest {
         XmlSuite testSuite = new XmlSuite();
         testSuite.setName("Fake test suite name");
 
-        Map<String, String> params = new HashMap<String, String>();
+        Map<String, String> params = new HashMap<>();
         params.put("numberOfTests", Integer.toString(2));
 
         XmlTest testCase = new XmlTest(testSuite);

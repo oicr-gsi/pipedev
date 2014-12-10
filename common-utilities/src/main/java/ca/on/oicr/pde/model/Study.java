@@ -11,7 +11,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class Study implements SeqwareObject, Name {
 
-    private static final Map<String, Study> cache = new ConcurrentHashMap<String, Study>();
+    private static final Map<String, Study> cache = new ConcurrentHashMap<>();
 
     private final String title;
     private final String swid;

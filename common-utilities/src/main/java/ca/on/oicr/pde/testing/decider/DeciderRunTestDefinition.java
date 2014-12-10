@@ -82,7 +82,7 @@ public class DeciderRunTestDefinition {
         private Set<String> iniExclusions = defaultIniExclusions;
 
         public Test() {
-            parameters = new LinkedHashMap<String, String>();
+            parameters = new LinkedHashMap<>();
             parameters.putAll(defaultParameters);
         }
 

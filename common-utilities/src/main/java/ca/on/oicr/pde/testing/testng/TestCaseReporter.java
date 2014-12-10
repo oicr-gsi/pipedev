@@ -121,7 +121,7 @@ public class TestCaseReporter implements IReporter {
                 //Iterate over all test case results.  Aggregate failed, skipped, and succeeded tests by test name (@ITest's getName()).
                 for (Entry<String, Collection<ITestResult>> e : groupResults(tc.getPassedTests(), tc.getFailedTests(), tc.getSkippedTests()).entrySet()) {
                     System.out.println(formatAndIndent(2, "Test case = [%s]", e.getKey())); //test case name
-                    List<ITestResult> rs = new ArrayList<ITestResult>(e.getValue()); //get all tests for the test case (ie, all tests with the same @ITest getName()
+                    List<ITestResult> rs = new ArrayList<>(e.getValue()); //get all tests for the test case (ie, all tests with the same @ITest getName()
                     Collections.sort(rs, new Comparator<ITestResult>() { //sort the list of tests by their start time
                         @Override
                         public int compare(ITestResult o1, ITestResult o2) {

@@ -248,7 +248,7 @@ public class FileAttributes {
         lane = assignInt(atts, Header.LANE_NUM);
         sequencerRun = assignString(atts, Header.SEQUENCER_RUN_NAME);
         barcode = assignString(atts, Header.IUS_TAG);
-        sampleAttributes = new EnumMap<Lims, String>(Lims.class);
+        sampleAttributes = new EnumMap<>(Lims.class);
 
         for (Lims limsAtt : Lims.values()) {
             for (String geoString : atts.keySet()) {

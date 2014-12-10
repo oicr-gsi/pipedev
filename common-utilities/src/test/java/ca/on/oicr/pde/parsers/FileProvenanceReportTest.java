@@ -260,7 +260,7 @@ public class FileProvenanceReportTest {
 
     private List<FileProvenanceReportRecord> getReport(String resource) {
 
-        List<FileProvenanceReportRecord> rs = new ArrayList<FileProvenanceReportRecord>();
+        List<FileProvenanceReportRecord> rs = new ArrayList<>();
 
         InputStream i = this.getClass().getResourceAsStream(resource);
 

@@ -45,8 +45,8 @@ public class TestDefinition {
         private String metricsCalculateScript = "";
         private String metricsCompareScript = "";
         private String iniDirectory = "";
-        private Map<String, String> parameters = new LinkedHashMap<String, String>();
-        private Map<String, String> enviromentVariables = new LinkedHashMap<String, String>();
+        private Map<String, String> parameters = new LinkedHashMap<>();
+        private Map<String, String> enviromentVariables = new LinkedHashMap<>();
 
         public void setDescription(String description) {
             this.description = description;
@@ -111,8 +111,8 @@ public class TestDefinition {
         private Map<String, String> environmentVariables;
 
         public Test() {
-            parameters = new LinkedHashMap<String, String>(defaults.parameters);
-            environmentVariables = new LinkedHashMap<String, String>(defaults.enviromentVariables);
+            parameters = new LinkedHashMap<>(defaults.parameters);
+            environmentVariables = new LinkedHashMap<>(defaults.enviromentVariables);
         }
 
         public String getId() {

@@ -14,7 +14,7 @@ public class CommandChecker {
     public static void checkEm(List<String> actual, String expected) {
         String[] expectedArr = expected.trim().split("\\s");
 
-        ArrayList<String> list = new ArrayList<String>();
+        ArrayList<String> list = new ArrayList<>();
         for (String arg : actual) {
             list.addAll(Arrays.asList(arg.split("\\s")));
         }

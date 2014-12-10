@@ -29,11 +29,11 @@ public class RegressionTestStudyIT extends RegressionTestStudyBase{
     public void attachFilesToTestStudy() throws MalformedURLException, InterruptedException, ExecutionException {
 
         es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 4);
-        List<Future<String>> fs = new LinkedList<Future<String>>();
+        List<Future<String>> fs = new LinkedList<>();
         for (int i = 1; i <= 22; i++) {
             fs.addAll(generateFiles(seqwareObjects.get("IUS" + i), "Workflow_" + i, 100));
         }
-        List<SeqwareAccession> workflowRunIds = new ArrayList<SeqwareAccession>();
+        List<SeqwareAccession> workflowRunIds = new ArrayList<>();
         for (Future<String> f : fs) {
             workflowRunIds.add(new SeqwareAccession(f.get()));
         }
@@ -75,7 +75,7 @@ public class RegressionTestStudyIT extends RegressionTestStudyBase{
 
     private List<Future<String>> generateFiles(SeqwareObject parent, String workflowName, int numberOfFiles) {
         Workflow wf = seqwareWriter.createWorkflow(workflowName, "0.0", "the description");
-        List<Future<String>> fs = new ArrayList<Future<String>>();
+        List<Future<String>> fs = new ArrayList<>();
         for (int i = 0; i < numberOfFiles; i++) {
             fs.add(es.submit(new CreateFile(seqwareWriter, wf, Arrays.asList(parent),
                     Arrays.asList(new FileInfo("TYPE", "META-TYPE", "/tmp/test_" + workflowName + "_" + i + ".gz"))

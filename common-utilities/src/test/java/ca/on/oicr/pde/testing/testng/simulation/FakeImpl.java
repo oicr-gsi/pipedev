@@ -25,7 +25,7 @@ public class FakeImpl {
     @Factory
     @Parameters({"numberOfTests", "numberOfTestMethods"})
     public Object[] testCaseGenerator(int testCount, int testMethods) {
-        List<Object> tests = new LinkedList<Object>();
+        List<Object> tests = new LinkedList<>();
         for (int i = 0; i < testCount; i++) {
             tests.add(new TestClass(i, testMethods));
         }

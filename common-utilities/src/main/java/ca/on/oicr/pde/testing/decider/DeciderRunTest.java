@@ -35,9 +35,9 @@ public class DeciderRunTest extends RunTestBase {
     private SeqwareReadService seqwareService;
     private Workflow workflow;
 
-    private final List<String> studies = new ArrayList<String>();
-    private final List<String> sequencerRuns = new ArrayList<String>();
-    private final List<String> samples = new ArrayList<String>();
+    private final List<String> studies = new ArrayList<>();
+    private final List<String> sequencerRuns = new ArrayList<>();
+    private final List<String> samples = new ArrayList<>();
 
     File actualReportFile;
     File expectedReportFile;
@@ -231,7 +231,7 @@ public class DeciderRunTest extends RunTestBase {
     }
 
     private List<String> validateReport(DeciderRunTestReport t) {
-        List<String> problems = new ArrayList<String>();
+        List<String> problems = new ArrayList<>();
 
         if (t.getWorkflowRunCount().equals(Integer.valueOf("0"))) {
             problems.add("No workflow run were scheduled.");

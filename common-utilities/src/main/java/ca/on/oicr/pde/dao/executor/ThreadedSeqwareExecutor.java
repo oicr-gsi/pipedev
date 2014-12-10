@@ -39,7 +39,7 @@ public class ThreadedSeqwareExecutor extends ShellExecutor {
 
     @Override
     public void cancelWorkflowRuns(Workflow w) {
-        List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
+        List<Callable<Object>> tasks = new ArrayList<>();
         for (WorkflowRunReportRecord wr : seqwareService.getWorkflowRunRecords(w)) {
             tasks.add(Executors.callable(new CancelTask(wr.getWorkflowRunSwid())));
         }

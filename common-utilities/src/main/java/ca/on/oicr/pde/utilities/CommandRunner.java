@@ -27,7 +27,7 @@ public class CommandRunner {
         inMemoryCommandOutputStream = new ByteArrayOutputStream();
         commandOutputStream = inMemoryCommandOutputStream;
         
-        additionalEnvironmentVariables = new HashMap<String, String>();
+        additionalEnvironmentVariables = new HashMap<>();
 
     }
 

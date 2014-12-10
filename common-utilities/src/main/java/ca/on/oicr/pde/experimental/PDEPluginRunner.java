@@ -51,12 +51,8 @@ public class PDEPluginRunner {
         PluginInterface plugin;
         try {
             plugin = (PluginInterface) Class.forName(pluginName).newInstance();
-        } catch (ClassNotFoundException cnfe) {
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException cnfe) {
             throw new RuntimeException(cnfe);
-        } catch (IllegalAccessException iae) {
-            throw new RuntimeException(iae);
-        } catch (InstantiationException ie) {
-            throw new RuntimeException(ie);
         }
         //args after "--"
         plugin.setParams(options.valuesOf(nonOptionSpec));

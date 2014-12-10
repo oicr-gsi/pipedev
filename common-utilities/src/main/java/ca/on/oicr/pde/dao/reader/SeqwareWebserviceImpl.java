@@ -165,7 +165,7 @@ public final class SeqwareWebserviceImpl extends SeqwareReadService {
     @Override
     protected List<Accessionable> getWorkflowRunInputFiles(WorkflowRun workflowRun) {
 
-        List<String> fileAccessions = new ArrayList<String>();
+        List<String> fileAccessions = new ArrayList<>();
         try {
             fileAccessions = getElementFromXML(getHttpResponse(url + "/workflowruns/" + workflowRun.getSwid()),
                     "/WorkflowRun/inputFileAccessions/text()", true);
@@ -173,7 +173,7 @@ public final class SeqwareWebserviceImpl extends SeqwareReadService {
             throw new RuntimeException(ioe);
         }
 
-        List files = new ArrayList<File>();
+        List files = new ArrayList<>();
         for (String s : fileAccessions) {
             File.Builder fileBuilder = new File.Builder();
             fileBuilder.setSwid(s);
@@ -200,14 +200,8 @@ public final class SeqwareWebserviceImpl extends SeqwareReadService {
             XPathFactory xpathFactory = XPathFactory.newInstance();
             XPathExpression expr = xpathFactory.newXPath().compile(xpath);
             result = expr.evaluate(doc);
-        } catch (IOException ioe) {
+        } catch (IOException | ParserConfigurationException | SAXException | XPathExpressionException ioe) {
             throw new RuntimeException(ioe);
-        } catch (ParserConfigurationException pce) {
-            throw new RuntimeException(pce);
-        } catch (SAXException sae) {
-            throw new RuntimeException(sae);
-        } catch (XPathExpressionException xee) {
-            throw new RuntimeException(xee);
         }
 
         return result;
@@ -223,7 +217,7 @@ public final class SeqwareWebserviceImpl extends SeqwareReadService {
      */
     public static List<String> getElementFromXML(InputStream xmlDoc, String xpath, boolean all) {
 
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         try {
             DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
@@ -236,14 +230,8 @@ public final class SeqwareWebserviceImpl extends SeqwareReadService {
                 result.add(nodes.item(i).getNodeValue());
             }
 
-        } catch (IOException ioe) {
+        } catch (IOException | ParserConfigurationException | SAXException | XPathExpressionException ioe) {
             throw new RuntimeException(ioe);
-        } catch (ParserConfigurationException pce) {
-            throw new RuntimeException(pce);
-        } catch (SAXException sae) {
-            throw new RuntimeException(sae);
-        } catch (XPathExpressionException xee) {
-            throw new RuntimeException(xee);
         }
 
         return result;

@@ -32,10 +32,10 @@ public class SeqwareTestDatabase {
         //load the postgres driver
         Class.forName("org.postgresql.Driver");
 
-        //create the test database
-        Connection postgresConnection = DriverManager.getConnection("jdbc:postgresql://" + host + ":" + port + "/" + "postgres", user, password);
-        postgresConnection.createStatement().execute("create database " + databaseName + ";");
-        postgresConnection.close();
+        try ( //create the test database
+                Connection postgresConnection = DriverManager.getConnection("jdbc:postgresql://" + host + ":" + port + "/" + "postgres", user, password)) {
+            postgresConnection.createStatement().execute("create database " + databaseName + ";");
+        }
 
         //populate the test database
         Connection dbConnection = DriverManager.getConnection("jdbc:postgresql://" + host + ":" + port + "/" + databaseName, user, password);
@@ -69,9 +69,9 @@ public class SeqwareTestDatabase {
     public void shutdown() {
         //drop the database
         try {
-            Connection postgresConnection = DriverManager.getConnection("jdbc:postgresql://" + host + ":" + port + "/" + "postgres", user, password);
-            postgresConnection.createStatement().execute("drop database " + databaseName + ";");
-            postgresConnection.close();
+            try (Connection postgresConnection = DriverManager.getConnection("jdbc:postgresql://" + host + ":" + port + "/" + "postgres", user, password)) {
+                postgresConnection.createStatement().execute("drop database " + databaseName + ";");
+            }
         } catch (SQLException ex) {
             throw new RuntimeException(ex);
         }
