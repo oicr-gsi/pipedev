@@ -298,6 +298,7 @@
                         <dbPassword>${dbPassword}</dbPassword>
                         <seqwareWar>${seqwareWar}</seqwareWar>
                     </systemPropertyVariables>
+                    <argLine>-XX:PermSize=256M -XX:MaxPermSize=512M</argLine>
                 </configuration>
                 <executions>
                     <execution>
