@@ -7,10 +7,11 @@ import java.sql.SQLException;
 import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import org.apache.commons.configuration.ConfigurationException;
+import org.apache.tomcat.jdbc.pool.DataSource;
+import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
-import org.postgresql.ds.PGPoolingDataSource;
 import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 
 /**
@@ -25,27 +26,28 @@ public class SeqwareTestWebservice {
     private final String password = "admin";
 
     private final Server webservice;
-    private final PGPoolingDataSource pg;
+    private final DataSource dataSource;
     private final WebAppContext appContext;
 
-    public SeqwareTestWebservice(SeqwareTestDatabase db, File seqwareWar) throws ClassNotFoundException, SQLException, InterruptedException, 
+    public SeqwareTestWebservice(SeqwareTestDatabase db, File seqwareWar) throws ClassNotFoundException, SQLException, InterruptedException,
             ServletException, MalformedURLException, IllegalStateException, NamingException, IOException, ConfigurationException {
         this(db.getHost(), db.getPort(), db.getUser(), db.getPassword(), db.getDatabaseName(), seqwareWar);
     }
 
-    public SeqwareTestWebservice(String dbHost, int dbPort, String dbUser, String dbPassword, String dbName, File seqwareWar) throws SQLException, 
+    public SeqwareTestWebservice(String dbHost, int dbPort, String dbUser, String dbPassword, String dbName, File seqwareWar) throws SQLException,
             InterruptedException, ServletException, MalformedURLException, IllegalStateException, NamingException, IOException, ConfigurationException {
 
+        PoolProperties p = new PoolProperties();
+        p.setDriverClassName("org.postgresql.Driver");
+        p.setUsername(dbUser);
+        p.setPassword(dbPassword);
+        p.setUrl("jdbc:postgresql://" + dbHost + ":" + dbPort + "/" + dbName);
+        p.setInitialSize(10);
+
+        dataSource = new DataSource();
+        dataSource.setPoolProperties(p);
         port = RandomUtils.nextInt(2000, 65000);
 
-        pg = new PGPoolingDataSource();
-        pg.setDatabaseName(dbName);
-        pg.setUser(dbUser);
-        pg.setPassword(dbPassword);
-        pg.setServerName(dbHost);
-        pg.setPortNumber(dbPort);
-        pg.setMaxConnections(10);
-        
         appContext = new WebAppContext(seqwareWar.getAbsolutePath(), "/");
 
         webservice = new Server(port);
@@ -88,8 +90,8 @@ public class SeqwareTestWebservice {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
-        
-        pg.close();
+
+        dataSource.close();
 
     }
 
