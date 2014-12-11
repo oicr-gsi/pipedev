@@ -32,18 +32,17 @@ public class SeqwareTestDatabase {
         //load the postgres driver
         Class.forName("org.postgresql.Driver");
 
-        try ( //create the test database
-                Connection postgresConnection = DriverManager.getConnection("jdbc:postgresql://" + host + ":" + port + "/" + "postgres", user, password)) {
+        //create the test database
+        try (Connection postgresConnection = DriverManager.getConnection("jdbc:postgresql://" + host + ":" + port + "/" + "postgres", user, password)) {
             postgresConnection.createStatement().execute("create database " + databaseName + ";");
         }
 
         //populate the test database
-        Connection dbConnection = DriverManager.getConnection("jdbc:postgresql://" + host + ":" + port + "/" + databaseName, user, password);
-        Statement db = dbConnection.createStatement();
-        db.execute(Helpers.getStringFromResource("/io/seqware/metadb/util/seqware_meta_db.sql").replaceAll("OWNER TO seqware;", "OWNER TO " + this.user + ";"));
-        db.execute(Helpers.getStringFromResource("/io/seqware/metadb/util/seqware_meta_db_data.sql"));
-        db.close();
-        dbConnection.close();
+        try (Connection dbConnection = DriverManager.getConnection("jdbc:postgresql://" + host + ":" + port + "/" + databaseName, user, password);
+                Statement db = dbConnection.createStatement()) {
+            db.execute(Helpers.getStringFromResource("/io/seqware/metadb/util/seqware_meta_db.sql").replaceAll("OWNER TO seqware;", "OWNER TO " + this.user + ";"));
+            db.execute(Helpers.getStringFromResource("/io/seqware/metadb/util/seqware_meta_db_data.sql"));
+        }
     }
 
     public String getHost() {
@@ -68,13 +67,10 @@ public class SeqwareTestDatabase {
 
     public void shutdown() {
         //drop the database
-        try {
-            try (Connection postgresConnection = DriverManager.getConnection("jdbc:postgresql://" + host + ":" + port + "/" + "postgres", user, password)) {
-                postgresConnection.createStatement().execute("drop database " + databaseName + ";");
-            }
+        try (Connection postgresConnection = DriverManager.getConnection("jdbc:postgresql://" + host + ":" + port + "/" + "postgres", user, password)) {
+            postgresConnection.createStatement().execute("drop database " + databaseName + ";");
         } catch (SQLException ex) {
             throw new RuntimeException(ex);
         }
     }
-
 }
