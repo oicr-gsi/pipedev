@@ -66,6 +66,8 @@ public class SeqwareTestWebservice {
         SimpleNamingContextBuilder builder = new SimpleNamingContextBuilder();
         builder.bind("java:comp/env/jdbc/SeqWareMetaDB", pg);
         builder.activate();
+        SimpleNamingContextBuilder builder = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
+        builder.bind("java:comp/env/jdbc/SeqWareMetaDB", dataSource);
 
         try {
             webservice.start();
