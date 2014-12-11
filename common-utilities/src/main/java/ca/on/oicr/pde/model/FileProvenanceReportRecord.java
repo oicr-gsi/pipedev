@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,7 +15,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -40,11 +41,12 @@ public class FileProvenanceReportRecord implements Serializable {
     private final List<Sample> parentSamples;
 
     private final String lastModified;
+    private final String pathSkip;
     private final String skip;
 
     public enum ValidationMode {
 
-        STR, STRICT, SKIP;
+        STRICT, SKIP;
     }
 
     private FileProvenanceReportRecord(Builder b) {
@@ -62,6 +64,7 @@ public class FileProvenanceReportRecord implements Serializable {
         this.rootSample = b.rootSample;
         this.parentSamples = b.parentSamples;
         this.lastModified = b.lastModified;
+        this.pathSkip = b.pathSkip;
         this.skip = b.skip;
 
     }
@@ -237,8 +240,8 @@ public class FileProvenanceReportRecord implements Serializable {
     public Map<String, Set<String>> getProcessingAttributes() {
         return processing.getAttributes();
     }
-    
-        public String getProcessingStatus() {
+
+    public String getProcessingStatus() {
         return processing.getStatus();
     }
 
@@ -268,6 +271,10 @@ public class FileProvenanceReportRecord implements Serializable {
 
     public String getFileDescription() {
         return file.getDescription();
+    }
+
+    public String getPathSkip() {
+        return pathSkip;
     }
 
     public String getSkip() {
@@ -350,45 +357,60 @@ public class FileProvenanceReportRecord implements Serializable {
 
         //record info
         private String lastModified = "";
+
         private String studyTitle = "";
         private String studySwid = "";
         private String studyAttributes = "";
+
         private String experimentName = "";
         private String experimentSwid = "";
         private String experimentAttributes = "";
+
         private String rootSampleName = "";
         private String rootSampleSwid = "";
+
         private String parentSampleNames = "";
         private String parentSampleSwids = "";
         private String parentSampleOrganismIds = "";
         private String parentSampleAttributes = "";
+
         private String sampleName = "";
         private String sampleSwid = "";
         private String sampleOrganismId = "";
         private String sampleOrganismCode = "";
         private String sampleAttributes = "";
+
         private String sequencerRunName = "";
         private String sequencerRunSwid = "";
         private String sequencerRunAttributes = "";
         private String sequencerRunPlatformId = "";
         private String sequencerRunPlatformName = "";
+
         private String laneName = "";
         private String laneNumber = "";
         private String laneSwid = "";
         private String laneAttributes = "";
+
         private String iusTag = "";
         private String iusSwid = "";
         private String iusAttributes = "";
+
         private String workflowName = "";
         private String workflowVersion = "";
         private String workflowSwid = "";
+        private String workflowAttributes = "";
+
         private String workflowRunName = "";
         private String workflowRunStatus = "";
         private String workflowRunSwid = "";
+        private String workflowRunAttributes = "";
+        private String workflowRunInputFileSwids = "";
+
         private String processingAlgorithm = "";
         private String processingSwid = "";
         private String processingAttributes = "";
         private String processingStatus = "";
+
         private String fileMetaType = "";
         private String fileSwid = "";
         private String fileAttributes = "";
@@ -396,6 +418,7 @@ public class FileProvenanceReportRecord implements Serializable {
         private String fileMd5sum = "";
         private String fileSize = "";
         private String fileDescription = "";
+        private String pathSkip = "";
         private String skip = "";
 
         public Builder(long recordNumber) {
@@ -572,6 +595,11 @@ public class FileProvenanceReportRecord implements Serializable {
             return this;
         }
 
+        public Builder setWorkflowAttributes(String workflowAttributes) {
+            this.workflowAttributes = workflowAttributes;
+            return this;
+        }
+
         public Builder setWorkflowRunName(String workflowRunName) {
             this.workflowRunName = workflowRunName;
             return this;
@@ -584,6 +612,16 @@ public class FileProvenanceReportRecord implements Serializable {
 
         public Builder setWorkflowRunSwid(String workflowRunSwid) {
             this.workflowRunSwid = workflowRunSwid;
+            return this;
+        }
+
+        public Builder setWorkflowRunAttributes(String workflowRunAttributes) {
+            this.workflowRunAttributes = workflowRunAttributes;
+            return this;
+        }
+
+        public Builder setWorkflowRunInputFileSwids(String workflowRunInputFileSwids) {
+            this.workflowRunInputFileSwids = workflowRunInputFileSwids;
             return this;
         }
 
@@ -639,6 +677,11 @@ public class FileProvenanceReportRecord implements Serializable {
 
         public Builder setFileDescription(String fileDescription) {
             this.fileDescription = fileDescription;
+            return this;
+        }
+
+        public Builder setPathSkip(String pathSkip) {
+            this.pathSkip = pathSkip;
             return this;
         }
 
@@ -705,12 +748,17 @@ public class FileProvenanceReportRecord implements Serializable {
             workflowBuilder.setSwid(getSwid(workflowSwid));
             workflowBuilder.setName(workflowName);
             workflowBuilder.setVersion(workflowVersion);
+            workflowBuilder.setAttributes(transformAttributeStringToMap(workflowAttributes,
+                    attrKeyValuePairDelimiter, attrKeyValueSeparator, attrValueDelimiter));
             workflow = workflowBuilder.build();
 
             WorkflowRun.Builder workflowRunBuilder = new WorkflowRun.Builder();
             workflowRunBuilder.setSwid(getSwid(workflowRunSwid));
             workflowRunBuilder.setName(workflowRunName);
             workflowRunBuilder.setStatus(workflowRunStatus);
+            workflowRunBuilder.setAttributes(transformAttributeStringToMap(workflowRunAttributes,
+                    attrKeyValuePairDelimiter, attrKeyValueSeparator, attrValueDelimiter));
+            workflowRunBuilder.setInputFileSwids(new HashSet<>(Arrays.asList(StringUtils.split(workflowRunInputFileSwids, ","))));
             workflowRun = workflowRunBuilder.build();
 
             File.Builder fileBuilder = new File.Builder();

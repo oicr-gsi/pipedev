@@ -75,6 +75,7 @@ public class FileProvenanceReportTest {
         rec1Builder.setSampleOrganismCode("Homo_sapiens");
         rec1Builder.setSequencerRunPlatformId("20");
         rec1Builder.setSequencerRunPlatformName("ILLUMINA");
+        rec1Builder.setPathSkip("false");
         rec1 = rec1Builder.build();
         rec1Modified = rec1Builder.setSkip("invalid").build();
 
@@ -126,6 +127,7 @@ public class FileProvenanceReportTest {
         rec2Builder.setSampleOrganismCode("Homo_sapiens");
         rec2Builder.setSequencerRunPlatformId("20");
         rec2Builder.setSequencerRunPlatformName("ILLUMINA");
+        rec2Builder.setPathSkip("false");
         rec2 = rec2Builder.build();
 
         FileProvenanceReportRecord.Builder rec3Builder = new FileProvenanceReportRecord.Builder(3);
@@ -176,6 +178,7 @@ public class FileProvenanceReportTest {
         rec3Builder.setSampleOrganismCode("Homo_sapiens");
         rec3Builder.setSequencerRunPlatformId("20");
         rec3Builder.setSequencerRunPlatformName("ILLUMINA");
+        rec3Builder.setPathSkip("false");
         rec3 = rec3Builder.build();
 
         String reportFile = "/fileprovenance/valid.tsv";
