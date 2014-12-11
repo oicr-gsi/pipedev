@@ -5,7 +5,6 @@ import ca.on.oicr.pde.dao.writer.SeqwareWriteService;
 import ca.on.oicr.pde.model.SeqwareObject;
 import java.io.File;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 import org.testng.annotations.AfterClass;
@@ -20,7 +19,6 @@ public class RegressionTestStudyBase {
     RegressionTestStudy r;
     SeqwareWriteService seqwareWriter;
     SeqwareReadService seqwareReader;
-    ExecutorService es;
     Map<String, SeqwareObject> seqwareObjects;
 
     public RegressionTestStudyBase() {
@@ -55,7 +53,5 @@ public class RegressionTestStudyBase {
     @AfterClass
     public void cleanup() {
         r.shutdown();
-        r = null;
-        seqwareWriter = null;
     }
 }
