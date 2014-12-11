@@ -224,7 +224,7 @@ public class SeqwareServiceCliImpl implements SeqwareWriteService {
     private final Pattern seqwareSwidRegex = Pattern.compile("SWID: (\\d*)");
 
     private String createObject(String objectType, List<String> params) {
-        List<String> args = new ArrayList<String>();
+        List<String> args = new ArrayList<>();
         args.add("--plugin");
         args.add("net.sourceforge.seqware.pipeline.plugins.Metadata");
         args.add("--");
@@ -286,15 +286,7 @@ public class SeqwareServiceCliImpl implements SeqwareWriteService {
             } else {
                 r = null;
             }
-        } catch (NoSuchMethodException ex) {
-            Logger.getLogger(SeqwareServiceCliImpl.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SecurityException ex) {
-            Logger.getLogger(SeqwareServiceCliImpl.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(SeqwareServiceCliImpl.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(SeqwareServiceCliImpl.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvocationTargetException ex) {
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             Logger.getLogger(SeqwareServiceCliImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
 

@@ -26,7 +26,7 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
     /**
      * A map of job names to job objects.
      */
-    protected Map<String, Job> jobs = new HashMap<String, Job>();
+    protected Map<String, Job> jobs = new HashMap<>();
 
     /**
      * <p>
@@ -46,7 +46,7 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
      * @return an array containing the absolute paths of the input files parsed from "identifier"
      */
     protected String[] getInputFiles(String identifier) {
-        List<String> files = new ArrayList<String>();
+        List<String> files = new ArrayList<>();
         try {
             String input = super.getProperty(identifier);
             files.addAll(Arrays.asList(input.split(",")));

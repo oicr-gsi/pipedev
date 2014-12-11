@@ -128,7 +128,7 @@ public class DeciderRunTestFactory {
         seqwareService.update();
         log.printf(Level.INFO, "Completed loading of seqware metadata in %s", timer.stop());
 
-        List<DeciderRunTest> tests = new ArrayList<DeciderRunTest>();
+        List<DeciderRunTest> tests = new ArrayList<>();
         int count = 0;
 
         //Setup a shared thread pool for all tests to use

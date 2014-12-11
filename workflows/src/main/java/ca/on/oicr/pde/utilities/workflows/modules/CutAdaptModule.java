@@ -150,7 +150,7 @@ public class CutAdaptModule extends OicrModule {
         command += ";";
 
 	try{
-        java.util.ArrayList<String> theCommand = new java.util.ArrayList<String>();
+        java.util.ArrayList<String> theCommand = new java.util.ArrayList<>();
         theCommand.add("bash");
         theCommand.add("-lc");
         StringBuffer cmdBuff = new StringBuffer();

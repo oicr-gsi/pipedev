@@ -11,7 +11,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class WorkflowRun implements SeqwareObject {
 
-    private static final Map<String, WorkflowRun> cache = new ConcurrentHashMap<String, WorkflowRun>();
+    private static final Map<String, WorkflowRun> cache = new ConcurrentHashMap<>();
 
     private final String name;
     private final String status;

@@ -63,7 +63,7 @@ public abstract class SeqwareReadService {
      * Setup common
      */
     protected SeqwareReadService() {
-        workflowToWorkflowRunReportRecords = new HashMap<Workflow, List<WorkflowRunReportRecord>>();
+        workflowToWorkflowRunReportRecords = new HashMap<>();
         accessionToFileProvenanceReportRecords = LinkedListMultimap.create();
     }
 
@@ -95,7 +95,7 @@ public abstract class SeqwareReadService {
      */
     public List<ReducedFileProvenanceReportRecord> getFiles(Collection<? extends Accessionable> accessions) {
 
-        List<FileProvenanceReportRecord> filesToBeProcessed = new ArrayList<FileProvenanceReportRecord>();
+        List<FileProvenanceReportRecord> filesToBeProcessed = new ArrayList<>();
         for (Accessionable s : accessions) {
             filesToBeProcessed.addAll(accessionToFileProvenanceReportRecords.get(s.getSwid()));
         }
@@ -138,7 +138,7 @@ public abstract class SeqwareReadService {
      * @return A set of study names
      */
     public Set<String> getStudy(List<? extends Accessionable> swids) {
-        Set studies = new HashSet<String>();
+        Set studies = new HashSet<>();
         for (Accessionable swid : swids) {
             for (FileProvenanceReportRecord fpr : accessionToFileProvenanceReportRecords.get(swid.getSwid())) {
                 studies.add(fpr.getStudyTitle());
@@ -154,7 +154,7 @@ public abstract class SeqwareReadService {
      * @return A set of sequencer run names
      */
     public Set<String> getSequencerRuns(List<? extends Accessionable> swids) {
-        Set sequencerRuns = new HashSet<String>();
+        Set sequencerRuns = new HashSet<>();
         for (Accessionable swid : swids) {
             for (FileProvenanceReportRecord fpr : accessionToFileProvenanceReportRecords.get(swid.getSwid())) {
                 sequencerRuns.add(fpr.getSequencerRunName());
@@ -170,7 +170,7 @@ public abstract class SeqwareReadService {
      * @return A set of lanes names
      */
     public Set<String> getLanes(List<? extends Accessionable> swids) {
-        Set lanes = new HashSet<String>();
+        Set lanes = new HashSet<>();
         for (Accessionable swid : swids) {
             for (FileProvenanceReportRecord fpr : accessionToFileProvenanceReportRecords.get(swid.getSwid())) {
                 lanes.add(fpr.getLaneName());
@@ -186,7 +186,7 @@ public abstract class SeqwareReadService {
      * @return A set of sample names
      */
     public Set<String> getSamples(List<? extends Accessionable> swids) {
-        Set samples = new HashSet<String>();
+        Set samples = new HashSet<>();
         for (Accessionable swid : swids) {
             for (FileProvenanceReportRecord fpr : accessionToFileProvenanceReportRecords.get(swid.getSwid())) {
                 samples.add(fpr.getSampleName());
@@ -202,7 +202,7 @@ public abstract class SeqwareReadService {
      * @return A set of processing algorithm names
      */
     public Set<String> getProcessingAlgorithms(List<? extends Accessionable> swids) {
-        Set processingAlgorithms = new HashSet<String>();
+        Set processingAlgorithms = new HashSet<>();
         for (Accessionable swid : swids) {
             for (FileProvenanceReportRecord fpr : accessionToFileProvenanceReportRecords.get(swid.getSwid())) {
                 processingAlgorithms.add(fpr.getProcessingAlgorithm());
@@ -218,7 +218,7 @@ public abstract class SeqwareReadService {
      * @return A list of file metatype names
      */
     public Set<String> getFileMetaTypes(List<? extends Accessionable> swids) {
-        Set fileTypes = new HashSet<String>();
+        Set fileTypes = new HashSet<>();
         for (Accessionable swid : swids) {
             for (FileProvenanceReportRecord fpr : accessionToFileProvenanceReportRecords.get(swid.getSwid())) {
                 fileTypes.add(fpr.getFileMetaType());
@@ -234,7 +234,7 @@ public abstract class SeqwareReadService {
      * @return A set of workflow names
      */
     public Set<String> getWorkflows(List<? extends Accessionable> swids) {
-        Set workflows = new HashSet<String>();
+        Set workflows = new HashSet<>();
         for (Accessionable swid : swids) {
             for (FileProvenanceReportRecord fpr : accessionToFileProvenanceReportRecords.get(swid.getSwid())) {
                 workflows.add(fpr.getWorkflowName());
@@ -253,7 +253,7 @@ public abstract class SeqwareReadService {
         if (!workflowToWorkflowRunReportRecords.containsKey(workflow)) {
             updateWorkflowRunRecords(workflow);
         }
-        return new ArrayList<WorkflowRunReportRecord>(workflowToWorkflowRunReportRecords.get(workflow));
+        return new ArrayList<>(workflowToWorkflowRunReportRecords.get(workflow));
     }
 
     /**
@@ -265,7 +265,7 @@ public abstract class SeqwareReadService {
     public List<Accessionable> getParentAccessions(WorkflowRun wr) {
         Map ini = getWorkflowRunIni(wr);
         StringTokenizer st = new StringTokenizer(ini.get("parent-accessions").toString(), ",");
-        List<Accessionable> ps = new ArrayList<Accessionable>();
+        List<Accessionable> ps = new ArrayList<>();
         while (st.hasMoreTokens()) {
             ps.add(new SeqwareAccession(st.nextToken()));
         }

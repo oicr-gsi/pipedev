@@ -28,7 +28,7 @@ public class OicrModule extends Module {
     private ReturnValue ret;
     private OptionSet options = null;
     protected OptionParser parser;
-    private List<String> requiredParams = new ArrayList<String>();
+    private List<String> requiredParams = new ArrayList<>();
 
     public OicrModule() {
         super();

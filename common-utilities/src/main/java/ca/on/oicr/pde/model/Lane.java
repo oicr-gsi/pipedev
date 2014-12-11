@@ -11,7 +11,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class Lane implements SeqwareObject, Name {
 
-    private static final Map<String, Lane> cache = new ConcurrentHashMap<String, Lane>();
+    private static final Map<String, Lane> cache = new ConcurrentHashMap<>();
 
     private final String name;
     private final String number;

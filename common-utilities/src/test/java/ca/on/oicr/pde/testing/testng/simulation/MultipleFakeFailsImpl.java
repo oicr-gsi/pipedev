@@ -23,7 +23,7 @@ public class MultipleFakeFailsImpl {
     @Factory
     @Parameters({"numberOfTests"})
     public Object[] testCaseGenerator(int testCount) {
-        List<Object> tests = new LinkedList<Object>();
+        List<Object> tests = new LinkedList<>();
         for (int i = 0; i < testCount; i++) {
             tests.add(new MultipleFakeFailsImpl.TestClass(i));
         }

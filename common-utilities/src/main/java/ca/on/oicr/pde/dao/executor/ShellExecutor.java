@@ -34,7 +34,7 @@ public class ShellExecutor implements SeqwareExecutor {
                 "The working directory %s is invalid", workingDirectory.getAbsolutePath());
         this.workingDirectory = workingDirectory;
 
-        this.environmentVariables = new HashMap<String, String>();
+        this.environmentVariables = new HashMap<>();
         environmentVariables.put("SEQWARE_SETTINGS", this.seqwareSettings.getAbsolutePath());
 
         // Setup a java tmp dir that is located within the working directory

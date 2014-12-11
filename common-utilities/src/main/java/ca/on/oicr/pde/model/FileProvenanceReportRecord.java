@@ -738,7 +738,7 @@ public class FileProvenanceReportRecord implements Serializable {
             rootSampleBuilder.setName(rootSampleName);
             rootSample = rootSampleBuilder.build();
 
-            parentSamples = new ArrayList<Sample>();
+            parentSamples = new ArrayList<>();
             parentSamples = buildParentSamples(parentSampleSwids, parentSampleNames, parentSampleOrganismIds, parentSampleAttributes);
 
             return new FileProvenanceReportRecord(this);
@@ -748,7 +748,7 @@ public class FileProvenanceReportRecord implements Serializable {
         private List<Sample> buildParentSamples(String parentSampleSwids, String parentSampleNames, String parentSampleOrganismIds, String parentSampleAttributes) {
 
             if (parentSampleSwids == null || parentSampleSwids.isEmpty()) {
-                return new ArrayList<Sample>();
+                return new ArrayList<>();
             }
 
             List<String> swids = Arrays.asList(parentSampleSwids.split(":"));
@@ -791,7 +791,7 @@ public class FileProvenanceReportRecord implements Serializable {
                 }
             }
 
-            List<Sample> samples = new ArrayList<Sample>(swids.size());
+            List<Sample> samples = new ArrayList<>(swids.size());
             for (String swid : swids) {
                 Sample.Builder sampleBuilder = new Sample.Builder();
                 sampleBuilder.setSwid(swid);
@@ -821,13 +821,13 @@ public class FileProvenanceReportRecord implements Serializable {
     public static Map<String, Set<String>> transformAttributeStringToMap(String input,
             String keyValuePairDelimiter, String keyValueDelimiter, String valueDelimiter) {
 
-        Map<String, Set<String>> out = new TreeMap<String, Set<String>>();
+        Map<String, Set<String>> out = new TreeMap<>();
 
         for (String keyValuePair : StringUtils.split(input, keyValuePairDelimiter)) {
             String[] kv = StringUtils.split(keyValuePair, keyValueDelimiter);
 
             String key = kv[0];
-            Set<String> values = kv.length == 1 ? new TreeSet<String>() : new TreeSet<String>(Arrays.asList(StringUtils.split(kv[1], valueDelimiter)));
+            Set<String> values = kv.length == 1 ? new TreeSet<String>() : new TreeSet<>(Arrays.asList(StringUtils.split(kv[1], valueDelimiter)));
 
             if (out.containsKey(key)) {
                 out.get(key).addAll(values);
@@ -844,7 +844,7 @@ public class FileProvenanceReportRecord implements Serializable {
         checkNotNull(keys, "key list can not be null");
         checkNotNull(listAsString, "listAsString can not be null");
 
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         List<String> values;
         if (listAsString.isEmpty()) {
             String[] tmp = new String[keys.size()];
@@ -874,7 +874,7 @@ public class FileProvenanceReportRecord implements Serializable {
         checkNotNull(mapAsString);
         checkArgument(!keys.isEmpty());
 
-        Map<String, Map<String, Set<String>>> map = new HashMap<String, Map<String, Set<String>>>();
+        Map<String, Map<String, Set<String>>> map = new HashMap<>();
         for (String s : keys) {
             Map<String, Set<String>> previousValue = map.put(s, new HashMap<String, Set<String>>());
             if (previousValue != null) {
@@ -905,7 +905,7 @@ public class FileProvenanceReportRecord implements Serializable {
                 throw new IllegalArgumentException(String.format("the id [%s] (for parent attribute [%s]) does not exist in the key list", primaryKey, attrKey));
             }
 
-            Set<String> attrValues = new TreeSet<String>(Arrays.asList(StringUtils.split(attrValueString, "&")));
+            Set<String> attrValues = new TreeSet<>(Arrays.asList(StringUtils.split(attrValueString, "&")));
 
             //Set the attr key value pair for the given primary key
             Set<String> previousValue = map.get(primaryKey).put(attrKey, attrValues);

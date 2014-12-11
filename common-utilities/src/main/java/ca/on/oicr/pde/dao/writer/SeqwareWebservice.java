@@ -164,13 +164,13 @@ public class SeqwareWebservice implements SeqwareWriteService {
         checkNotNull(parents);
         checkNotNull(files);
 
-        ArrayList<FileMetadata> files2 = new ArrayList<FileMetadata>();
+        ArrayList<FileMetadata> files2 = new ArrayList<>();
         for (FileInfo f : files) {
             FileMetadata fm = new FileMetadata(f.getFilePath(), f.getType(), f.getMetaType(), null);
             files2.add(fm);
         }
 
-        List<Integer> parentSwids = new ArrayList<Integer>();
+        List<Integer> parentSwids = new ArrayList<>();
         for (SeqwareObject so : parents) {
             parentSwids.add(Integer.parseInt(so.getSwid()));
         }
