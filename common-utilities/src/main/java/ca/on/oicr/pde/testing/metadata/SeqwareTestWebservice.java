@@ -22,6 +22,8 @@ public class SeqwareTestWebservice {
 
     private final String host = "localhost";
     private final int port;
+
+    //TODO: user and password needs to be a parameter
     private final String user = "admin@admin.com";
     private final String password = "admin";
 
@@ -46,6 +48,8 @@ public class SeqwareTestWebservice {
 
         dataSource = new DataSource();
         dataSource.setPoolProperties(p);
+
+        //TODO: check that port is free
         port = RandomUtils.nextInt(2000, 65000);
 
         appContext = new WebAppContext(seqwareWar.getAbsolutePath(), "/");
@@ -53,21 +57,6 @@ public class SeqwareTestWebservice {
         webservice = new Server(port);
         webservice.setHandler(appContext);
 
-//        ResourceHandler resourceHandler = new ResourceHandler();
-//        resourceHandler.("jdbc/SeqWareMetaDB", pg);
-//        //https://blogs.oracle.com/randystuph/entry/injecting_jndi_datasources_for_junit
-//        System.setProperty(Context.INITIAL_CONTEXT_FACTORY,
-//                "org.apache.naming.java.javaURLContextFactory");
-//        System.setProperty(Context.URL_PKG_PREFIXES,
-//                "org.apache.naming");
-//
-//        InitialContext c = new InitialContext();
-//        c.createSubcontext("java:").createSubcontext("java:comp").createSubcontext("java:comp/env").createSubcontext("java:comp/env/jdbc");
-//        c.bind("java:comp/env/jdbc/SeqWareMetaDB", pg);
-//        //c.addToEnvironment("java:comp/env/jdbc/SeqWareMetaDB", pg);
-        SimpleNamingContextBuilder builder = new SimpleNamingContextBuilder();
-        builder.bind("java:comp/env/jdbc/SeqWareMetaDB", pg);
-        builder.activate();
         SimpleNamingContextBuilder builder = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
         builder.bind("java:comp/env/jdbc/SeqWareMetaDB", dataSource);
 
@@ -79,14 +68,18 @@ public class SeqwareTestWebservice {
     }
 
     public void shutdown() {
+
         try {
             webservice.stop();
+            webservice.join();
+            webservice.destroy();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
         try {
             appContext.stop();
+            appContext.destroy();
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
