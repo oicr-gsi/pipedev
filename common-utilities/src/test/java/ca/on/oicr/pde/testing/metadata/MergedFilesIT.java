@@ -100,13 +100,12 @@ public class MergedFilesIT extends RegressionTestStudyBase {
         }
     }
 
-    //TODO: enable this test after upgrade to seqware 1.1.0.alpha7
-    @Test(dependsOnMethods = "skipSequencerRun", enabled = false)
+    @Test(dependsOnMethods = "skipSequencerRun")
     public void checkFileProvenanceRecordsAreSkipped() {
         Collection<FileProvenanceReportRecord> fs = seqwareReader.getFileRecords(mergeBams);
         Assert.assertEquals(fs.size(), 3);
         for (FileProvenanceReportRecord f : fs) {
-            Assert.assertEquals(f.getSkip(), true, "File with swid = " + f.getFileSwid() + " should have been skipped.");
+            Assert.assertEquals(f.getSkip(), "true", "File with swid = " + f.getFileSwid() + " should have been skipped.");
         }
     }
 
