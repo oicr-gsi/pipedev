@@ -18,13 +18,14 @@ import org.testng.annotations.Test;
 
 /**
  * IT for SEQWARE-1994: For files with multiple paths, skip the file when any of paths are skipped
+ *
  * @author mlaszloffy
  */
 public class MergedFilesIT extends RegressionTestStudyBase {
 
     List<WorkflowRun> inputFileWorkflowRuns;
     Workflow mergeBams;
-    
+
     public MergedFilesIT() {
         inputFileWorkflowRuns = new ArrayList<>();
     }
@@ -99,7 +100,7 @@ public class MergedFilesIT extends RegressionTestStudyBase {
         }
     }
 
-    //This
+    //TODO: enable this test after upgrade to seqware 1.1.0.alpha7
     @Test(dependsOnMethods = "skipSequencerRun", enabled = false)
     public void checkFileProvenanceRecordsAreSkipped() {
         Collection<FileProvenanceReportRecord> fs = seqwareReader.getFileRecords(mergeBams);
