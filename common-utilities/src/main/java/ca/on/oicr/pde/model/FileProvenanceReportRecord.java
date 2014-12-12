@@ -758,7 +758,7 @@ public class FileProvenanceReportRecord implements Serializable {
             workflowRunBuilder.setStatus(workflowRunStatus);
             workflowRunBuilder.setAttributes(transformAttributeStringToMap(workflowRunAttributes,
                     attrKeyValuePairDelimiter, attrKeyValueSeparator, attrValueDelimiter));
-            workflowRunBuilder.setInputFileSwids(new HashSet<>(Arrays.asList(StringUtils.split(workflowRunInputFileSwids, ","))));
+            workflowRunBuilder.setInputFileSwids(new HashSet<>(Arrays.asList(StringUtils.split(workflowRunInputFileSwids, ";"))));
             workflowRun = workflowRunBuilder.build();
 
             File.Builder fileBuilder = new File.Builder();
