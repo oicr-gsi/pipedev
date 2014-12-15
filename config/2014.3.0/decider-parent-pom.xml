@@ -37,12 +37,12 @@
         <dependency>
             <groupId>com.github.seqware</groupId>
             <artifactId>seqware-pipeline</artifactId>
-            <version>${seqware-version}</version>
+            <version>[${seqware-version}]</version>
         </dependency>
         <dependency>
             <groupId>com.github.seqware</groupId>
             <artifactId>seqware-common</artifactId>
-            <version>${seqware-version}</version>
+            <version>[${seqware-version}]</version>
         </dependency>
         <dependency>
             <groupId>ca.on.oicr.pde</groupId>
