@@ -24,7 +24,7 @@ public class SeqwareTestConfiguration {
 
         seqwareSettings = Helpers.generateSeqwareSettings(Files.createTempDir(), "http://" + ws.getHost() + ":" + Integer.toString(ws.getPort()), "oozie", "nah");
 
-        Map tmpConfig = new HashMap<String, String>();
+        Map tmpConfig = new HashMap<>();
         MapTools.ini2Map(seqwareSettings.getAbsolutePath(), tmpConfig);
         seqwareConfig = Collections.unmodifiableMap(tmpConfig);
     }

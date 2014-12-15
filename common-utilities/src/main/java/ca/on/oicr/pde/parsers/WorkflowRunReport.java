@@ -17,7 +17,7 @@ public class WorkflowRunReport {
 
     private static void validateHeader(Map header) {
 
-        Map workflowRunReportExpectedHeader = new HashMap<String, Integer>();
+        Map workflowRunReportExpectedHeader = new HashMap<>();
         workflowRunReportExpectedHeader.put("Workflow", 0);
         workflowRunReportExpectedHeader.put("Workflow Run SWID", 1);
         workflowRunReportExpectedHeader.put("Workflow Run Status", 2);
@@ -66,7 +66,7 @@ public class WorkflowRunReport {
 
         validateHeader(p.getHeaderMap());
 
-        List ls = new ArrayList<WorkflowRunReportRecord>();
+        List ls = new ArrayList<>();
         for (CSVRecord r : p) {
 
             if (!r.isConsistent()) {

@@ -11,7 +11,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class Processing implements SeqwareObject {
 
-    private static final Map<String, Processing> cache = new ConcurrentHashMap<String, Processing>();
+    private static final Map<String, Processing> cache = new ConcurrentHashMap<>();
 
     private final String algorithm;
     private final String swid;

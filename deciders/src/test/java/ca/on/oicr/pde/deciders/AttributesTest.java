@@ -46,7 +46,7 @@ public class AttributesTest {
         String myRandomString = "TEST";
         
         int i = 0;
-        Map<String, String> atts = new HashMap<String, String>();
+        Map<String, String> atts = new HashMap<>();
         for (Header h : Header.values()) {
             atts.put(h.getTitle(), myRandomString+(i++));
         }
@@ -85,7 +85,7 @@ public class AttributesTest {
         String myRandomString = "TEST";
         
         int i = 0;
-        Map<String, String> atts = new HashMap<String, String>();
+        Map<String, String> atts = new HashMap<>();
         for (Header h : Header.values()) {
             atts.put(h.getTitle(), myRandomString+(i++));
         }

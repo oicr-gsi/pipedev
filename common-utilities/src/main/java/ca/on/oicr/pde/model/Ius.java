@@ -11,7 +11,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class Ius implements SeqwareObject {
 
-    private static final Map<String, Ius> cache = new ConcurrentHashMap<String, Ius>();
+    private static final Map<String, Ius> cache = new ConcurrentHashMap<>();
 
     private final String tag;
     private final String swid;

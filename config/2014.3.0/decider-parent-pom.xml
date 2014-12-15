@@ -40,14 +40,14 @@
             <version>${seqware-version}</version>
         </dependency>
         <dependency>
+            <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-common</artifactId>
+            <version>${seqware-version}</version>
+        </dependency>
+        <dependency>
             <groupId>ca.on.oicr.pde</groupId>
             <artifactId>decider-utilities</artifactId>
             <version>1.6-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>18.0</version>
         </dependency>
 
         <!-- test dependencies -->

@@ -44,6 +44,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-common</artifactId>
+            <version>${seqware-version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>ca.on.oicr.pde</groupId>
             <artifactId>workflow-utilities</artifactId>
             <version>1.6-SNAPSHOT</version>
@@ -388,7 +394,7 @@
                 <executions>
                     <execution>
                         <id>recursive_executable</id>
-                        <phase>process-sources</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>

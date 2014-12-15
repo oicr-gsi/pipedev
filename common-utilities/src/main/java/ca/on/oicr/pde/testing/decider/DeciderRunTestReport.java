@@ -40,17 +40,17 @@ public class DeciderRunTestReport {
     private List<WorkflowRunReport> workflowRuns;
 
     public DeciderRunTestReport() {
-        studies = new TreeSet<String>();
-        sequencerRuns = new TreeSet<String>();
-        lanes = new TreeSet<String>();
-        samples = new TreeSet<String>();
-        workflows = new TreeSet<String>();
-        processingAlgorithms = new TreeSet<String>();
-        fileMetaTypes = new TreeSet<String>();
+        studies = new TreeSet<>();
+        sequencerRuns = new TreeSet<>();
+        lanes = new TreeSet<>();
+        samples = new TreeSet<>();
+        workflows = new TreeSet<>();
+        processingAlgorithms = new TreeSet<>();
+        fileMetaTypes = new TreeSet<>();
         maxInputFiles = Integer.MIN_VALUE;
         minInputFiles = Integer.MAX_VALUE;
 
-        workflowRuns = new ArrayList<WorkflowRunReport>();
+        workflowRuns = new ArrayList<>();
     }
 
     public static DeciderRunTestReport buildFromJson(File jsonPath) throws IOException {
@@ -285,15 +285,15 @@ public class DeciderRunTestReport {
 
     public static class WorkflowRunReport implements Comparable<WorkflowRunReport> {
 
-        Map workflowIni = new TreeMap<String, String>();
-        List<ReducedFileProvenanceReportRecord> files = new ArrayList<ReducedFileProvenanceReportRecord>();
+        Map workflowIni = new TreeMap<>();
+        List<ReducedFileProvenanceReportRecord> files = new ArrayList<>();
 
         public Map getWorkflowIni() {
             return workflowIni;
         }
 
         public void setWorkflowIni(Map<String, String> workflowIni) {
-            this.workflowIni = new TreeMap<String, String>(workflowIni);
+            this.workflowIni = new TreeMap<>(workflowIni);
         }
 
         public List<ReducedFileProvenanceReportRecord> getFiles() {

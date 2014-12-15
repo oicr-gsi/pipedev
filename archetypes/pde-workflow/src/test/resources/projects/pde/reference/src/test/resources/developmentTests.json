@@ -1,0 +1,11 @@
+{
+    "defaults": {
+        "description": "HelloWorld workflow test",
+        "metrics_calculate": "calculate.sh",
+        "metrics_compare": "compare.sh",
+        "input_config_dir": "/.mounts/labs/PDE/data/RegressionTests/HelloWorld/workflow/development/input_config/",
+        "output_metrics_dir": "/.mounts/labs/PDE/data/RegressionTests/HelloWorld/workflow/development/output_expectation/"
+    },
+    "tests": [
+    ]
+}

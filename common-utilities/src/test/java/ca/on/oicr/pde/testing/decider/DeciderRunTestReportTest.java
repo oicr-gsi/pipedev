@@ -130,7 +130,7 @@ public class DeciderRunTestReportTest {
         expected.setMaxInputFiles(10);
         expected.setMinInputFiles(1);
 
-        List<ReducedFileProvenanceReportRecord> fs = new LinkedList<ReducedFileProvenanceReportRecord>();
+        List<ReducedFileProvenanceReportRecord> fs = new LinkedList<>();
 
         //Simulate files that are part of decider run test workflow run
         for (int i = 0; i < 10; i++) {
@@ -160,7 +160,7 @@ public class DeciderRunTestReportTest {
 
         //Shuffle workflow run file list order
         for (DeciderRunTestReport.WorkflowRunReport w : actual.getWorkflowRuns()) {
-            List<ReducedFileProvenanceReportRecord> rs = new ArrayList<ReducedFileProvenanceReportRecord>(w.getFiles());
+            List<ReducedFileProvenanceReportRecord> rs = new ArrayList<>(w.getFiles());
             Collections.shuffle(rs);
             w.getFiles().clear();
             w.setFiles(rs);

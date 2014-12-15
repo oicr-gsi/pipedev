@@ -8,7 +8,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class Workflow implements Accessionable {
 
-    private static final Map<String, Workflow> cache = new ConcurrentHashMap<String, Workflow>();
+    private static final Map<String, Workflow> cache = new ConcurrentHashMap<>();
 
     private final String swid;
     private final String name;

@@ -35,9 +35,9 @@ public class DeciderRunTest extends RunTestBase {
     private SeqwareReadService seqwareService;
     private Workflow workflow;
 
-    private final List<String> studies = new ArrayList<String>();
-    private final List<String> sequencerRuns = new ArrayList<String>();
-    private final List<String> samples = new ArrayList<String>();
+    private final List<String> studies = new ArrayList<>();
+    private final List<String> sequencerRuns = new ArrayList<>();
+    private final List<String> samples = new ArrayList<>();
 
     File actualReportFile;
     File expectedReportFile;
@@ -64,7 +64,7 @@ public class DeciderRunTest extends RunTestBase {
         samples.addAll(testDefinition.getSamples());
         sequencerRuns.addAll(testDefinition.getSequencerRuns());
 
-        expectedReportFile = testDefinition.metrics();
+        expectedReportFile = testDefinition.getMetrics();
 
         if (expectedReportFile != null) {
             try {
@@ -211,8 +211,8 @@ public class DeciderRunTest extends RunTestBase {
         if (!actual.equals(expected)) {
             StringBuilder sb = new StringBuilder();
             sb.append("There are differences between decider runs:\n");
-            sb.append("Expected run report: ").append(expectedReportFile).append("\n");
-            sb.append("Actual run report: ").append(actualReportFile).append("\n");
+            sb.append("Expected run report: ").append(expectedReportFile.getAbsolutePath()).append("\n");
+            sb.append("Actual run report: ").append(actualReportFile.getAbsolutePath()).append("\n");
 
             //Build the summary report
             String headerSummary = DeciderRunTestReport.diffHeader(actual, expected);
@@ -231,7 +231,7 @@ public class DeciderRunTest extends RunTestBase {
     }
 
     private List<String> validateReport(DeciderRunTestReport t) {
-        List<String> problems = new ArrayList<String>();
+        List<String> problems = new ArrayList<>();
 
         if (t.getWorkflowRunCount().equals(Integer.valueOf("0"))) {
             problems.add("No workflow run were scheduled.");

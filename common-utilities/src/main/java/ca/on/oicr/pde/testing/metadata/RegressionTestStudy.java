@@ -29,7 +29,7 @@ public class RegressionTestStudy {
         te = new TestEnvironment(host, port, user, password, seqwareWar);
         SeqwareWriteService writeService = te.getWriteService();
 
-        objects = new HashMap<String, SeqwareObject>();
+        objects = new HashMap<>();
 
         Study study = writeService.createStudy("111", "OICR", "PDE_TEST", null, "11", "PDE_TEST");
         Experiment experiment = writeService.createExperiment(null, "20", study, "PDE_ILLUMINA");

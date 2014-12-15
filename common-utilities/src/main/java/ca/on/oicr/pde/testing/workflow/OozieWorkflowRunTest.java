@@ -36,7 +36,7 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
         super.initializeEnvironment();
 
         //Get a seqware metadb object for probing the metadb state
-        HashMap<String, String> hm = new HashMap<String, String>();
+        HashMap<String, String> hm = new HashMap<>();
         MapTools.ini2Map(seqwareSettings.getAbsolutePath(), hm, true);
         metadb = MetadataFactory.get(hm);
 
