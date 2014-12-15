@@ -36,6 +36,7 @@
                     <version>2.6</version>
                     <configuration>
                         <includeEmptyDirs>true</includeEmptyDirs>
+                        <encoding>UTF-8</encoding>
                     </configuration>
                 </plugin>
             </plugins>
