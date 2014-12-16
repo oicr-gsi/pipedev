@@ -16,14 +16,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.apache.logging.log4j.Level;
 
 public class DeciderRunTestReport {
 
@@ -231,7 +230,8 @@ public class DeciderRunTestReport {
         return mapper.writeValueAsString(this);
     }
 
-    public static DeciderRunTestReport generateReport(SeqwareReadService srs, Workflow workflow, Collection<String> iniExclusions) {
+    public static DeciderRunTestReport generateReport(SeqwareReadService srs, Workflow workflow, Collection<String> iniExclusions,
+            Map<String, String> iniSubstitutions) {
         List<WorkflowRunReportRecord> wrrs = srs.getWorkflowRunRecords(workflow);
 
         DeciderRunTestReport t = new DeciderRunTestReport();
@@ -267,9 +267,20 @@ public class DeciderRunTestReport {
                 t.setMinInputFiles(files.size());
             }
 
-            Map ini = srs.getWorkflowRunIni(wr);
+            //get the ini that the decider scheduled
+            Map<String, String> ini = srs.getWorkflowRunIni(wr);
+
+            //apply ini exclusions
             for (String s : iniExclusions) {
                 ini.remove(s);
+            }
+
+            //apply ini substitutions
+            for (Entry<String, String> iniEntry : ini.entrySet()) {
+                for (Entry<String, String> substitutionEntry : iniSubstitutions.entrySet()) {
+                    String modifiedValue = iniEntry.getValue().replace(substitutionEntry.getKey(), substitutionEntry.getValue());
+                    iniEntry.setValue(modifiedValue);
+                }
             }
 
             WorkflowRunReport x = new WorkflowRunReport();

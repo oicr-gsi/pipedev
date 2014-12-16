@@ -2,7 +2,6 @@ package ca.on.oicr.pde.testing.decider;
 
 import ca.on.oicr.pde.dao.reader.SeqwareReadService;
 import ca.on.oicr.pde.diff.ObjectDiff;
-import ca.on.oicr.pde.model.SeqwareAccession;
 import ca.on.oicr.pde.model.Workflow;
 import ca.on.oicr.pde.testing.common.RunTestBase;
 import ca.on.oicr.pde.utilities.Timer;
@@ -12,7 +11,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
@@ -152,7 +153,7 @@ public class DeciderRunTest extends RunTestBase {
         Assert.assertNotNull(workflow.getSwid(), "Installation of the workflow bundle failed");
         log.printf(Level.INFO, "[%s] Completed installing workflow bundle in %s", testName, timer.stop());
     }
-
+    
 //    @Test(groups = "preExecution", expectedExceptions = Exception.class)
 //    public void getDeciderObject() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 //        //get decider object + all parameters
@@ -187,7 +188,10 @@ public class DeciderRunTest extends RunTestBase {
     public void calculateWorkflowRunReport() throws JsonProcessingException, IOException {
         Timer timer = Timer.start();
 
-        actual = DeciderRunTestReport.generateReport(seqwareService, workflow, testDefinition.getIniExclusions());
+        Map<String, String> iniSubstitutions = new HashMap<>();
+        iniSubstitutions.put(bundledWorkflow.getAbsolutePath(), "${workflow_bundle_dir}");
+        
+        actual = DeciderRunTestReport.generateReport(seqwareService, workflow, testDefinition.getIniExclusions(), iniSubstitutions);
 
         actualReportFile = new File(workingDirectory.getAbsolutePath() + "/" + testDefinition.outputName());
         Assert.assertFalse(actualReportFile.exists());
