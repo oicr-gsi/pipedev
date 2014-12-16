@@ -389,6 +389,13 @@
                             </properties>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>verify</id>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                        <phase>verify</phase>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
