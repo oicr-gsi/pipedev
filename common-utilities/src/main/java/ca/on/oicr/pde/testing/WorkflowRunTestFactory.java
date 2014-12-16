@@ -69,7 +69,7 @@ public class WorkflowRunTestFactory {
             File calculateMetricsScript = getScriptFromResource(t.getMetricsCalculateScript());
             File compareMetricsScript = getScriptFromResource(t.getMetricsCompareScript());
 
-            List<File> iniFiles = new ArrayList<File>();
+            List<File> iniFiles = new ArrayList<>();
             
             //Add a blank ini file to list (need at least one ini file for seqware command line)
             iniFiles.add(File.createTempFile("blank", "ini"));

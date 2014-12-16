@@ -28,7 +28,7 @@ public class PluginExecutor implements SeqwareExecutor {
     @Override
     public SeqwareAccession installWorkflow(File bundledWorkflowPath) throws IOException {
 
-        List<String> params = new ArrayList<String>();
+        List<String> params = new ArrayList<>();
         params.add("--plugin");
         params.add("net.sourceforge.seqware.pipeline.plugins.BundleManager");
         params.add("--");
@@ -48,7 +48,7 @@ public class PluginExecutor implements SeqwareExecutor {
     @Override
     public void deciderRunSchedule(String decider, Workflow workflow, String... deciderArgs) throws IOException {
 
-        List<String> params = new ArrayList<String>();
+        List<String> params = new ArrayList<>();
         params.add("--plugin");
         params.add(decider);
         params.add("--");

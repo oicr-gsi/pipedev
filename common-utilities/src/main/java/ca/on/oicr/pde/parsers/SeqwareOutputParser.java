@@ -16,7 +16,7 @@ public class SeqwareOutputParser {
         Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(seqwareExecutionOutput);
 
-        List<String> accessions = new ArrayList<String>();
+        List<String> accessions = new ArrayList<>();
         while (m.find()) {
             accessions.add(m.group(1).trim());
         }

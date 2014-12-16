@@ -15,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -152,7 +153,7 @@ public class SeqwareServiceCliImpl implements SeqwareWriteService {
     }
 
     @Override
-    public String createWorkflowRun(Workflow workflow, List<? extends SeqwareObject> parents, List<FileInfo> files) {
+    public String createWorkflowRun(Workflow workflow, Collection<? extends SeqwareObject> parents, List<FileInfo> files) {
         List<String> params = new ArrayList(Arrays.asList(
                 "--workflow-accession", sanitize(workflow.getSwid())
         ));
@@ -223,7 +224,7 @@ public class SeqwareServiceCliImpl implements SeqwareWriteService {
     private final Pattern seqwareSwidRegex = Pattern.compile("SWID: (\\d*)");
 
     private String createObject(String objectType, List<String> params) {
-        List<String> args = new ArrayList<String>();
+        List<String> args = new ArrayList<>();
         args.add("--plugin");
         args.add("net.sourceforge.seqware.pipeline.plugins.Metadata");
         args.add("--");
@@ -285,15 +286,7 @@ public class SeqwareServiceCliImpl implements SeqwareWriteService {
             } else {
                 r = null;
             }
-        } catch (NoSuchMethodException ex) {
-            Logger.getLogger(SeqwareServiceCliImpl.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SecurityException ex) {
-            Logger.getLogger(SeqwareServiceCliImpl.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(SeqwareServiceCliImpl.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(SeqwareServiceCliImpl.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvocationTargetException ex) {
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             Logger.getLogger(SeqwareServiceCliImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
 

@@ -11,7 +11,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class Experiment implements SeqwareObject {
 
-    private static final Map<String, Experiment> cache = new ConcurrentHashMap<String, Experiment>();
+    private static final Map<String, Experiment> cache = new ConcurrentHashMap<>();
 
     private final String name;
     private final String swid;
@@ -33,7 +33,7 @@ public class Experiment implements SeqwareObject {
 
     @Override
     public Map<String, Set<String>> getAttributes() {
-        return new HashMap<String, Set<String>>(attributes);
+        return new HashMap<>(attributes);
     }
 
     @Override

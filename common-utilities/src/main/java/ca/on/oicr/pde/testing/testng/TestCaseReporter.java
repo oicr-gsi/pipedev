@@ -1,5 +1,7 @@
 package ca.on.oicr.pde.testing.testng;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
@@ -34,13 +36,13 @@ import org.testng.xml.XmlSuite;
  * Example report:
  *
  * Test suite = [Default Suite]
- *   Test context = [Command line test 5614e690-20f6-4d42-8ba0-6ad6d97164e8]
- *      Test case = [Fake test case 0]
- *         group = [], method = [sleepTest], execution time = [1.00s], status = [SUCCESS]
- *         group = [], method = [sleepTest], execution time = [1.00s], status = [SUCCESS]
- *      Test case = [Fake test case 1]
- *         group = [], method = [sleepTest], execution time = [1.00s], status = [SUCCESS]
- *         group = [], method = [sleepTest], execution time = [1.00s], status = [SUCCESS]
+ * __Test context = [Command line test 5614e690-20f6-4d42-8ba0-6ad6d97164e8]
+ * ____Test case = [Fake test case 0]
+ * ______group = [], method = [sleepTest], execution time = [1.00s], status = [SUCCESS]
+ * ______group = [], method = [sleepTest], execution time = [1.00s], status = [SUCCESS]
+ * ____Test case = [Fake test case 1]
+ * ______group = [], method = [sleepTest], execution time = [1.00s], status = [SUCCESS]
+ * ______group = [], method = [sleepTest], execution time = [1.00s], status = [SUCCESS]
  */
 public class TestCaseReporter implements IReporter {
 
@@ -90,13 +92,15 @@ public class TestCaseReporter implements IReporter {
         return new TreeMap(groupedResults.asMap());
     }
 
-    String padding = "  ";
+    public static String formatAndIndent(int level, String out, Object... args) {
+        return formatAndIndent("  ", level, out, args);
+    }
 
-    private void print(int level, String out, Object... args) {
+    public static String formatAndIndent(String padding, int level, String out, Object... args) {
+        checkArgument(level >= 0);
+        checkNotNull(out);
         String prefix = StringUtils.repeat(padding, level);
-        List<Object> argsList = new LinkedList<Object>(Arrays.asList(args));
-        argsList.add(0, prefix);
-        System.out.format("%s" + out.replaceAll("\n", "\n" + prefix) + "%n", argsList.toArray());
+        return String.format(prefix + out, args).replaceAll("\n", "\n" + prefix);
     }
 
     @Override
@@ -107,17 +111,17 @@ public class TestCaseReporter implements IReporter {
 
         //Iterate over all test suites (eg, testng.xml)
         for (ISuite suite : suites) {
-            print(0, "Test suite = [%s]", suite.getName());
+            System.out.println(formatAndIndent(0, "Test suite = [%s]", suite.getName()));
 
             //Get the results for the test suite
             for (ISuiteResult sr : suite.getResults().values()) {
                 ITestContext tc = sr.getTestContext();
-                print(1, "Test context = [%s]", tc.getName()); //
+                System.out.println(formatAndIndent(1, "Test context = [%s]", tc.getName()));
 
                 //Iterate over all test case results.  Aggregate failed, skipped, and succeeded tests by test name (@ITest's getName()).
                 for (Entry<String, Collection<ITestResult>> e : groupResults(tc.getPassedTests(), tc.getFailedTests(), tc.getSkippedTests()).entrySet()) {
-                    print(2, "Test case = [%s]", e.getKey()); //test case name
-                    List<ITestResult> rs = new ArrayList<ITestResult>(e.getValue()); //get all tests for the test case (ie, all tests with the same @ITest getName()
+                    System.out.println(formatAndIndent(2, "Test case = [%s]", e.getKey())); //test case name
+                    List<ITestResult> rs = new ArrayList<>(e.getValue()); //get all tests for the test case (ie, all tests with the same @ITest getName()
                     Collections.sort(rs, new Comparator<ITestResult>() { //sort the list of tests by their start time
                         @Override
                         public int compare(ITestResult o1, ITestResult o2) {
@@ -127,9 +131,9 @@ public class TestCaseReporter implements IReporter {
 
                     //Iterate over all test results for the test case
                     for (ITestResult tr : rs) {
-                        print(3, "group = %s, method = [%s], execution time = [%.2fs], status = [%s]",
+                        System.out.println(formatAndIndent(3, "group = %s, method = [%s], execution time = [%.2fs], status = [%s]",
                                 Arrays.toString(tr.getMethod().getGroups()), tr.getMethod().getMethodName(),
-                                (tr.getEndMillis() - tr.getStartMillis()) / 1000D, TestNGStatuses.valueOf(tr.getStatus()));
+                                (tr.getEndMillis() - tr.getStartMillis()) / 1000D, TestNGStatuses.valueOf(tr.getStatus())));
 
                         //If there was an error for the test case, print the output
                         if (!tr.isSuccess()) {
@@ -138,7 +142,7 @@ public class TestCaseReporter implements IReporter {
                                 errorMessage = tr.getThrowable().getMessage();
                             }
                             if (errorMessage != null) {
-                                print(4, tr.getThrowable().getMessage());
+                                System.out.println(formatAndIndent(4, "%s", errorMessage));
                             }
                         }
                     }
