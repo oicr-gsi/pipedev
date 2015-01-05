@@ -274,6 +274,7 @@ public class DeciderRunTestReportTest {
                 + "  \"fileMetaTypes\" : [ ],\n"
                 + "  \"maxInputFiles\" : -2147483648,\n"
                 + "  \"minInputFiles\" : 2147483647,\n"
+                + "  \"totalInputFiles\" : 0,\n"
                 + "  \"workflowRuns\" : [ {\n"
                 + "    \"workflowIni\" : { },\n"
                 + "    \"files\" : [ {\n"

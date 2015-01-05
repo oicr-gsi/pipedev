@@ -36,6 +36,7 @@ public class DeciderRunTestReport {
     private final Set<String> fileMetaTypes;
     private Integer maxInputFiles;
     private Integer minInputFiles;
+    private Integer totalInputFiles;
     private List<WorkflowRunReport> workflowRuns;
 
     public DeciderRunTestReport() {
@@ -48,6 +49,7 @@ public class DeciderRunTestReport {
         fileMetaTypes = new TreeSet<>();
         maxInputFiles = Integer.MIN_VALUE;
         minInputFiles = Integer.MAX_VALUE;
+        totalInputFiles = Integer.valueOf("0");
 
         workflowRuns = new ArrayList<>();
     }
@@ -110,6 +112,14 @@ public class DeciderRunTestReport {
 
     public void setMinInputFiles(Integer minInputFiles) {
         this.minInputFiles = minInputFiles;
+    }
+
+    public Integer getTotalInputFiles() {
+        return totalInputFiles;
+    }
+
+    public void setTotalInputFiles(Integer totalInputFiles) {
+        this.totalInputFiles = totalInputFiles;
     }
 
     public void setWorkflowRunCount(Integer workflowRunCount) {
@@ -215,6 +225,9 @@ public class DeciderRunTestReport {
         if (expected.minInputFiles.intValue() != actual.minInputFiles.intValue()) {
             sb.append(String.format("Min input files changed from %s to %s%n", expected.minInputFiles, actual.minInputFiles));
         }
+        if (expected.totalInputFiles.intValue() != actual.totalInputFiles.intValue()) {
+            sb.append(String.format("Total input file count changed from %s to %s%n", expected.totalInputFiles, actual.totalInputFiles));
+        }
 
         //Remove last new line character
         if (sb.length() != 0) {
@@ -266,6 +279,8 @@ public class DeciderRunTestReport {
             if (files.size() < t.getMinInputFiles()) {
                 t.setMinInputFiles(files.size());
             }
+            
+            t.setTotalInputFiles(t.getTotalInputFiles() + files.size());
 
             //get the ini that the decider scheduled
             Map<String, String> ini = srs.getWorkflowRunIni(wr);
