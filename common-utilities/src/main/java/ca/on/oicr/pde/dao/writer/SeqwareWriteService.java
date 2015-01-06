@@ -8,6 +8,7 @@ import ca.on.oicr.pde.model.SequencerRun;
 import ca.on.oicr.pde.model.SeqwareObject;
 import ca.on.oicr.pde.model.Study;
 import ca.on.oicr.pde.model.Workflow;
+import java.util.Collection;
 import java.util.List;
 
 public interface SeqwareWriteService {
@@ -25,7 +26,7 @@ public interface SeqwareWriteService {
 
     public Study createStudy(String id, String centerName, String centerProjectName, String description, String studyType, String title);
 
-    public String createWorkflowRun(Workflow workflow, List<? extends SeqwareObject> parents, List<FileInfo> files);
+    public String createWorkflowRun(Workflow workflow, Collection<? extends SeqwareObject> parents, List<FileInfo> files);
 
     public Workflow createWorkflow(String name, String version, String description);
 

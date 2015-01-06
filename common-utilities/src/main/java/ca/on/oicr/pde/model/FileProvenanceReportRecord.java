@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,7 +15,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -40,11 +41,12 @@ public class FileProvenanceReportRecord implements Serializable {
     private final List<Sample> parentSamples;
 
     private final String lastModified;
+    private final String pathSkip;
     private final String skip;
 
     public enum ValidationMode {
 
-        STR, STRICT, SKIP;
+        STRICT, SKIP;
     }
 
     private FileProvenanceReportRecord(Builder b) {
@@ -62,8 +64,53 @@ public class FileProvenanceReportRecord implements Serializable {
         this.rootSample = b.rootSample;
         this.parentSamples = b.parentSamples;
         this.lastModified = b.lastModified;
+        this.pathSkip = b.pathSkip;
         this.skip = b.skip;
 
+    }
+
+    public Experiment getExperiment() {
+        return experiment;
+    }
+
+    public Study getStudy() {
+        return study;
+    }
+
+    public Ius getIus() {
+        return ius;
+    }
+
+    public Lane getLane() {
+        return lane;
+    }
+
+    public SequencerRun getSequencerRun() {
+        return sequencerRun;
+    }
+
+    public Processing getProcessing() {
+        return processing;
+    }
+
+    public Workflow getWorkflow() {
+        return workflow;
+    }
+
+    public WorkflowRun getWorkflowRun() {
+        return workflowRun;
+    }
+
+    public File getFile() {
+        return file;
+    }
+
+    public Sample getSample() {
+        return sample;
+    }
+
+    public Sample getRootSample() {
+        return rootSample;
     }
 
     public String getLastModified() {
@@ -193,8 +240,8 @@ public class FileProvenanceReportRecord implements Serializable {
     public Map<String, Set<String>> getProcessingAttributes() {
         return processing.getAttributes();
     }
-    
-        public String getProcessingStatus() {
+
+    public String getProcessingStatus() {
         return processing.getStatus();
     }
 
@@ -224,6 +271,10 @@ public class FileProvenanceReportRecord implements Serializable {
 
     public String getFileDescription() {
         return file.getDescription();
+    }
+
+    public String getPathSkip() {
+        return pathSkip;
     }
 
     public String getSkip() {
@@ -306,45 +357,60 @@ public class FileProvenanceReportRecord implements Serializable {
 
         //record info
         private String lastModified = "";
+
         private String studyTitle = "";
         private String studySwid = "";
         private String studyAttributes = "";
+
         private String experimentName = "";
         private String experimentSwid = "";
         private String experimentAttributes = "";
+
         private String rootSampleName = "";
         private String rootSampleSwid = "";
+
         private String parentSampleNames = "";
         private String parentSampleSwids = "";
         private String parentSampleOrganismIds = "";
         private String parentSampleAttributes = "";
+
         private String sampleName = "";
         private String sampleSwid = "";
         private String sampleOrganismId = "";
         private String sampleOrganismCode = "";
         private String sampleAttributes = "";
+
         private String sequencerRunName = "";
         private String sequencerRunSwid = "";
         private String sequencerRunAttributes = "";
         private String sequencerRunPlatformId = "";
         private String sequencerRunPlatformName = "";
+
         private String laneName = "";
         private String laneNumber = "";
         private String laneSwid = "";
         private String laneAttributes = "";
+
         private String iusTag = "";
         private String iusSwid = "";
         private String iusAttributes = "";
+
         private String workflowName = "";
         private String workflowVersion = "";
         private String workflowSwid = "";
+        private String workflowAttributes = "";
+
         private String workflowRunName = "";
         private String workflowRunStatus = "";
         private String workflowRunSwid = "";
+        private String workflowRunAttributes = "";
+        private String workflowRunInputFileSwids = "";
+
         private String processingAlgorithm = "";
         private String processingSwid = "";
         private String processingAttributes = "";
         private String processingStatus = "";
+
         private String fileMetaType = "";
         private String fileSwid = "";
         private String fileAttributes = "";
@@ -352,6 +418,7 @@ public class FileProvenanceReportRecord implements Serializable {
         private String fileMd5sum = "";
         private String fileSize = "";
         private String fileDescription = "";
+        private String pathSkip = "";
         private String skip = "";
 
         public Builder(long recordNumber) {
@@ -528,6 +595,11 @@ public class FileProvenanceReportRecord implements Serializable {
             return this;
         }
 
+        public Builder setWorkflowAttributes(String workflowAttributes) {
+            this.workflowAttributes = workflowAttributes;
+            return this;
+        }
+
         public Builder setWorkflowRunName(String workflowRunName) {
             this.workflowRunName = workflowRunName;
             return this;
@@ -540,6 +612,16 @@ public class FileProvenanceReportRecord implements Serializable {
 
         public Builder setWorkflowRunSwid(String workflowRunSwid) {
             this.workflowRunSwid = workflowRunSwid;
+            return this;
+        }
+
+        public Builder setWorkflowRunAttributes(String workflowRunAttributes) {
+            this.workflowRunAttributes = workflowRunAttributes;
+            return this;
+        }
+
+        public Builder setWorkflowRunInputFileSwids(String workflowRunInputFileSwids) {
+            this.workflowRunInputFileSwids = workflowRunInputFileSwids;
             return this;
         }
 
@@ -595,6 +677,11 @@ public class FileProvenanceReportRecord implements Serializable {
 
         public Builder setFileDescription(String fileDescription) {
             this.fileDescription = fileDescription;
+            return this;
+        }
+
+        public Builder setPathSkip(String pathSkip) {
+            this.pathSkip = pathSkip;
             return this;
         }
 
@@ -661,12 +748,17 @@ public class FileProvenanceReportRecord implements Serializable {
             workflowBuilder.setSwid(getSwid(workflowSwid));
             workflowBuilder.setName(workflowName);
             workflowBuilder.setVersion(workflowVersion);
+            workflowBuilder.setAttributes(transformAttributeStringToMap(workflowAttributes,
+                    attrKeyValuePairDelimiter, attrKeyValueSeparator, attrValueDelimiter));
             workflow = workflowBuilder.build();
 
             WorkflowRun.Builder workflowRunBuilder = new WorkflowRun.Builder();
             workflowRunBuilder.setSwid(getSwid(workflowRunSwid));
             workflowRunBuilder.setName(workflowRunName);
             workflowRunBuilder.setStatus(workflowRunStatus);
+            workflowRunBuilder.setAttributes(transformAttributeStringToMap(workflowRunAttributes,
+                    attrKeyValuePairDelimiter, attrKeyValueSeparator, attrValueDelimiter));
+            workflowRunBuilder.setInputFileSwids(new HashSet<>(Arrays.asList(StringUtils.split(workflowRunInputFileSwids, ";"))));
             workflowRun = workflowRunBuilder.build();
 
             File.Builder fileBuilder = new File.Builder();
@@ -694,7 +786,7 @@ public class FileProvenanceReportRecord implements Serializable {
             rootSampleBuilder.setName(rootSampleName);
             rootSample = rootSampleBuilder.build();
 
-            parentSamples = new ArrayList<Sample>();
+            parentSamples = new ArrayList<>();
             parentSamples = buildParentSamples(parentSampleSwids, parentSampleNames, parentSampleOrganismIds, parentSampleAttributes);
 
             return new FileProvenanceReportRecord(this);
@@ -704,7 +796,7 @@ public class FileProvenanceReportRecord implements Serializable {
         private List<Sample> buildParentSamples(String parentSampleSwids, String parentSampleNames, String parentSampleOrganismIds, String parentSampleAttributes) {
 
             if (parentSampleSwids == null || parentSampleSwids.isEmpty()) {
-                return new ArrayList<Sample>();
+                return new ArrayList<>();
             }
 
             List<String> swids = Arrays.asList(parentSampleSwids.split(":"));
@@ -747,7 +839,7 @@ public class FileProvenanceReportRecord implements Serializable {
                 }
             }
 
-            List<Sample> samples = new ArrayList<Sample>(swids.size());
+            List<Sample> samples = new ArrayList<>(swids.size());
             for (String swid : swids) {
                 Sample.Builder sampleBuilder = new Sample.Builder();
                 sampleBuilder.setSwid(swid);
@@ -777,13 +869,13 @@ public class FileProvenanceReportRecord implements Serializable {
     public static Map<String, Set<String>> transformAttributeStringToMap(String input,
             String keyValuePairDelimiter, String keyValueDelimiter, String valueDelimiter) {
 
-        Map<String, Set<String>> out = new TreeMap<String, Set<String>>();
+        Map<String, Set<String>> out = new TreeMap<>();
 
         for (String keyValuePair : StringUtils.split(input, keyValuePairDelimiter)) {
             String[] kv = StringUtils.split(keyValuePair, keyValueDelimiter);
 
             String key = kv[0];
-            Set<String> values = kv.length == 1 ? new TreeSet<String>() : new TreeSet<String>(Arrays.asList(StringUtils.split(kv[1], valueDelimiter)));
+            Set<String> values = kv.length == 1 ? new TreeSet<String>() : new TreeSet<>(Arrays.asList(StringUtils.split(kv[1], valueDelimiter)));
 
             if (out.containsKey(key)) {
                 out.get(key).addAll(values);
@@ -800,7 +892,7 @@ public class FileProvenanceReportRecord implements Serializable {
         checkNotNull(keys, "key list can not be null");
         checkNotNull(listAsString, "listAsString can not be null");
 
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         List<String> values;
         if (listAsString.isEmpty()) {
             String[] tmp = new String[keys.size()];
@@ -830,7 +922,7 @@ public class FileProvenanceReportRecord implements Serializable {
         checkNotNull(mapAsString);
         checkArgument(!keys.isEmpty());
 
-        Map<String, Map<String, Set<String>>> map = new HashMap<String, Map<String, Set<String>>>();
+        Map<String, Map<String, Set<String>>> map = new HashMap<>();
         for (String s : keys) {
             Map<String, Set<String>> previousValue = map.put(s, new HashMap<String, Set<String>>());
             if (previousValue != null) {
@@ -861,7 +953,7 @@ public class FileProvenanceReportRecord implements Serializable {
                 throw new IllegalArgumentException(String.format("the id [%s] (for parent attribute [%s]) does not exist in the key list", primaryKey, attrKey));
             }
 
-            Set<String> attrValues = new TreeSet<String>(Arrays.asList(StringUtils.split(attrValueString, "&")));
+            Set<String> attrValues = new TreeSet<>(Arrays.asList(StringUtils.split(attrValueString, "&")));
 
             //Set the attr key value pair for the given primary key
             Set<String> previousValue = map.get(primaryKey).put(attrKey, attrValues);

@@ -92,7 +92,7 @@ public class OicrDecider extends BasicDecider {
     private Group groupBy = null;
     protected Map<String, FileAttributes> files;
     private int numberOfFilesPerGroup = Integer.MIN_VALUE;
-    private List<String> requiredParams = new ArrayList<String>();
+    private List<String> requiredParams = new ArrayList<>();
     private static final String[][] readMateFlags = {{"_R1_", "1_sequence.txt", ".1.fastq"}, {"_R2_", "2_sequence.txt", ".2.fastq"}};
     public static final int MATE_UNDEF = 0;
     public static final int MATE_1 = 1;
@@ -126,7 +126,7 @@ public class OicrDecider extends BasicDecider {
         defineArgument("output-folder", "The relative path to put the final result(s) (workflow output-dir option).", false);
         defineArgument("after-date", "Optional: Format YYYY-MM-DD. Only run on files that have been modified after a certain date, not inclusive.", false);
         defineArgument("before-date", "Optional: Format YYYY-MM-DD. Only run on files that have been modified before a certain date, not inclusive.", false);
-        files = new HashMap<String, FileAttributes>();
+        files = new HashMap<>();
         format = new SimpleDateFormat("yyyy-MM-dd");
     }
 
@@ -543,7 +543,7 @@ public class OicrDecider extends BasicDecider {
 
     private SortedSet<String> addToSet(SortedSet<String> set, String value) {
         if (set == null) {
-            set = new TreeSet<String>();
+            set = new TreeSet<>();
         }
         if (value != null) {
             set.add(value);

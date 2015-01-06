@@ -30,6 +30,19 @@ public class TestCaseReporterTest {
     }
 
     @Test
+    public void multilineStringTest() {
+        Assert.assertEquals(TestCaseReporter.formatAndIndent(1, "%s", "a\nb\nc"), "  a\n  b\n  c");
+        Assert.assertEquals(TestCaseReporter.formatAndIndent(1, "%s\nx=[%s]", "a\nb\nc", "100"), "  a\n  b\n  c\n  x=[100]");
+    }
+
+    @Test
+    public void floatOutputTest() {
+        Assert.assertEquals(TestCaseReporter.formatAndIndent(1, "%.2f", 0.0), "  0.00");
+        Assert.assertEquals(TestCaseReporter.formatAndIndent(1, "%.2f", 0f), "  0.00");
+        Assert.assertEquals(TestCaseReporter.formatAndIndent(1, "%.2f", 0.00499999), "  0.00");
+    }
+
+    @Test
     public void testCaseReporterTestOnTestSuccesses() {
 
         int numberOfTestCases = 10;
@@ -48,7 +61,7 @@ public class TestCaseReporterTest {
 
         XmlTest testCase = new XmlTest(testSuite);
         testCase.setName("Fake test context name");
-        Map<String, String> params = new HashMap<String, String>();
+        Map<String, String> params = new HashMap<>();
         params.put("numberOfTests", Integer.toString(numberOfTestCases));
         params.put("numberOfTestMethods", Integer.toString(numberOfTestMethods));
         testCase.setParameters(params);
@@ -162,7 +175,7 @@ public class TestCaseReporterTest {
         XmlSuite testSuite = new XmlSuite();
         testSuite.setName("Fake test suite name");
 
-        Map<String, String> params = new HashMap<String, String>();
+        Map<String, String> params = new HashMap<>();
         params.put("numberOfTests", Integer.toString(2));
 
         XmlTest testCase = new XmlTest(testSuite);
