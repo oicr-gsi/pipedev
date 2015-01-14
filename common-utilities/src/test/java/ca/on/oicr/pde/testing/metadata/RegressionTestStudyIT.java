@@ -76,7 +76,7 @@ public class RegressionTestStudyIT extends RegressionTestStudyBase {
         //each sample has 100 files... (8 + 12 + 2) * 100 = 2200 files expected
         assertEquals(files.size(), 2200);
 
-        //ius 13 and 18 (from sequencer run 2), lane 4 of sequencer run 2, and all of sequencer run 3 are skipped
+        //ius 13 and 19 (from sequencer run 2), lane 4 of sequencer run 2, and all of sequencer run 3 are skipped
         //2200 - 6 * 100 = 1600
         assertEquals(okayCount, 1600);
         //6 * 100 = 600
