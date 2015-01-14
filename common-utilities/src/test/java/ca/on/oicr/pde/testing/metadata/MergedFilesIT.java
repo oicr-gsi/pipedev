@@ -117,7 +117,7 @@ public class MergedFilesIT extends RegressionTestStudyBase {
             Assert.assertEquals(rf.getSkip(), Boolean.TRUE, "The file [" + rf.toString() + "] should have been skipped.");
         }
     }
-
+    
     private List<ReducedFileProvenanceReportRecord> getAllFiles() {
         seqwareWriter.updateFileReport();
         seqwareReader.update();

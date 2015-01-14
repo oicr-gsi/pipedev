@@ -10,6 +10,7 @@ import ca.on.oicr.pde.model.Study;
 import ca.on.oicr.pde.model.Workflow;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public interface SeqwareWriteService {
 
@@ -17,7 +18,7 @@ public interface SeqwareWriteService {
 
     public Ius createIus(String barcode, String description, Lane lane, String name, Sample sample, boolean skip);
 
-    public Lane createLane(String cycleDescriptor, String description, String laneNumber, String librarySelectionId, 
+    public Lane createLane(String cycleDescriptor, String description, String laneNumber, String librarySelectionId,
             String librarySourceId, String libraryStrategyId, String name, SequencerRun sequencerRun, boolean skip, String studyTypeId);
 
     public Sample createSample(String description, Experiment experiment, String organismId, String title, Sample parentSample);
@@ -29,6 +30,8 @@ public interface SeqwareWriteService {
     public String createWorkflowRun(Workflow workflow, Collection<? extends SeqwareObject> parents, List<FileInfo> files);
 
     public Workflow createWorkflow(String name, String version, String description);
+
+    public Workflow createWorkflow(String name, String version, String description, Map<String, String> defaultParameters);
 
     public void annotate(SeqwareObject o, String key, String value);
 

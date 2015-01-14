@@ -14,16 +14,21 @@ import com.google.common.primitives.Ints;
 import io.seqware.common.model.ProcessingStatus;
 import io.seqware.common.model.SequencerRunStatus;
 import io.seqware.common.model.WorkflowRunStatus;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import net.sourceforge.seqware.common.metadata.Metadata;
 import net.sourceforge.seqware.common.metadata.MetadataFactory;
 import net.sourceforge.seqware.common.model.WorkflowRun;
 import net.sourceforge.seqware.common.module.FileMetadata;
 import net.sourceforge.seqware.common.module.ReturnValue;
+import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -196,12 +201,31 @@ public class SeqwareWebservice implements SeqwareWriteService {
 
     @Override
     public Workflow createWorkflow(String name, String version, String description) {
+        return createWorkflow(name, version, description, Collections.EMPTY_MAP);
+    }
+
+    @Override
+    public Workflow createWorkflow(String name, String version, String description, Map<String, String> defaultParameters) {
 
         checkNotNull(name);
         checkNotNull(version);
         checkNotNull(description);
+        checkNotNull(defaultParameters);
 
-        ReturnValue rv = metadata.addWorkflow(name, version, description, null, null, null, null, false, null, false, null, null, null, null);
+        Properties p = new Properties();
+        p.putAll(defaultParameters);
+
+        File defaultParametersFile = null;
+        try {
+            defaultParametersFile = File.createTempFile("defaults", ".ini");
+            p.store(FileUtils.openOutputStream(defaultParametersFile), "");
+        } catch (IOException ioe) {
+            throw new RuntimeException(ioe);
+        }
+
+        ReturnValue rv = metadata.addWorkflow(name, version, description,
+                null, defaultParametersFile.getAbsolutePath(), 
+                "", "/tmp", true, null, false, "/tmp", "java", "Oozie", "1.x");
 
         //TODO: rv.getReturnValue() does not equal "SUCCESS"
         if (rv == null || rv.getAttribute("sw_accession") == null) {
@@ -212,6 +236,10 @@ public class SeqwareWebservice implements SeqwareWriteService {
         b.setName(name);
         b.setVersion(version);
         b.setSwid(rv.getAttribute("sw_accession"));
+//        Workflow w = b.build();
+
+//        net.sourceforge.seqware.common.model.Workflow wf = metadata.getWorkflow(Integer.parseInt(w.getSwid()));
+//        wf.setWorkflowParams(null);
         return b.build();
     }
 
