@@ -15,6 +15,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <seqware-client-version>1.1.0-beta.0</seqware-client-version>
+        <seqwareWar>${com.github.seqware:seqware-webservice:war}</seqwareWar>
+        <skipITs>true</skipITs>
     </properties>
 
     <build>
@@ -36,6 +38,49 @@
                 <configuration>
                     <encoding>UTF-8</encoding>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.9</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>properties</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.18.1</version>
+                <configuration>
+                    <skip>${skipITs}</skip>
+                    <systemPropertyVariables>
+                        <dbHost>${dbHost}</dbHost>
+                        <dbPort>${dbPort}</dbPort>
+                        <dbUser>${dbUser}</dbUser>
+                        <dbPass>${dbPass}</dbPass>
+                        <seqwareWar>${seqwareWar}</seqwareWar>
+                    </systemPropertyVariables>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>integration test</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                        <phase>integration-test</phase>
+                    </execution>
+                    <execution>
+                        <id>verify</id>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                        <phase>verify</phase>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -71,6 +116,19 @@
             <groupId>com.github.seqware</groupId>
             <artifactId>seqware-pipeline</artifactId>
             <version>${seqware-client-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ca.on.oicr.pde</groupId>
+            <artifactId>common-utilities</artifactId>
+            <version>1.6-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-distribution</artifactId>
+            <version>${seqware-client-version}</version>
+            <classifier>full</classifier>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
