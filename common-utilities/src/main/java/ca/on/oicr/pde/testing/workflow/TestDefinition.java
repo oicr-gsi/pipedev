@@ -45,6 +45,7 @@ public class TestDefinition {
         private String metricsCalculateScript = "";
         private String metricsCompareScript = "";
         private String iniDirectory = "";
+        private int iterations = 1;
         private Map<String, String> parameters = new LinkedHashMap<>();
         private Map<String, String> enviromentVariables = new LinkedHashMap<>();
 
@@ -63,13 +64,13 @@ public class TestDefinition {
         }
 
         //@JsonProperty("defaultMetricsCalculateScript, metrics_calculate")
-                @JsonProperty("metrics_calculate")
+        @JsonProperty("metrics_calculate")
         public void setMetricsCalculateScript(String metricsCalculateScript) {
             this.metricsCalculateScript = metricsCalculateScript;
         }
 
         //@JsonProperty("defaultMetricsCompareScript, metrics_compare")
-                @JsonProperty("metrics_compare")
+        @JsonProperty("metrics_compare")
         public void setMetricsCompareScript(String metricsCompareScript) {
             this.metricsCompareScript = metricsCompareScript;
         }
@@ -77,6 +78,11 @@ public class TestDefinition {
         @JsonProperty("input_config_dir")
         public void setIniDirectory(String iniDirectory) {
             this.iniDirectory = iniDirectory;
+        }
+
+        @JsonProperty("iterations")
+        public void setIterations(int iterations) {
+            this.iterations = iterations;
         }
 
         @JsonProperty("parameters")
@@ -106,6 +112,7 @@ public class TestDefinition {
         private String metricsCalculateScript = defaults.metricsCalculateScript;
         private String metricsCompareScript = defaults.metricsCompareScript;
         private String iniDirectoryPath = defaults.iniDirectory;
+        private int iterations = defaults.iterations;
         private String iniFilePath = "";
         private Map<String, String> parameters;
         private Map<String, String> environmentVariables;
@@ -185,6 +192,15 @@ public class TestDefinition {
         @JsonProperty("input_config_dir")
         public void setIniDirectory(String iniDirectoryPath) {
             this.iniDirectoryPath = iniDirectoryPath;
+        }
+
+        public int getIterations() {
+            return iterations;
+        }
+
+        @JsonProperty("iterations")
+        public void setIterations(int iterations) {
+            this.iterations = iterations;
         }
 
         public Map<String, String> getParameters() {

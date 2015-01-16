@@ -62,37 +62,34 @@ public class WorkflowRunTestFactory {
         tests = new ArrayList();
         int count = 0;
         for (TestDefinition.Test t : td.getTests()) {
+            for (int i = 0; i < t.getIterations(); i++) {
+                String testName = "WorkflowRunTest_" + (count++) + "_" + workflowName + "-" + workflowVersion;
+                String prefix = new SimpleDateFormat("yyMMdd_HHmm").format(new Date());
+                String testId = UUID.randomUUID().toString().substring(0, 7);
+                File testWorkingDir = generateTestWorkingDirectory(workingDirectory, prefix, testName, testId);
+                File seqwareSettings = generateSeqwareSettings(testWorkingDir, seqwareWebserviceUrl, schedulingSystem, schedulingHost);
 
-            String testName = "WorkflowRunTest_" + (count++) + "_" + workflowName + "-" + workflowVersion;
-            String prefix = new SimpleDateFormat("yyMMdd_HHmm").format(new Date());
-            String testId = UUID.randomUUID().toString().substring(0, 7);
-            File testWorkingDir = generateTestWorkingDirectory(workingDirectory, prefix, testName, testId);
-            File seqwareSettings = generateSeqwareSettings(testWorkingDir, seqwareWebserviceUrl, schedulingSystem, schedulingHost);
                 Path scriptDirectory = Files.createDirectory(Paths.get(testWorkingDir.getAbsolutePath()).resolve("scripts"));
                 File calculateMetricsScript = getScriptFromResource(t.getMetricsCalculateScript(), scriptDirectory);
                 File compareMetricsScript = getScriptFromResource(t.getMetricsCompareScript(), scriptDirectory);
 
+                List<File> iniFiles = new ArrayList<>();
 
-            List<File> iniFiles = new ArrayList<>();
-            
-            //Add a blank ini file to list (need at least one ini file for seqware command line)
-            iniFiles.add(File.createTempFile("blank", "ini"));
+                //Add a blank ini file to list (need at least one ini file for seqware command line)
+                iniFiles.add(File.createTempFile("blank", "ini"));
 
-            //Add user specified ini file if it is accessible
-            if (t.getIniFile() != null) {
-                iniFiles.add(t.getIniFile());
-            }
+                //Add user specified ini file if it is accessible
+                if (t.getIniFile() != null) {
+                    iniFiles.add(t.getIniFile());
+                }
 
-            if ("oozie".equals(schedulingSystem)) {
-                tests.add(new OozieWorkflowRunTest(seqwareDistribution, seqwareSettings, testWorkingDir, testName,
-                        workflowBundlePath, workflowName, workflowVersion, workflowBundleBinPath, iniFiles, t.getMetricsFile(),
-                        calculateMetricsScript, compareMetricsScript, t.getEnvironmentVariables(), t.getParameters()));
-            } else if ("pegasus".equals(schedulingSystem)) {
-                tests.add(new WorkflowRunTest(seqwareDistribution, seqwareSettings, testWorkingDir, testName,
-                        workflowBundlePath, workflowName, workflowVersion, workflowBundleBinPath, iniFiles, t.getMetricsFile(),
-                        calculateMetricsScript, compareMetricsScript, t.getEnvironmentVariables(), t.getParameters()));
-            } else {
-                throw new RuntimeException("Unsupported schedulingSystem type.");
+                if ("oozie".equals(schedulingSystem)) {
+                    tests.add(new OozieWorkflowRunTest(seqwareDistribution, seqwareSettings, testWorkingDir, testName,
+                            workflowBundlePath, workflowName, workflowVersion, workflowBundleBinPath, iniFiles, t.getMetricsFile(),
+                            calculateMetricsScript, compareMetricsScript, t.getEnvironmentVariables(), t.getParameters()));
+                } else {
+                    throw new RuntimeException("Unsupported schedulingSystem type.");
+                }
             }
         }
 
