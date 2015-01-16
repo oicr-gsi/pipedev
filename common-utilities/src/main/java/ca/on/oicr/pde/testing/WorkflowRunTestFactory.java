@@ -10,6 +10,9 @@ import static ca.on.oicr.pde.utilities.Helpers.getRequiredSystemPropertyAsString
 import static ca.on.oicr.pde.utilities.Helpers.getScriptFromResource;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -65,9 +68,10 @@ public class WorkflowRunTestFactory {
             String testId = UUID.randomUUID().toString().substring(0, 7);
             File testWorkingDir = generateTestWorkingDirectory(workingDirectory, prefix, testName, testId);
             File seqwareSettings = generateSeqwareSettings(testWorkingDir, seqwareWebserviceUrl, schedulingSystem, schedulingHost);
+                Path scriptDirectory = Files.createDirectory(Paths.get(testWorkingDir.getAbsolutePath()).resolve("scripts"));
+                File calculateMetricsScript = getScriptFromResource(t.getMetricsCalculateScript(), scriptDirectory);
+                File compareMetricsScript = getScriptFromResource(t.getMetricsCompareScript(), scriptDirectory);
 
-            File calculateMetricsScript = getScriptFromResource(t.getMetricsCalculateScript());
-            File compareMetricsScript = getScriptFromResource(t.getMetricsCompareScript());
 
             List<File> iniFiles = new ArrayList<>();
             
