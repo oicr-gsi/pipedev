@@ -136,7 +136,7 @@ public class TestCaseReporter implements IReporter {
                                 (tr.getEndMillis() - tr.getStartMillis()) / 1000D, TestNGStatuses.valueOf(tr.getStatus())));
 
                         //If there was an error for the test case, print the output
-                        if (!tr.isSuccess()) {
+                        if (!tr.isSuccess() && tr.getStatus() != TestNGStatuses.SKIP.statusCode) {
                             String errorMessage = null;
                             if (tr.getThrowable() != null) {
                                 errorMessage = tr.getThrowable().getMessage();

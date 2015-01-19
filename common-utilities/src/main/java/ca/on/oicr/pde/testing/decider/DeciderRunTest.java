@@ -209,9 +209,6 @@ public class DeciderRunTest extends RunTestBase {
 
         Assert.assertNotNull(expected, "There is no expected output to compare to");
 
-        List<String> problems = validateReport(actual);
-        Assert.assertTrue(problems.isEmpty(), problems.toString());
-
         if (!actual.equals(expected)) {
             StringBuilder sb = new StringBuilder();
             sb.append("There are differences between decider runs:\n");
@@ -232,16 +229,6 @@ public class DeciderRunTest extends RunTestBase {
         }
 
         log.printf(Level.INFO, "[%s] Completed comparing workflow run reports in %s", testName, timer.stop());
-    }
-
-    private List<String> validateReport(DeciderRunTestReport t) {
-        List<String> problems = new ArrayList<>();
-
-        if (t.getWorkflowRunCount().equals(Integer.valueOf("0"))) {
-            problems.add("No workflow run were scheduled.");
-        }
-
-        return problems;
     }
     
 }

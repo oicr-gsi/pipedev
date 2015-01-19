@@ -40,32 +40,27 @@
         <dependency>
             <groupId>com.github.seqware</groupId>
             <artifactId>seqware-pipeline</artifactId>
-            <version>[${seqware-version}]</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.seqware</groupId>
             <artifactId>seqware-common</artifactId>
-            <version>[${seqware-version}]</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>ca.on.oicr.pde</groupId>
             <artifactId>workflow-utilities</artifactId>
-            <version>1.6-SNAPSHOT</version>
         </dependency>
         
         <!-- test dependencies -->
         <dependency>
             <groupId>ca.on.oicr.pde</groupId>
             <artifactId>common-utilities</artifactId>
-            <version>1.6-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.8.8</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -204,11 +199,12 @@
                             <goal>copy</goal>
                         </goals>
                         <configuration>
+                            <stripVersion>false</stripVersion>
+                            <useBaseVersion>true</useBaseVersion>
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>com.github.seqware</groupId>
                                     <artifactId>seqware-distribution</artifactId>
-                                    <version>${seqware-version}</version>
                                     <classifier>full</classifier>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${bundleDirectory}/lib</outputDirectory>

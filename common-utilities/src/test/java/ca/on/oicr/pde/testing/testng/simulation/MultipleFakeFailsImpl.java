@@ -39,23 +39,27 @@ public class MultipleFakeFailsImpl {
         }
 
         @Test(groups = {"level1"})
-        public void successlTestLevel1_1() {
+        public void successTestLevel1_1() throws InterruptedException {
+            Thread.sleep(100L);
             Assert.assertTrue(true);
         }
 
         @Test(groups = {"level2"}, dependsOnGroups = "level1")
-        public void successTestLevel2_1() {
+        public void successTestLevel2_1() throws InterruptedException {
+            Thread.sleep(100L);
             Assert.assertTrue(true);
         }
 
         @Test(groups = {"level3"}, dependsOnGroups = "level2")
-        public void failureTestLevel3_1() {
+        public void failureTestLevel3_1() throws InterruptedException {
+            Thread.sleep(100L);
             Assert.assertTrue(false, "There was a fake failure.\nExtra information regarding the failure.");
         }
 
         //should be skipped
         @Test(groups = {"level4"}, dependsOnGroups = "level3")
-        public void successTestLevel4_1() {
+        public void successTestLevel4_1() throws InterruptedException {
+            Thread.sleep(100L);
             Assert.assertTrue(true);
         }
 
