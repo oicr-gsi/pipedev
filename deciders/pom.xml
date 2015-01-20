@@ -3,6 +3,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>ca.on.oicr.pde.config</groupId>
+        <artifactId>common</artifactId>
+        <version>2014.3.0-SNAPSHOT</version>
+    </parent>
+
     <groupId>ca.on.oicr.pde</groupId>
     <artifactId>decider-utilities</artifactId>
     <version>1.6-SNAPSHOT</version>
@@ -14,7 +20,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <seqware-client-version>1.1.0-beta.0</seqware-client-version>
         <seqwareWar>${com.github.seqware:seqware-webservice:war}</seqwareWar>
         <skipITs>true</skipITs>
     </properties>
@@ -25,7 +30,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
@@ -34,7 +38,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.7</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
                 </configuration>
@@ -85,7 +88,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>2.3</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -98,7 +100,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9.1</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -115,7 +116,6 @@
         <dependency>
             <groupId>com.github.seqware</groupId>
             <artifactId>seqware-pipeline</artifactId>
-            <version>${seqware-client-version}</version>
         </dependency>
         <dependency>
             <groupId>ca.on.oicr.pde</groupId>
@@ -133,7 +133,6 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.8.8</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
