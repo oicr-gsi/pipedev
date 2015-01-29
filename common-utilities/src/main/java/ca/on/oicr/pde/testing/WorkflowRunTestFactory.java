@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Parameters;
 
@@ -83,9 +84,18 @@ public class WorkflowRunTestFactory {
                     iniFiles.add(t.getIniFile());
                 }
 
+                String actualOutputFileName = "";
+                if(StringUtils.isNotBlank(t.getId())){
+                    actualOutputFileName = StringUtils.trim(t.getId()) +".metrics";
+                } else if(t.getIniFile() != null && StringUtils.isNotBlank(t.getIniFile().getName())) {
+                     actualOutputFileName = t.getIniFile().getName() + ".metrics";
+                } else {
+                    throw new RuntimeException();
+                }
+
                 if ("oozie".equals(schedulingSystem)) {
                     tests.add(new OozieWorkflowRunTest(seqwareDistribution, seqwareSettings, testWorkingDir, testName,
-                            workflowBundlePath, workflowName, workflowVersion, workflowBundleBinPath, iniFiles, t.getMetricsFile(),
+                            workflowBundlePath, workflowName, workflowVersion, workflowBundleBinPath, iniFiles, actualOutputFileName, t.getMetricsFile(),
                             calculateMetricsScript, compareMetricsScript, t.getEnvironmentVariables(), t.getParameters()));
                 } else {
                     throw new RuntimeException("Unsupported schedulingSystem type.");

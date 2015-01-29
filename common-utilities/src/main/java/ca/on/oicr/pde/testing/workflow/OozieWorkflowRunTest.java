@@ -22,11 +22,11 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
 
     public OozieWorkflowRunTest(File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName,
             File workflowBundlePath, String workflowName, String workflowVersion, File workflowBundleBinPath,
-            List<File> workflowInis, File expectedOutput, File calculateMetricsScript, File compareMetricsScript,
+            List<File> workflowInis, String actualOutputFileName, File expectedOutput, File calculateMetricsScript, File compareMetricsScript,
             Map<String, String> environmentVariables, Map<String,String> parameters) throws IOException {
 
         super(seqwareDistribution, seqwareSettings, workingDirectory, testName, workflowBundlePath, workflowName, workflowVersion, workflowBundleBinPath,
-                workflowInis, expectedOutput, calculateMetricsScript, compareMetricsScript, environmentVariables, parameters);
+                workflowInis, actualOutputFileName, expectedOutput, calculateMetricsScript, compareMetricsScript, environmentVariables, parameters);
 
     }
 
