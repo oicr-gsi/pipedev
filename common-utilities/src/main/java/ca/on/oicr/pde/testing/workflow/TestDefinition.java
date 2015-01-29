@@ -224,21 +224,22 @@ public class TestDefinition {
         @JsonIgnore
         public File getIniFile() {
             File iniFile = null;
-            if (isFileAccessible(iniFilePath)) {
+            if ("".equals(iniFilePath)) {
+                //"input_config" is not set, assuming the workflow parameters are set in the "parameters" field
+                return null;
+            } else if (isFileAccessible(iniFilePath)) {
                 iniFile = new File(iniFilePath);
             } else if (isFileAccessible(iniDirectoryPath + "/" + iniFilePath)) {
                 iniFile = new File(iniDirectoryPath + "/" + iniFilePath);
             } else {
-                //there is no valid file path to the ini
-                iniFile = null;
+                //"input_config" is set but the ini file is not accessible
+                throw new RuntimeException(String.format("The ini file [%s] is not accessible", iniFilePath));
             }
             return iniFile;
         }
 
         @JsonIgnore
         public File getMetricsFile() {
-
-            //String outputMetrics = test.get("output_metrics") == null ? inputConfig + ".metrics" : test.get("output_metrics").getTextValue();
             File metricsFile = null;
             if (isFileAccessible(metricsFilePath)) {
                 metricsFile = new File(metricsFilePath);

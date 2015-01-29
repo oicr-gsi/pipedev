@@ -13,6 +13,7 @@ import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.springframework.mock.jndi.SimpleNamingContextBuilder;
+import static com.google.common.base.Preconditions.*;
 
 /**
  *
@@ -38,6 +39,8 @@ public class SeqwareTestWebservice {
 
     public SeqwareTestWebservice(String dbHost, int dbPort, String dbUser, String dbPassword, String dbName, File seqwareWar) throws SQLException,
             InterruptedException, ServletException, MalformedURLException, IllegalStateException, NamingException, IOException, ConfigurationException {
+        
+        checkArgument(seqwareWar.exists());
 
         PoolProperties p = new PoolProperties();
         p.setDriverClassName("org.postgresql.Driver");
