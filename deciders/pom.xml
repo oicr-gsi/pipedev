@@ -120,13 +120,11 @@
         <dependency>
             <groupId>ca.on.oicr.pde</groupId>
             <artifactId>common-utilities</artifactId>
-            <version>1.6-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.github.seqware</groupId>
             <artifactId>seqware-distribution</artifactId>
-            <version>${seqware-client-version}</version>
             <classifier>full</classifier>
             <scope>test</scope>
         </dependency>
