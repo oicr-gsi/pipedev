@@ -246,7 +246,7 @@ public class DeciderRunTestReport {
     public static DeciderRunTestReport generateReport(SeqwareReadService srs, Workflow workflow, Collection<String> iniExclusions,
             Map<String, String> iniSubstitutions) {
         List<WorkflowRunReportRecord> wrrs = srs.getWorkflowRunRecords(workflow);
-
+        
         DeciderRunTestReport t = new DeciderRunTestReport();
         t.setWorkflowRunCount(wrrs.size());
 

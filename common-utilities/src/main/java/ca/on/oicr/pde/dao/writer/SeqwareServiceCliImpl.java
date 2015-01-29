@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -187,6 +188,11 @@ public class SeqwareServiceCliImpl implements SeqwareWriteService {
         w.setSwid(callPrivateSeqwareCliMethod("createWorkflow", params));
 
         return w.build();
+    }
+
+    @Override
+    public Workflow createWorkflow(String name, String version, String description, Map<String, String> defaultParameters) {
+        throw new UnsupportedOperationException("The seqware cli does not support default parameters.");
     }
 
     @Override
