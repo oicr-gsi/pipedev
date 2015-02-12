@@ -123,7 +123,7 @@ public class WorkflowRunTest extends RunTestBase {
     @Test(dependsOnGroups = "execution", dependsOnMethods = "checkWorkflowOutputExists", groups = "postExecution")
     public void calculateOutputMetrics() throws IOException {
 
-        Assert.assertTrue(!actualOutput.exists() && actualOutput.isFile(),
+        Assert.assertTrue(!actualOutput.exists(),
                 String.format("The actual output metrics file [%s] already exists", actualOutput));
 
         StringBuilder command = new StringBuilder();
