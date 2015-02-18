@@ -14,6 +14,8 @@ import net.sourceforge.seqware.pipeline.workflowV2.model.SqwFile;
  * @author mtaschuk
  */
 public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
+    
+    private final Random random = new Random(System.nanoTime());
 
     /**
      * A workflow model ReturnValue that can be used to track the errors and state during workflow model construction. See the <b>Module
@@ -69,7 +71,6 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
      */
     protected SqwFile[] provisionInputFiles(String identifier) {
         String[] files = getInputFiles(identifier);
-        Random random = new Random(System.currentTimeMillis());
         int start = random.nextInt(10000);
         SqwFile[] pFiles = new SqwFile[files.length];
         for (int i = 0; i < files.length; i++) {
