@@ -1,6 +1,5 @@
 package ca.on.oicr.pde.utilities.workflows;
 
-import java.io.File;
 import java.util.*;
 import net.sourceforge.seqware.common.module.ReturnValue;
 import net.sourceforge.seqware.common.util.Log;
@@ -81,7 +80,7 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
         }
         return pFiles;
     }
-
+    
     /**
      * Retrieves the value of a property from the INI file. Implemented in OicrWorkflow to catch any Exceptions thrown, set the ReturnValue
      * to ReturnValue.INVALIDPARAMETERS, and print the stacktrace.
@@ -260,5 +259,18 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
         }
 
         return file;
+    }
+    
+    /**
+     * Verifies that the workflow data model object was built correctly.
+     * {@inheritDoc}
+     *
+     * @throws RuntimeException When the workflow data model object's {@link OicrWorkflow#ret} is not "SUCCESS".
+     */
+    @Override
+    public void wrapup() {
+        if (ret.getExitStatus() != ReturnValue.SUCCESS) {
+            throw new RuntimeException("The were errors building the workflow data model object. Final return value is [" + ret.getExitStatus() + "].");
+        }
     }
 }
