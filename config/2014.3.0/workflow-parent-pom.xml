@@ -20,11 +20,18 @@
     <properties>
         <jre-version>1.7.0_51</jre-version>
         
-        <display-name>workflow_${project.artifactId}</display-name>
+        <display-name>workflow_${workflow-name}</display-name>
         
         <skipITs>true</skipITs>
         <skipRunITs>true</skipRunITs>
         <skipBundleTest>true</skipBundleTest>
+        
+        <!-- workflow zip bundle settings -->
+        <skipZipBundle>true</skipZipBundle>
+        <finalBundleDirectory>${project.build.directory}</finalBundleDirectory>
+        
+        <!--legacy-property-->
+        <workflow-directory-name>${workflow-name}</workflow-directory-name>
         
         <!-- default testng test suite -->
         <testSuite>src/test/resources/development.xml</testSuite>
@@ -33,7 +40,7 @@
         <schedulingSystem>oozie</schedulingSystem>
         <seqwareDistribution>${bundleDirectory}/lib/seqware-distribution-${seqware-version}-full.jar</seqwareDistribution>
         <workingDirectory>${user.home}/_testing/</workingDirectory>
-        <bundleDirectory>${project.build.directory}/Workflow_Bundle_${workflow-directory-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-directory-name}/${project.version}</bundleDirectory>
+        <bundleDirectory>${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-name}/${project.version}</bundleDirectory>
     </properties>
     
     <dependencies>
@@ -341,8 +348,8 @@
                         <bundledJava>${bundleDirectory}/bin/jre1.7.0_40/bin/java</bundledJava>
                         <bundleDirectory>${bundleDirectory}</bundleDirectory>
                         <bundledBinPath>${bundleDirectory}/bin/</bundledBinPath>
-                        <bundledWorkflow>${project.build.directory}/Workflow_Bundle_${workflow-directory-name}_${project.version}_SeqWare_${seqware-version}/</bundledWorkflow>
-                        <workflowName>${workflow-directory-name}</workflowName>
+                        <bundledWorkflow>${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/</bundledWorkflow>
+                        <workflowName>${workflow-name}</workflowName>
                         <workflowVersion>${project.version}</workflowVersion>
                         
                         <!-- required to create seqware settings -->
@@ -418,7 +425,19 @@
                         <configuration>
                             <skip>${skipBundleTest}</skip>
                             <executable>${bundleDirectory}/bin/jre${jre-version}/bin/java</executable>
-                            <commandlineArgs>-jar ${project.build.directory}/Workflow_Bundle_${project.artifactId}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-directory-name}/${project.version}/lib/seqware-distribution-${seqware-version}-full.jar --plugin net.sourceforge.seqware.pipeline.plugins.BundleManager -- -t -b ${project.build.directory}/Workflow_Bundle_${project.artifactId}_${project.version}_SeqWare_${seqware-version}/ </commandlineArgs>
+                            <commandlineArgs>-jar ${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-name}/${project.version}/lib/seqware-distribution-${seqware-version}-full.jar --plugin net.sourceforge.seqware.pipeline.plugins.BundleManager -- -t -b ${project.build.directory}/Workflow_Bundle_${project.artifactId}_${project.version}_SeqWare_${seqware-version}/ </commandlineArgs>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>zip bundle</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${skipZipBundle}</skip>
+                            <executable>${bundleDirectory}/bin/jre${jre-version}/bin/java</executable>
+                            <commandlineArgs>-jar ${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-name}/${project.version}/lib/seqware-distribution-${seqware-version}-full.jar --plugin net.sourceforge.seqware.pipeline.plugins.BundleManager -- --bundle ${finalBundleDirectory} --path-to-package ${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/</commandlineArgs>
                         </configuration>
                     </execution>
                 </executions>
@@ -450,7 +469,7 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
-                            <Workflow-Bundle-Path>${project.build.directory}/Workflow_Bundle_${workflow-directory-name}_${project.version}_SeqWare_${seqware-version}</Workflow-Bundle-Path>
+                            <Workflow-Bundle-Path>${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}</Workflow-Bundle-Path>
                         </manifestEntries>
                     </archive>
                 </configuration>
