@@ -44,8 +44,10 @@ public class PDEPluginRunner {
     }
 
     public ReturnValue runPlugin(String[] args) {
+
         //get options
         OptionSet options = parser.parse(args);
+
         //get plugin
         String pluginName = (String) options.valueOf("plugin");
         PluginInterface plugin;
@@ -54,34 +56,50 @@ public class PDEPluginRunner {
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException cnfe) {
             throw new RuntimeException(cnfe);
         }
+
         //args after "--"
         plugin.setParams(options.valuesOf(nonOptionSpec));
+
         //seqware settings
         plugin.setConfig(config);
+
         //metadata connection
         plugin.setMetadata(meta);
+
         //execute the plugin
         ReturnValue parseRv = plugin.parse_parameters();
-        if (parseRv.getReturnValue() != ReturnValue.SUCCESS) {
-            throw new RuntimeException(pluginName + " parse parameters failed");
+        if (!Arrays.asList(ReturnValue.SUCCESS).contains(parseRv.getExitStatus())) {
+            throw new PluginRunException(pluginName + " parse_parameters failed with exit code = " + parseRv.getExitStatus());
         }
+
         ReturnValue initRv = plugin.init();
-        if (initRv.getReturnValue() != ReturnValue.SUCCESS) {
-            throw new RuntimeException(pluginName + " init failed");
+        if (!Arrays.asList(ReturnValue.SUCCESS).contains(initRv.getExitStatus())) {
+            throw new PluginRunException(pluginName + " init failed with exit code = " + initRv.getExitStatus());
         }
+
         ReturnValue testRv = plugin.do_test();
-        if (testRv.getReturnValue() != ReturnValue.SUCCESS) {
-            throw new RuntimeException(pluginName + " do test failed");
+        if (!Arrays.asList(ReturnValue.SUCCESS, ReturnValue.NOTIMPLEMENTED).contains(testRv.getExitStatus())) {
+            throw new PluginRunException(pluginName + " do_test failed with exit code = " + testRv.getExitStatus());
         }
+
         ReturnValue runRv = plugin.do_run();
-        if (parseRv.getReturnValue() != ReturnValue.SUCCESS) {
-            throw new RuntimeException(pluginName + " do run failed");
+        if (!Arrays.asList(ReturnValue.SUCCESS, ReturnValue.QUEUED).contains(runRv.getExitStatus())) {
+            throw new PluginRunException(pluginName + " do_run failed with exit code = " + runRv.getExitStatus());
         }
+
         ReturnValue cleanRv = plugin.clean_up();
-        if (parseRv.getReturnValue() != ReturnValue.SUCCESS) {
-            throw new RuntimeException(pluginName + " clean up failed");
+        if (!Arrays.asList(ReturnValue.SUCCESS, ReturnValue.NOTIMPLEMENTED).contains(cleanRv.getExitStatus())) {
+            throw new PluginRunException(pluginName + " clean_up failed with exit code = " + cleanRv.getExitStatus());
         }
+
         return runRv;
+    }
+
+    public class PluginRunException extends RuntimeException {
+
+        public PluginRunException(String errorMessage) {
+            super(errorMessage);
+        }
     }
 
 }
