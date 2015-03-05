@@ -384,8 +384,9 @@ public class OicrDecider extends BasicDecider {
     
     @Override
     public ReturnValue do_summary(){
+        ReturnValue rv = super.do_summary();
+        
         //decider run failed somewhere, but some how the decider did not terminate - set the exit code to non-zero
-        ReturnValue rv = new ReturnValue();
         if(isFailed){
             rv.setReturnValue(ReturnValue.FAILURE);
         }
