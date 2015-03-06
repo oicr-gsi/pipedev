@@ -26,9 +26,9 @@
         <skipRunITs>true</skipRunITs>
         <skipBundleTest>true</skipBundleTest>
         
-        <!-- workflow zip bundle settings -->
-        <skipZipBundle>true</skipZipBundle>
-        <finalBundleDirectory>${project.build.directory}</finalBundleDirectory>
+        <!-- workflow zip release -->
+        <skipReleasePackage>true</skipReleasePackage>
+        <releaseDirectory>${project.build.directory}</releaseDirectory>
         
         <!--legacy-property-->
         <workflow-directory-name>${workflow-name}</workflow-directory-name>
@@ -435,9 +435,9 @@
                             <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <skip>${skipZipBundle}</skip>
+                            <skip>${skipReleasePackage}</skip>
                             <executable>${bundleDirectory}/bin/jre${jre-version}/bin/java</executable>
-                            <commandlineArgs>-jar ${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-name}/${project.version}/lib/seqware-distribution-${seqware-version}-full.jar --plugin net.sourceforge.seqware.pipeline.plugins.BundleManager -- --bundle ${finalBundleDirectory} --path-to-package ${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/</commandlineArgs>
+                            <commandlineArgs>-jar ${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-name}/${project.version}/lib/seqware-distribution-${seqware-version}-full.jar --plugin net.sourceforge.seqware.pipeline.plugins.BundleManager -- --bundle ${releaseDirectory} --path-to-package ${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/</commandlineArgs>
                         </configuration>
                     </execution>
                 </executions>

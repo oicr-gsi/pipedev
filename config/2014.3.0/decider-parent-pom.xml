@@ -23,6 +23,10 @@
         <skipITs>true</skipITs>
         <skipRunITs>true</skipRunITs>
         
+        <!-- decider jar release -->
+        <skipReleasePackage>true</skipReleasePackage>
+        <releaseDirectory>${project.build.directory}</releaseDirectory>
+        
         <!-- default testng test suite -->
         <testSuite>src/test/resources/development.xml</testSuite>
         
@@ -31,6 +35,8 @@
         <seqwareDistribution>${com.github.seqware:seqware-distribution:jar:full}</seqwareDistribution>
         <workingDirectory>${user.home}/_testing/</workingDirectory>
         <seqwareWar>${com.github.seqware:seqware-webservice:war}</seqwareWar>
+        
+        <final-name>Decider_${project.version}_${project.artifactId}_${workflow-version}_SeqWare_${seqware-version}</final-name>
     </properties>
             
     <dependencies>
@@ -67,7 +73,7 @@
     </dependencies>
     
     <build>
-        <finalName>Decider_${project.version}_${project.artifactId}_${workflow-version}_SeqWare_${seqware-version}</finalName>
+        <finalName>${final-name}</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -267,13 +273,14 @@
                 <executions>
                     <execution>
                         <id>upload-jar</id>
-                        <phase>deploy</phase>
+                        <phase>install</phase>
                         <goals>
-                            <goal>upload</goal>
+                            <goal>upload-single</goal>
                         </goals>
                         <configuration>
+                            <skip>${skipReleasePackage}</skip>
                             <fromFile>${project.build.directory}/${final-name}-jar-with-dependencies.jar</fromFile>
-                            <url>file://${final-jar-location}</url>
+                            <url>file://${releaseDirectory}</url>
                         </configuration>
                     </execution>
                 </executions>
