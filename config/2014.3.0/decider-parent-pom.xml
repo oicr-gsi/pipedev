@@ -23,10 +23,6 @@
         <skipITs>true</skipITs>
         <skipRunITs>true</skipRunITs>
         
-        <!-- decider jar release -->
-        <skipReleasePackage>true</skipReleasePackage>
-        <releaseDirectory>${project.build.directory}</releaseDirectory>
-        
         <!-- default testng test suite -->
         <testSuite>src/test/resources/development.xml</testSuite>
         
@@ -200,6 +196,27 @@
                             <fail>true</fail>
                         </configuration>
                     </execution>
+                    <execution>
+                        <!-- seqware bundle overwrites files by default -->
+                        <id>check-package-does-not-exist</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <phase>deploy</phase>
+                        <configuration>
+                            <rules>
+                                <requireProperty>
+                                    <property>releaseDirectory</property>
+                                    <message>releaseDirectory property is missing</message>
+                                </requireProperty>
+                                <requireFilesDontExist>
+                                    <files>
+                                        <file>${releaseDirectory}/${project.build.finalName}-jar-with-dependencies.jar</file>
+                                    </files>
+                                </requireFilesDontExist>
+                            </rules>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -273,17 +290,24 @@
                 <executions>
                     <execution>
                         <id>upload-jar</id>
-                        <phase>install</phase>
+                        <phase>deploy</phase>
                         <goals>
                             <goal>upload-single</goal>
                         </goals>
                         <configuration>
-                            <skip>${skipReleasePackage}</skip>
+                            <!--<skip>${skipReleasePackage}</skip>-->
                             <fromFile>${project.build.directory}/${final-name}-jar-with-dependencies.jar</fromFile>
                             <url>file://${releaseDirectory}</url>
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
             </plugin>
         </plugins>
     </build>

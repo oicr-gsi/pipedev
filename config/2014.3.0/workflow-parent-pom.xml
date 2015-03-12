@@ -16,7 +16,7 @@
     <version>2014.3.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <url>http://maven.apache.org</url>
-    
+         
     <properties>
         <jre-version>1.7.0_51</jre-version>
         
@@ -25,10 +25,6 @@
         <skipITs>true</skipITs>
         <skipRunITs>true</skipRunITs>
         <skipBundleTest>true</skipBundleTest>
-        
-        <!-- workflow zip release -->
-        <skipReleasePackage>true</skipReleasePackage>
-        <releaseDirectory>${project.build.directory}</releaseDirectory>
         
         <!--legacy-property-->
         <workflow-directory-name>${workflow-name}</workflow-directory-name>
@@ -337,6 +333,27 @@
                             <fail>true</fail>
                         </configuration>
                     </execution>
+                    <execution>
+                        <!-- seqware bundle overwrites files by default -->
+                        <id>check-package-does-not-exist</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <phase>deploy</phase>
+                        <configuration>
+                            <rules>
+                                <requireProperty>
+                                    <property>releaseDirectory</property>
+                                    <message>releaseDirectory property is missing</message>
+                                </requireProperty>
+                                <requireFilesDontExist>
+                                    <files>
+                                        <file>${releaseDirectory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}.zip</file>
+                                    </files>
+                                </requireFilesDontExist>
+                            </rules>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -429,18 +446,24 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>zip bundle</id>
-                        <phase>install</phase>
+                        <id>zip-bundle</id>
+                        <phase>deploy</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <skip>${skipReleasePackage}</skip>
                             <executable>${bundleDirectory}/bin/jre${jre-version}/bin/java</executable>
                             <commandlineArgs>-jar ${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-name}/${project.version}/lib/seqware-distribution-${seqware-version}-full.jar --plugin net.sourceforge.seqware.pipeline.plugins.BundleManager -- --bundle ${releaseDirectory} --path-to-package ${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/</commandlineArgs>
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>com.pyx4j</groupId>
