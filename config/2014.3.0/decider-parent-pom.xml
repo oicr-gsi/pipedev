@@ -159,10 +159,6 @@
                                     <property>dbUser</property>
                                     <message>dbUser property is missing</message>
                                 </requireProperty>
-                                <requireProperty>
-                                    <property>dbPassword</property>
-                                    <message>dbPassword property is missing</message>
-                                </requireProperty>
                             </rules>
                             <fail>true</fail>
                         </configuration>
