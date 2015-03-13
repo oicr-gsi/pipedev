@@ -123,4 +123,117 @@ public class HelpersTest {
         Helpers.getScriptFromResource("helpers/test.txt", Paths.get("/tmp/does_not_exist_" + UUID.randomUUID() + "/"));
     }
 
+    @Test
+    public void getPgpassPasswordValidTest1() throws IOException {
+        String host = "test.host";
+        int port = 99999;
+        String databaseName = "*";
+        String user = "test_user";
+        String password = UUID.randomUUID().toString().replace("-", "");
+
+        String pgpassString = "###pgpass file\n" + host + ":" + port + ":" + databaseName + ":" + user + ":" + password + "\n" + "###pgpassfile";
+
+        File tempDir = Files.createTempDir();
+        tempDir.deleteOnExit();
+        File pgpassFile = new File(tempDir, ".pgpass");
+        pgpassFile.deleteOnExit();
+
+        FileUtils.write(pgpassFile, pgpassString);
+
+        System.setProperty("PGPASSFILE", pgpassFile.getAbsolutePath());
+        String pgpassPassword = Helpers.getPgpassPassword(host, port, user);
+
+        Assert.assertEquals(pgpassPassword, password);
+    }
+
+    @Test
+    public void getPgpassPasswordValidTest2() throws IOException {
+        String host = "test.host";
+        int port = 99999;
+        String databaseName = "*";
+        String user = "test_user";
+        String password = UUID.randomUUID().toString().replace("-", "");
+
+        String pgpassString = "###pgpass file\n" + host + ":" + port + ":" + databaseName + ":" + user + ":" + password + "\n" + "###pgpassfile";
+
+        File tempDir = Files.createTempDir();
+        tempDir.deleteOnExit();
+        File pgpassFile = new File(tempDir, ".pgpass");
+        pgpassFile.deleteOnExit();
+
+        FileUtils.write(pgpassFile, pgpassString);
+
+        System.clearProperty("PGPASSFILE");
+        System.setProperty("user.home", tempDir.getAbsolutePath());
+        String pgpassPassword = Helpers.getPgpassPassword(host, port, user);
+
+        Assert.assertEquals(pgpassPassword, password);
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void getPgpassPasswordInvalidTest1() throws IOException {
+        String host = "test.host";
+        int port = 99999;
+        String databaseName = "*";
+        String user = "test_user";
+        String password = UUID.randomUUID().toString().replace("-", "");
+
+        String pgpassString = "###pgpass file\n" + host + ":" + port + ":" + databaseName + ":" + user + ":" + password + "\n"
+                + host + ":" + port + ":" + databaseName + ":" + user + ":" + password + "_" + "\n" + "###pgpassfile";
+
+        File tempDir = Files.createTempDir();
+        tempDir.deleteOnExit();
+        File pgpassFile = new File(tempDir, ".pgpass");
+        pgpassFile.deleteOnExit();
+
+        FileUtils.write(pgpassFile, pgpassString);
+
+        System.setProperty("PGPASSFILE", pgpassFile.getAbsolutePath());
+        Helpers.getPgpassPassword(host, port, user);
+
+        Assert.fail();
+    }
+
+    @Test
+    public void getPgpassPasswordInvalidTest2() throws IOException {
+        String host = "test.host";
+        int port = 99999;
+        String databaseName = "*";
+        String user = "test_user";
+        String password = UUID.randomUUID().toString().replace("-", "");
+
+        String pgpassString = "###pgpass file\n" + host + "::" + port + ":" + databaseName + ":" + user + ":" + password + "\n" + "###pgpassfile";
+
+        File tempDir = Files.createTempDir();
+        tempDir.deleteOnExit();
+        File pgpassFile = new File(tempDir, ".pgpass");
+        pgpassFile.deleteOnExit();
+
+        FileUtils.write(pgpassFile, pgpassString);
+
+        System.setProperty("PGPASSFILE", pgpassFile.getAbsolutePath());
+        String pgpassPassword = Helpers.getPgpassPassword(host, port, user);
+
+        Assert.assertNull(pgpassPassword);
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void getPgpassPasswordInvalidTest3() throws IOException {
+        System.setProperty("PGPASSFILE", "/tmp/does_not_exist/.pgpass");
+        Helpers.getPgpassPassword("host", 99999, "user");
+
+        Assert.fail();
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void getPgpassPasswordInvalidTest4() throws IOException {
+        System.clearProperty("PGPASSFILE");
+        File tempDir = Files.createTempDir();
+        tempDir.deleteOnExit();
+        System.setProperty("user.home", tempDir.getAbsolutePath());
+        Helpers.getPgpassPassword("host", 99999, "user");
+
+        Assert.fail();
+    }
+
 }
