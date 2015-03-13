@@ -39,13 +39,17 @@ public class TestEnvironment {
         checkNotNull(host);
         checkNotNull(port);
         checkNotNull(user);
-        checkNotNull(password);
         checkNotNull(seqwareWar);
 
         this.keepDatabase = keepDatabase;
 
         try {
-            db = new SeqwareTestDatabase(host, Integer.parseInt(port), user, password);
+            if (password == null || password.isEmpty()) {
+                //get password from pgpass
+                db = new SeqwareTestDatabase(host, Integer.parseInt(port), user);
+            } else {
+                db = new SeqwareTestDatabase(host, Integer.parseInt(port), user, password);
+            }
         } catch (ClassNotFoundException | SQLException | IOException ex) {
             throw new RuntimeException(ex);
         }

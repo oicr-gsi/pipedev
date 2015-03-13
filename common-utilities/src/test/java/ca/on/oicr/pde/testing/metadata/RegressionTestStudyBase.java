@@ -35,7 +35,6 @@ public class RegressionTestStudyBase {
         assertNotNull(dbHost, "Set dbHost (-DdbHost=xxxxxx) to a test postgresql db host name.");
         assertNotNull(dbPort, "Set dbPort (-DdbPort=xxxxxx) to a test postgresql db port.");
         assertNotNull(dbUser, "Set dbUser (-DdbUser=xxxxxx) to a test postgresql db user name.");
-        assertNotNull(dbPassword, "Set dbPassword (-DdbPassword=xxxxxx) to a test postgresql db password.");
 
         String seqwareWarPath = System.getProperty("seqwareWar");
         assertNotNull(seqwareWarPath, "The seqware webservice war is not set.");
