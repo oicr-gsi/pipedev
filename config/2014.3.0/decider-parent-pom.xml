@@ -224,7 +224,7 @@
                         <dbHost>${dbHost}</dbHost>
                         <dbPort>${dbPort}</dbPort>
                         <dbUser>${dbUser}</dbUser>
-                        <dbPass>${dbPass}</dbPass>
+                        <dbPassword>${dbPassword}</dbPassword>
                         <seqwareWar>${seqwareWar}</seqwareWar>
                         <deciderJar>${project.build.directory}/${project.build.finalName}-jar-with-dependencies.jar</deciderJar>
                         <deciderClass>${main-class}</deciderClass>
