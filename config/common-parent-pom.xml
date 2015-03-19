@@ -166,17 +166,17 @@
             <dependency>
                 <groupId>ca.on.oicr.pde</groupId>
                 <artifactId>decider-utilities</artifactId>
-                <version>1.6-SNAPSHOT</version>
+                <version>1.6</version>
             </dependency>
             <dependency>
                 <groupId>ca.on.oicr.pde</groupId>
                 <artifactId>workflow-utilities</artifactId>
-                <version>1.6-SNAPSHOT</version>
+                <version>1.6</version>
             </dependency>
             <dependency>
                 <groupId>ca.on.oicr.pde</groupId>
                 <artifactId>common-utilities</artifactId>
-                <version>1.6-SNAPSHOT</version>
+                <version>1.6</version>
             </dependency>
             
             <dependency>
