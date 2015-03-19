@@ -283,7 +283,7 @@ public class Helpers {
         }
 
         String pgpassPassword = null;
-        Pattern p = Pattern.compile("([A-Za-z0-9_.-]+?):([A-Za-z0-9_.]+?):([A-Za-z0-9_.*]+?):([A-Za-z0-9_.]+?):([A-Za-z0-9_.]+?)");
+        Pattern p = Pattern.compile("^([^\\s:]+?):([^\\s:]+?):([^\\s:]+?):([^\\s:]+?):([^\\s:]+?)$");
         for (String line : FileUtils.readFileToString(pgpassFile).split("\\r?\\n")) {
             Matcher m = p.matcher(line);
             if (m.matches()) {
