@@ -133,10 +133,10 @@ public class OicrDecider extends BasicDecider {
     /**
      * Define an argument for the Decider to use on the command line.
      *
-     * @param command the argument to use. Single letters will use -, and more characters will use --
+     * @param command     the argument to use. Single letters will use -, and more characters will use --
      * @param description the description of the argument to give when giving help
-     * @param required whether or not the argument is required for the decider to function. The presence of this argument is tested in the
-     * {@link #init() init} method, which will throw an exception if the argument is not present.
+     * @param required    whether or not the argument is required for the decider to function. The presence of this argument is tested in the
+     *                    {@link #init() init} method, which will throw an exception if the argument is not present.
      */
     protected final void defineArgument(String command, String description, boolean required) {
         parser.accepts(command, description).withRequiredArg();
@@ -154,6 +154,7 @@ public class OicrDecider extends BasicDecider {
      *
      *
      * @param arg an argument previously defined by 'defineArgument'.
+     *
      * @return the value provided on the command line, or empty string if none provided.
      */
     protected String getArgument(String arg) {
@@ -175,7 +176,7 @@ public class OicrDecider extends BasicDecider {
     @Override
     public ReturnValue init() {
         ReturnValue ret = new ReturnValue();
-        
+
         if (options.has("help")) {
             System.err.println(get_syntax());
             ret.setExitStatus(ReturnValue.RETURNEDHELPMSG);
@@ -269,7 +270,8 @@ public class OicrDecider extends BasicDecider {
      * Helper method that determines if a date string is after a reference date.
      *
      * @param dateString the date to check against a reference date
-     * @param afterDate the reference date
+     * @param afterDate  the reference date
+     *
      * @return true if dateString is after "afterDate", false otherwise
      */
     public boolean isAfterDate(String dateString, Date afterDate) {
@@ -290,6 +292,7 @@ public class OicrDecider extends BasicDecider {
      *
      * @param dateString the date to check against a reference date
      * @param beforeDate the reference date
+     *
      * @return true if dateString is before "beforeDate", false otherwise
      */
     public boolean isBeforeDate(String dateString, Date beforeDate) {
@@ -381,19 +384,19 @@ public class OicrDecider extends BasicDecider {
 
         return run.getIniFile();
     }
-    
+
     @Override
-    public ReturnValue do_summary(){
+    public ReturnValue do_summary() {
         ReturnValue rv = super.do_summary();
-        
+
         //decider run failed somewhere, but some how the decider did not terminate - set the exit code to non-zero
-        if(isFailed){
+        if (isFailed) {
             rv.setReturnValue(ReturnValue.FAILURE);
         }
         return rv;
     }
-    
-    private void setFinalStatusToFailed(){
+
+    private void setFinalStatusToFailed() {
         isFailed = true;
     }
 
@@ -424,8 +427,8 @@ public class OicrDecider extends BasicDecider {
      * Files produced by sequencer runs with the same name. <li> Group.FILE : Files with the same absolute file path </ul>
      *
      *
-     * @param groupBy one of Group.STUDY, Group.EXPERIMENT, Group.DONOR, Group.LIBRARY, Group.BARCODE, Group.LANE, Group.SEQUENCER_RUN,
-     * Group.FILE
+     * @param groupBy      one of Group.STUDY, Group.EXPERIMENT, Group.DONOR, Group.LIBRARY, Group.BARCODE, Group.LANE, Group.SEQUENCER_RUN,
+     *                     Group.FILE
      * @param groupSimilar whether or not to group items with identical names
      */
     public void setGroupBy(Group groupBy, boolean groupSimilar) {
@@ -461,6 +464,7 @@ public class OicrDecider extends BasicDecider {
      * [0-9A-Za-z _-] to their corresponding html code.
      *
      * @param input string to be escaped
+     *
      * @return the input string with special characters escaped
      */
     public String escapeString(String input) {
@@ -501,6 +505,7 @@ public class OicrDecider extends BasicDecider {
      * This method uses the metadata associated with the file, not the filename itself, in order to determine these values.</p>
      *
      * @param inputFiles the list of files from WorkflowRun.getFiles();
+     *
      * @see WorkflowRun#getFiles()
      * @return a String representing the combined filename
      */
@@ -557,6 +562,7 @@ public class OicrDecider extends BasicDecider {
      * mate info is unavailable if no pattern detected).
      *
      * @param filePath file path to identify if mate 1 or 2
+     *
      * @return 1 if mate 1, 2 if mate 2, 0 if not able to find mate value
      */
     public static int idMate(String filePath) {
@@ -577,6 +583,7 @@ public class OicrDecider extends BasicDecider {
      * reads are sensible. If it encounters a problem, it returns the same set you passed in originally along with printing a warning.
      *
      * @param files input files to be sorted
+     *
      * @return sorted array of files
      */
     public FileAttributes[] arrangeFastqs(FileAttributes[] files) {
