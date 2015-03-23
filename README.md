@@ -23,7 +23,7 @@ Build
 To build our utilities, use Maven.
 
 ```bash
-mvn install:install -f utility-modules-pom.xml
+mvn clean install -f utility-modules-pom.xml
 ```
 Afterwards, they will be available in your local Maven repository.
 
