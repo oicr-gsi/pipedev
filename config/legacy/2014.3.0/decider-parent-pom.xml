@@ -31,49 +31,45 @@
         <seqwareDistribution>${com.github.seqware:seqware-distribution:jar:full}</seqwareDistribution>
         <workingDirectory>${user.home}/_testing/</workingDirectory>
         <seqwareWar>${com.github.seqware:seqware-webservice:war}</seqwareWar>
+        
+        <final-name>Decider_${project.version}_${project.artifactId}_${workflow-version}_SeqWare_${seqware-version}</final-name>
     </properties>
             
     <dependencies>
         <dependency>
             <groupId>com.github.seqware</groupId>
             <artifactId>seqware-pipeline</artifactId>
-            <version>${seqware-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-common</artifactId>
         </dependency>
         <dependency>
             <groupId>ca.on.oicr.pde</groupId>
             <artifactId>decider-utilities</artifactId>
-            <version>1.6-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>18.0</version>
         </dependency>
 
         <!-- test dependencies -->
         <dependency>
             <groupId>ca.on.oicr.pde</groupId>
             <artifactId>common-utilities</artifactId>
-            <version>1.6-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.github.seqware</groupId>
             <artifactId>seqware-distribution</artifactId>
-            <version>${seqware-version}</version>
             <classifier>full</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.8.8</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
     
     <build>
-        <finalName>Decider_${project.version}_${project.artifactId}_${workflow-version}_SeqWare_${seqware-version}</finalName>
+        <finalName>${final-name}</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -93,6 +89,13 @@
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                    <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
             <plugin>
@@ -156,10 +159,6 @@
                                     <property>dbUser</property>
                                     <message>dbUser property is missing</message>
                                 </requireProperty>
-                                <requireProperty>
-                                    <property>dbPassword</property>
-                                    <message>dbPassword property is missing</message>
-                                </requireProperty>
                             </rules>
                             <fail>true</fail>
                         </configuration>
@@ -193,6 +192,27 @@
                             <fail>true</fail>
                         </configuration>
                     </execution>
+                    <execution>
+                        <!-- seqware bundle overwrites files by default -->
+                        <id>check-package-does-not-exist</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <phase>deploy</phase>
+                        <configuration>
+                            <rules>
+                                <requireProperty>
+                                    <property>releaseDirectory</property>
+                                    <message>releaseDirectory property is missing</message>
+                                </requireProperty>
+                                <requireFilesDontExist>
+                                    <files>
+                                        <file>${releaseDirectory}/${project.build.finalName}-jar-with-dependencies.jar</file>
+                                    </files>
+                                </requireFilesDontExist>
+                            </rules>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -204,7 +224,7 @@
                         <dbHost>${dbHost}</dbHost>
                         <dbPort>${dbPort}</dbPort>
                         <dbUser>${dbUser}</dbUser>
-                        <dbPass>${dbPass}</dbPass>
+                        <dbPassword>${dbPassword}</dbPassword>
                         <seqwareWar>${seqwareWar}</seqwareWar>
                         <deciderJar>${project.build.directory}/${project.build.finalName}-jar-with-dependencies.jar</deciderJar>
                         <deciderClass>${main-class}</deciderClass>
@@ -251,6 +271,13 @@
                             </properties>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>verify</id>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                        <phase>verify</phase>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -261,14 +288,22 @@
                         <id>upload-jar</id>
                         <phase>deploy</phase>
                         <goals>
-                            <goal>upload</goal>
+                            <goal>upload-single</goal>
                         </goals>
                         <configuration>
+                            <!--<skip>${skipReleasePackage}</skip>-->
                             <fromFile>${project.build.directory}/${final-name}-jar-with-dependencies.jar</fromFile>
-                            <url>file://${final-jar-location}</url>
+                            <url>file://${releaseDirectory}</url>
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
             </plugin>
         </plugins>
     </build>

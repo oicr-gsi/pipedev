@@ -130,7 +130,7 @@ public class DeciderRunTestReportTest {
         expected.setMaxInputFiles(10);
         expected.setMinInputFiles(1);
 
-        List<ReducedFileProvenanceReportRecord> fs = new LinkedList<ReducedFileProvenanceReportRecord>();
+        List<ReducedFileProvenanceReportRecord> fs = new LinkedList<>();
 
         //Simulate files that are part of decider run test workflow run
         for (int i = 0; i < 10; i++) {
@@ -149,7 +149,7 @@ public class DeciderRunTestReportTest {
                     .build());
             fs.add(r);
         }
-        DeciderRunTestReport.WorkflowRunReport expectedWR = new DeciderRunTestReport.WorkflowRunReport();
+        WorkflowRunReport expectedWR = new WorkflowRunReport();
         expectedWR.setWorkflowIni(ImmutableMap.<String, String>builder().put("prop1", "val1").build());
         expectedWR.setFiles(fs);
 
@@ -159,8 +159,8 @@ public class DeciderRunTestReportTest {
         DeciderRunTestReport actual = DeciderRunTestReport.buildFromJson(expected.toJson());
 
         //Shuffle workflow run file list order
-        for (DeciderRunTestReport.WorkflowRunReport w : actual.getWorkflowRuns()) {
-            List<ReducedFileProvenanceReportRecord> rs = new ArrayList<ReducedFileProvenanceReportRecord>(w.getFiles());
+        for (WorkflowRunReport w : actual.getWorkflowRuns()) {
+            List<ReducedFileProvenanceReportRecord> rs = new ArrayList<>(w.getFiles());
             Collections.shuffle(rs);
             w.getFiles().clear();
             w.setFiles(rs);
@@ -274,6 +274,7 @@ public class DeciderRunTestReportTest {
                 + "  \"fileMetaTypes\" : [ ],\n"
                 + "  \"maxInputFiles\" : -2147483648,\n"
                 + "  \"minInputFiles\" : 2147483647,\n"
+                + "  \"totalInputFiles\" : 0,\n"
                 + "  \"workflowRuns\" : [ {\n"
                 + "    \"workflowIni\" : { },\n"
                 + "    \"files\" : [ {\n"
@@ -316,7 +317,7 @@ public class DeciderRunTestReportTest {
 
         List<FileProvenanceReportRecord> fs = FileProvenanceReport.parseFileProvenanceReport(Helpers.getFileFromResource("fileprovenance/valid.tsv"));
 
-        DeciderRunTestReport.WorkflowRunReport wrr = new DeciderRunTestReport.WorkflowRunReport();
+        WorkflowRunReport wrr = new WorkflowRunReport();
         wrr.setFiles(Arrays.asList(new ReducedFileProvenanceReportRecord(fs)));
 
         DeciderRunTestReport t = new DeciderRunTestReport();
@@ -368,10 +369,10 @@ public class DeciderRunTestReportTest {
         FileProvenanceReportRecord f1 = new FileProvenanceReportRecord.Builder(1).setExperimentName("Test1").setFilePath("/tmp/1").setFileSwid("1").build();
         FileProvenanceReportRecord f2 = new FileProvenanceReportRecord.Builder(2).setExperimentName("Test2").setFilePath("/tmp/2").setFileSwid("2").build();
 
-        DeciderRunTestReport.WorkflowRunReport expected = new DeciderRunTestReport.WorkflowRunReport();
+        WorkflowRunReport expected = new WorkflowRunReport();
         expected.setFiles(Arrays.asList(new ReducedFileProvenanceReportRecord(f1), new ReducedFileProvenanceReportRecord(f2)));
 
-        DeciderRunTestReport.WorkflowRunReport actual = new DeciderRunTestReport.WorkflowRunReport();
+        WorkflowRunReport actual = new WorkflowRunReport();
         actual.setFiles(Arrays.asList(new ReducedFileProvenanceReportRecord(f2), new ReducedFileProvenanceReportRecord(f1)));
 
         Assert.assertEquals(actual, expected);

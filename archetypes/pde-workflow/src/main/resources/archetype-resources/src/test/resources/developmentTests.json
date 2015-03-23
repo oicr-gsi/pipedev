@@ -1,0 +1,11 @@
+{
+    "defaults": {
+        "description": "${workflow-name-camel-case} workflow test",
+        "metrics_calculate": "calculate.sh",
+        "metrics_compare": "compare.sh",
+        "input_config_dir": "/.mounts/labs/PDE/data/RegressionTests/${workflow-name-camel-case}/workflow/development/input_config/",
+        "output_metrics_dir": "/.mounts/labs/PDE/data/RegressionTests/${workflow-name-camel-case}/workflow/development/output_expectation/"
+    },
+    "tests": [
+    ]
+}

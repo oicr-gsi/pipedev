@@ -39,38 +39,24 @@ public class TestEnvironment {
         checkNotNull(host);
         checkNotNull(port);
         checkNotNull(user);
-        checkNotNull(password);
         checkNotNull(seqwareWar);
 
         this.keepDatabase = keepDatabase;
 
         try {
-            db = new SeqwareTestDatabase(host, Integer.parseInt(port), user, password);
-        } catch (ClassNotFoundException ex) {
-            throw new RuntimeException(ex);
-        } catch (SQLException ex) {
-            throw new RuntimeException(ex);
-        } catch (IOException ex) {
+            if (password == null || password.isEmpty()) {
+                //get password from pgpass
+                db = new SeqwareTestDatabase(host, Integer.parseInt(port), user);
+            } else {
+                db = new SeqwareTestDatabase(host, Integer.parseInt(port), user, password);
+            }
+        } catch (ClassNotFoundException | SQLException | IOException ex) {
             throw new RuntimeException(ex);
         }
 
         try {
             ws = new SeqwareTestWebservice(db, seqwareWar);
-        } catch (ClassNotFoundException ex) {
-            throw new RuntimeException(ex);
-        } catch (SQLException ex) {
-            throw new RuntimeException(ex);
-        } catch (InterruptedException ex) {
-            throw new RuntimeException(ex);
-        } catch (ServletException ex) {
-            throw new RuntimeException(ex);
-        } catch (IllegalStateException ex) {
-            throw new RuntimeException(ex);
-        } catch (NamingException ex) {
-            throw new RuntimeException(ex);
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        } catch (ConfigurationException ex) {
+        } catch (ClassNotFoundException | SQLException | InterruptedException | ServletException | IllegalStateException | NamingException | IOException | ConfigurationException ex) {
             throw new RuntimeException(ex);
         }
 

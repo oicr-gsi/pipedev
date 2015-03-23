@@ -1,0 +1,11 @@
+{
+    "defaultDescription": "HelloWorld decider test",
+    "defaultMetricsDirectory": "/.mounts/labs/PDE/data/RegressionTests/HelloWorld/decider/development",
+    "defaultParameters": {
+    },
+    "defaultIniExclusions": ["parent-accessions", "workflow_run_accession", "workflow-run-accession",
+        "parent_accessions", "parent_accession", "input_file", "input_files", "workflow_bundle_dir",
+        "output_prefix", "unique_string"],
+    "tests": [
+    ]
+}

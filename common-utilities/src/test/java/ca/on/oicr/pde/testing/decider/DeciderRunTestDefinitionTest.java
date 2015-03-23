@@ -82,7 +82,7 @@ public class DeciderRunTestDefinitionTest {
         }
 
         Map<String, String> expected;
-        expected = new LinkedHashMap<String, String>();
+        expected = new LinkedHashMap<>();
         expected.put("a", "overridden argument");
         expected.put("c", "d");
 
@@ -103,7 +103,7 @@ public class DeciderRunTestDefinitionTest {
         }
 
         Map<String, String> expected;
-        expected = new LinkedHashMap<String, String>();
+        expected = new LinkedHashMap<>();
         expected.put("a", "b");
         expected.put("c", "d");
         expected.put("e", "f");

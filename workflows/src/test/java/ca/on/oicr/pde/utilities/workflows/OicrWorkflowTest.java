@@ -25,7 +25,7 @@ public class OicrWorkflowTest {
 //    }
     @BeforeMethod
     public void setUp() throws Exception {
-        Map<String, String> configs = new HashMap<String, String>();
+        Map<String, String> configs = new HashMap<>();
         //for getProperty
         configs.put("valid", "valid result");
         //for getInputFiles

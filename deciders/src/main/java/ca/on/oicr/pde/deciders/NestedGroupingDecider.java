@@ -103,7 +103,7 @@ public class NestedGroupingDecider extends BasicDecider {
     @Override
     public Map<String, List<ReturnValue>> separateFiles(List<ReturnValue> vals, String groupBy) {
         //get files from study
-        Map<String, List<ReturnValue>> map = new HashMap<String, List<ReturnValue>>();
+        Map<String, List<ReturnValue>> map = new HashMap<>();
 
         //group files according to the designated header (e.g. sample SWID)
         for (ReturnValue r : vals) {
@@ -115,7 +115,7 @@ public class NestedGroupingDecider extends BasicDecider {
 
             List<ReturnValue> vs = map.get(currVal);
             if (vs == null) {
-                vs = new ArrayList<ReturnValue>();
+                vs = new ArrayList<>();
             }
             vs.add(r);
 	    map.put(currVal, vs);
@@ -129,7 +129,7 @@ public class NestedGroupingDecider extends BasicDecider {
     protected Map<String, String> modifyIniFile(String commaSeparatedFilePaths, String commaSeparatedParentAccessions) {
         Log.debug("INI FILE:" + commaSeparatedFilePaths);
 
-	Map<String, String> iniFileMap = new TreeMap<String, String>();
+	Map<String, String> iniFileMap = new TreeMap<>();
         iniFileMap.put("input_files", commaSeparatedFilePaths);
 	iniFileMap.put("output_prefix",this.path);
 	iniFileMap.put("output_dir", this.folder);

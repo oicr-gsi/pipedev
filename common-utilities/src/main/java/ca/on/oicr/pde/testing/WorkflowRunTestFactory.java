@@ -10,12 +10,16 @@ import static ca.on.oicr.pde.utilities.Helpers.getRequiredSystemPropertyAsString
 import static ca.on.oicr.pde.utilities.Helpers.getScriptFromResource;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Parameters;
 
@@ -59,36 +63,43 @@ public class WorkflowRunTestFactory {
         tests = new ArrayList();
         int count = 0;
         for (TestDefinition.Test t : td.getTests()) {
+            for (int i = 0; i < t.getIterations(); i++) {
+                String testName = "WorkflowRunTest_" + (count++) + "_" + workflowName + "-" + workflowVersion;
+                String prefix = new SimpleDateFormat("yyMMdd_HHmm").format(new Date());
+                String testId = UUID.randomUUID().toString().substring(0, 7);
+                File testWorkingDir = generateTestWorkingDirectory(workingDirectory, prefix, testName, testId);
+                File seqwareSettings = generateSeqwareSettings(testWorkingDir, seqwareWebserviceUrl, schedulingSystem, schedulingHost);
 
-            String testName = "WorkflowRunTest_" + (count++) + "_" + workflowName + "-" + workflowVersion;
-            String prefix = new SimpleDateFormat("yyMMdd_HHmm").format(new Date());
-            String testId = UUID.randomUUID().toString().substring(0, 7);
-            File testWorkingDir = generateTestWorkingDirectory(workingDirectory, prefix, testName, testId);
-            File seqwareSettings = generateSeqwareSettings(testWorkingDir, seqwareWebserviceUrl, schedulingSystem, schedulingHost);
+                Path scriptDirectory = Files.createDirectory(Paths.get(testWorkingDir.getAbsolutePath()).resolve("scripts"));
+                File calculateMetricsScript = getScriptFromResource(t.getMetricsCalculateScript(), scriptDirectory);
+                File compareMetricsScript = getScriptFromResource(t.getMetricsCompareScript(), scriptDirectory);
 
-            File calculateMetricsScript = getScriptFromResource(t.getMetricsCalculateScript());
-            File compareMetricsScript = getScriptFromResource(t.getMetricsCompareScript());
+                List<File> iniFiles = new ArrayList<>();
 
-            List<File> iniFiles = new ArrayList<File>();
-            
-            //Add a blank ini file to list (need at least one ini file for seqware command line)
-            iniFiles.add(File.createTempFile("blank", "ini"));
+                //Add a blank ini file to list (need at least one ini file for seqware command line)
+                iniFiles.add(File.createTempFile("blank", "ini"));
 
-            //Add user specified ini file if it is accessible
-            if (t.getIniFile() != null) {
-                iniFiles.add(t.getIniFile());
-            }
+                //Add user specified ini file if it is accessible
+                if (t.getIniFile() != null) {
+                    iniFiles.add(t.getIniFile());
+                }
 
-            if ("oozie".equals(schedulingSystem)) {
-                tests.add(new OozieWorkflowRunTest(seqwareDistribution, seqwareSettings, testWorkingDir, testName,
-                        workflowBundlePath, workflowName, workflowVersion, workflowBundleBinPath, iniFiles, t.getMetricsFile(),
-                        calculateMetricsScript, compareMetricsScript, t.getEnvironmentVariables(), t.getParameters()));
-            } else if ("pegasus".equals(schedulingSystem)) {
-                tests.add(new WorkflowRunTest(seqwareDistribution, seqwareSettings, testWorkingDir, testName,
-                        workflowBundlePath, workflowName, workflowVersion, workflowBundleBinPath, iniFiles, t.getMetricsFile(),
-                        calculateMetricsScript, compareMetricsScript, t.getEnvironmentVariables(), t.getParameters()));
-            } else {
-                throw new RuntimeException("Unsupported schedulingSystem type.");
+                String actualOutputFileName = "";
+                if(StringUtils.isNotBlank(t.getId())){
+                    actualOutputFileName = StringUtils.trim(t.getId()) +".metrics";
+                } else if(t.getIniFile() != null && StringUtils.isNotBlank(t.getIniFile().getName())) {
+                     actualOutputFileName = t.getIniFile().getName() + ".metrics";
+                } else {
+                    throw new RuntimeException();
+                }
+
+                if ("oozie".equals(schedulingSystem)) {
+                    tests.add(new OozieWorkflowRunTest(seqwareDistribution, seqwareSettings, testWorkingDir, testName,
+                            workflowBundlePath, workflowName, workflowVersion, workflowBundleBinPath, iniFiles, actualOutputFileName, t.getMetricsFile(),
+                            calculateMetricsScript, compareMetricsScript, t.getEnvironmentVariables(), t.getParameters()));
+                } else {
+                    throw new RuntimeException("Unsupported schedulingSystem type.");
+                }
             }
         }
 

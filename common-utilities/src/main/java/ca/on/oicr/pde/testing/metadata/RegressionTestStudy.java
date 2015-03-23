@@ -29,7 +29,7 @@ public class RegressionTestStudy {
         te = new TestEnvironment(host, port, user, password, seqwareWar);
         SeqwareWriteService writeService = te.getWriteService();
 
-        objects = new HashMap<String, SeqwareObject>();
+        objects = new HashMap<>();
 
         Study study = writeService.createStudy("111", "OICR", "PDE_TEST", null, "11", "PDE_TEST");
         Experiment experiment = writeService.createExperiment(null, "20", study, "PDE_ILLUMINA");
@@ -158,8 +158,8 @@ public class RegressionTestStudy {
         lane = writeService.createLane(null, null, "8", LibraryType.PE.getId(), "5", "14", null, (SequencerRun) objects.get("TEST_SEQUENCER_RUN_001"), false, "11");
         objects.put("TEST_SEQUENCER_RUN_001_8", lane);
 
-        sample = writeService.createSample(null, experiment, "34", "TEST_0001_Ly_R_PE_250_EX", (Sample) objects.get("TEST_0001_Ly_R"));
-        objects.put("TEST_0001_Ly_R_PE_250_EX", sample);
+        sample = writeService.createSample(null, experiment, "34", "TEST_0001_Pa_P_PE_350_EX", (Sample) objects.get("TEST_0001_Pa_P"));
+        objects.put("TEST_0001_Pa_P_PE_350_EX", sample);
         writeService.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
         writeService.annotate(sample, "geo_tissue_type", TissueType.P.toString());
         writeService.annotate(sample, "geo_library_size_code", "350");
@@ -338,7 +338,7 @@ public class RegressionTestStudy {
         writeService.annotate(objects.get("TEST_SEQUENCER_RUN_002_4"), true, "lane skip test");
         writeService.annotate(objects.get("TEST_SEQUENCER_RUN_003"), true, "sequencer run skip test");
         writeService.annotate(objects.get("IUS13"), true, "ius skip test");
-        writeService.annotate(objects.get("IUS18"), true, "ius skip test");
+        writeService.annotate(objects.get("IUS19"), true, "ius skip test");
 
     }
 

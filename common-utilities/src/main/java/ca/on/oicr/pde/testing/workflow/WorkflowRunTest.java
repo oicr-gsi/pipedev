@@ -35,7 +35,7 @@ public class WorkflowRunTest extends RunTestBase {
 
     public WorkflowRunTest(File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName,
             File workflowBundlePath, String workflowName, String workflowVersion, File workflowBundleBinPath,
-            List<File> workflowInis, File expectedOutput, File calculateMetricsScript, File compareMetricsScript,
+            List<File> workflowInis, String actualOutputFileName, File expectedOutput, File calculateMetricsScript, File compareMetricsScript,
             Map<String, String> environmentVariables, Map<String, String> parameters) throws IOException {
 
         super(seqwareDistribution, seqwareSettings, workingDirectory, testName);
@@ -51,7 +51,7 @@ public class WorkflowRunTest extends RunTestBase {
         this.expectedOutput = expectedOutput;
         this.workflowOutputDirectory = new File(workingDirectory + "/output/");
         this.parameters = parameters;
-        this.actualOutput = new File(workingDirectory + "/" + expectedOutput.getName());
+        this.actualOutput = new File(workingDirectory + "/" + actualOutputFileName);
 
         // Add all directories located within "workflowBundleBinPath" to the PATH
         environmentVariables.put("PATH", Helpers.buildPathFromDirectory(System.getenv("PATH"), workflowBundleBinPath));
@@ -75,8 +75,8 @@ public class WorkflowRunTest extends RunTestBase {
                 "Seqware distribution does not exist - verify seqwareDistribution is correct in pom.xml.");
         Assert.assertTrue(FileUtils.getFile(workflowBundlePath).exists(),
                 "Bundled workflow path does not exist - verify bundledWorkflow is correct in pom.xml.");
-        Assert.assertTrue(expectedOutput.exists() && expectedOutput.canRead() && expectedOutput.isFile(),
-                String.format("The output expectation file [%s] is not accessible - please generate it using calculate script.", expectedOutput));
+//        Assert.assertTrue(expectedOutput.exists() && expectedOutput.canRead() && expectedOutput.isFile(),
+//                String.format("The output expectation file [%s] is not accessible - please generate it using calculate script.", expectedOutput));
 
     }
 
@@ -123,6 +123,9 @@ public class WorkflowRunTest extends RunTestBase {
     @Test(dependsOnGroups = "execution", dependsOnMethods = "checkWorkflowOutputExists", groups = "postExecution")
     public void calculateOutputMetrics() throws IOException {
 
+        Assert.assertTrue(!actualOutput.exists(),
+                String.format("The actual output metrics file [%s] already exists", actualOutput));
+
         StringBuilder command = new StringBuilder();
         command.append(calculateMetricsScript + " " + workflowOutputDirectory + " > " + actualOutput);
 
@@ -132,6 +135,9 @@ public class WorkflowRunTest extends RunTestBase {
 
     @Test(dependsOnGroups = "execution", dependsOnMethods = "calculateOutputMetrics")
     public void compareOutputToExpected() throws IOException {
+
+        Assert.assertTrue(expectedOutput != null && expectedOutput.exists() && expectedOutput.canRead() && expectedOutput.isFile(),
+                String.format("The output expectation file [%s] is not accessible.", expectedOutput));
 
         StringBuilder command = new StringBuilder();
         command.append(compareMetricsScript + " " + actualOutput + " " + expectedOutput);

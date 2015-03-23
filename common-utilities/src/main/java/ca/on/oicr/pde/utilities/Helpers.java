@@ -13,14 +13,18 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.testng.Assert;
 import static com.google.common.base.Preconditions.*;
-import com.google.common.io.Files;
 import com.jcabi.manifests.Manifests;
 import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -29,40 +33,40 @@ public class Helpers {
 
     private final static Logger log = LogManager.getLogger(Helpers.class);
 
-    public static File getFileFromResource(String resourceFilePath) throws IOException {
+    public static File getFileFromResource(String resourceFilePath, Path outputDirectory) throws IOException {
+        checkArgument(outputDirectory.toFile().exists() && outputDirectory.toFile().isDirectory() && outputDirectory.toFile().canWrite());
+        String fileName = FilenameUtils.getName(resourceFilePath);
+        checkArgument(fileName != null && StringUtils.isNotEmpty(fileName));
 
-        File tempDir = Files.createTempDir();
-        tempDir.deleteOnExit();
-
-        File tempFile = new File(tempDir + FilenameUtils.getName(resourceFilePath));
-        tempFile.deleteOnExit();
-
-        InputStream resourceStream = Helpers.class.getClassLoader().getResourceAsStream(resourceFilePath);
-
-        if (resourceStream == null) {
-            throw new IOException("The resource [" + resourceFilePath + "] is not accessible");
+        Path outputPath = outputDirectory.resolve(fileName);
+        try (InputStream resourceStream = Helpers.class.getClassLoader().getResourceAsStream(resourceFilePath)) {
+            if (resourceStream == null) {
+                throw new IOException("The resource [" + resourceFilePath + "] is not accessible");
+            }
+            Files.copy(resourceStream, outputPath);
         }
 
-        FileUtils.writeStringToFile(tempFile, IOUtils.toString(resourceStream));
+        return outputPath.toFile();
+    }
 
-        return tempFile;
+    public static File getFileFromResource(String resourceFilePath) throws IOException {
+        Path tempDir = Files.createTempDirectory(null);
+        return getFileFromResource(resourceFilePath, tempDir);
+    }
 
+    public static File getScriptFromResource(String scriptName, Path directory) throws IOException {
+        File scriptFile = getFileFromResource(scriptName, directory);
+        scriptFile.setExecutable(true);
+        return scriptFile;
     }
 
     public static File getScriptFromResource(String scriptName) throws IOException {
-
-        File script = File.createTempFile(scriptName, ".sh");
-        script.setExecutable(true);
-        script.deleteOnExit();
-
-        InputStream resourceStream = Helpers.class.getClassLoader().getResourceAsStream(scriptName);
-        Assert.assertNotNull(resourceStream,
-                String.format("Script resource [%s] was not found - verify that script exists as a resource.", scriptName));
-
-        FileUtils.writeStringToFile(script, IOUtils.toString(resourceStream));
-
-        return script;
-
+        Path tempDir = Files.createTempDirectory(null);
+        File scriptFile = getFileFromResource(scriptName, tempDir);
+        scriptFile.setExecutable(true);
+        scriptFile.deleteOnExit();
+        tempDir.toFile().deleteOnExit();
+        return scriptFile;
     }
 
     public static String getStringFromResource(String resourceFilePath) throws IOException {
@@ -263,4 +267,41 @@ public class Helpers {
         return bundledWorkflow;
     }
 
+    public static String getPgpassPassword(String host, int port, String user) throws IOException {
+
+        String pgpass = System.getProperty("PGPASSFILE");
+
+        File pgpassFile = null;
+        if (pgpass != null && !pgpass.isEmpty()) {
+            pgpassFile = new File(pgpass);
+        } else {
+            pgpassFile = new File(System.getProperty("user.home"), ".pgpass");
+        }
+
+        if (!pgpassFile.exists() || !pgpassFile.canRead()) {
+            throw new RuntimeException("Unable to read pgpass file [" + pgpassFile + "]");
+        }
+
+        String pgpassPassword = null;
+        Pattern p = Pattern.compile("^([^\\s:]+?):([^\\s:]+?):([^\\s:]+?):([^\\s:]+?):([^\\s:]+?)$");
+        for (String line : FileUtils.readFileToString(pgpassFile).split("\\r?\\n")) {
+            Matcher m = p.matcher(line);
+            if (m.matches()) {
+                String matchedHost = m.group(1);
+                int matchedPort = Integer.parseInt(m.group(2));
+                String matchedDatabaseName = m.group(3);
+                String matchedUser = m.group(4);
+                String matchedPassword = m.group(5);
+
+                if (matchedHost.equals(host) && matchedPort == port && matchedDatabaseName.equals("*") && matchedUser.equals(user)) {
+                    if (pgpassPassword != null) {
+                        throw new RuntimeException("There are multiple pgpass matches.");
+                    }
+                    pgpassPassword = matchedPassword;
+                }
+            }
+        }
+
+        return pgpassPassword;
+    }
 }

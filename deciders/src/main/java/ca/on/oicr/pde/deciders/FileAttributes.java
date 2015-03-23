@@ -7,6 +7,7 @@ import java.util.Map;
 import net.sourceforge.seqware.common.hibernate.FindAllTheFiles.Header;
 import net.sourceforge.seqware.common.module.FileMetadata;
 import net.sourceforge.seqware.common.module.ReturnValue;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A Wrapper around all of the metadata relating to a file.
@@ -248,7 +249,7 @@ public class FileAttributes {
         lane = assignInt(atts, Header.LANE_NUM);
         sequencerRun = assignString(atts, Header.SEQUENCER_RUN_NAME);
         barcode = assignString(atts, Header.IUS_TAG);
-        sampleAttributes = new EnumMap<Lims, String>(Lims.class);
+        sampleAttributes = new EnumMap<>(Lims.class);
 
         for (Lims limsAtt : Lims.values()) {
             for (String geoString : atts.keySet()) {
@@ -281,17 +282,26 @@ public class FileAttributes {
         return toRet;
     }
 
-    private String assignLastInString(Map<String, String> atts, Header header, String delimiter) {
-        String variable = null;
-        String lastSt = atts.get(header.getTitle());
-        if (lastSt != null) {
-            String[] arr = lastSt.split(delimiter);
-            variable = arr[arr.length - 1];
+    static String assignLastInString(Map<String, String> atts, Header header, String delimiter) {
+        String[] values = StringUtils.splitPreserveAllTokens(atts.get(header.getTitle()), delimiter);
+
+        //if values is null, then the input attribute string was null (header key does not exist in atts)
+        if(values == null){
+            return null;
         }
-        if (variable != null) {
-            variable = variable.trim();
+        
+        //if values is empty, then the header key exists, but the atts string was empty
+        if(values.length == 0){
+            return "";
         }
-        return variable;
+        
+        String last = values[values.length - 1];
+
+        if (last != null) {
+            last = last.trim();
+        }
+
+        return last;
     }
 
     private String assignString(Map<String, String> atts, Header header) {

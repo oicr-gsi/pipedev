@@ -1,6 +1,7 @@
 package ca.on.oicr.pde.testing.metadata;
 
 import ca.on.oicr.pde.utilities.Helpers;
+import static com.google.common.base.Preconditions.*;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -22,7 +23,16 @@ public class SeqwareTestDatabase {
     private final String password;
     private final String databaseName;
 
+    public SeqwareTestDatabase(String host, int port, String user) throws ClassNotFoundException, SQLException, IOException {
+        this(host, port, user, Helpers.getPgpassPassword(host, port, user));
+    }
+
     public SeqwareTestDatabase(String host, int port, String user, String password) throws ClassNotFoundException, SQLException, IOException {
+        checkNotNull(host, "The database host can not be null.");
+        checkArgument(port > 0 && port < 65535, "The database port must be valid.");
+        checkNotNull(user, "The database user can not be null.");
+        checkNotNull(password, "The database password can not be null.");
+
         this.host = host;
         this.port = port;
         this.user = user;
@@ -33,17 +43,16 @@ public class SeqwareTestDatabase {
         Class.forName("org.postgresql.Driver");
 
         //create the test database
-        Connection postgresConnection = DriverManager.getConnection("jdbc:postgresql://" + host + ":" + port + "/" + "postgres", user, password);
-        postgresConnection.createStatement().execute("create database " + databaseName + ";");
-        postgresConnection.close();
+        try (Connection postgresConnection = DriverManager.getConnection("jdbc:postgresql://" + host + ":" + port + "/" + "postgres", user, password)) {
+            postgresConnection.createStatement().execute("create database " + databaseName + ";");
+        }
 
         //populate the test database
-        Connection dbConnection = DriverManager.getConnection("jdbc:postgresql://" + host + ":" + port + "/" + databaseName, user, password);
-        Statement db = dbConnection.createStatement();
-        db.execute(Helpers.getStringFromResource("/io/seqware/metadb/util/seqware_meta_db.sql").replaceAll("OWNER TO seqware;", "OWNER TO " + this.user + ";"));
-        db.execute(Helpers.getStringFromResource("/io/seqware/metadb/util/seqware_meta_db_data.sql"));
-        db.close();
-        dbConnection.close();
+        try (Connection dbConnection = DriverManager.getConnection("jdbc:postgresql://" + host + ":" + port + "/" + databaseName, user, password);
+                Statement db = dbConnection.createStatement()) {
+            db.execute(Helpers.getStringFromResource("/io/seqware/metadb/util/seqware_meta_db.sql").replaceAll("OWNER TO seqware;", "OWNER TO " + this.user + ";"));
+            db.execute(Helpers.getStringFromResource("/io/seqware/metadb/util/seqware_meta_db_data.sql"));
+        }
     }
 
     public String getHost() {
@@ -68,13 +77,10 @@ public class SeqwareTestDatabase {
 
     public void shutdown() {
         //drop the database
-        try {
-            Connection postgresConnection = DriverManager.getConnection("jdbc:postgresql://" + host + ":" + port + "/" + "postgres", user, password);
+        try (Connection postgresConnection = DriverManager.getConnection("jdbc:postgresql://" + host + ":" + port + "/" + "postgres", user, password)) {
             postgresConnection.createStatement().execute("drop database " + databaseName + ";");
-            postgresConnection.close();
         } catch (SQLException ex) {
             throw new RuntimeException(ex);
         }
     }
-
 }

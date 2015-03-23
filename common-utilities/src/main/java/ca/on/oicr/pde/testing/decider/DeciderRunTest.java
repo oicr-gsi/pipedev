@@ -2,7 +2,6 @@ package ca.on.oicr.pde.testing.decider;
 
 import ca.on.oicr.pde.dao.reader.SeqwareReadService;
 import ca.on.oicr.pde.diff.ObjectDiff;
-import ca.on.oicr.pde.model.SeqwareAccession;
 import ca.on.oicr.pde.model.Workflow;
 import ca.on.oicr.pde.testing.common.RunTestBase;
 import ca.on.oicr.pde.utilities.Timer;
@@ -12,7 +11,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
@@ -35,9 +36,9 @@ public class DeciderRunTest extends RunTestBase {
     private SeqwareReadService seqwareService;
     private Workflow workflow;
 
-    private final List<String> studies = new ArrayList<String>();
-    private final List<String> sequencerRuns = new ArrayList<String>();
-    private final List<String> samples = new ArrayList<String>();
+    private final List<String> studies = new ArrayList<>();
+    private final List<String> sequencerRuns = new ArrayList<>();
+    private final List<String> samples = new ArrayList<>();
 
     File actualReportFile;
     File expectedReportFile;
@@ -64,7 +65,7 @@ public class DeciderRunTest extends RunTestBase {
         samples.addAll(testDefinition.getSamples());
         sequencerRuns.addAll(testDefinition.getSequencerRuns());
 
-        expectedReportFile = testDefinition.metrics();
+        expectedReportFile = testDefinition.getMetrics();
 
         if (expectedReportFile != null) {
             try {
@@ -152,7 +153,7 @@ public class DeciderRunTest extends RunTestBase {
         Assert.assertNotNull(workflow.getSwid(), "Installation of the workflow bundle failed");
         log.printf(Level.INFO, "[%s] Completed installing workflow bundle in %s", testName, timer.stop());
     }
-
+    
 //    @Test(groups = "preExecution", expectedExceptions = Exception.class)
 //    public void getDeciderObject() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 //        //get decider object + all parameters
@@ -187,7 +188,10 @@ public class DeciderRunTest extends RunTestBase {
     public void calculateWorkflowRunReport() throws JsonProcessingException, IOException {
         Timer timer = Timer.start();
 
-        actual = DeciderRunTestReport.generateReport(seqwareService, workflow, testDefinition.getIniExclusions());
+        Map<String, String> iniSubstitutions = new HashMap<>();
+        iniSubstitutions.put(bundledWorkflow.getAbsolutePath(), "${workflow_bundle_dir}");
+        
+        actual = DeciderRunTestReport.generateReport(seqwareService, workflow, testDefinition.getIniExclusions(), iniSubstitutions);
 
         actualReportFile = new File(workingDirectory.getAbsolutePath() + "/" + testDefinition.outputName());
         Assert.assertFalse(actualReportFile.exists());
@@ -205,14 +209,11 @@ public class DeciderRunTest extends RunTestBase {
 
         Assert.assertNotNull(expected, "There is no expected output to compare to");
 
-        List<String> problems = validateReport(actual);
-        Assert.assertTrue(problems.isEmpty(), problems.toString());
-
         if (!actual.equals(expected)) {
             StringBuilder sb = new StringBuilder();
             sb.append("There are differences between decider runs:\n");
-            sb.append("Expected run report: ").append(expectedReportFile).append("\n");
-            sb.append("Actual run report: ").append(actualReportFile).append("\n");
+            sb.append("Expected run report: ").append(expectedReportFile.getAbsolutePath()).append("\n");
+            sb.append("Actual run report: ").append(actualReportFile.getAbsolutePath()).append("\n");
 
             //Build the summary report
             String headerSummary = DeciderRunTestReport.diffHeader(actual, expected);
@@ -228,16 +229,6 @@ public class DeciderRunTest extends RunTestBase {
         }
 
         log.printf(Level.INFO, "[%s] Completed comparing workflow run reports in %s", testName, timer.stop());
-    }
-
-    private List<String> validateReport(DeciderRunTestReport t) {
-        List<String> problems = new ArrayList<String>();
-
-        if (t.getWorkflowRunCount().equals(Integer.valueOf("0"))) {
-            problems.add("No workflow run were scheduled.");
-        }
-
-        return problems;
     }
     
 }

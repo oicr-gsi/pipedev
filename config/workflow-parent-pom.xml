@@ -7,24 +7,26 @@
     <parent>
         <groupId>ca.on.oicr.pde.config</groupId>
         <artifactId>common</artifactId>
-        <version>2014.3.0-SNAPSHOT</version>
+        <version>3</version>
         <relativePath>common-parent-pom.xml</relativePath>
     </parent>
     
     <groupId>ca.on.oicr.pde.config</groupId>
     <artifactId>workflows</artifactId>
-    <version>2014.3.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <url>http://maven.apache.org</url>
-    
+         
     <properties>
         <jre-version>1.7.0_51</jre-version>
         
-        <display-name>workflow_${project.artifactId}</display-name>
+        <display-name>workflow_${workflow-name}</display-name>
         
         <skipITs>true</skipITs>
         <skipRunITs>true</skipRunITs>
         <skipBundleTest>true</skipBundleTest>
+        
+        <!--legacy-property-->
+        <workflow-directory-name>${workflow-name}</workflow-directory-name>
         
         <!-- default testng test suite -->
         <testSuite>src/test/resources/development.xml</testSuite>
@@ -33,33 +35,34 @@
         <schedulingSystem>oozie</schedulingSystem>
         <seqwareDistribution>${bundleDirectory}/lib/seqware-distribution-${seqware-version}-full.jar</seqwareDistribution>
         <workingDirectory>${user.home}/_testing/</workingDirectory>
-        <bundleDirectory>${project.build.directory}/Workflow_Bundle_${workflow-directory-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-directory-name}/${project.version}</bundleDirectory>
+        <bundleDirectory>${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-name}/${project.version}</bundleDirectory>
     </properties>
     
     <dependencies>
         <dependency>
             <groupId>com.github.seqware</groupId>
             <artifactId>seqware-pipeline</artifactId>
-            <version>${seqware-version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-common</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>ca.on.oicr.pde</groupId>
             <artifactId>workflow-utilities</artifactId>
-            <version>1.6-SNAPSHOT</version>
         </dependency>
         
         <!-- test dependencies -->
         <dependency>
             <groupId>ca.on.oicr.pde</groupId>
             <artifactId>common-utilities</artifactId>
-            <version>1.6-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.8.8</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -124,6 +127,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
                 <executions>
                     <execution>
                         <id>copy-resources-no-filter</id>
@@ -195,11 +201,12 @@
                             <goal>copy</goal>
                         </goals>
                         <configuration>
+                            <stripVersion>false</stripVersion>
+                            <useBaseVersion>true</useBaseVersion>
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>com.github.seqware</groupId>
                                     <artifactId>seqware-distribution</artifactId>
-                                    <version>${seqware-version}</version>
                                     <classifier>full</classifier>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${bundleDirectory}/lib</outputDirectory>
@@ -325,6 +332,27 @@
                             <fail>true</fail>
                         </configuration>
                     </execution>
+                    <execution>
+                        <!-- seqware bundle overwrites files by default -->
+                        <id>check-package-does-not-exist</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <phase>deploy</phase>
+                        <configuration>
+                            <rules>
+                                <requireProperty>
+                                    <property>releaseDirectory</property>
+                                    <message>releaseDirectory property is missing</message>
+                                </requireProperty>
+                                <requireFilesDontExist>
+                                    <files>
+                                        <file>${releaseDirectory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}.zip</file>
+                                    </files>
+                                </requireFilesDontExist>
+                            </rules>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -336,8 +364,8 @@
                         <bundledJava>${bundleDirectory}/bin/jre1.7.0_40/bin/java</bundledJava>
                         <bundleDirectory>${bundleDirectory}</bundleDirectory>
                         <bundledBinPath>${bundleDirectory}/bin/</bundledBinPath>
-                        <bundledWorkflow>${project.build.directory}/Workflow_Bundle_${workflow-directory-name}_${project.version}_SeqWare_${seqware-version}/</bundledWorkflow>
-                        <workflowName>${workflow-directory-name}</workflowName>
+                        <bundledWorkflow>${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/</bundledWorkflow>
+                        <workflowName>${workflow-name}</workflowName>
                         <workflowVersion>${project.version}</workflowVersion>
                         
                         <!-- required to create seqware settings -->
@@ -380,6 +408,13 @@
                             </properties>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>verify</id>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                        <phase>verify</phase>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -388,7 +423,7 @@
                 <executions>
                     <execution>
                         <id>recursive_executable</id>
-                        <phase>process-sources</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
@@ -406,10 +441,28 @@
                         <configuration>
                             <skip>${skipBundleTest}</skip>
                             <executable>${bundleDirectory}/bin/jre${jre-version}/bin/java</executable>
-                            <commandlineArgs>-jar ${project.build.directory}/Workflow_Bundle_${project.artifactId}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-directory-name}/${project.version}/lib/seqware-distribution-${seqware-version}-full.jar --plugin net.sourceforge.seqware.pipeline.plugins.BundleManager -- -t -b ${project.build.directory}/Workflow_Bundle_${project.artifactId}_${project.version}_SeqWare_${seqware-version}/ </commandlineArgs>
+                            <commandlineArgs>-jar ${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-name}/${project.version}/lib/seqware-distribution-${seqware-version}-full.jar --plugin net.sourceforge.seqware.pipeline.plugins.BundleManager -- -t -b ${project.build.directory}/Workflow_Bundle_${project.artifactId}_${project.version}_SeqWare_${seqware-version}/ </commandlineArgs>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>zip-bundle</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${bundleDirectory}/bin/jre${jre-version}/bin/java</executable>
+                            <commandlineArgs>-jar ${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-name}/${project.version}/lib/seqware-distribution-${seqware-version}-full.jar --plugin net.sourceforge.seqware.pipeline.plugins.BundleManager -- --bundle ${releaseDirectory} --path-to-package ${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/</commandlineArgs>
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>com.pyx4j</groupId>
@@ -438,7 +491,7 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
-                            <Workflow-Bundle-Path>${project.build.directory}/Workflow_Bundle_${workflow-directory-name}_${project.version}_SeqWare_${seqware-version}</Workflow-Bundle-Path>
+                            <Workflow-Bundle-Path>${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}</Workflow-Bundle-Path>
                         </manifestEntries>
                     </archive>
                 </configuration>

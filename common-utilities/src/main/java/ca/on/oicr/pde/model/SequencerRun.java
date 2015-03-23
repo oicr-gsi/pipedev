@@ -11,7 +11,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class SequencerRun implements SeqwareObject, Name {
 
-    private static final Map<String, SequencerRun> cache = new ConcurrentHashMap<String, SequencerRun>();
+    private static final Map<String, SequencerRun> cache = new ConcurrentHashMap<>();
 
     private final String name;
     private final String swid;

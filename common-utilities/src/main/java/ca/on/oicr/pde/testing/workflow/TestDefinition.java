@@ -45,8 +45,9 @@ public class TestDefinition {
         private String metricsCalculateScript = "";
         private String metricsCompareScript = "";
         private String iniDirectory = "";
-        private Map<String, String> parameters = new LinkedHashMap<String, String>();
-        private Map<String, String> enviromentVariables = new LinkedHashMap<String, String>();
+        private int iterations = 1;
+        private Map<String, String> parameters = new LinkedHashMap<>();
+        private Map<String, String> enviromentVariables = new LinkedHashMap<>();
 
         public void setDescription(String description) {
             this.description = description;
@@ -63,13 +64,13 @@ public class TestDefinition {
         }
 
         //@JsonProperty("defaultMetricsCalculateScript, metrics_calculate")
-                @JsonProperty("metrics_calculate")
+        @JsonProperty("metrics_calculate")
         public void setMetricsCalculateScript(String metricsCalculateScript) {
             this.metricsCalculateScript = metricsCalculateScript;
         }
 
         //@JsonProperty("defaultMetricsCompareScript, metrics_compare")
-                @JsonProperty("metrics_compare")
+        @JsonProperty("metrics_compare")
         public void setMetricsCompareScript(String metricsCompareScript) {
             this.metricsCompareScript = metricsCompareScript;
         }
@@ -77,6 +78,11 @@ public class TestDefinition {
         @JsonProperty("input_config_dir")
         public void setIniDirectory(String iniDirectory) {
             this.iniDirectory = iniDirectory;
+        }
+
+        @JsonProperty("iterations")
+        public void setIterations(int iterations) {
+            this.iterations = iterations;
         }
 
         @JsonProperty("parameters")
@@ -106,13 +112,14 @@ public class TestDefinition {
         private String metricsCalculateScript = defaults.metricsCalculateScript;
         private String metricsCompareScript = defaults.metricsCompareScript;
         private String iniDirectoryPath = defaults.iniDirectory;
+        private int iterations = defaults.iterations;
         private String iniFilePath = "";
         private Map<String, String> parameters;
         private Map<String, String> environmentVariables;
 
         public Test() {
-            parameters = new LinkedHashMap<String, String>(defaults.parameters);
-            environmentVariables = new LinkedHashMap<String, String>(defaults.enviromentVariables);
+            parameters = new LinkedHashMap<>(defaults.parameters);
+            environmentVariables = new LinkedHashMap<>(defaults.enviromentVariables);
         }
 
         public String getId() {
@@ -187,6 +194,15 @@ public class TestDefinition {
             this.iniDirectoryPath = iniDirectoryPath;
         }
 
+        public int getIterations() {
+            return iterations;
+        }
+
+        @JsonProperty("iterations")
+        public void setIterations(int iterations) {
+            this.iterations = iterations;
+        }
+
         public Map<String, String> getParameters() {
             return parameters;
         }
@@ -208,21 +224,22 @@ public class TestDefinition {
         @JsonIgnore
         public File getIniFile() {
             File iniFile = null;
-            if (isFileAccessible(iniFilePath)) {
+            if ("".equals(iniFilePath)) {
+                //"input_config" is not set, assuming the workflow parameters are set in the "parameters" field
+                return null;
+            } else if (isFileAccessible(iniFilePath)) {
                 iniFile = new File(iniFilePath);
             } else if (isFileAccessible(iniDirectoryPath + "/" + iniFilePath)) {
                 iniFile = new File(iniDirectoryPath + "/" + iniFilePath);
             } else {
-                //there is no valid file path to the ini
-                iniFile = null;
+                //"input_config" is set but the ini file is not accessible
+                throw new RuntimeException(String.format("The ini file [%s] is not accessible", iniFilePath));
             }
             return iniFile;
         }
 
         @JsonIgnore
         public File getMetricsFile() {
-
-            //String outputMetrics = test.get("output_metrics") == null ? inputConfig + ".metrics" : test.get("output_metrics").getTextValue();
             File metricsFile = null;
             if (isFileAccessible(metricsFilePath)) {
                 metricsFile = new File(metricsFilePath);
