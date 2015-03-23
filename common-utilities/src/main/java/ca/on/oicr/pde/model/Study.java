@@ -4,38 +4,36 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public class Study implements Accessionable, Attributable, Name {
+public class Study implements SeqwareObject, Name {
 
-    private String title;
-    private String swid;
-    private Map<String, Set<String>> attributes;
+    private static final Map<String, Study> cache = new ConcurrentHashMap<>();
 
-    public Study() {
-        attributes = Collections.EMPTY_MAP;
+    private final String title;
+    private final String swid;
+    private final Map<String, Set<String>> attributes;
+
+    private Study(Builder b) {
+        title = b.title;
+        swid = b.swid;
+        if (b.attributes == null) {
+            attributes = Collections.EMPTY_MAP;
+        } else {
+            attributes = new HashMap(b.attributes);
+        }
     }
 
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
     @Override
     public Map<String, Set<String>> getAttributes() {
         return new HashMap(attributes);
-    }
-
-    @Override
-    public void setAttributes(Map<String, Set<String>> attributes) {
-
-        this.attributes = attributes;
-
     }
 
     @Override
@@ -53,10 +51,6 @@ public class Study implements Accessionable, Attributable, Name {
     @Override
     public String getSwid() {
         return swid;
-    }
-
-    public void setSwid(String swid) {
-        this.swid = swid;
     }
 
     @Override
@@ -79,6 +73,45 @@ public class Study implements Accessionable, Attributable, Name {
             return false;
         }
         return EqualsBuilder.reflectionEquals(this, obj);
+    }
+
+    @Override
+    public String getTableName() {
+        return "study";
+    }
+
+    public static class Builder {
+
+        private String title;
+        private String swid;
+        private Map<String, Set<String>> attributes;
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public void setSwid(String swid) {
+            this.swid = swid;
+        }
+
+        public void setAttributes(Map<String, Set<String>> attributes) {
+            this.attributes = attributes;
+        }
+
+        public Study build() {
+            String key = swid;
+            Study r = cache.get(key);
+            if (r == null) {
+                r = new Study(this);
+                cache.put(key, r);
+            }
+            return r;
+        }
+
+    }
+    
+    public static void clearCache(){
+        cache.clear();
     }
 
 }

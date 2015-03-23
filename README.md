@@ -23,7 +23,7 @@ Build
 To build our utilities, use Maven.
 
 ```bash
-mvn install:install -f utility-modules-pom.xml
+mvn clean install -f utility-modules-pom.xml
 ```
 Afterwards, they will be available in your local Maven repository.
 
@@ -31,20 +31,43 @@ Afterwards, they will be available in your local Maven repository.
 <dependency>
     <groupId>ca.on.oicr.pde</groupId>
     <artifactId>common-utilities</artifactId>
-    <version>1.0</version>
+    <version>1.6</version>
 </dependency>
 
 <dependency>
     <groupId>ca.on.oicr.pde</groupId>
     <artifactId>decider-utilities</artifactId>
-    <version>1.4.3</version>
+    <version>1.6</version>
 </dependency>
 
 <dependency>
     <groupId>ca.on.oicr.pde</groupId>
     <artifactId>workflow-utilities</artifactId>
-    <version>1.3</version>
+    <version>1.6</version>
 </dependency>
 ```
 
+To install our parent poms:
 
+```bash
+mvn install:install -f config/config-modules.xml
+```
+To use the workflow parent pom, add the following to your workflow's pom.xml:
+
+```html
+<parent>
+    <groupId>ca.on.oicr.pde.config</groupId>
+    <artifactId>workflows</artifactId>
+    <version>3</version>
+</parent>
+```
+
+To use the decider parent pom, add the following to your decider's pom.xml:
+
+```html
+<parent>
+    <groupId>ca.on.oicr.pde.config</groupId>
+    <artifactId>deciders</artifactId>
+    <version>3</version>
+</parent>
+```

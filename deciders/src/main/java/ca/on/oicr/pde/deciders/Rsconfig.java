@@ -90,7 +90,7 @@ public class Rsconfig {
     }
 
     private Map<String, Reference> loadRsconfig(File rsconfigFilePath) throws ParserConfigurationException, SAXException, IOException, InvalidFileFormatException {
-        Map<String, Reference> refs = new HashMap<String, Reference>();
+        Map<String, Reference> refs = new HashMap<>();
         Element eElement = null;
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -148,7 +148,7 @@ public class Rsconfig {
         private final String templateType;
         private final String resequencingType;
 
-        private final Map<String, String> config = new HashMap<String, String>();
+        private final Map<String, String> config = new HashMap<>();
 
         public Reference(String templateType, String resequencingType) {
             this.templateType = templateType;

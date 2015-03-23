@@ -27,7 +27,7 @@ public class FileProvenanceReportTest {
     @BeforeClass
     public void initializeObjects() {
 
-        FileProvenanceReportRecord.Builder rec1Builder = new FileProvenanceReportRecord.Builder();
+        FileProvenanceReportRecord.Builder rec1Builder = new FileProvenanceReportRecord.Builder(1);
         rec1Builder.setLastModified("2013-09-06 10:01:59.193073");
         rec1Builder.setStudyTitle("TestStudy");
         rec1Builder.setStudySwid("22717");
@@ -68,10 +68,18 @@ public class FileProvenanceReportTest {
         rec1Builder.setFileSize("");
         rec1Builder.setFileDescription("provisionFile_out");
         rec1Builder.setSkip("false");
+        rec1Builder.setRootSampleName("TES_0014");
+        rec1Builder.setRootSampleSwid("9");
+        rec1Builder.setParentSampleOrganismIds("31:31:31:31:31");
+        rec1Builder.setSampleOrganismId("31");
+        rec1Builder.setSampleOrganismCode("Homo_sapiens");
+        rec1Builder.setSequencerRunPlatformId("20");
+        rec1Builder.setSequencerRunPlatformName("ILLUMINA");
+        rec1Builder.setPathSkip("false");
         rec1 = rec1Builder.build();
         rec1Modified = rec1Builder.setSkip("invalid").build();
 
-        FileProvenanceReportRecord.Builder rec2Builder = new FileProvenanceReportRecord.Builder();
+        FileProvenanceReportRecord.Builder rec2Builder = new FileProvenanceReportRecord.Builder(2);
         rec2Builder.setLastModified("2013-02-04 01:46:10.061");
         rec2Builder.setStudyTitle("TestStudy");
         rec2Builder.setStudySwid("235066");
@@ -112,9 +120,17 @@ public class FileProvenanceReportTest {
         rec2Builder.setFileSize("");
         rec2Builder.setFileDescription("");
         rec2Builder.setSkip("false");
+        rec2Builder.setRootSampleName("TES_0003");
+        rec2Builder.setRootSampleSwid("99");
+        rec2Builder.setParentSampleOrganismIds("31:31:31:31:31");
+        rec2Builder.setSampleOrganismId("31");
+        rec2Builder.setSampleOrganismCode("Homo_sapiens");
+        rec2Builder.setSequencerRunPlatformId("20");
+        rec2Builder.setSequencerRunPlatformName("ILLUMINA");
+        rec2Builder.setPathSkip("false");
         rec2 = rec2Builder.build();
 
-        FileProvenanceReportRecord.Builder rec3Builder = new FileProvenanceReportRecord.Builder();
+        FileProvenanceReportRecord.Builder rec3Builder = new FileProvenanceReportRecord.Builder(3);
         rec3Builder.setLastModified("2012-07-01 20:29:20.69934");
         rec3Builder.setStudyTitle("TestStudy");
         rec3Builder.setStudySwid("91");
@@ -155,6 +171,14 @@ public class FileProvenanceReportTest {
         rec3Builder.setFileSize("");
         rec3Builder.setFileDescription("A longer description.");
         rec3Builder.setSkip("false");
+        rec3Builder.setRootSampleName("TES_149");
+        rec3Builder.setRootSampleSwid("999");
+        rec3Builder.setParentSampleOrganismIds("31:31:31:31:31");
+        rec3Builder.setSampleOrganismId("31");
+        rec3Builder.setSampleOrganismCode("Homo_sapiens");
+        rec3Builder.setSequencerRunPlatformId("20");
+        rec3Builder.setSequencerRunPlatformName("ILLUMINA");
+        rec3Builder.setPathSkip("false");
         rec3 = rec3Builder.build();
 
         String reportFile = "/fileprovenance/valid.tsv";
@@ -239,7 +263,7 @@ public class FileProvenanceReportTest {
 
     private List<FileProvenanceReportRecord> getReport(String resource) {
 
-        List<FileProvenanceReportRecord> rs = new ArrayList<FileProvenanceReportRecord>();
+        List<FileProvenanceReportRecord> rs = new ArrayList<>();
 
         InputStream i = this.getClass().getResourceAsStream(resource);
 

@@ -1,6 +1,5 @@
 package ca.on.oicr.pde.utilities.workflows;
 
-import java.io.File;
 import java.util.*;
 import net.sourceforge.seqware.common.module.ReturnValue;
 import net.sourceforge.seqware.common.util.Log;
@@ -14,6 +13,8 @@ import net.sourceforge.seqware.pipeline.workflowV2.model.SqwFile;
  * @author mtaschuk
  */
 public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
+    
+    private final Random random = new Random(System.nanoTime());
 
     /**
      * A workflow model ReturnValue that can be used to track the errors and state during workflow model construction. See the <b>Module
@@ -26,7 +27,7 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
     /**
      * A map of job names to job objects.
      */
-    protected Map<String, Job> jobs = new HashMap<String, Job>();
+    protected Map<String, Job> jobs = new HashMap<>();
 
     /**
      * <p>
@@ -46,7 +47,7 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
      * @return an array containing the absolute paths of the input files parsed from "identifier"
      */
     protected String[] getInputFiles(String identifier) {
-        List<String> files = new ArrayList<String>();
+        List<String> files = new ArrayList<>();
         try {
             String input = super.getProperty(identifier);
             files.addAll(Arrays.asList(input.split(",")));
@@ -69,7 +70,6 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
      */
     protected SqwFile[] provisionInputFiles(String identifier) {
         String[] files = getInputFiles(identifier);
-        Random random = new Random(System.currentTimeMillis());
         int start = random.nextInt(10000);
         SqwFile[] pFiles = new SqwFile[files.length];
         for (int i = 0; i < files.length; i++) {
@@ -80,7 +80,7 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
         }
         return pFiles;
     }
-
+    
     /**
      * Retrieves the value of a property from the INI file. Implemented in OicrWorkflow to catch any Exceptions thrown, set the ReturnValue
      * to ReturnValue.INVALIDPARAMETERS, and print the stacktrace.
@@ -259,5 +259,18 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
         }
 
         return file;
+    }
+    
+    /**
+     * Verifies that the workflow data model object was built correctly.
+     * {@inheritDoc}
+     *
+     * @throws RuntimeException When the workflow data model object's {@link OicrWorkflow#ret} is not "SUCCESS".
+     */
+    @Override
+    public void wrapup() {
+        if (ret.getExitStatus() != ReturnValue.SUCCESS) {
+            throw new RuntimeException("The were errors building the workflow data model object. Final return value is [" + ret.getExitStatus() + "].");
+        }
     }
 }

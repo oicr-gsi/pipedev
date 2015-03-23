@@ -4,27 +4,36 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public class SequencerRun implements Accessionable, Attributable, Name {
+public class SequencerRun implements SeqwareObject, Name {
 
-    private String name;
-    private String swid;
-    private Map<String, Set<String>> attributes;
+    private static final Map<String, SequencerRun> cache = new ConcurrentHashMap<>();
 
-    public SequencerRun() {
-        attributes = Collections.EMPTY_MAP;
+    private final String name;
+    private final String swid;
+    private final String platformId;
+    private final String platformName;
+    private final Map<String, Set<String>> attributes;
+
+    private SequencerRun(Builder b) {
+        name = b.name;
+        swid = b.swid;
+        platformId = b.platformId;
+        platformName = b.platformName;
+        if (b.attributes == null) {
+            attributes = Collections.EMPTY_MAP;
+        } else {
+            attributes = new HashMap(b.attributes);
+        }
     }
 
     @Override
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     @Override
@@ -33,17 +42,8 @@ public class SequencerRun implements Accessionable, Attributable, Name {
     }
 
     @Override
-    public void setAttributes(Map<String, Set<String>> attributes) {
-
-        this.attributes = attributes;
-
-    }
-
-    @Override
     public Set<String> getAttribute(String key) {
-
         return this.attributes.get(key);
-
     }
 
     @Override
@@ -51,8 +51,17 @@ public class SequencerRun implements Accessionable, Attributable, Name {
         return swid;
     }
 
-    public void setSwid(String swid) {
-        this.swid = swid;
+    public String getPlatformId() {
+        return platformId;
+    }
+
+    public String getPlatformName() {
+        return platformName;
+    }
+
+    @Override
+    public String getTableName() {
+        return "sequencer-run";
     }
 
     @Override
@@ -75,6 +84,50 @@ public class SequencerRun implements Accessionable, Attributable, Name {
             return false;
         }
         return EqualsBuilder.reflectionEquals(this, obj);
+    }
+
+    public static class Builder {
+
+        private String name;
+        private String swid;
+        private String platformId;
+        private String platformName;
+        private Map<String, Set<String>> attributes;
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public void setSwid(String swid) {
+            this.swid = swid;
+        }
+
+        public void setPlatformId(String platformId) {
+            this.platformId = platformId;
+        }
+
+        public void setPlatformName(String platformName) {
+            this.platformName = platformName;
+        }
+
+        public void setAttributes(Map<String, Set<String>> attributes) {
+            this.attributes = attributes;
+        }
+
+        public SequencerRun build() {
+            String key = swid;
+            SequencerRun r = cache.get(key);
+            if (r == null) {
+                r = new SequencerRun(this);
+                cache.put(key, r);
+            }
+            return r;
+        }
+
+    }
+
+    public static void clearCache() {
+        cache.clear();
     }
 
 }

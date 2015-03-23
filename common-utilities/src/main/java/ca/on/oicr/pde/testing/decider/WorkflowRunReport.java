@@ -11,17 +11,20 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+/**
+ *
+ * @author mlaszloffy
+ */
 public class WorkflowRunReport implements Comparable<WorkflowRunReport> {
-
-    Map workflowIni = new TreeMap<String, String>();
-    List<ReducedFileProvenanceReportRecord> files = new ArrayList<ReducedFileProvenanceReportRecord>();
+    Map workflowIni = new TreeMap<>();
+    List<ReducedFileProvenanceReportRecord> files = new ArrayList<>();
 
     public Map getWorkflowIni() {
         return workflowIni;
     }
 
     public void setWorkflowIni(Map<String, String> workflowIni) {
-        this.workflowIni = new TreeMap<String, String>(workflowIni);
+        this.workflowIni = new TreeMap<>(workflowIni);
     }
 
     public List<ReducedFileProvenanceReportRecord> getFiles() {
@@ -54,5 +57,5 @@ public class WorkflowRunReport implements Comparable<WorkflowRunReport> {
         //TODO: optimize
         return this.toString().compareTo(o.toString());
     }
-
+    
 }

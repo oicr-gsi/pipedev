@@ -1,7 +1,7 @@
 package ca.on.oicr.pde.testing.common;
 
-import ca.on.oicr.pde.utilities.SeqwareExecutor;
-import ca.on.oicr.pde.utilities.ShellExecutor;
+import ca.on.oicr.pde.dao.executor.SeqwareExecutor;
+import ca.on.oicr.pde.dao.executor.ShellExecutor;
 import java.io.File;
 
 public abstract class RunTestBase implements org.testng.ITest {
@@ -10,7 +10,7 @@ public abstract class RunTestBase implements org.testng.ITest {
     protected final File seqwareSettings;
     protected final File workingDirectory;
     protected final String testName;
-    protected final SeqwareExecutor exec;
+    protected SeqwareExecutor seqwareExecutor;
 
     public RunTestBase(File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName) {
 
@@ -19,15 +19,17 @@ public abstract class RunTestBase implements org.testng.ITest {
         this.workingDirectory = workingDirectory;
         this.testName = testName;
 
-        exec = new ShellExecutor(testName, seqwareDistribution, seqwareSettings, workingDirectory);
+        this.seqwareExecutor = new ShellExecutor(testName, seqwareDistribution, seqwareSettings, workingDirectory);
 
     }
 
     @Override
     public String getTestName() {
-
         return testName;
-
+    }
+    
+    public void setSeqwareExecutor(SeqwareExecutor seqwareExecutor){
+        this.seqwareExecutor = seqwareExecutor;
     }
 
 }

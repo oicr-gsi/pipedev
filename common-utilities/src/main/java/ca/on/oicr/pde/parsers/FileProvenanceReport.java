@@ -1,22 +1,26 @@
 package ca.on.oicr.pde.parsers;
 
 import ca.on.oicr.pde.model.FileProvenanceReportRecord;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class FileProvenanceReport {
 
-    private final static Logger log = Logger.getLogger(FileProvenanceReport.class);
+    private final static Logger log = LogManager.getLogger(FileProvenanceReport.class);
 
     public static class ValidationException extends RuntimeException {
 
@@ -47,50 +51,75 @@ public class FileProvenanceReport {
         //  3) Update the "parseFileProvenanceReport" method to include/remove the attribute
         //  4) Update the FileProvenanceRecord class (don't forget the setter/getter)
         Map fileProvenanceReportExpectedHeader = new LinkedHashMap();
-        fileProvenanceReportExpectedHeader.put("Last Modified", 0);
-        fileProvenanceReportExpectedHeader.put("Study Title", 1);
-        fileProvenanceReportExpectedHeader.put("Study SWID", 2);
-        fileProvenanceReportExpectedHeader.put("Study Attributes", 3);
-        fileProvenanceReportExpectedHeader.put("Experiment Name", 4);
-        fileProvenanceReportExpectedHeader.put("Experiment SWID", 5);
-        fileProvenanceReportExpectedHeader.put("Experiment Attributes", 6);
-        fileProvenanceReportExpectedHeader.put("Parent Sample Name", 7);
-        fileProvenanceReportExpectedHeader.put("Parent Sample SWID", 8);
-        fileProvenanceReportExpectedHeader.put("Parent Sample Attributes", 9);
-        fileProvenanceReportExpectedHeader.put("Sample Name", 10);
-        fileProvenanceReportExpectedHeader.put("Sample SWID", 11);
-        fileProvenanceReportExpectedHeader.put("Sample Attributes", 12);
-        fileProvenanceReportExpectedHeader.put("Sequencer Run Name", 13);
-        fileProvenanceReportExpectedHeader.put("Sequencer Run SWID", 14);
-        fileProvenanceReportExpectedHeader.put("Sequencer Run Attributes", 15);
-        fileProvenanceReportExpectedHeader.put("Lane Name", 16);
-        fileProvenanceReportExpectedHeader.put("Lane Number", 17);
-        fileProvenanceReportExpectedHeader.put("Lane SWID", 18);
-        fileProvenanceReportExpectedHeader.put("Lane Attributes", 19);
-        fileProvenanceReportExpectedHeader.put("IUS Tag", 20);
-        fileProvenanceReportExpectedHeader.put("IUS SWID", 21);
-        fileProvenanceReportExpectedHeader.put("IUS Attributes", 22);
-        fileProvenanceReportExpectedHeader.put("Workflow Name", 23);
-        fileProvenanceReportExpectedHeader.put("Workflow Version", 24);
-        fileProvenanceReportExpectedHeader.put("Workflow SWID", 25);
-        fileProvenanceReportExpectedHeader.put("Workflow Run Name", 26);
-        fileProvenanceReportExpectedHeader.put("Workflow Run Status", 27);
-        fileProvenanceReportExpectedHeader.put("Workflow Run SWID", 28);
-        fileProvenanceReportExpectedHeader.put("Processing Algorithm", 29);
-        fileProvenanceReportExpectedHeader.put("Processing SWID", 30);
-        fileProvenanceReportExpectedHeader.put("Processing Attributes", 31);
-        fileProvenanceReportExpectedHeader.put("File Meta-Type", 32);
-        fileProvenanceReportExpectedHeader.put("File SWID", 33);
-        fileProvenanceReportExpectedHeader.put("File Attributes", 34);
-        fileProvenanceReportExpectedHeader.put("File Path", 35);
-        fileProvenanceReportExpectedHeader.put("File Md5sum", 36);
-        fileProvenanceReportExpectedHeader.put("File Size", 37);
-        fileProvenanceReportExpectedHeader.put("File Description", 38);
-        fileProvenanceReportExpectedHeader.put("Skip", 39);
+        int col = 0;
+        fileProvenanceReportExpectedHeader.put("Last Modified", col++);
+        
+        fileProvenanceReportExpectedHeader.put("Study Title", col++);
+        fileProvenanceReportExpectedHeader.put("Study SWID", col++);
+        fileProvenanceReportExpectedHeader.put("Study Attributes", col++);
+        
+        fileProvenanceReportExpectedHeader.put("Experiment Name", col++);
+        fileProvenanceReportExpectedHeader.put("Experiment SWID", col++);
+        fileProvenanceReportExpectedHeader.put("Experiment Attributes", col++);
+        
+        fileProvenanceReportExpectedHeader.put("Root Sample Name", col++);
+        fileProvenanceReportExpectedHeader.put("Root Sample SWID", col++);
+        
+        fileProvenanceReportExpectedHeader.put("Parent Sample Name", col++);
+        fileProvenanceReportExpectedHeader.put("Parent Sample SWID", col++);
+        fileProvenanceReportExpectedHeader.put("Parent Sample Organism IDs", col++);
+        fileProvenanceReportExpectedHeader.put("Parent Sample Attributes", col++);
+        
+        fileProvenanceReportExpectedHeader.put("Sample Name", col++);
+        fileProvenanceReportExpectedHeader.put("Sample SWID", col++);
+        fileProvenanceReportExpectedHeader.put("Sample Organism ID", col++);
+        fileProvenanceReportExpectedHeader.put("Sample Organism Code", col++);
+        fileProvenanceReportExpectedHeader.put("Sample Attributes", col++);
+        
+        fileProvenanceReportExpectedHeader.put("Sequencer Run Name", col++);
+        fileProvenanceReportExpectedHeader.put("Sequencer Run SWID", col++);
+        fileProvenanceReportExpectedHeader.put("Sequencer Run Attributes", col++);
+        fileProvenanceReportExpectedHeader.put("Sequencer Run Platform ID", col++);
+        fileProvenanceReportExpectedHeader.put("Sequencer Run Platform Name", col++);
+        
+        fileProvenanceReportExpectedHeader.put("Lane Name", col++);
+        fileProvenanceReportExpectedHeader.put("Lane Number", col++);
+        fileProvenanceReportExpectedHeader.put("Lane SWID", col++);
+        fileProvenanceReportExpectedHeader.put("Lane Attributes", col++);
+        
+        fileProvenanceReportExpectedHeader.put("IUS Tag", col++);
+        fileProvenanceReportExpectedHeader.put("IUS SWID", col++);
+        fileProvenanceReportExpectedHeader.put("IUS Attributes", col++);
+        
+        fileProvenanceReportExpectedHeader.put("Workflow Name", col++);
+        fileProvenanceReportExpectedHeader.put("Workflow Version", col++);
+        fileProvenanceReportExpectedHeader.put("Workflow SWID", col++);
+        fileProvenanceReportExpectedHeader.put("Workflow Attributes", col++);
+        
+        fileProvenanceReportExpectedHeader.put("Workflow Run Name", col++);
+        fileProvenanceReportExpectedHeader.put("Workflow Run Status", col++);
+        fileProvenanceReportExpectedHeader.put("Workflow Run SWID", col++);
+        fileProvenanceReportExpectedHeader.put("Workflow Run Attributes", col++);
+        fileProvenanceReportExpectedHeader.put("Workflow Run Input File SWAs", col++);
+        
+        fileProvenanceReportExpectedHeader.put("Processing Algorithm", col++);
+        fileProvenanceReportExpectedHeader.put("Processing SWID", col++);
+        fileProvenanceReportExpectedHeader.put("Processing Attributes", col++);
+        fileProvenanceReportExpectedHeader.put("Processing Status", col++);
+        
+        fileProvenanceReportExpectedHeader.put("File Meta-Type", col++);
+        fileProvenanceReportExpectedHeader.put("File SWID", col++);
+        fileProvenanceReportExpectedHeader.put("File Attributes", col++);
+        fileProvenanceReportExpectedHeader.put("File Path", col++);
+        fileProvenanceReportExpectedHeader.put("File Md5sum", col++);
+        fileProvenanceReportExpectedHeader.put("File Size", col++);
+        fileProvenanceReportExpectedHeader.put("File Description", col++);
+        fileProvenanceReportExpectedHeader.put("Path Skip", col++);
+        fileProvenanceReportExpectedHeader.put("Skip", col++);
 
         if (!fileProvenanceReportExpectedHeader.equals(header)) {
 
-            log.warn("Expected header:\n" + fileProvenanceReportExpectedHeader.toString() + "\nActual header:\n" + header.toString());
+            log.printf(Level.WARN, "Expected header:\n%s\nActual header:\n%s", fileProvenanceReportExpectedHeader.toString(), header.toString());
             throw new ValidationException("FileProvenanceReport headers differ from expected format.");
 
         }
@@ -120,15 +149,20 @@ public class FileProvenanceReport {
 
     }
 
+    public static List<FileProvenanceReportRecord> parseFileProvenanceReport(File reportFile) throws IOException {
+
+        return parseFileProvenanceReport(new FileReader(reportFile), HeaderValidationMode.STRICT);
+
+    }
+
     public static List<FileProvenanceReportRecord> parseFileProvenanceReport(Reader reportReader, HeaderValidationMode mode) throws IOException {
 
         CSVFormat csvFormat = CSVFormat.RFC4180.withHeader().withDelimiter('\t');
 
-        CSVParser p = new CSVParser(reportReader, csvFormat);
-
+        CSVParser parser = new CSVParser(reportReader, csvFormat);
         // This will throw a runtime exception (ValidationException) if the headers to not match the expected header format
         try {
-            validateHeader(p.getHeaderMap());
+            validateHeader(parser.getHeaderMap());
         } catch (ValidationException ve) {
             if (HeaderValidationMode.STRICT.equals(mode)) {
                 throw ve;
@@ -140,44 +174,66 @@ public class FileProvenanceReport {
         }
 
         // Build a list of FileProvenanceRecord from tsv stream reader
-        log.debug("Starting transform of file provenance csv to FileProvenanceRecord objects");
-        List ls = new ArrayList<FileProvenanceReportRecord>();
-        for (CSVRecord r : p) {
+        List ls = new LinkedList<>();
+        for (CSVRecord r : parser) {
 
-            FileProvenanceReportRecord.Builder rec = new FileProvenanceReportRecord.Builder();
+            FileProvenanceReportRecord.Builder rec = new FileProvenanceReportRecord.Builder(r.getRecordNumber());
 
             rec.setLastModified(r.get("Last Modified"));
+
             rec.setStudyTitle(r.get("Study Title"));
             rec.setStudySwid(r.get("Study SWID"));
             rec.setStudyAttributes(r.get("Study Attributes"));
+
             rec.setExperimentName(r.get("Experiment Name"));
             rec.setExperimentSwid(r.get("Experiment SWID"));
             rec.setExperimentAttributes(r.get("Experiment Attributes"));
+
+            rec.setRootSampleName(r.get("Root Sample Name"));
+            rec.setRootSampleSwid(r.get("Root Sample SWID"));
+
             rec.setParentSampleName(r.get("Parent Sample Name"));
             rec.setParentSampleSwid(r.get("Parent Sample SWID"));
+            rec.setParentSampleOrganismIds(r.get("Parent Sample Organism IDs"));
             rec.setParentSampleAttributes(r.get("Parent Sample Attributes"));
+
             rec.setSampleName(r.get("Sample Name"));
             rec.setSampleSwid(r.get("Sample SWID"));
+            rec.setSampleOrganismId(r.get("Sample Organism ID"));
+            rec.setSampleOrganismCode(r.get("Sample Organism Code"));
             rec.setSampleAttributes(r.get("Sample Attributes"));
+
             rec.setSequencerRunName(r.get("Sequencer Run Name"));
             rec.setSequencerRunSwid(r.get("Sequencer Run SWID"));
             rec.setSequencerRunAttributes(r.get("Sequencer Run Attributes"));
+            rec.setSequencerRunPlatformId(r.get("Sequencer Run Platform ID"));
+            rec.setSequencerRunPlatformName(r.get("Sequencer Run Platform Name"));
+
             rec.setLaneName(r.get("Lane Name"));
             rec.setLaneNumber(r.get("Lane Number"));
             rec.setLaneSwid(r.get("Lane SWID"));
             rec.setLaneAttributes(r.get("Lane Attributes"));
+
             rec.setIusTag(r.get("IUS Tag"));
             rec.setIusSwid(r.get("IUS SWID"));
             rec.setIusAttributes(r.get("IUS Attributes"));
+
             rec.setWorkflowName(r.get("Workflow Name"));
             rec.setWorkflowVersion(r.get("Workflow Version"));
             rec.setWorkflowSwid(r.get("Workflow SWID"));
+            rec.setWorkflowAttributes(r.get("Workflow Attributes"));
+
             rec.setWorkflowRunName(r.get("Workflow Run Name"));
             rec.setWorkflowRunStatus(r.get("Workflow Run Status"));
             rec.setWorkflowRunSwid(r.get("Workflow Run SWID"));
+            rec.setWorkflowRunAttributes(r.get("Workflow Run Attributes"));
+            rec.setWorkflowRunInputFileSwids(r.get("Workflow Run Input File SWAs"));
+
             rec.setProcessingAlgorithm(r.get("Processing Algorithm"));
             rec.setProcessingSwid(r.get("Processing SWID"));
             rec.setProcessingAttributes(r.get("Processing Attributes"));
+            rec.setProcessingStatus(r.get("Processing Status"));
+
             rec.setFileMetaType(r.get("File Meta-Type"));
             rec.setFileSwid(r.get("File SWID"));
             rec.setFileAttributes(r.get("File Attributes"));
@@ -185,12 +241,16 @@ public class FileProvenanceReport {
             rec.setFileMd5sum(r.get("File Md5sum"));
             rec.setFileSize(r.get("File Size"));
             rec.setFileDescription(r.get("File Description"));
+            rec.setPathSkip(r.get("Path Skip"));
             rec.setSkip(r.get("Skip"));
 
             ls.add(rec.build());
 
+            if (r.getRecordNumber() % 10000 == 0) {
+                log.printf(Level.INFO, "Processing record %s", r.getRecordNumber());
+            }
+
         }
-        log.debug("Completed transform of file provenance csv to FileProvenanceRecord objects");
 
         return ls;
 

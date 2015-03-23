@@ -1,5 +1,6 @@
 package ca.on.oicr.pde.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.TreeMultimap;
@@ -34,6 +35,7 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
     private Multimap<String, Set<String>> processingAttributes;
     private Set<String> fileMetaType;
     private Multimap<String, Set<String>> fileAttributes;
+    private boolean skip = false;
     private int fileHash = 0;
 
     private static final Comparator stringComparator = new Comparator<String>() {
@@ -51,22 +53,22 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
     };
 
     private ReducedFileProvenanceReportRecord() {
-        studyTitle = new TreeSet<String>();
+        studyTitle = new TreeSet<>();
         studyAttributes = TreeMultimap.create(stringComparator, stringSetComparator);
-        experimentName = new TreeSet<String>();
+        experimentName = new TreeSet<>();
         experimentAttributes = TreeMultimap.create(stringComparator, stringSetComparator);
-        sampleName = new TreeSet<String>();
+        sampleName = new TreeSet<>();
         sampleAttributes = TreeMultimap.create(stringComparator, stringSetComparator);
-        sequencerRunName = new TreeSet<String>();
+        sequencerRunName = new TreeSet<>();
         sequencerRunAttributes = TreeMultimap.create(stringComparator, stringSetComparator);
-        laneName = new TreeSet<String>();
+        laneName = new TreeSet<>();
         laneAttributes = TreeMultimap.create(stringComparator, stringSetComparator);
-        iusTag = new TreeSet<String>();
+        iusTag = new TreeSet<>();
         iusAttributes = TreeMultimap.create(stringComparator, stringSetComparator);
-        workflowName = new TreeSet<String>();
-        processingAlgorithm = new TreeSet<String>();
+        workflowName = new TreeSet<>();
+        processingAlgorithm = new TreeSet<>();
         processingAttributes = TreeMultimap.create(stringComparator, stringSetComparator);
-        fileMetaType = new TreeSet<String>();
+        fileMetaType = new TreeSet<>();
         fileAttributes = TreeMultimap.create(stringComparator, stringSetComparator);
         fileHash = 0;
     }
@@ -95,6 +97,7 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
             this.processingAttributes.putAll(Multimaps.forMap(f.getProcessingAttributes()));
             this.fileMetaType.add(f.getFileMetaType());
             this.fileAttributes.putAll(Multimaps.forMap(f.getFileAttributes()));
+            this.skip = this.skip == true ? skip : Boolean.valueOf(f.getSkip());
             this.fileHash = f.getFilePath().hashCode();
         }
     }
@@ -104,7 +107,7 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
     }
 
     public void setStudyTitle(Set studyTitle) {
-        this.studyTitle = new TreeSet<String>(studyTitle);
+        this.studyTitle = new TreeSet<>(studyTitle);
     }
 
     public Map<String, Collection<Set<String>>> getStudyAttributes() {
@@ -123,7 +126,7 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
     }
 
     public void setExperimentName(Set experimentName) {
-        this.experimentName = new TreeSet<String>(experimentName);
+        this.experimentName = new TreeSet<>(experimentName);
     }
 
     public Map<String, Collection<Set<String>>> getExperimentAttributes() {
@@ -142,7 +145,7 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
     }
 
     public void setSampleName(Set sampleName) {
-        this.sampleName = new TreeSet<String>(sampleName);
+        this.sampleName = new TreeSet<>(sampleName);
     }
 
     public Map<String, Collection<Set<String>>> getSampleAttributes() {
@@ -161,7 +164,7 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
     }
 
     public void setSequencerRunName(Set sequencerRunName) {
-        this.sequencerRunName = new TreeSet<String>(sequencerRunName);
+        this.sequencerRunName = new TreeSet<>(sequencerRunName);
     }
 
     public Map<String, Collection<Set<String>>> getSequencerRunAttributes() {
@@ -180,7 +183,7 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
     }
 
     public void setLaneName(Set laneName) {
-        this.laneName = new TreeSet<String>(laneName);
+        this.laneName = new TreeSet<>(laneName);
     }
 
     public Map<String, Collection<Set<String>>> getLaneAttributes() {
@@ -199,7 +202,7 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
     }
 
     public void setIusTag(Set iusTag) {
-        this.iusTag = new TreeSet<String>(iusTag);
+        this.iusTag = new TreeSet<>(iusTag);
     }
 
     public Map<String, Collection<Set<String>>> getIusAttributes() {
@@ -218,7 +221,7 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
     }
 
     public void setWorkflowName(Set workflowName) {
-        this.workflowName = new TreeSet<String>(workflowName);
+        this.workflowName = new TreeSet<>(workflowName);
     }
 
     public Set getProcessingAlgorithm() {
@@ -226,7 +229,7 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
     }
 
     public void setProcessingAlgorithm(Set processingAlgorithm) {
-        this.processingAlgorithm = new TreeSet<String>(processingAlgorithm);
+        this.processingAlgorithm = new TreeSet<>(processingAlgorithm);
     }
 
     public Map<String, Collection<Set<String>>> getProcessingAttributes() {
@@ -240,12 +243,17 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
         }
     }
 
+    @JsonIgnore
+    public Boolean getSkip() {
+        return skip;
+    }
+
     public Set getFileMetaType() {
         return fileMetaType;
     }
 
     public void setFileMetaType(Set fileMetaType) {
-        this.fileMetaType = new TreeSet<String>(fileMetaType);
+        this.fileMetaType = new TreeSet<>(fileMetaType);
     }
 
     public Map<String, Collection<Set<String>>> getFileAttributes() {

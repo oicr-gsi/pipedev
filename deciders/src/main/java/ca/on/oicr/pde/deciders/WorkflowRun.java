@@ -21,7 +21,7 @@ public class WorkflowRun {
      */
     public WorkflowRun(Map<String, String> iniFile, FileAttributes[] files) {
         if (iniFile == null) {
-            this.iniFile = new HashMap<String, String>();
+            this.iniFile = new HashMap<>();
         } else {
             this.iniFile = iniFile;
         }

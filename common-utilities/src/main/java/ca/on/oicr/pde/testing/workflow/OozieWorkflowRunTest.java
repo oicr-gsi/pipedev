@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import net.sourceforge.seqware.common.metadata.Metadata;
 import net.sourceforge.seqware.common.metadata.MetadataFactory;
@@ -21,11 +22,11 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
 
     public OozieWorkflowRunTest(File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName,
             File workflowBundlePath, String workflowName, String workflowVersion, File workflowBundleBinPath,
-            File workflowIni, File expectedOutput, File calculateMetricsScript, File compareMetricsScript,
-            Map<String, String> environmentVariables) throws IOException {
+            List<File> workflowInis, String actualOutputFileName, File expectedOutput, File calculateMetricsScript, File compareMetricsScript,
+            Map<String, String> environmentVariables, Map<String,String> parameters) throws IOException {
 
         super(seqwareDistribution, seqwareSettings, workingDirectory, testName, workflowBundlePath, workflowName, workflowVersion, workflowBundleBinPath,
-                workflowIni, expectedOutput, calculateMetricsScript, compareMetricsScript, environmentVariables);
+                workflowInis, actualOutputFileName, expectedOutput, calculateMetricsScript, compareMetricsScript, environmentVariables, parameters);
 
     }
 
@@ -35,7 +36,7 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
         super.initializeEnvironment();
 
         //Get a seqware metadb object for probing the metadb state
-        HashMap<String, String> hm = new HashMap<String, String>();
+        HashMap<String, String> hm = new HashMap<>();
         MapTools.ini2Map(seqwareSettings.getAbsolutePath(), hm, true);
         metadb = MetadataFactory.get(hm);
 
@@ -48,10 +49,10 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
 //        //TODO: verify scheduling host is accessible
 //        
 //    }
-    @Test(groups = "preExecution")
+        @Test(groups = "preExecution")
     public void installWorkflow() throws IOException {
 
-        workflowSwid = exec.installWorkflow(workflowBundlePath);
+        workflowSwid = seqwareExecutor.installWorkflow(workflowBundlePath);
 
         Assert.assertNotNull(workflowSwid);
 
@@ -60,7 +61,7 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
     @Test(groups = "preExecution", dependsOnMethods = "installWorkflow")
     public void scheduleWorkflow() throws IOException {
 
-        workflowRunSwid = exec.workflowRunSchedule(workflowSwid, workflowIni);
+        workflowRunSwid = seqwareExecutor.workflowRunSchedule(workflowSwid, workflowInis, parameters);
 
         Assert.assertNotNull(workflowRunSwid);
 
@@ -70,7 +71,7 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
     public void executeWorkflow() throws IOException {
 
         //TODO: integrate this process into SeqwareExecutor
-        exec.workflowRunLaunch(workflowRunSwid);
+        seqwareExecutor.workflowRunLaunch(workflowRunSwid);
 
         String workflowRunStatus = "pending";
         while (Arrays.asList("running", "pending").contains(workflowRunStatus)) {
@@ -81,8 +82,8 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
                 System.out.println(ie.getStackTrace());
             }
 
-            exec.workflowRunUpdateStatus(workflowRunSwid);
-            workflowRunStatus = exec.workflowRunReport(workflowRunSwid);
+            seqwareExecutor.workflowRunUpdateStatus(workflowRunSwid);
+            workflowRunStatus = seqwareExecutor.workflowRunReport(workflowRunSwid);
 
         }
 

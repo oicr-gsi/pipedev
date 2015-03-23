@@ -1,6 +1,6 @@
 package ca.on.oicr.pde.dao;
 
-import static ca.on.oicr.pde.dao.SeqwareWebserviceImpl.getElementFromXML;
+import static ca.on.oicr.pde.dao.reader.SeqwareWebserviceImpl.getElementFromXML;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.io.IOUtils;

@@ -2,9 +2,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>ca.on.oicr.pde.config</groupId>
+        <artifactId>common</artifactId>
+        <version>3</version>
+    </parent>
+
     <groupId>ca.on.oicr.pde</groupId>
     <artifactId>common-utilities</artifactId>
-    <version>1.0</version>
+    <version>1.6</version>
     <packaging>jar</packaging>
 
     <name>common-utilities</name>
@@ -12,86 +18,173 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <seqwareWar>${com.github.seqware:seqware-webservice:war}</seqwareWar>
+
         <skipITs>true</skipITs>
-        <seqware-version>1.0.14</seqware-version>
     </properties>
     
     <dependencies>
         <dependency>
+            <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-meta-db</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-webservice</artifactId>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-pipeline</artifactId>
+        </dependency>
+        
+        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.3.1</version>
+            <version>2.5.0</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.3.0</version>
+            <version>2.5.0</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.3.1</version>
+            <version>2.5.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>12.0</version>
+            <version>18.0</version>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.8.8</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-exec</artifactId>
-            <version>1.1</version>
+            <version>1.3</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.3</version>
+            <version>2.4</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.1</version>
-            <type>jar</type>
+            <version>3.3.2</version>
         </dependency>
         <dependency>
             <groupId>antlr</groupId>
             <artifactId>antlr</artifactId>
             <version>2.7.7</version>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.sdicons.jsontools</groupId>
             <artifactId>jsontools-core</artifactId>
             <version>1.7</version>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.github.seqware</groupId>
-            <artifactId>seqware-distribution</artifactId>
-            <version>${seqware-version}</version>
-            <classifier>full</classifier>
-            <scope>provided</scope>
+            <version>1.1</version>
         </dependency>
         <dependency>
             <groupId>com.jcabi</groupId>
             <artifactId>jcabi-manifests</artifactId>
-            <version>0.7.5</version>
+            <version>1.1</version>
         </dependency>
         <dependency>
             <groupId>de.danielbechler</groupId>
             <artifactId>java-object-diff</artifactId>
-            <version>0.13.1</version>
+            <version>0.91.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>4.1.1.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+            <version>9.3.0.M1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-webapp</artifactId>
+            <version>9.3.0.M1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-jsp</artifactId>
+            <version>9.3.0.M1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-jndi</artifactId>
+            <version>9.3.0.M1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-util</artifactId>
+            <version>9.3.0.M1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>4.2.0.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>9.3-1102-jdbc41</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat</groupId>
+            <artifactId>tomcat-jdbc</artifactId>
+            <version>8.0.17</version>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.7</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.jopt-simple</groupId>
+            <artifactId>jopt-simple</artifactId>
+            <version>4.7</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>commons-configuration</groupId>
+            <artifactId>commons-configuration</artifactId>
+            <version>1.10</version>
+            <type>jar</type>
         </dependency>
     </dependencies>
 
@@ -153,14 +246,29 @@
     </repositories>
     
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>config.properties</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>config.properties</exclude>
+                </excludes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                 </configuration>
             </plugin>
             <!--            <plugin>
@@ -174,37 +282,49 @@
             </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.16</version>
+                <artifactId>maven-resources-plugin</artifactId>
                 <configuration>
-                    <skip>${skipITs}</skip>
-                    <includes>
-                        <include>**/*IT.java</include>
-                    </includes>
-                    <systemPropertyVariables>
-                        <dbFile>${dbFile}</dbFile>
-                        <dbPatchDir>${dbPatchDir}</dbPatchDir>
-                        <dbHost>${dbHost}</dbHost>
-                        <dbPort>${dbPort}</dbPort>
-                        <dbUser>${dbUser}</dbUser>
-                        <dbPass>${dbPass}</dbPass>
-                        <seqwareWebserviceDir>${seqwareWebserviceDir}</seqwareWebserviceDir>
-                    </systemPropertyVariables>
+                    <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
+                <artifactId>maven-failsafe-plugin</artifactId>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <skip>${skipITs}</skip>
+                    <systemPropertyVariables>
+                        <!--<dbFile>${dbFile}</dbFile>
+                        <dbPatchDir>${dbPatchDir}</dbPatchDir>-->
+                        <dbHost>${dbHost}</dbHost>
+                        <dbPort>${dbPort}</dbPort>
+                        <dbUser>${dbUser}</dbUser>
+                        <dbPassword>${dbPassword}</dbPassword>
+                        <seqwareWar>${seqwareWar}</seqwareWar>
+                    </systemPropertyVariables>
+                    <argLine>-XX:PermSize=256M -XX:MaxPermSize=512M</argLine>
+                    <forkCount>5</forkCount>
+                    <reuseForks>false</reuseForks>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                        <phase>integration-test</phase>
+                    </execution>
+                    <execution>
+                        <id>verify</id>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                        <phase>verify</phase>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>2.3</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -217,12 +337,22 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9.1</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
                         <goals>
                             <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>properties</goal>
                         </goals>
                     </execution>
                 </executions>

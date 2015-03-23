@@ -1,5 +1,6 @@
 package ca.on.oicr.pde.testing;
 
+import ca.on.oicr.pde.testing.workflow.TestDefinition;
 import ca.on.oicr.pde.testing.workflow.OozieWorkflowRunTest;
 import ca.on.oicr.pde.testing.workflow.WorkflowRunTest;
 import static ca.on.oicr.pde.utilities.Helpers.generateSeqwareSettings;
@@ -9,18 +10,16 @@ import static ca.on.oicr.pde.utilities.Helpers.getRequiredSystemPropertyAsString
 import static ca.on.oicr.pde.utilities.Helpers.getScriptFromResource;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.UUID;
 import org.apache.commons.io.FileUtils;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Parameters;
 
@@ -59,61 +58,49 @@ public class WorkflowRunTestFactory {
     @Factory
     public Object[] createTests(String testDefinition) throws IOException {
 
-        //Get the test configuration json document
-        JsonNode testConfig = new ObjectMapper().readTree(FileUtils.readFileToString(FileUtils.toFile(getClass().getResource(testDefinition))));
+        TestDefinition td = TestDefinition.buildFromJson(FileUtils.readFileToString(FileUtils.toFile(getClass().getResource(testDefinition))));
 
-        //Get default and common settings
-        String defaultDescription = testConfig.get("defaults").get("description").getTextValue();
-        String defaultMetricsCalculateCommand = testConfig.get("defaults").get("metrics_calculate").getTextValue();
-        String defaultMetricsCompareCommand = testConfig.get("defaults").get("metrics_compare").getTextValue();
-        String defaultInputConfigDir = testConfig.get("defaults").get("input_config_dir").getTextValue();
-        String defaultOutputMetricsDir = testConfig.get("defaults").get("output_metrics_dir").getTextValue();
-
-        //build a list of tests
-        tests = new ArrayList<WorkflowRunTest>();
-
-        
-        //TODO: implement a TestDefinition and TestResult class
+        tests = new ArrayList();
         int count = 0;
-        //Generate a new test for each test defined in json file
-        for (JsonNode test : testConfig.get("tests")) {
-            String description = test.get("description") == null ? defaultDescription : test.get("description").getTextValue();
-            String inputConfigDir = test.get("input_config_dir") == null ? defaultInputConfigDir : test.get("input_config_dir").getTextValue();
-            String inputConfig = test.get("input_config").getTextValue();
-            String outputMetricsDir = test.get("output_metrics_dir") == null ? defaultOutputMetricsDir : test.get("output_metrics_dir").getTextValue();
-            String outputMetrics = test.get("output_metrics") == null ? inputConfig + ".metrics" : test.get("output_metrics").getTextValue();
-            String metricsCalculateCommand = test.get("metrics_calculate") == null ? defaultMetricsCalculateCommand : test.get("metrics_calculate").getTextValue();
-            String metricsCompareCommand = test.get("metrics_compare") == null ? defaultMetricsCompareCommand : test.get("metrics_compare").getTextValue();
+        for (TestDefinition.Test t : td.getTests()) {
+            for (int i = 0; i < t.getIterations(); i++) {
+                String testName = "WorkflowRunTest_" + (count++) + "_" + workflowName + "-" + workflowVersion;
+                String prefix = new SimpleDateFormat("yyMMdd_HHmm").format(new Date());
+                String testId = UUID.randomUUID().toString().substring(0, 7);
+                File testWorkingDir = generateTestWorkingDirectory(workingDirectory, prefix, testName, testId);
+                File seqwareSettings = generateSeqwareSettings(testWorkingDir, seqwareWebserviceUrl, schedulingSystem, schedulingHost);
 
-            Map<String, String> environmentVariables = new HashMap<String, String>();
-            if (test.get("environment_variables") != null) {
-                Iterator<Entry<String, JsonNode>> ji = test.get("environment_variables").getFields();
-                while (ji.hasNext()) {
-                    Entry<String, JsonNode> e = ji.next();
-                    environmentVariables.put(e.getKey(), e.getValue().getTextValue());
+                Path scriptDirectory = Files.createDirectory(Paths.get(testWorkingDir.getAbsolutePath()).resolve("scripts"));
+                File calculateMetricsScript = getScriptFromResource(t.getMetricsCalculateScript(), scriptDirectory);
+                File compareMetricsScript = getScriptFromResource(t.getMetricsCompareScript(), scriptDirectory);
+
+                List<File> iniFiles = new ArrayList<>();
+
+                //Add a blank ini file to list (need at least one ini file for seqware command line)
+                iniFiles.add(File.createTempFile("blank", "ini"));
+
+                //Add user specified ini file if it is accessible
+                if (t.getIniFile() != null) {
+                    iniFiles.add(t.getIniFile());
+                }
+
+                String actualOutputFileName = "";
+                if(StringUtils.isNotBlank(t.getId())){
+                    actualOutputFileName = StringUtils.trim(t.getId()) +".metrics";
+                } else if(t.getIniFile() != null && StringUtils.isNotBlank(t.getIniFile().getName())) {
+                     actualOutputFileName = t.getIniFile().getName() + ".metrics";
+                } else {
+                    throw new RuntimeException();
+                }
+
+                if ("oozie".equals(schedulingSystem)) {
+                    tests.add(new OozieWorkflowRunTest(seqwareDistribution, seqwareSettings, testWorkingDir, testName,
+                            workflowBundlePath, workflowName, workflowVersion, workflowBundleBinPath, iniFiles, actualOutputFileName, t.getMetricsFile(),
+                            calculateMetricsScript, compareMetricsScript, t.getEnvironmentVariables(), t.getParameters()));
+                } else {
+                    throw new RuntimeException("Unsupported schedulingSystem type.");
                 }
             }
-
-            File workflowIni = new File(inputConfigDir + "/" + inputConfig);
-            File expectedOutput = new File(outputMetricsDir + "/" + outputMetrics);
-            File calculateMetricsScript = getScriptFromResource(metricsCalculateCommand);
-            File compareMetricsScript = getScriptFromResource(metricsCompareCommand);
-
-            String testName = "WorkflowRunTest_" + (count++) + "_" + workflowName + "-" + workflowVersion;
-            String prefix = new SimpleDateFormat("yyMMdd_HHmm").format(new Date());
-            String testId = UUID.randomUUID().toString().substring(0, 7);
-            File testWorkingDir = generateTestWorkingDirectory(workingDirectory, prefix, testName, testId);
-
-            File seqwareSettings = generateSeqwareSettings(testWorkingDir, seqwareWebserviceUrl, schedulingSystem, schedulingHost);
-
-            if ("oozie".equals(schedulingSystem)) {
-                tests.add(new OozieWorkflowRunTest(seqwareDistribution, seqwareSettings, testWorkingDir, testName, workflowBundlePath, workflowName, workflowVersion, workflowBundleBinPath, workflowIni, expectedOutput, calculateMetricsScript, compareMetricsScript, environmentVariables));
-            } else if ("pegasus".equals(schedulingSystem)) {
-                tests.add(new WorkflowRunTest(seqwareDistribution, seqwareSettings, testWorkingDir, testName, workflowBundlePath, workflowName, workflowVersion, workflowBundleBinPath, workflowIni, expectedOutput, calculateMetricsScript, compareMetricsScript, environmentVariables));
-            } else {
-                throw new RuntimeException();
-            }
-
         }
 
         return tests.toArray();
