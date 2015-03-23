@@ -31,19 +31,19 @@ Afterwards, they will be available in your local Maven repository.
 <dependency>
     <groupId>ca.on.oicr.pde</groupId>
     <artifactId>common-utilities</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.6</version>
 </dependency>
 
 <dependency>
     <groupId>ca.on.oicr.pde</groupId>
     <artifactId>decider-utilities</artifactId>
-    <version>1.4.3-SNAPSHOT</version>
+    <version>1.6</version>
 </dependency>
 
 <dependency>
     <groupId>ca.on.oicr.pde</groupId>
     <artifactId>workflow-utilities</artifactId>
-    <version>1.3-SNAPSHOT</version>
+    <version>1.6</version>
 </dependency>
 ```
 
@@ -58,7 +58,7 @@ To use the workflow parent pom, add the following to your workflow's pom.xml:
 <parent>
     <groupId>ca.on.oicr.pde.config</groupId>
     <artifactId>workflows</artifactId>
-    <version>2014.3.0-SNAPSHOT</version>
+    <version>3</version>
 </parent>
 ```
 
@@ -68,6 +68,6 @@ To use the decider parent pom, add the following to your decider's pom.xml:
 <parent>
     <groupId>ca.on.oicr.pde.config</groupId>
     <artifactId>deciders</artifactId>
-    <version>2014.3.0-SNAPSHOT</version>
+    <version>3</version>
 </parent>
 ```
