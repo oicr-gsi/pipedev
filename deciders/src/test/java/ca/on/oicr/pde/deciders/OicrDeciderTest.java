@@ -1,5 +1,7 @@
 package ca.on.oicr.pde.deciders;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -65,15 +67,22 @@ public class OicrDeciderTest {
     @Test
     public void outputPathInvalid() {
         Assert.assertEquals(getOicrDeciderInitExitStatus("--output-path", "/tmp/does/not/exist"), ReturnValue.INVALIDPARAMETERS);
+        Assert.assertEquals(getOicrDeciderInitExitStatus("--output-path", "/dev/null"), ReturnValue.INVALIDPARAMETERS);
         Assert.assertEquals(getOicrDeciderInitExitStatus("--output-path", "/tmp/*"), ReturnValue.INVALIDPARAMETERS);
         Assert.assertEquals(getOicrDeciderInitExitStatus("--output-path", "/root/"), ReturnValue.INVALIDPARAMETERS);
         Assert.assertEquals(getOicrDeciderInitExitStatus("--output-path", "/"), ReturnValue.INVALIDPARAMETERS);
     }
 
     @Test
+    public void outputPathIsAFile() throws IOException {
+        File outputPath = File.createTempFile("testFile", "");
+        outputPath.deleteOnExit();
+        Assert.assertEquals(getOicrDeciderInitExitStatus("--output-path", outputPath.getAbsolutePath()), ReturnValue.INVALIDPARAMETERS);
+    }
+
+    @Test
     public void outputPathValid() {
         Assert.assertEquals(getOicrDeciderInitExitStatus("--output-path", "/tmp/"), ReturnValue.SUCCESS);
-        Assert.assertEquals(getOicrDeciderInitExitStatus("--output-path", "/dev/null"), ReturnValue.SUCCESS);
         Assert.assertEquals(getOicrDeciderInitExitStatus("--output-path", "./"), ReturnValue.SUCCESS);
         Assert.assertEquals(getOicrDeciderInitExitStatus(), ReturnValue.SUCCESS); //default output-path is ./
     }
@@ -85,7 +94,7 @@ public class OicrDeciderTest {
         OicrDecider od = new OicrDecider();
         od.setParams(Arrays.asList(params));
         od.parse_parameters();
-        
+
         ReturnValue rv = od.init();
         Assert.assertTrue(basicDeciderMock.initCalled);
 

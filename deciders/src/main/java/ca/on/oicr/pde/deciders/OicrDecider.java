@@ -215,7 +215,7 @@ public class OicrDecider extends BasicDecider {
         }
         if (options.has("output-path")) {
             Path outputPath = Paths.get(getArgument("output-path"));
-            if (!Files.exists(outputPath) || !Files.isWritable(outputPath)) {
+            if (!Files.exists(outputPath) || !Files.isDirectory(outputPath) || !Files.isWritable(outputPath)) {
                 Log.error("The output-path is not accessible.");
                 ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
             }
