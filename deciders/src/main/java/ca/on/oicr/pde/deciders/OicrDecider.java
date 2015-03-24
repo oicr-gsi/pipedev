@@ -1,6 +1,9 @@
 package ca.on.oicr.pde.deciders;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -122,8 +125,8 @@ public class OicrDecider extends BasicDecider {
         parser.acceptsAll(Arrays.asList("check-file-exists", "cf"), "Optional: only launch on the file if the file exists");
         parser.accepts("skip-status-check", "Optional: If enabled will skip the check for the status of the sequencer run/lane/IUS/workflow run");
         parser.acceptsAll(Arrays.asList("help", "h"), "Prints this help message");
-        defineArgument("output-path", "The absolute path of the directory to put the final file(s) (workflow output-prefix option).", false);
-        defineArgument("output-folder", "The relative path to put the final result(s) (workflow output-dir option).", false);
+        defineArgument("output-path", "The absolute path of the directory to put the final file(s).  This directory must exist and be writable.", false);
+        defineArgument("output-folder", "The relative path to put the final result(s).  This directory will be created.", false);
         defineArgument("after-date", "Optional: Format YYYY-MM-DD. Only run on files that have been modified after a certain date, not inclusive.", false);
         defineArgument("before-date", "Optional: Format YYYY-MM-DD. Only run on files that have been modified before a certain date, not inclusive.", false);
         files = new HashMap<>();
@@ -207,6 +210,13 @@ public class OicrDecider extends BasicDecider {
                 beforeDate = format.parse(dateString);
             } catch (ParseException e) {
                 Log.error("Before Date should be in the format: " + format.toPattern(), e);
+                ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
+            }
+        }
+        if (options.has("output-path")) {
+            Path outputPath = Paths.get(getArgument("output-path"));
+            if (!Files.exists(outputPath) || !Files.isWritable(outputPath)) {
+                Log.error("The output-path is not accessible.");
                 ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
             }
         }
