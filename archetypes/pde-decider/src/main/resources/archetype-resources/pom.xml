@@ -7,7 +7,7 @@
     <parent>
         <groupId>ca.on.oicr.pde.config</groupId>
         <artifactId>deciders</artifactId>
-        <version>4-SNAPSHOT</version>
+        <version>3</version>
     </parent>
 
     <artifactId>${decider-name}</artifactId>
