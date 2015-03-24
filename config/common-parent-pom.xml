@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>ca.on.oicr.pde.config</groupId>
     <artifactId>common</artifactId>
-    <version>3</version>
+    <version>4-SNAPSHOT</version>
     <packaging>pom</packaging>
     <url>http://maven.apache.org</url>
 
@@ -166,23 +166,28 @@
             <dependency>
                 <groupId>ca.on.oicr.pde</groupId>
                 <artifactId>decider-utilities</artifactId>
-                <version>1.6</version>
+                <version>1.7-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ca.on.oicr.pde</groupId>
                 <artifactId>workflow-utilities</artifactId>
-                <version>1.6</version>
+                <version>1.7-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>ca.on.oicr.pde</groupId>
                 <artifactId>common-utilities</artifactId>
-                <version>1.6</version>
+                <version>1.7-SNAPSHOT</version>
             </dependency>
             
             <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
-                <version>6.8.17</version>
+                <version>6.8.21</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmockit</groupId>
+                <artifactId>jmockit</artifactId>
+                <version>1.16</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

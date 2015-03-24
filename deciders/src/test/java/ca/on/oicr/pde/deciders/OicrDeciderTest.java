@@ -1,15 +1,18 @@
 package ca.on.oicr.pde.deciders;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import mockit.*;
+import net.sourceforge.seqware.common.module.ReturnValue;
+import net.sourceforge.seqware.pipeline.deciders.BasicDecider;
 import org.testng.annotations.*;
 import org.testng.Assert;
 
 public class OicrDeciderTest {
-
-    public OicrDeciderTest() {
-    }
 
     /**
      * Test of escapeString method, of class OicrDecider.
@@ -59,5 +62,53 @@ public class OicrDeciderTest {
         Assert.assertFalse(instance.isAfterDate(jan1, jan1Date), "isAfterDate Test for: Jan 1 after Jan 1?");
         Assert.assertFalse(instance.isAfterDate(jan1, jan2Date), "isAfterDate Test for: Jan 1 after Jan 2?");
 
+    }
+
+    @Test
+    public void outputPathInvalid() {
+        Assert.assertEquals(getOicrDeciderInitExitStatus("--output-path", "/tmp/does/not/exist"), ReturnValue.INVALIDPARAMETERS);
+        Assert.assertEquals(getOicrDeciderInitExitStatus("--output-path", "/dev/null"), ReturnValue.INVALIDPARAMETERS);
+        Assert.assertEquals(getOicrDeciderInitExitStatus("--output-path", "/tmp/*"), ReturnValue.INVALIDPARAMETERS);
+        Assert.assertEquals(getOicrDeciderInitExitStatus("--output-path", "/root/"), ReturnValue.INVALIDPARAMETERS);
+        Assert.assertEquals(getOicrDeciderInitExitStatus("--output-path", "/"), ReturnValue.INVALIDPARAMETERS);
+    }
+
+    @Test
+    public void outputPathIsAFile() throws IOException {
+        File outputPath = File.createTempFile("testFile", "");
+        outputPath.deleteOnExit();
+        Assert.assertEquals(getOicrDeciderInitExitStatus("--output-path", outputPath.getAbsolutePath()), ReturnValue.INVALIDPARAMETERS);
+    }
+
+    @Test
+    public void outputPathValid() {
+        Assert.assertEquals(getOicrDeciderInitExitStatus("--output-path", "/tmp/"), ReturnValue.SUCCESS);
+        Assert.assertEquals(getOicrDeciderInitExitStatus("--output-path", "./"), ReturnValue.SUCCESS);
+        Assert.assertEquals(getOicrDeciderInitExitStatus(), ReturnValue.SUCCESS); //default output-path is ./
+    }
+
+    private int getOicrDeciderInitExitStatus(String... params) {
+        BasicDeciderMock basicDeciderMock = new BasicDeciderMock();
+        Assert.assertFalse(basicDeciderMock.initCalled);
+
+        OicrDecider od = new OicrDecider();
+        od.setParams(Arrays.asList(params));
+        od.parse_parameters();
+
+        ReturnValue rv = od.init();
+        Assert.assertTrue(basicDeciderMock.initCalled);
+
+        return rv.getExitStatus();
+    }
+
+    public static class BasicDeciderMock extends MockUp<BasicDecider> {
+
+        private boolean initCalled = false;
+
+        @Mock
+        public ReturnValue init() {
+            this.initCalled = true;
+            return new ReturnValue();
+        }
     }
 }

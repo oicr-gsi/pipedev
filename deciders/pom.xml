@@ -6,12 +6,12 @@
     <parent>
         <groupId>ca.on.oicr.pde.config</groupId>
         <artifactId>common</artifactId>
-        <version>3</version>
+        <version>4-SNAPSHOT</version>
     </parent>
 
     <groupId>ca.on.oicr.pde</groupId>
     <artifactId>decider-utilities</artifactId>
-    <version>1.6</version>
+    <version>1.7-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>decider-utilities</name>
@@ -131,6 +131,11 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jmockit</groupId>
+            <artifactId>jmockit</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
