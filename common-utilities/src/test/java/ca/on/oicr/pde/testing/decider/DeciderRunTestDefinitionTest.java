@@ -16,7 +16,7 @@ import org.testng.annotations.Test;
 
 public class DeciderRunTestDefinitionTest {
 
-    DeciderRunTestDefinition td;
+    DeciderRunTestDefinition expected;
 
     @BeforeTest
     public void setup() throws IOException {
@@ -78,75 +78,71 @@ public class DeciderRunTestDefinitionTest {
                 + "    ]\n"
                 + "}";
 
-        td = DeciderRunTestDefinition.buildFromJson(jsonDoc);
-        System.out.println(td);
+        expected = DeciderRunTestDefinition.buildFromJson(jsonDoc);
+        System.out.println(expected);
 
         ObjectMapper m = new ObjectMapper();
         m.enable(SerializationFeature.INDENT_OUTPUT);
-        System.out.println(m.writeValueAsString(td));
+        System.out.println(m.writeValueAsString(expected));
 
     }
 
     @Test
     public void verifyBuildJson() {
-        DeciderRunTestDefinition d = new DeciderRunTestDefinition();
-        d.setDefaultDescription("BamQC decider test");
-        d.setDefaultParameters(ImmutableMap.of("a", "b", "c", "d"));
-        d.setDefaultMetricsDirectory("/tmp");
+        DeciderRunTestDefinition actual = new DeciderRunTestDefinition();
+        actual.setDefaultDescription("BamQC decider test");
+        actual.setDefaultParameters(ImmutableMap.of("a", "b", "c", "d"));
+        actual.setDefaultMetricsDirectory("/tmp");
 
         DeciderRunTestDefinition.Test t;
 
         t = new DeciderRunTestDefinition.Test();
         t.setSamples(Sets.newHashSet("a", "a", "a", "a"));
-        d.add(t);
+        actual.add(t);
 
         t = new DeciderRunTestDefinition.Test();
         t.setStudies(Sets.newHashSet("b", "a"));
-        d.add(t);
+        actual.add(t);
 
         t = new DeciderRunTestDefinition.Test();
         t.setSequencerRuns(Sets.newHashSet("c", "a"));
-        d.add(t);
+        actual.add(t);
 
         t = new DeciderRunTestDefinition.Test();
         t.setSamples(Sets.newHashSet("d"));
-        d.add(t);
+        actual.add(t);
 
         t = new DeciderRunTestDefinition.Test();
         t.setSequencerRuns(Sets.newHashSet("e", "a"));
-        d.add(t);
+        actual.add(t);
 
         t = new DeciderRunTestDefinition.Test();
         t.setId("parameter override test");
         t.setSequencerRuns(Sets.newHashSet("f", "a"));
         t.setParameters(ImmutableMap.of("a", "overridden argument"));
-        d.add(t);
+        actual.add(t);
 
         t = new DeciderRunTestDefinition.Test();
         t.setId("parameter addition test");
         t.setSequencerRuns(Sets.newHashSet("g", "a"));
         t.setParameters(ImmutableMap.of("e", "f"));
-        d.add(t);
+        actual.add(t);
 
         t = new DeciderRunTestDefinition.Test();
-        d.add(t);
+        actual.add(t);
 
         t = new DeciderRunTestDefinition.Test();
         t.setSamples(Sets.newHashSet(""));
         t.setDescription("a different description");
-        d.add(t);
+        actual.add(t);
 
-        System.out.println("d:\n" + d.toString());
-
-        System.out.println("td:\n" + td.toString());
-
-        Assert.assertEquals(d, td);
+        Assert.assertEquals(actual, expected);
     }
 
     @Test()
     public void checkForMissingTests() throws IOException {
-        Assert.assertNotNull(td);
-        Assert.assertEquals(9, td.getTests().size());
+        Assert.assertNotNull(expected);
+        Assert.assertEquals(9, expected.getTests().size());
     }
 
     @Test()
@@ -218,7 +214,7 @@ public class DeciderRunTestDefinitionTest {
     private DeciderRunTestDefinition.Test getTest(String id) {
         //Check that parameter additions are working:
         DeciderRunTestDefinition.Test test = null;
-        for (DeciderRunTestDefinition.Test t : td.getTests()) {
+        for (DeciderRunTestDefinition.Test t : expected.getTests()) {
             if (t.getId().equals(id)) {
                 test = t;
             }
