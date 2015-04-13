@@ -134,7 +134,7 @@ public class DeciderRunTestFactory {
         //Setup a shared thread pool for all tests to use
         ExecutorService sharedPool = Executors.newFixedThreadPool(50);
 
-        for (DeciderRunTestDefinition.Test t : td.tests) {
+        for (DeciderRunTestDefinition.Test t : td.getTests()) {
 
             //Build test name
             StringBuilder b = new StringBuilder();
