@@ -31,7 +31,7 @@ public class DeciderRunTestDefinition {
     private static Set<String> defaultSequencerRuns = new HashSet<>();
     private static Set<String> defaultSamples = new HashSet<>();
 
-    public Collection<DeciderRunTestDefinition.Test> tests;
+    private final Collection<DeciderRunTestDefinition.Test> tests = new LinkedList<>();
 
     public static DeciderRunTestDefinition buildFromJson(String json) throws IOException {
         ObjectMapper m = new ObjectMapper();
@@ -69,6 +69,18 @@ public class DeciderRunTestDefinition {
 
     public void setDefaultIniExclusions(Set<String> defaultIniExclusions) {
         DeciderRunTestDefinition.defaultIniExclusions = defaultIniExclusions;
+    }
+
+    public void add(DeciderRunTestDefinition.Test t) {
+        tests.add(t);
+    }
+
+    public void addAll(Collection<DeciderRunTestDefinition.Test> ts) {
+        tests.addAll(ts);
+    }
+
+    public Collection<DeciderRunTestDefinition.Test> getTests() {
+        return Collections.unmodifiableCollection(tests);
     }
 
     public static class Test {

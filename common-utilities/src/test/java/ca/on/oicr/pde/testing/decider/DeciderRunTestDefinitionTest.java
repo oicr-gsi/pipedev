@@ -88,7 +88,7 @@ public class DeciderRunTestDefinitionTest {
     @Test()
     public void checkForMissingTests() throws IOException {
         Assert.assertNotNull(td);
-        Assert.assertEquals(13, td.tests.size());
+        Assert.assertEquals(9, td.getTests().size());
     }
 
     @Test()
@@ -160,7 +160,7 @@ public class DeciderRunTestDefinitionTest {
     private DeciderRunTestDefinition.Test getTest(String id) {
         //Check that parameter additions are working:
         DeciderRunTestDefinition.Test test = null;
-        for (DeciderRunTestDefinition.Test t : td.tests) {
+        for (DeciderRunTestDefinition.Test t : td.getTests()) {
             if (t.getId().equals(id)) {
                 test = t;
             }
