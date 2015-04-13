@@ -18,6 +18,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.WordUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class DeciderRunTestDefinition {
@@ -186,6 +188,22 @@ public class DeciderRunTestDefinition {
             return ToStringBuilder.reflectionToString(this);
         }
 
+        @Override
+        public int hashCode() {
+            return HashCodeBuilder.reflectionHashCode(this);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            return EqualsBuilder.reflectionEquals(this, obj);
+        }
+
         @JsonIgnore
         public File getMetrics() throws IOException {
 
@@ -243,6 +261,22 @@ public class DeciderRunTestDefinition {
     public String toString() {
         //return "TestDefinition{" + "tests=" + tests + '}';
         return ToStringBuilder.reflectionToString(this);
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     private static Map<String, List<String>> parseParameters(Map<String, Object> parameters) {

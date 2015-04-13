@@ -2,6 +2,8 @@ package ca.on.oicr.pde.testing.decider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -83,6 +85,62 @@ public class DeciderRunTestDefinitionTest {
         m.enable(SerializationFeature.INDENT_OUTPUT);
         System.out.println(m.writeValueAsString(td));
 
+    }
+
+    @Test
+    public void verifyBuildJson() {
+        DeciderRunTestDefinition d = new DeciderRunTestDefinition();
+        d.setDefaultDescription("BamQC decider test");
+        d.setDefaultParameters(ImmutableMap.of("a", "b", "c", "d"));
+        d.setDefaultMetricsDirectory("/tmp");
+
+        DeciderRunTestDefinition.Test t;
+
+        t = new DeciderRunTestDefinition.Test();
+        t.setSamples(Sets.newHashSet("a", "a", "a", "a"));
+        d.add(t);
+
+        t = new DeciderRunTestDefinition.Test();
+        t.setStudies(Sets.newHashSet("b", "a"));
+        d.add(t);
+
+        t = new DeciderRunTestDefinition.Test();
+        t.setSequencerRuns(Sets.newHashSet("c", "a"));
+        d.add(t);
+
+        t = new DeciderRunTestDefinition.Test();
+        t.setSamples(Sets.newHashSet("d"));
+        d.add(t);
+
+        t = new DeciderRunTestDefinition.Test();
+        t.setSequencerRuns(Sets.newHashSet("e", "a"));
+        d.add(t);
+
+        t = new DeciderRunTestDefinition.Test();
+        t.setId("parameter override test");
+        t.setSequencerRuns(Sets.newHashSet("f", "a"));
+        t.setParameters(ImmutableMap.of("a", "overridden argument"));
+        d.add(t);
+
+        t = new DeciderRunTestDefinition.Test();
+        t.setId("parameter addition test");
+        t.setSequencerRuns(Sets.newHashSet("g", "a"));
+        t.setParameters(ImmutableMap.of("e", "f"));
+        d.add(t);
+
+        t = new DeciderRunTestDefinition.Test();
+        d.add(t);
+
+        t = new DeciderRunTestDefinition.Test();
+        t.setSamples(Sets.newHashSet(""));
+        t.setDescription("a different description");
+        d.add(t);
+
+        System.out.println("d:\n" + d.toString());
+
+        System.out.println("td:\n" + td.toString());
+
+        Assert.assertEquals(d, td);
     }
 
     @Test()
