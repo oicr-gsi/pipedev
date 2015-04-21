@@ -104,8 +104,9 @@ public class OicrDeciderIT {
 
         assertEquals(run(decider, params).getWorkflowRunCount().intValue(), 16); //no new workflow runs should be scheduled
 
-//        params.add("--ignore-previous-runs");
-//        assertEquals(run(d, params).getWorkflowRunCount().intValue(), 32);
+        //Test for SEQWARE-2017
+        params.add("--ignore-previous-runs");
+        assertEquals(run(decider, params).getWorkflowRunCount().intValue(), 32);
     }
 
     @Test
