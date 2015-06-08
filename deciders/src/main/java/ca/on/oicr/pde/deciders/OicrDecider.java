@@ -490,8 +490,8 @@ public class OicrDecider extends BasicDecider {
     /**
      * <p>
      * Creates a new file name from the input files given to it. The new filename contains, in order: the donor, the tissue origin, the
-     * tissue type, the library type, the library size, the library template type, and the IUS ids. Duplicate values are only listed once,
-     * and multiple values are separated by hyphens.</p>
+     * tissue type, the library type, the library size, the library template type, the group id, and the IUS ids. Duplicate values are 
+     * only listed once, and multiple values are separated by hyphens.</p>
      *
      * <p>
      * E.g. Two files ABCD_0001_Ly_R_420_EX.bam and ABCD_0001_Pa_P_369_EX.bam produce combined file name
@@ -505,7 +505,7 @@ public class OicrDecider extends BasicDecider {
      * @return a String representing the combined filename
      */
     protected String getCombinedFileName(FileAttributes[] inputFiles) {
-        SortedSet<String> donor = null, origin = null, tType = null, lType = null, lSize = null, lTemplate = null, ius = null;
+        SortedSet<String> donor = null, origin = null, tType = null, lType = null, lSize = null, lTemplate = null, lGroupid = null, ius = null;
         for (FileAttributes fileAtt : inputFiles) {
             donor = addToSet(donor, fileAtt.getDonor());
             origin = addToSet(origin, fileAtt.getLimsValue(Lims.TISSUE_ORIGIN));
@@ -513,6 +513,7 @@ public class OicrDecider extends BasicDecider {
             lType = addToSet(lType, fileAtt.getLimsValue(Lims.LIBRARY_TYPE));
             lSize = addToSet(lSize, fileAtt.getLimsValue(Lims.LIBRARY_SIZE));
             lTemplate = addToSet(lTemplate, fileAtt.getLimsValue(Lims.LIBRARY_TEMPLATE_TYPE));
+            lGroupid = addToSet(lGroupid, fileAtt.getLimsValue(Lims.GROUP_ID));
             ius = addToSet(ius, fileAtt.getOtherAttribute(FindAllTheFiles.Header.IUS_SWA));
         }
 
@@ -523,6 +524,7 @@ public class OicrDecider extends BasicDecider {
         root.append(appendAll(lType, "_"));
         root.append(appendAll(lSize, "_"));
         root.append(appendAll(lTemplate, "_"));
+        root.append(appendAll(lGroupid, "_"));
         root.append("ius").append(appendAll(ius, ""));
 
         return root.toString();
