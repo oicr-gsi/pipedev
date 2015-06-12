@@ -70,7 +70,7 @@
     <build>
 
         <filters>
-            <filter>workflow.properties</filter>
+            <filter>src/main/filters/workflow.properties</filter>
         </filters>
         
         <resources>
@@ -118,7 +118,7 @@
                         </goals>
                         <configuration>
                             <files>
-                                <file>workflow.properties</file>
+                                <file>src/main/filters/workflow.properties</file>
                             </files>
                         </configuration>
                     </execution>
