@@ -265,7 +265,6 @@
                             <outputDirectory>${bundleDirectory}/bin</outputDirectory>
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>true</overWriteSnapshots>
-                            <includeScope>provided</includeScope>
                             <includeTypes>zip,tar.gz,gz</includeTypes>
                         </configuration>
                     </execution>
