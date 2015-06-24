@@ -1,4 +1,4 @@
-package ca.on.oicr.pde.commands;
+package ca.on.oicr.pde.tools.common;
 
 import java.util.Collections;
 import java.util.LinkedList;
