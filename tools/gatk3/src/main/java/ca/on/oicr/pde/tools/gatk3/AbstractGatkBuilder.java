@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-import net.sourceforge.seqware.common.util.Log;
 
 /**
  *
@@ -52,7 +51,6 @@ public abstract class AbstractGatkBuilder<T> {
             try (InputStream is = getClass().getClassLoader().getResourceAsStream("tool.properties")) {
                 props.load(is);
             } catch (IOException ioe) {
-                Log.error("Unable to load tool.properties");
                 throw new RuntimeException(ioe);
             }
             jarPath = Paths.get(p.toString(), props.getProperty("gatk_dir"), "GenomeAnalysisTK.jar").toString();
