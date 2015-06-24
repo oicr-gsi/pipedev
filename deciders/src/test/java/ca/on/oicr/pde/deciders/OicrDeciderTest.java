@@ -3,6 +3,11 @@ package ca.on.oicr.pde.deciders;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import net.sourceforge.seqware.common.hibernate.FindAllTheFiles;
+import net.sourceforge.seqware.common.module.FileMetadata;
+import net.sourceforge.seqware.common.module.ReturnValue;
 import org.testng.annotations.*;
 import org.testng.Assert;
 
@@ -59,5 +64,30 @@ public class OicrDeciderTest {
         Assert.assertFalse(instance.isAfterDate(jan1, jan1Date), "isAfterDate Test for: Jan 1 after Jan 1?");
         Assert.assertFalse(instance.isAfterDate(jan1, jan2Date), "isAfterDate Test for: Jan 1 after Jan 2?");
 
+    }
+
+    @Test
+    public void testGetPrefixFromFileMetadata() {
+        OicrDecider od = new OicrDecider();
+        ReturnValue rv;
+        FileAttributes fa;
+
+        Map<String, String> attributes = new HashMap<>();
+        attributes.put(FindAllTheFiles.Header.IUS_SWA.getTitle(), "IUSSWA");
+        attributes.put(FindAllTheFiles.Header.SAMPLE_NAME.getTitle(), "SAMPLENAME");
+        attributes.put(FindAllTheFiles.Header.SEQUENCER_RUN_NAME.getTitle(), "SEQUENCERRUNNAME");
+        attributes.put(FindAllTheFiles.Header.IUS_TAG.getTitle(), "IUSTAG");
+        attributes.put(FindAllTheFiles.Header.LANE_NUM.getTitle(), "1");
+
+        rv = new ReturnValue();
+        rv.setAttributes(attributes);
+        fa = new FileAttributes(rv, new FileMetadata());
+        Assert.assertEquals(od.getPrefixFromFileMetadata(fa), "SWID_IUSSWA_SAMPLENAME_SEQUENCERRUNNAME_IUSTAG_L001_R1_001_");
+
+        attributes.put(Lims.GROUP_ID.getAttributeTitle(), "GROUPID");
+        rv = new ReturnValue();
+        rv.setAttributes(attributes);
+        fa = new FileAttributes(rv, new FileMetadata());
+        Assert.assertEquals(od.getPrefixFromFileMetadata(fa), "SWID_IUSSWA_SAMPLENAME_GROUPID_SEQUENCERRUNNAME_IUSTAG_L001_R1_001_");
     }
 }

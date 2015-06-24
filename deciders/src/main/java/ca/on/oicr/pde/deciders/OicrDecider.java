@@ -175,7 +175,7 @@ public class OicrDecider extends BasicDecider {
     @Override
     public ReturnValue init() {
         ReturnValue ret = new ReturnValue();
-        
+
         if (options.has("help")) {
             System.err.println(get_syntax());
             ret.setExitStatus(ReturnValue.RETURNEDHELPMSG);
@@ -381,18 +381,18 @@ public class OicrDecider extends BasicDecider {
 
         return run.getIniFile();
     }
-    
+
     @Override
     public ReturnValue do_summary(){
         ReturnValue rv = super.do_summary();
-        
+
         //decider run failed somewhere, but some how the decider did not terminate - set the exit code to non-zero
         if(isFailed){
             rv.setReturnValue(ReturnValue.FAILURE);
         }
         return rv;
     }
-    
+
     private void setFinalStatusToFailed(){
         isFailed = true;
     }
@@ -490,7 +490,7 @@ public class OicrDecider extends BasicDecider {
     /**
      * <p>
      * Creates a new file name from the input files given to it. The new filename contains, in order: the donor, the tissue origin, the
-     * tissue type, the library type, the library size, the library template type, the group id, and the IUS ids. Duplicate values are 
+     * tissue type, the library type, the library size, the library template type, the group id, and the IUS ids. Duplicate values are
      * only listed once, and multiple values are separated by hyphens.</p>
      *
      * <p>
@@ -601,5 +601,82 @@ public class OicrDecider extends BasicDecider {
             }
         }
         return inputs;
+    }
+
+    /**
+     * Gets the key (Lims or FindAllTheFiles.Header) value from the FileAttributes object, throws a RuntimeException if the value is missing.
+     * Use getOptionalAttribute() if the RuntimeException is undesired.
+     *
+     * @param fa  FileAttribute object to search through.
+     * @param key The FindAllTheFiles.Header or Lims enum key.
+     *
+     * @return A string value for the FileAttribute key requested.
+     *
+     * @throws RuntimeException if a value is not set for the key in the FileAttributes object.
+     */
+    public String getRequiredAttribute(FileAttributes fa, Enum key) {
+        String value = getAttribute(fa, key);
+        if (value == null) {
+            throw new RuntimeException(String.format("File swid = [%s] is missing a required metadata attribute = [%s].",
+                    fa.getOtherAttribute(FindAllTheFiles.Header.FILE_SWA), key));
+        }
+        return value;
+    }
+
+    /**
+     * Gets the key (Lims or FindAllTheFiles.Header) value from the FileAttributes object, returns empty string if the value is missing.
+     * Use getRequiredAttribute() if the "empty string on missing value" is undesired.
+     *
+     * @param fa  FileAttribute object to search through.
+     * @param key The FindAllTheFiles.Header or Lims enum key.
+     *
+     * @return A string value for the requested FileAttribute key or empty string if the key value is null.
+     *
+     */
+    public String getOptionalAttribute(FileAttributes fa, Enum key) {
+        String value = getAttribute(fa, key);
+        if (value == null) {
+            value = "";
+        }
+        return value;
+    }
+
+    private String getAttribute(FileAttributes fa, Enum key) {
+        String value;
+        if (key == null || fa == null) {
+            throw new IllegalArgumentException("Null arguments");
+        } else if (key instanceof FindAllTheFiles.Header) {
+            value = fa.getOtherAttribute((FindAllTheFiles.Header) key);
+        } else if (key instanceof Lims) {
+            value = fa.getLimsValue((Lims) key);
+        } else {
+            throw new IllegalArgumentException("Only Header and Lims key type supported");
+        }
+        return value;
+    }
+
+    /**
+     * Builds a standard prefix from a FileAttributes.
+     * Uses Lims and FindAllTheFiles.Header enum keys to build a prefix string from a FileAttributes object.
+     *
+     * @param fa FileAttribute object to build prefix from.
+     *
+     * @return A prefix string with the format "SWID_{IUS_SWA}_{SAMPLE_NAME}[_{GROUP_ID}]_{SEQUENCER_RUN_NAME}_{IUS_TAG}_L00{LANE_NUM}_R1_001_"
+     *
+     */
+    public String getPrefixFromFileMetadata(FileAttributes fa) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SWID").append("_").append(getRequiredAttribute(fa, FindAllTheFiles.Header.IUS_SWA));
+        sb.append("_").append(getRequiredAttribute(fa, FindAllTheFiles.Header.SAMPLE_NAME));
+        if (getAttribute(fa, Lims.GROUP_ID) != null) {
+            sb.append("_").append(getRequiredAttribute(fa, Lims.GROUP_ID));
+        }
+        sb.append("_").append(getRequiredAttribute(fa, FindAllTheFiles.Header.SEQUENCER_RUN_NAME));
+        sb.append("_").append(getRequiredAttribute(fa, FindAllTheFiles.Header.IUS_TAG));
+        sb.append("_").append("L00").append(getRequiredAttribute(fa, FindAllTheFiles.Header.LANE_NUM));
+        sb.append("_").append("R1");
+        sb.append("_").append("001");
+        sb.append("_");
+        return sb.toString();
     }
 }
