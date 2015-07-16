@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package ca.on.oicr.pde.deciders;
 
 import net.sourceforge.seqware.common.hibernate.FindAllTheFiles.Header;
@@ -14,6 +10,7 @@ public enum Group {
     STUDY(Header.STUDY_SWA, Header.STUDY_TITLE),
     EXPERIMENT(Header.EXPERIMENT_SWA, Header.EXPERIMENT_NAME),
     DONOR(Header.PARENT_SAMPLE_SWA, Header.PARENT_SAMPLE_NAME),
+    ROOT_SAMPLE_NAME(Header.ROOT_SAMPLE_NAME, Header.ROOT_SAMPLE_NAME),
     LIBRARY(Header.SAMPLE_SWA, Header.SAMPLE_NAME),
     BARCODE(Header.IUS_SWA, Header.IUS_TAG),
     LANE(Header.LANE_SWA, Header.LANE_NUM),
