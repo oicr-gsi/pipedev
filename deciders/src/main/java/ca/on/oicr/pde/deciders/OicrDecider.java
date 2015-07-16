@@ -436,6 +436,20 @@ public class OicrDecider extends BasicDecider {
             this.setGroupingStrategy(groupBy.getSwaHeader());
         }
     }
+    
+    /**
+     * Get the OicrDecider Group (a simplified version of "FindAllTheFiles" header fields)
+     * 
+     * @return the OicrDecider grouping strategy (Group) or null if not set
+     * 
+     * @see Group
+     * @see FindAllTheFiles.Header
+     * @see OicrDecider#setGroupBy()
+     * @see BasicDecider#getGroupingStrategy()
+     */
+    public Group getGroupBy() {
+        return this.groupBy;
+    }
 
     /**
      * Get the number of expected files per workflow run group.
