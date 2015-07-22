@@ -27,6 +27,7 @@ public class CatVariants extends AbstractCommand {
     public static class Builder extends AbstractGatkBuilder<Builder> {
 
         private final List<String> inputFiles = new LinkedList<>();
+        private boolean doSorting = false;
 
         public Builder(String javaPath, String maxHeapSize, String tmpDir, String gatkJarPath, String gatkKey, String outputDir) {
             super(javaPath, maxHeapSize, tmpDir, gatkJarPath, gatkKey, outputDir);
@@ -40,6 +41,16 @@ public class CatVariants extends AbstractCommand {
         public Builder setInputFiles(Collection<String> inputFiles) {
             this.inputFiles.clear();
             this.inputFiles.addAll(inputFiles);
+            return this;
+        }
+
+        public Builder disableSorting() {
+            this.doSorting = false;
+            return this;
+        }
+
+        public Builder enableSorting() {
+            this.doSorting = true;
             return this;
         }
 
@@ -59,10 +70,10 @@ public class CatVariants extends AbstractCommand {
                 } else {
                     throw new RuntimeException("Unsupported file type = [" + inputFile + "]");
                 }
-                
-                if(outputFileType == null) {
+
+                if (outputFileType == null) {
                     outputFileType = currentFileType;
-                } else if (!currentFileType.equals(outputFileType)){
+                } else if (!currentFileType.equals(outputFileType)) {
                     throw new RuntimeException("Expected all input files to be of the same type:\n" + Arrays.toString(inputFiles.toArray()));
                 } else {
                     //outputFileType == currentFileType
@@ -86,6 +97,10 @@ public class CatVariants extends AbstractCommand {
 
             c.add("--reference");
             c.add(referenceSequence);
+
+            if (!doSorting) {
+                c.add("--assumeSorted");
+            }
 
             for (String inputFile : inputFiles) {
                 c.add("--variant");
