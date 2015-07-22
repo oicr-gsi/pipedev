@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#set -e
+#set -o errexit
 #set -o pipefail
 
 die () {
@@ -149,7 +149,7 @@ echo "${pegasus_tc_data}" > "${PEGASUS_CATALOG_TRANSFORMATION_FILE}"
 elif [[ "$SCHEDULING_SYSTEM" == "oozie" ]]
 then
 
-OOZIE_APP_PATH="hdfs://${SCHEDULING_HOST}:8020/user/"$(whoami)"/"
+OOZIE_APP_PATH="hdfs://${SCHEDULING_HOST}:8020/user/$(whoami)/"
 
 OOZIE_WORK_DIR="${BASE_DIR}"/oozieTmp
 mkdir "${OOZIE_WORK_DIR}"
