@@ -3,7 +3,9 @@ package ca.on.oicr.pde.testing.decider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
@@ -17,7 +19,7 @@ public class DeciderRunTestDefinitionTest {
     public void setup() throws IOException {
         String jsonDoc = "{\n"
                 + "    \"defaultDescription\": \"BamQC decider test\",\n"
-                + "    \"defaultParameters\": {\"a\":\"b\",\"c\":\"d\"},\n"
+                + "    \"defaultParameters\": {\"a\":[\"b\"],\"c\":[\"d\"]},\n"
                 + "    \"defaultMetricsDirectory\":\"/tmp\",\n"
                 + "    \"tests\": [\n"
                 + "        {\n"
@@ -38,12 +40,12 @@ public class DeciderRunTestDefinitionTest {
                 + "        {\n"
                 + "            \"id\": \"parameter override test\",\n"
                 + "            \"sequencerRuns\": [\"f\",\"a\"],\n"
-                + "            \"parameters\": {\"a\":\"overridden argument\"}\n "
+                + "            \"parameters\": {\"a\":[\"overridden argument\"]}\n "
                 + "        },\n"
                 + "        {\n"
                 + "            \"id\": \"parameter addition test\",\n"
                 + "            \"sequencerRuns\": [\"g\",\"a\"],\n"
-                + "            \"parameters\": {\"e\":\"f\"}\n "
+                + "            \"parameters\": {\"e\":[\"f\"]}\n "
                 + "        },\n"
                 + "        {\n"
                 + "         " //empty test, will use defaults
@@ -51,6 +53,11 @@ public class DeciderRunTestDefinitionTest {
                 + "        {\n"
                 + "            \"samples\": [\"\"],\n"
                 + "            \"description\":\"a different description\"\n"
+                + "        },\n"
+                + "        {\n"
+                + "            \"id\": \"multiple parameters test\",\n"
+                + "            \"samples\": [\"a\"],\n"
+                + "            \"parameters\": {\"e\":[\"f\",\"g\"], \"x\":[\"y\"]}\n "
                 + "        }\n"
                 + "    ]\n"
                 + "}";
@@ -67,50 +74,54 @@ public class DeciderRunTestDefinitionTest {
     @Test()
     public void checkForMissingTests() throws IOException {
         Assert.assertNotNull(td);
-        Assert.assertEquals(9, td.tests.size());
+        Assert.assertEquals(10, td.tests.size());
     }
 
     @Test()
     public void checkParameterOverride() throws IOException {
 
-        //Check that parameter overrides are working:
-        DeciderRunTestDefinition.Test test = null;
-        for (DeciderRunTestDefinition.Test t : td.tests) {
-            if (t.getId().equals("parameter override test")) {
-                test = t;
-            }
-        }
-
-        Map<String, String> expected;
+        Map<String, List<String>> expected;
         expected = new LinkedHashMap<>();
-        expected.put("a", "overridden argument");
-        expected.put("c", "d");
+        expected.put("a", Arrays.asList("overridden argument"));
+        expected.put("c", Arrays.asList("d"));
 
-        Assert.assertNotNull(test);
-        Assert.assertEquals(test.getParameters(), expected);
-
+        Assert.assertEquals(getTest("parameter override test").getParameters(), expected);
     }
 
     @Test()
     public void checkParameterAddition() throws IOException {
 
+        Map<String, List<String>> expected;
+        expected = new LinkedHashMap<>();
+        expected.put("a", Arrays.asList("b"));
+        expected.put("c", Arrays.asList("d"));
+        expected.put("e", Arrays.asList("f"));
+
+        Assert.assertEquals(getTest("parameter addition test").getParameters(), expected);
+    }
+
+    @Test()
+    public void testMultipleParams() throws IOException {
+
+        Map<String, List<String>> expected;
+        expected = new LinkedHashMap<>();
+        expected.put("a", Arrays.asList("b"));
+        expected.put("c", Arrays.asList("d"));
+        expected.put("e", Arrays.asList("f", "g"));
+        expected.put("x", Arrays.asList("y"));
+
+        Assert.assertEquals(getTest("multiple parameters test").getParameters(), expected);
+    }
+
+    private DeciderRunTestDefinition.Test getTest(String id) {
         //Check that parameter additions are working:
         DeciderRunTestDefinition.Test test = null;
         for (DeciderRunTestDefinition.Test t : td.tests) {
-            if (t.getId().equals("parameter addition test")) {
+            if (t.getId().equals(id)) {
                 test = t;
             }
         }
-
-        Map<String, String> expected;
-        expected = new LinkedHashMap<>();
-        expected.put("a", "b");
-        expected.put("c", "d");
-        expected.put("e", "f");
-
-        Assert.assertNotNull(test);
-        Assert.assertEquals(test.getParameters(), expected);
-
+        return test;
     }
 
 }

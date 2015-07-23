@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.io.FileUtils;
@@ -22,7 +23,7 @@ public class DeciderRunTestDefinition {
     private static String defaultDescription = "";
     private static String defaultMetricsDirectory = "";
     private static String defaultMetricsResources = "";
-    private static Map<String, String> defaultParameters = new LinkedHashMap<>();
+    private static Map<String, List<String>> defaultParameters = new LinkedHashMap<>();
     private static Set<String> defaultIniExclusions = new HashSet<>();
     private static Set<String> defaultStudies = new HashSet<>();
     private static Set<String> defaultSequencerRuns = new HashSet<>();
@@ -48,7 +49,7 @@ public class DeciderRunTestDefinition {
         DeciderRunTestDefinition.defaultMetricsResources = defaultMetricsResources;
     }
 
-    public void setDefaultParameters(Map<String, String> defaultParameters) {
+    public void setDefaultParameters(Map<String, List<String>> defaultParameters) {
         DeciderRunTestDefinition.defaultParameters = defaultParameters;
     }
 
@@ -75,7 +76,7 @@ public class DeciderRunTestDefinition {
         private Set<String> studies = defaultStudies;
         private Set<String> sequencerRuns = defaultSequencerRuns;
         private Set<String> samples = defaultSamples;
-        private final Map<String, String> parameters;
+        private final Map<String, List<String>> parameters;
         private String metricsDirectory = defaultMetricsDirectory;
         private String metricsResources = defaultMetricsResources;
         private String metricsFile;
@@ -126,11 +127,11 @@ public class DeciderRunTestDefinition {
             this.samples = samples;
         }
 
-        public Map<String, String> getParameters() {
+        public Map<String, List<String>> getParameters() {
             return Collections.unmodifiableMap(parameters);
         }
 
-        public void setParameters(Map<String, String> parameters) {
+        public void setParameters(Map<String, List<String>> parameters) {
             this.parameters.putAll(parameters);
         }
 

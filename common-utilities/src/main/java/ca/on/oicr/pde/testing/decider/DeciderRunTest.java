@@ -153,7 +153,7 @@ public class DeciderRunTest extends RunTestBase {
         Assert.assertNotNull(workflow.getSwid(), "Installation of the workflow bundle failed");
         log.printf(Level.INFO, "[%s] Completed installing workflow bundle in %s", testName, timer.stop());
     }
-    
+
 //    @Test(groups = "preExecution", expectedExceptions = Exception.class)
 //    public void getDeciderObject() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 //        //get decider object + all parameters
@@ -177,8 +177,12 @@ public class DeciderRunTest extends RunTestBase {
     public void executeDecider() throws IOException, InstantiationException, ClassNotFoundException, IllegalAccessException {
         Timer timer = Timer.start();
         StringBuilder extraArgs = new StringBuilder();
-        for (Entry<String, String> e : testDefinition.getParameters().entrySet()) {
-            extraArgs.append(" ").append(e.getKey()).append(" ").append(e.getValue());
+        for (Entry<String, List<String>> e : testDefinition.getParameters().entrySet()) {
+            String parameter = e.getKey();
+            List<String> arguments = e.getValue();
+            for (String argument : arguments) {
+                extraArgs.append(" ").append(parameter).append(" ").append(argument);
+            }
         }
         seqwareExecutor.deciderRunSchedule(deciderJar, workflow, studies, sequencerRuns, samples, extraArgs.toString());
         log.printf(Level.INFO, "[%s] Completed workflow run scheduling in %s", testName, timer.stop());
@@ -190,7 +194,7 @@ public class DeciderRunTest extends RunTestBase {
 
         Map<String, String> iniSubstitutions = new HashMap<>();
         iniSubstitutions.put(bundledWorkflow.getAbsolutePath(), "${workflow_bundle_dir}");
-        
+
         actual = DeciderRunTestReport.generateReport(seqwareService, workflow, testDefinition.getIniExclusions(), iniSubstitutions);
 
         actualReportFile = new File(workingDirectory.getAbsolutePath() + "/" + testDefinition.outputName());
@@ -230,5 +234,5 @@ public class DeciderRunTest extends RunTestBase {
 
         log.printf(Level.INFO, "[%s] Completed comparing workflow run reports in %s", testName, timer.stop());
     }
-    
+
 }
