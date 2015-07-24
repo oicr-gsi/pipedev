@@ -180,8 +180,12 @@ public class DeciderRunTest extends RunTestBase {
         for (Entry<String, List<String>> e : testDefinition.getParameters().entrySet()) {
             String parameter = e.getKey();
             List<String> arguments = e.getValue();
-            for (String argument : arguments) {
-                extraArgs.append(" ").append(parameter).append(" ").append(argument);
+            if (arguments.isEmpty()) {
+                extraArgs.append(" ").append(parameter);
+            } else {
+                for (String argument : arguments) {
+                    extraArgs.append(" ").append(parameter).append(" ").append(argument);
+                }
             }
         }
         seqwareExecutor.deciderRunSchedule(deciderJar, workflow, studies, sequencerRuns, samples, extraArgs.toString());

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +59,11 @@ public class DeciderRunTestDefinitionTest {
                 + "            \"id\": \"multiple parameters test\",\n"
                 + "            \"samples\": [\"a\"],\n"
                 + "            \"parameters\": {\"e\":[\"f\",\"g\"], \"x\":[\"y\"]}\n "
+                + "        },\n"
+                + "        {\n"
+                + "            \"id\": \"no arguments test\",\n"
+                + "            \"samples\": [\"a\"],\n"
+                + "            \"parameters\": {\"e\":[], \"x\":[]}\n "
                 + "        }\n"
                 + "    ]\n"
                 + "}";
@@ -74,12 +80,11 @@ public class DeciderRunTestDefinitionTest {
     @Test()
     public void checkForMissingTests() throws IOException {
         Assert.assertNotNull(td);
-        Assert.assertEquals(10, td.tests.size());
+        Assert.assertEquals(11, td.tests.size());
     }
 
     @Test()
     public void checkParameterOverride() throws IOException {
-
         Map<String, List<String>> expected;
         expected = new LinkedHashMap<>();
         expected.put("a", Arrays.asList("overridden argument"));
@@ -90,7 +95,6 @@ public class DeciderRunTestDefinitionTest {
 
     @Test()
     public void checkParameterAddition() throws IOException {
-
         Map<String, List<String>> expected;
         expected = new LinkedHashMap<>();
         expected.put("a", Arrays.asList("b"));
@@ -102,7 +106,6 @@ public class DeciderRunTestDefinitionTest {
 
     @Test()
     public void testMultipleParams() throws IOException {
-
         Map<String, List<String>> expected;
         expected = new LinkedHashMap<>();
         expected.put("a", Arrays.asList("b"));
@@ -111,6 +114,18 @@ public class DeciderRunTestDefinitionTest {
         expected.put("x", Arrays.asList("y"));
 
         Assert.assertEquals(getTest("multiple parameters test").getParameters(), expected);
+    }
+
+    @Test()
+    public void noArgumentsTest() throws IOException {
+        Map<String, List<String>> expected;
+        expected = new LinkedHashMap<>();
+        expected.put("a", Arrays.asList("b"));
+        expected.put("c", Arrays.asList("d"));
+        expected.put("e", Collections.EMPTY_LIST);
+        expected.put("x", Collections.EMPTY_LIST);
+
+        Assert.assertEquals(getTest("no arguments test").getParameters(), expected);
     }
 
     private DeciderRunTestDefinition.Test getTest(String id) {
