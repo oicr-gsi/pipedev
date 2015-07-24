@@ -11,7 +11,7 @@
 
     <groupId>ca.on.oicr.pde</groupId>
     <artifactId>workflow-utilities</artifactId>
-    <version>1.6.2-SNAPSHOT</version>
+    <version>1.6.2</version>
     <packaging>jar</packaging>
 
     <name>workflow-utilities</name>
