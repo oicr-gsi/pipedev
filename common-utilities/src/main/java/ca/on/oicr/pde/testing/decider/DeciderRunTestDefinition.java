@@ -51,8 +51,8 @@ public class DeciderRunTestDefinition {
         DeciderRunTestDefinition.defaultMetricsResources = defaultMetricsResources;
     }
 
-    public void setDefaultParameters(Map<String, List<String>> defaultParameters) {
-        DeciderRunTestDefinition.defaultParameters = defaultParameters;
+    public void setDefaultParameters(Map<String, Object> defaultParameters) {
+        DeciderRunTestDefinition.defaultParameters.putAll(parseParameters(defaultParameters));
     }
 
     public void setDefaultStudies(Set<String> defaultStudies) {
@@ -134,21 +134,7 @@ public class DeciderRunTestDefinition {
         }
 
         public void setParameters(Map<String, Object> parameters) {
-            Map<String, List<String>> ps = new LinkedHashMap<>();
-            for (Entry<String, Object> e : parameters.entrySet()) {
-                String key = e.getKey();
-                Object o = e.getValue();
-                if (o == null) {
-                    ps.put(key, null);
-                } else if (o instanceof List<?>) {
-                    ps.put(key, (List<String>) o);
-                } else if (o instanceof String) {
-                    ps.put(key, Arrays.asList((String) o));
-                } else {
-                    throw new RuntimeException("Unsupported object found in test definition parameters.");
-                }
-            }
-            this.parameters.putAll(ps);
+            this.parameters.putAll(parseParameters(parameters));
         }
 
         public String getMetricsDirectory() {
@@ -247,4 +233,21 @@ public class DeciderRunTestDefinition {
         return ToStringBuilder.reflectionToString(this);
     }
 
+    private static Map<String, List<String>> parseParameters(Map<String, Object> parameters) {
+        Map<String, List<String>> ps = new LinkedHashMap<>();
+        for (Entry<String, Object> e : parameters.entrySet()) {
+            String key = e.getKey();
+            Object o = e.getValue();
+            if (o == null) {
+                ps.put(key, null);
+            } else if (o instanceof List<?>) {
+                ps.put(key, (List<String>) o);
+            } else if (o instanceof String) {
+                ps.put(key, Arrays.asList((String) o));
+            } else {
+                throw new RuntimeException("Unsupported object found in test definition parameters.");
+            }
+        }
+        return ps;
+    }
 }

@@ -20,7 +20,7 @@ public class DeciderRunTestDefinitionTest {
     public void setup() throws IOException {
         String jsonDoc = "{\n"
                 + "    \"defaultDescription\": \"BamQC decider test\",\n"
-                + "    \"defaultParameters\": {\"a\":[\"b\"],\"c\":[\"d\"]},\n"
+                + "    \"defaultParameters\": {\"a\":[\"b\"],\"c\":\"d\"},\n"
                 + "    \"defaultMetricsDirectory\":\"/tmp\",\n"
                 + "    \"tests\": [\n"
                 + "        {\n"
