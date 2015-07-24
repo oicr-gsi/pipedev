@@ -13,6 +13,7 @@
         <module>workflows</module>
         <module>deciders</module>
         <module>common-utilities</module>
+	<module>tools</module>
     </modules>
 
 </project>
