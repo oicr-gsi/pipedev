@@ -180,7 +180,9 @@ public class DeciderRunTest extends RunTestBase {
         for (Entry<String, List<String>> e : testDefinition.getParameters().entrySet()) {
             String parameter = e.getKey();
             List<String> arguments = e.getValue();
-            if (arguments.isEmpty()) {
+            if (arguments == null) {
+                //continue
+            } else if (arguments.isEmpty()) {
                 extraArgs.append(" ").append(parameter);
             } else {
                 for (String argument : arguments) {

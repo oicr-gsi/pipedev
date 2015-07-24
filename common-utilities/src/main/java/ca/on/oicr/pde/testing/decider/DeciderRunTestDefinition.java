@@ -7,12 +7,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.WordUtils;
@@ -131,8 +133,22 @@ public class DeciderRunTestDefinition {
             return Collections.unmodifiableMap(parameters);
         }
 
-        public void setParameters(Map<String, List<String>> parameters) {
-            this.parameters.putAll(parameters);
+        public void setParameters(Map<String, Object> parameters) {
+            Map<String, List<String>> ps = new LinkedHashMap<>();
+            for (Entry<String, Object> e : parameters.entrySet()) {
+                String key = e.getKey();
+                Object o = e.getValue();
+                if (o == null) {
+                    ps.put(key, null);
+                } else if (o instanceof List<?>) {
+                    ps.put(key, (List<String>) o);
+                } else if (o instanceof String) {
+                    ps.put(key, Arrays.asList((String) o));
+                } else {
+                    throw new RuntimeException("Unsupported object found in test definition parameters.");
+                }
+            }
+            this.parameters.putAll(ps);
         }
 
         public String getMetricsDirectory() {

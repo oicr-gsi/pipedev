@@ -64,6 +64,14 @@ public class DeciderRunTestDefinitionTest {
                 + "            \"id\": \"no arguments test\",\n"
                 + "            \"samples\": [\"a\"],\n"
                 + "            \"parameters\": {\"e\":[], \"x\":[]}\n "
+                + "        },\n"
+                + "        {\n"
+                + "            \"id\": \"backwards compatibility test\",\n"
+                + "            \"parameters\": {\"e\":\"f\", \"a\":\"b\", \"c\":\"d\"}\n "
+                + "        },\n"
+                + "        {\n"
+                + "            \"id\": \"remove defaults test\",\n"
+                + "            \"parameters\": {\"c\":null}\n "
                 + "        }\n"
                 + "    ]\n"
                 + "}";
@@ -80,7 +88,7 @@ public class DeciderRunTestDefinitionTest {
     @Test()
     public void checkForMissingTests() throws IOException {
         Assert.assertNotNull(td);
-        Assert.assertEquals(11, td.tests.size());
+        Assert.assertEquals(13, td.tests.size());
     }
 
     @Test()
@@ -126,6 +134,27 @@ public class DeciderRunTestDefinitionTest {
         expected.put("x", Collections.EMPTY_LIST);
 
         Assert.assertEquals(getTest("no arguments test").getParameters(), expected);
+    }
+
+    @Test()
+    public void backwardsCompatibilityTest() throws IOException {
+        Map<String, List<String>> expected;
+        expected = new LinkedHashMap<>();
+        expected.put("a", Arrays.asList("b"));
+        expected.put("c", Arrays.asList("d"));
+        expected.put("e", Arrays.asList("f"));
+
+        Assert.assertEquals(getTest("backwards compatibility test").getParameters(), expected);
+    }
+
+    @Test()
+    public void removeDefaultsTest() throws IOException {
+        Map<String, List<String>> expected;
+        expected = new LinkedHashMap<>();
+        expected.put("a", Arrays.asList("b"));
+        expected.put("c", null);
+
+        Assert.assertEquals(getTest("remove defaults test").getParameters(), expected);
     }
 
     private DeciderRunTestDefinition.Test getTest(String id) {
