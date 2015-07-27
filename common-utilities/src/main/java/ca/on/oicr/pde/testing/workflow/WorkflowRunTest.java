@@ -4,6 +4,7 @@ import ca.on.oicr.pde.testing.common.RunTestBase;
 import ca.on.oicr.pde.utilities.Helpers;
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.testng.Assert;
@@ -47,10 +48,10 @@ public class WorkflowRunTest extends RunTestBase {
         this.workflowInis = workflowInis;
         this.calculateMetricsScript = calculateMetricsScript;
         this.compareMetricsScript = compareMetricsScript;
-        this.environmentVariables = environmentVariables;
+        this.environmentVariables = new LinkedHashMap<>(environmentVariables);
         this.expectedOutput = expectedOutput;
         this.workflowOutputDirectory = new File(workingDirectory + "/output/");
-        this.parameters = parameters;
+        this.parameters = new LinkedHashMap<>(parameters);
         this.actualOutput = new File(workingDirectory + "/" + actualOutputFileName);
 
         // Add all directories located within "workflowBundleBinPath" to the PATH
