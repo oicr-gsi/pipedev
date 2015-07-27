@@ -114,8 +114,8 @@ public class TestDefinition {
         private String iniDirectoryPath = defaults.iniDirectory;
         private int iterations = defaults.iterations;
         private String iniFilePath = "";
-        private Map<String, String> parameters;
         private Map<String, String> environmentVariables;
+        private final Map<String, String> parameters;
 
         public Test() {
             parameters = new LinkedHashMap<>(defaults.parameters);
@@ -204,12 +204,12 @@ public class TestDefinition {
         }
 
         public Map<String, String> getParameters() {
-            return parameters;
+            return Collections.unmodifiableMap(parameters);
         }
 
         @JsonProperty("parameters")
         public void setParameters(Map<String, String> parameters) {
-            this.parameters = parameters;
+            this.parameters.putAll(parameters);
         }
 
         public Map<String, String> getEnvironmentVariables() {
