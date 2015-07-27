@@ -34,7 +34,7 @@
         
         <decider-utilities.version>1.6.2</decider-utilities.version>
         <workflow-utilities.version>1.6.2</workflow-utilities.version>
-        <common-utilities.version>1.6.2</common-utilities.version>
+        <common-utilities.version>1.6.3</common-utilities.version>
         
         <seqware-version>1.1.0</seqware-version>
     </properties>
