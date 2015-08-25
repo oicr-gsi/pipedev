@@ -13,6 +13,7 @@
     
     <groupId>ca.on.oicr.pde.config</groupId>
     <artifactId>deciders</artifactId>
+    <version>3.1.1</version>
     <packaging>pom</packaging>
     <url>http://maven.apache.org</url>
 
@@ -136,6 +137,14 @@
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>com.github.seqware:seqware-common</artifact>
+                                    <excludes>
+                                        <exclude>net/sourceforge/seqware/common/hibernate/FindAllTheFiles**</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
                         </configuration>
                     </execution>
                 </executions>
