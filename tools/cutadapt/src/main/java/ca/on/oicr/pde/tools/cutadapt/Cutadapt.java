@@ -35,12 +35,12 @@ public class Cutadapt extends AbstractCommand {
             return this;
         }
         
-        public Builder removeStartBases(int count) {
+        public Builder removeStartBases(Integer count) {
             nFirstBasesToRemove = count;
             return this;
         }
 
-        public Builder removeEndBases(int count) {
+        public Builder removeEndBases(Integer count) {
             nLastBasesToRemove = count;
             return this;
         }
