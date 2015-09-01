@@ -47,7 +47,7 @@ public class DryRun<T extends AbstractWorkflowDataModel> {
     }
 
     // Mocking of net.sourceforge.seqware.pipeline.workflowV2.WorkflowDataModelFactory.getWorkflowDataModel()
-    public void buildWorkflowModel() throws IllegalAccessException, Exception {
+    public AbstractWorkflowDataModel buildWorkflowModel() throws IllegalAccessException, Exception {
 
         w.setConfigs(config);
 
@@ -70,6 +70,8 @@ public class DryRun<T extends AbstractWorkflowDataModel> {
         w.setupEnvironment();
         w.buildWorkflow();
         w.wrapup();
+        
+        return w;
     }
 
     public void validateWorkflow() {
