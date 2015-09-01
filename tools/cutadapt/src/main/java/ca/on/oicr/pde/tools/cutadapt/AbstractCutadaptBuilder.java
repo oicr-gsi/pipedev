@@ -44,7 +44,7 @@ public class AbstractCutadaptBuilder<T> {
 
         //https://cutadapt.readthedocs.org/en/stable/guide.html#quality-trimming
         if (minimumQualityScore != null) {
-            c.add("--trim-qualities");
+            c.add("-q");
             c.add(minimumQualityScore.toString());
         }
 
