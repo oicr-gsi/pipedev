@@ -50,11 +50,11 @@ public class Cutadapt extends AbstractCommand {
             List<String> c = super.getCommand();
 
             //https://cutadapt.readthedocs.org/en/stable/guide.html#removing-a-fixed-number-of-bases
-            if (nFirstBasesToRemove != null || nFirstBasesToRemove != 0) {
+            if (nFirstBasesToRemove != null && nFirstBasesToRemove != 0) {
                 c.add("--cut");
                 c.add(nFirstBasesToRemove.toString());
             }
-            if (nLastBasesToRemove != null || nLastBasesToRemove != 0) {
+            if (nLastBasesToRemove != null && nLastBasesToRemove != 0) {
                 c.add("--cut");
                 c.add(Integer.toString(-1 * nLastBasesToRemove));
             }
