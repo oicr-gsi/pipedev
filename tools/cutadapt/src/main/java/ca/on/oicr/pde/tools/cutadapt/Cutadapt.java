@@ -30,11 +30,11 @@ public class Cutadapt extends AbstractCommand {
             super(binDir, outputDir);
         }
 
-        public Builder setInputFile(String inputFile){
+        public Builder setInputFile(String inputFile) {
             this.inputFile = inputFile;
             return this;
         }
-        
+
         public Builder removeStartBases(Integer count) {
             nFirstBasesToRemove = count;
             return this;
@@ -50,11 +50,11 @@ public class Cutadapt extends AbstractCommand {
             List<String> c = super.getCommand();
 
             //https://cutadapt.readthedocs.org/en/stable/guide.html#removing-a-fixed-number-of-bases
-            if (nFirstBasesToRemove != null) {
+            if (nFirstBasesToRemove != null || nFirstBasesToRemove != 0) {
                 c.add("--cut");
                 c.add(nFirstBasesToRemove.toString());
             }
-            if (nLastBasesToRemove != null) {
+            if (nLastBasesToRemove != null || nLastBasesToRemove != 0) {
                 c.add("--cut");
                 c.add(Integer.toString(-1 * nLastBasesToRemove));
             }
