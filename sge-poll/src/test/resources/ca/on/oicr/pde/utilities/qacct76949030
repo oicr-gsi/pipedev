@@ -1,0 +1,43 @@
+==============================================================
+qname        default
+hostname     cn6-30.hpc.oicr.on.ca
+group        users
+owner        mtaschuk
+project      NONE
+department   defaultdepartment
+jobname      Job1-12345595050
+jobnumber    76949030
+taskid       undefined
+account      sge
+priority     0
+qsub_time    Fri Jun  7 18:08:16 2013
+start_time   Fri Jun  7 18:08:17 2013
+end_time     Fri Jun  7 18:08:18 2013
+granted_pe   NONE
+slots        1
+failed       0
+exit_status  127
+ru_wallclock 1
+ru_utime     0.060
+ru_stime     0.008
+ru_maxrss    1916
+ru_ixrss     0
+ru_ismrss    0
+ru_idrss     0
+ru_isrss     0
+ru_minflt    12479
+ru_majflt    6
+ru_nswap     0
+ru_inblock   416
+ru_oublock   16
+ru_msgsnd    0
+ru_msgrcv    0
+ru_nsignals  0
+ru_nvcsw     336
+ru_nivcsw    39
+cpu          0.068
+mem          0.000
+io           0.000
+iow          0.000
+maxvmem      0.000
+arid         undefined
