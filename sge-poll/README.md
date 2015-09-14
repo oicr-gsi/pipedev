@@ -2,7 +2,7 @@ JobMonitor is a small application that monitors a Sun Grid Engine or Open Grid E
 particular names, waits until those jobs complete, and collects some information about each job. It 
 was designed for use with SeqWare (http://seqware.io) but is not dependent on that infrastructure.
 
-##INTRO
+## Introduction
 
 SGE job monitor was designed to be used with so-called "one step workflows" : SeqWare workflows that
 have one job that launches jobs on the SGE cluster. The job usually consists of a script written in 
@@ -16,7 +16,7 @@ appear in qacct and records the exit status.
 The output file contains the job ID, job name and SGE exit status (not the process exit status).
 
 
-##OPTIONS
+## Options
 
     Option               Description                           
     ------               -----------                           
@@ -30,7 +30,7 @@ The output file contains the job ID, job name and SGE exit status (not the proce
 
     Must include parameter: --unique-job-string
 
-##BUILD
+## Build
 
 To build, use Maven:
 
@@ -38,10 +38,12 @@ To build, use Maven:
 
 The JAR with all dependencies is located in the target directory under `sge-job-monitor-<VERSION>-jar-with-dependencies.jar`.
 
-##RUN
+## Run
 
 Use Java 7:
 
     java -jar sge-job-monitor-jar-with-dependencies.jar --unique-job-string abcd --output-file log.txt
 
+## Support
 
+For help with this application, please file an issue on the [oicr-gsi/pipedev](https://github.com/oicr-gsi/pde-dev) project.
