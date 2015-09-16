@@ -1,0 +1,220 @@
+==============================================================
+job_number:                 9608118
+exec_file:                  job_scripts/9608118
+submission_time:            Fri Jun  7 16:43:35 2013
+owner:                      sqwprod
+uid:                        1739
+group:                      users 
+gid:                        100
+sge_o_home:                 /u/sqwprod
+sge_o_log_name:             sqwprod
+sge_o_path:                 /sbin:/usr/sbin:/bin:/usr/bin
+sge_o_workdir:              /u/sqwprod
+sge_o_host:                 sqwprod2
+account:                    sge
+stderr_path_list:           NONE:NONE:/u/sqwprod/.globus/job/sqwprod2/16289997933101415401.7638104969704690051/stderr
+hard resource_list:         h_stack=256M,h_vmem=24000M
+mail_list:                  sqwprod@sqwprod2.hpc.oicr.on.ca
+notify:                     FALSE 
+job_name:                   scheduler_sge_job_script
+stdout_path_list:           NONE:NONE:/u/sqwprod/.globus/job/sqwprod2/16289997933101415401.7638104969704690051/stdout
+jobshare:                   0
+hard_queue_list:            production
+shell_list:                 NONE:/bin/bash 
+env_list:
+script_file:                /u/sqwprod/.globus/job/sqwprod2/16289997933101415401.7638104969704690051/scheduler_sge_job_script
+usage    1:                 cpu=26:23:05:44, mem=26177909.68443 GBs, io=0.00000, vmem=12.770G, maxvmem=12.770G
+scheduling info:            queue instance "restricted@cn4-37.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "medchem@cn5-72.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "medchem@cn5-51.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "medchem@cn5-43.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "medchem@cn5-42.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "medchem@cn5-50.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "medchem@cn5-53.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "medchem@cn5-27.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "medchem@cn5-69.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "medchem@cn5-28.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "medchem@cn5-100.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "seqware@cn6-36.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "seqware@cn6-28.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "seqware@cn6-27.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "galaxy@cn5-72.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "galaxy@cn5-51.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "galaxy@cn5-43.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "galaxy@cn5-42.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "galaxy@cn5-50.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "galaxy@cn5-53.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "galaxy@cn5-27.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "galaxy@cn5-69.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "galaxy@cn5-28.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "galaxy@cn5-100.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "collab@cn4-37.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "research@cn4-37.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "research@cn5-72.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "research@cn6-36.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "research@cn5-51.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "research@cn6-28.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "research@cn5-43.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "research@cn8-45.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "research@cn5-42.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "research@cn5-50.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "research@cn5-53.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "research@cn5-27.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "research@cn5-69.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "research@cn6-27.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "research@cn5-28.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "research@cn5-100.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "short@cn4-37.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "short@cn5-72.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "short@cn6-36.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "short@cn5-51.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "short@cn6-28.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "short@cn5-43.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "short@cn8-45.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "short@cn5-42.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "short@cn5-50.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "short@cn5-53.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "short@cn5-27.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "short@cn5-69.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "short@cn6-27.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "short@cn5-28.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "short@cn5-100.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "mid_mem@cn4-37.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "mid_mem@cn5-72.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "mid_mem@cn6-36.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "mid_mem@cn5-51.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "mid_mem@cn6-28.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "mid_mem@cn5-43.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "mid_mem@cn8-45.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "mid_mem@cn5-42.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "mid_mem@cn5-50.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "mid_mem@cn5-53.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "mid_mem@cn5-27.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "mid_mem@cn5-69.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "mid_mem@cn6-27.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "mid_mem@cn5-28.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "mid_mem@cn5-100.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "low_mem@cn4-37.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "low_mem@cn5-72.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "low_mem@cn6-36.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "low_mem@cn5-51.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "low_mem@cn6-28.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "low_mem@cn5-43.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "low_mem@cn8-45.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "low_mem@cn5-42.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "low_mem@cn5-50.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "low_mem@cn5-53.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "low_mem@cn5-27.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "low_mem@cn5-69.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "low_mem@cn6-27.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "low_mem@cn5-28.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "low_mem@cn5-100.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "marathon@cn4-37.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "marathon@cn5-72.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "marathon@cn6-36.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "marathon@cn5-51.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "marathon@cn6-28.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "marathon@cn5-43.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "marathon@cn8-45.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "marathon@cn5-42.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "marathon@cn5-50.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "marathon@cn5-53.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "marathon@cn5-27.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "marathon@cn5-69.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "marathon@cn6-27.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "marathon@cn5-28.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "marathon@cn5-100.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "high_mem@cn4-37.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "high_mem@cn5-72.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "high_mem@cn6-36.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "high_mem@cn5-51.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "high_mem@cn6-28.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "high_mem@cn5-43.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "high_mem@cn8-45.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "high_mem@cn5-42.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "high_mem@cn5-50.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "high_mem@cn5-53.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "high_mem@cn5-27.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "high_mem@cn5-69.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "high_mem@cn6-27.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "high_mem@cn5-28.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "high_mem@cn5-100.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "long@cn4-37.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "long@cn5-72.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "long@cn6-36.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "long@cn5-51.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "long@cn6-28.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "long@cn5-43.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "long@cn8-45.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "long@cn5-42.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "long@cn5-50.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "long@cn5-53.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "long@cn5-27.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "long@cn5-69.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "long@cn6-27.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "long@cn5-28.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "long@cn5-100.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "default@cn4-37.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "default@cn5-72.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "default@cn6-36.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "default@cn5-51.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "default@cn6-28.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "default@cn5-43.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "default@cn8-45.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "high_mem@cn5-42.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "high_mem@cn5-50.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "high_mem@cn5-53.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "high_mem@cn5-27.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "high_mem@cn5-69.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "high_mem@cn6-27.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "high_mem@cn5-28.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "high_mem@cn5-100.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "long@cn4-37.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "long@cn5-72.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "long@cn6-36.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "long@cn5-51.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "long@cn6-28.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "long@cn5-43.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "long@cn8-45.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "long@cn5-42.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "low_mem@cn3-4.hpc.oicr.on.ca" is in suspend alarm: np_load_avg=3.127500 (= 3.127500 + 0.5 * 0.000000 with nproc=8) >= 2.50
+                            queue instance "marathon@cn3-4.hpc.oicr.on.ca" is in suspend alarm: np_load_avg=3.127500 (= 3.127500 + 0.5 * 0.000000 with nproc=8) >= 3.00
+                            queue instance "immediate@cn3-7.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=2.005000 (= 2.005000 + 0.5 * 0.000000 with nproc=8) >= 1.75
+                            queue instance "immediate@cn3-4.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=3.127500 (= 3.127500 + 0.5 * 0.000000 with nproc=8) >= 1.75
+                            queue instance "research@cn3-7.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=2.005000 (= 2.005000 + 0.5 * 0.000000 with nproc=8) >= 1.75
+                            queue instance "research@cn3-4.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=3.127500 (= 3.127500 + 0.5 * 0.000000 with nproc=8) >= 1.75
+                            queue instance "production@cn6-20.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=2.434375 (= 2.434375 + 0.5 * 0.000000 with nproc=16) >= 1.75
+                            queue instance "production@cn3-216.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=1.977917 (= 1.977917 + 0.5 * 0.000000 with nproc=24) >= 1.75
+                            queue instance "production@cn8-33.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=2.977917 (= 2.977917 + 0.5 * 0.000000 with nproc=24) >= 1.75
+                            queue instance "production@cn8-41.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=1.792917 (= 1.792917 + 0.5 * 0.000000 with nproc=24) >= 1.75
+                            queue instance "production@cn6-24.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=2.540625 (= 2.540625 + 0.5 * 0.000000 with nproc=16) >= 1.75
+                            queue instance "production@cn6-21.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=1.943750 (= 1.943750 + 0.5 * 0.000000 with nproc=16) >= 1.75
+                            queue instance "production@cn3-219.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=2.592917 (= 2.592917 + 0.5 * 0.000000 with nproc=24) >= 1.75
+                            queue instance "production@cn8-29.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=1.908750 (= 1.908750 + 0.5 * 0.000000 with nproc=24) >= 1.75
+                            queue instance "production@cn8-38.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=2.639167 (= 2.639167 + 0.5 * 0.000000 with nproc=24) >= 1.75
+                            queue instance "production@cn3-217.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=2.241667 (= 2.241667 + 0.5 * 0.000000 with nproc=24) >= 1.75
+                            queue instance "production@cn8-27.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=2.942500 (= 2.942500 + 0.5 * 0.000000 with nproc=24) >= 1.75
+                            queue instance "production@cn3-223.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=1.996250 (= 1.996250 + 0.5 * 0.000000 with nproc=24) >= 1.75
+                            queue instance "production@cn8-31.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=3.013750 (= 3.013750 + 0.5 * 0.000000 with nproc=24) >= 1.75
+                            queue instance "production@cn8-40.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=1.920000 (= 1.920000 + 0.5 * 0.000000 with nproc=24) >= 1.75
+                            queue instance "production@cn8-42.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=2.468750 (= 2.468750 + 0.5 * 0.000000 with nproc=24) >= 1.75
+                            queue instance "production@cn6-22.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=2.497500 (= 2.497500 + 0.5 * 0.000000 with nproc=16) >= 1.75
+                            queue instance "production@cn3-218.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=1.865833 (= 1.865833 + 0.5 * 0.000000 with nproc=24) >= 1.75
+                            queue instance "production@cn8-32.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=2.095833 (= 2.095833 + 0.5 * 0.000000 with nproc=24) >= 1.75
+                            queue instance "production@cn6-84.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=1.872917 (= 1.872917 + 0.5 * 0.000000 with nproc=24) >= 1.75
+                            queue instance "all.q@cn3-219.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=2.592917 (= 2.592917 + 0.5 * 0.000000 with nproc=24) >= 1.75
+                            queue instance "all.q@cn6-21.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=1.943750 (= 1.943750 + 0.5 * 0.000000 with nproc=16) >= 1.75
+                            queue instance "all.q@cn6-24.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=2.540625 (= 2.540625 + 0.5 * 0.000000 with nproc=16) >= 1.75
+                            queue instance "all.q@cn8-27.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=2.942500 (= 2.942500 + 0.5 * 0.000000 with nproc=24) >= 1.75
+                            queue instance "all.q@cn3-223.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=1.996250 (= 1.996250 + 0.5 * 0.000000 with nproc=24) >= 1.75
+                            queue instance "all.q@cn6-20.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=2.434375 (= 2.434375 + 0.5 * 0.000000 with nproc=16) >= 1.75
+                            queue instance "all.q@cn8-31.hpc.oicr.on.ca" dropped because it is overloaded: np_load_avg=3.013750 (= 3.013750 + 0.5 * 0.000000 with nproc=24) >= 1.75
+                            queue instance "research@cn6-60.hpc.oicr.on.ca" dropped because it is disabled
+                            queue instance "research@cn6-61.hpc.oicr.on.ca" dropped because it is disabled
+                            queue instance "short@cn8-44.hpc.oicr.on.ca" dropped because it is full
+                            queue instance "short@cn8-24.hpc.oicr.on.ca" dropped because it is full
+                            queue instance "short@cn8-55.hpc.oicr.on.ca" dropped because it is full
+                            queue instance "short@cn8-48.hpc.oicr.on.ca" dropped because it is full
+                            queue instance "short@cn8-43.hpc.oicr.on.ca" dropped because it is full
+                            queue instance "short@cn3-5.hpc.oicr.on.ca" dropped because it is full
+                            queue instance "short@cn8-57.hpc.oicr.on.ca" dropped because it is full
