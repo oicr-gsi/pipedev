@@ -29,6 +29,9 @@ public class GenotypeGVCFs extends AbstractCommand {
     public static class Builder extends AbstractGatkBuilder<Builder> {
 
         private final List<String> inputFiles = new LinkedList<>();
+        private Double standardCallConfidence;
+        private Double standardEmitConfidence;
+        private String dbsnpFilePath;
 
         public Builder(String javaPath, String maxHeapSize, String tmpDir, String gatkJarPath, String gatkKey, String outputDir) {
             super(javaPath, maxHeapSize, tmpDir, gatkJarPath, gatkKey, outputDir);
@@ -45,6 +48,21 @@ public class GenotypeGVCFs extends AbstractCommand {
             return this;
         }
 
+        public Builder setStandardCallConfidence(Double standardCallConfidence) {
+            this.standardCallConfidence = standardCallConfidence;
+            return this;
+        }
+
+        public Builder setStandardEmitConfidence(Double standardEmitConfidence) {
+            this.standardEmitConfidence = standardEmitConfidence;
+            return this;
+        }
+
+        public Builder setDbsnpFilePath(String dbsnpFilePath) {
+            this.dbsnpFilePath = dbsnpFilePath;
+            return this;
+        }
+
         public GenotypeGVCFs build() {
 
             String outputFilePath;
@@ -54,6 +72,21 @@ public class GenotypeGVCFs extends AbstractCommand {
             outputFilePath = outputDir + outputFileName + ".vcf.gz";
 
             List<String> c = build("GenotypeGVCFs");
+
+            if (standardCallConfidence != null) {
+                c.add("--standard_min_confidence_threshold_for_calling");
+                c.add(standardCallConfidence.toString());
+            }
+
+            if (standardEmitConfidence != null) {
+                c.add("--standard_min_confidence_threshold_for_emitting");
+                c.add(standardEmitConfidence.toString());
+            }
+
+            if (dbsnpFilePath != null) {
+                c.add("--dbsnp");
+                c.add(dbsnpFilePath);
+            }
 
             for (String inputFile : inputFiles) {
                 c.add("--variant");
