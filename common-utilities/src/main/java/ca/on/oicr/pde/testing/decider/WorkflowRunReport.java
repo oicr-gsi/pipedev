@@ -16,10 +16,11 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  * @author mlaszloffy
  */
 public class WorkflowRunReport implements Comparable<WorkflowRunReport> {
-    Map workflowIni = new TreeMap<>();
+
+    Map<String, String> workflowIni = new TreeMap<>();
     List<ReducedFileProvenanceReportRecord> files = new ArrayList<>();
 
-    public Map getWorkflowIni() {
+    public Map<String, String> getWorkflowIni() {
         return workflowIni;
     }
 
@@ -57,5 +58,5 @@ public class WorkflowRunReport implements Comparable<WorkflowRunReport> {
         //TODO: optimize
         return this.toString().compareTo(o.toString());
     }
-    
+
 }

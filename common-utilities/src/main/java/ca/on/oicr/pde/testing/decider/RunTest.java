@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import net.sourceforge.seqware.common.util.workflowtools.WorkflowInfo;
+import net.sourceforge.seqware.pipeline.bundle.Bundle;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
@@ -24,9 +26,9 @@ import org.testng.annotations.*;
 import org.testng.annotations.Test;
 
 @Listeners({ca.on.oicr.pde.testing.testng.TestCaseReporter.class})
-public class DeciderRunTest extends RunTestBase {
+public class RunTest extends RunTestBase {
 
-    private final Logger log = LogManager.getLogger(DeciderRunTest.class);
+    private final Logger log = LogManager.getLogger(RunTest.class);
     private final static List<File> reports = Collections.synchronizedList(new ArrayList<File>());
 
     private final File deciderJar;
@@ -43,15 +45,15 @@ public class DeciderRunTest extends RunTestBase {
     File actualReportFile;
     File expectedReportFile;
 
-    DeciderRunTestReport actual;
-    DeciderRunTestReport expected;
+    RunTestReport actual;
+    RunTestReport expected;
 
-    DeciderRunTestDefinition.Test testDefinition;
+    RunTestDefinition testDefinition;
 
     private Timer executionTimer;
 
-    public DeciderRunTest(SeqwareReadService seqwareService, File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName,
-            File deciderJar, File bundledWorkflow, String deciderClass, DeciderRunTestDefinition.Test definition) throws IOException {
+    public RunTest(SeqwareReadService seqwareService, File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName,
+            File deciderJar, File bundledWorkflow, String deciderClass, RunTestDefinition definition) throws IOException {
 
         super(seqwareDistribution, seqwareSettings, workingDirectory, testName);
 
@@ -65,11 +67,28 @@ public class DeciderRunTest extends RunTestBase {
         samples.addAll(testDefinition.getSamples());
         sequencerRuns.addAll(testDefinition.getSequencerRuns());
 
-        expectedReportFile = testDefinition.getMetrics();
+        WorkflowInfo wi = Bundle.findBundleInfo(bundledWorkflow).getWorkflowInfo().get(0);
+        String workflowName = wi.getName();
+        String workflowVersion = wi.getVersion();
 
+        expectedReportFile = testDefinition.getMetrics();
         if (expectedReportFile != null) {
             try {
-                expected = DeciderRunTestReport.buildFromJson(expectedReportFile);
+                expected = RunTestReport.buildFromJson(expectedReportFile);
+                expected.applyIniExclusions(testDefinition.getIniExclusions());
+
+                expected.applyIniStringSubstitution("\\$\\{workflow_bundle_dir\\}/Workflow_Bundle_[^/]+/[^/]+/",
+                        "\\$\\{workflow_bundle_dir\\}/Workflow_Bundle_" + workflowName + "/" + workflowVersion + "/");
+                //expected.applyIniSubstitutions(testDefinition.getIniSubstitutions());
+                expected.applyIniSubstitutions(testDefinition.getIniSubstitutions());
+
+                expectedReportFile = new File(workingDirectory.getAbsolutePath() + "/" + "expected_" + testDefinition.outputName());
+                if (expectedReportFile.exists()) {
+                    throw new RuntimeException("File already exists.");
+                } else {
+                    FileUtils.write(expectedReportFile, expected.toJson());
+                }
+
             } catch (IOException ioe) {
                 log.printf(Level.WARN, "[%s] There was a problem loading the metrics file: [%s].\n"
                         + "The exception output:\n%s\nContinuing with test but comparision step will fail.",
@@ -198,15 +217,28 @@ public class DeciderRunTest extends RunTestBase {
     public void calculateWorkflowRunReport() throws JsonProcessingException, IOException {
         Timer timer = Timer.start();
 
-        Map<String, String> iniSubstitutions = new HashMap<>();
-        iniSubstitutions.put(bundledWorkflow.getAbsolutePath(), "${workflow_bundle_dir}");
+        actual = RunTestReport.generateReport(seqwareService, workflow);
+        File actualUnmodifiedReportFile = new File(workingDirectory.getAbsolutePath() + "/tmp/" + testDefinition.outputName());
+        if (actualUnmodifiedReportFile.exists()) {
+            throw new RuntimeException("File already exists.");
+        } else {
+            FileUtils.write(actualUnmodifiedReportFile, actual.toJson());
+        }
 
-        actual = DeciderRunTestReport.generateReport(seqwareService, workflow, testDefinition.getIniExclusions(), iniSubstitutions);
+        Map<String, String> iniStringSubstitutions = new HashMap<>();
+        iniStringSubstitutions.put(bundledWorkflow.getAbsolutePath(), "\\$\\{workflow_bundle_dir\\}");
+        iniStringSubstitutions.putAll(testDefinition.getIniStringSubstitutions());
+
+        actual.applyIniExclusions(testDefinition.getIniExclusions());
+        //actual.applyIniSubstitutions(testDefinition.getIniSubstitutions());
+        actual.applyIniStringSubstitutions(iniStringSubstitutions);
 
         actualReportFile = new File(workingDirectory.getAbsolutePath() + "/" + testDefinition.outputName());
-        Assert.assertFalse(actualReportFile.exists());
-
-        FileUtils.write(actualReportFile, actual.toJson());
+        if (actualReportFile.exists()) {
+            throw new RuntimeException("File already exists.");
+        } else {
+            FileUtils.write(actualReportFile, actual.toJson());
+        }
 
         reports.add(actualReportFile);
 
@@ -226,7 +258,7 @@ public class DeciderRunTest extends RunTestBase {
             sb.append("Actual run report: ").append(actualReportFile.getAbsolutePath()).append("\n");
 
             //Build the summary report
-            String headerSummary = DeciderRunTestReport.diffHeader(actual, expected);
+            String headerSummary = RunTestReport.diffHeader(actual, expected);
             if (!headerSummary.isEmpty()) {
                 sb.append("Change summary:\n");
                 sb.append(headerSummary);

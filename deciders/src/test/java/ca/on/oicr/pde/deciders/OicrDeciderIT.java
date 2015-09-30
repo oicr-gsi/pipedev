@@ -6,13 +6,12 @@ import ca.on.oicr.pde.dao.writer.SeqwareWriteService;
 import ca.on.oicr.pde.model.Ius;
 import ca.on.oicr.pde.model.SeqwareObject;
 import ca.on.oicr.pde.model.Workflow;
-import ca.on.oicr.pde.testing.decider.DeciderRunTestReport;
+import ca.on.oicr.pde.testing.decider.RunTestReport;
 import ca.on.oicr.pde.testing.metadata.RegressionTestStudy;
 import com.google.common.collect.Iterables;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -229,7 +228,7 @@ public class OicrDeciderIT {
         assertEquals(run(decider, params).getWorkflowRunCount().intValue(), 8);
     }
 
-    private DeciderRunTestReport run(OicrDecider decider, List<String> params) {
+    private RunTestReport run(OicrDecider decider, List<String> params) {
         
         //create a workflow object from the decider's target workflow
         Workflow.Builder wb = new Workflow.Builder();
@@ -251,7 +250,7 @@ public class OicrDeciderIT {
         //build the decider run report
         srs.update();
         srs.updateWorkflowRunRecords(w);
-        return DeciderRunTestReport.generateReport(srs, w, Collections.EMPTY_LIST, Collections.EMPTY_MAP);
+        return RunTestReport.generateReport(srs, w);
     }
 
     @AfterSuite

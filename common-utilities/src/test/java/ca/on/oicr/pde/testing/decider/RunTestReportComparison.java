@@ -18,7 +18,7 @@ import java.util.TreeSet;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-public class DeciderRunTestReportTest {
+public class RunTestReportComparison {
 
     @Test
     public void jsonReportComparision() throws IOException {
@@ -108,8 +108,8 @@ public class DeciderRunTestReportTest {
                 + "    } ] } ] }";
 
         //Assert.assertTrue(compareReports(actual, expected));
-        DeciderRunTestReport actual = DeciderRunTestReport.buildFromJson(actualJson);
-        DeciderRunTestReport expected = DeciderRunTestReport.buildFromJson(expectedJson);
+        RunTestReport actual = RunTestReport.buildFromJson(actualJson);
+        RunTestReport expected = RunTestReport.buildFromJson(expectedJson);
 
         Assert.assertTrue(actual.equals(expected), ObjectDiff.diff(actual, expected).toString());
 
@@ -118,7 +118,7 @@ public class DeciderRunTestReportTest {
     @Test
     public void compareUnordered() throws IOException {
 
-        DeciderRunTestReport expected = new DeciderRunTestReport();
+        RunTestReport expected = new RunTestReport();
         expected.setWorkflowRunCount(1);
         expected.addStudies(Arrays.asList("TestStudy"));
         expected.addSequencerRuns(Arrays.asList("TestSequencerRun1"));
@@ -156,7 +156,7 @@ public class DeciderRunTestReportTest {
         expected.addWorkflowRun(expectedWR);
 
         //Test to json and conversion back
-        DeciderRunTestReport actual = DeciderRunTestReport.buildFromJson(expected.toJson());
+        RunTestReport actual = RunTestReport.buildFromJson(expected.toJson());
 
         //Shuffle workflow run file list order
         for (WorkflowRunReport w : actual.getWorkflowRuns()) {
@@ -242,8 +242,8 @@ public class DeciderRunTestReportTest {
                 + "    } ]\n"
                 + "  } ] }";
 
-        DeciderRunTestReport actualObject = DeciderRunTestReport.buildFromJson(actual);
-        DeciderRunTestReport expectedObject = DeciderRunTestReport.buildFromJson(expected);
+        RunTestReport actualObject = RunTestReport.buildFromJson(actual);
+        RunTestReport expectedObject = RunTestReport.buildFromJson(expected);
 
         Assert.assertEquals(2, actualObject.getWorkflowRuns().size());
         Assert.assertEquals(2, expectedObject.getWorkflowRuns().size());
@@ -320,7 +320,7 @@ public class DeciderRunTestReportTest {
         WorkflowRunReport wrr = new WorkflowRunReport();
         wrr.setFiles(Arrays.asList(new ReducedFileProvenanceReportRecord(fs)));
 
-        DeciderRunTestReport t = new DeciderRunTestReport();
+        RunTestReport t = new RunTestReport();
         t.setWorkflowRuns(Arrays.asList(wrr));
 
         String actualJson = t.toJson();
@@ -331,13 +331,13 @@ public class DeciderRunTestReportTest {
 
     @Test
     public void differencesTest() throws IOException {
-        DeciderRunTestReport expected = new DeciderRunTestReport();
+        RunTestReport expected = new RunTestReport();
         expected.setWorkflowRunCount(10);
         expected.setMaxInputFiles(2);
         expected.setMinInputFiles(1);
         expected.addSamples(Arrays.asList("Sample2", "Sample3", "Sample1"));
 
-        DeciderRunTestReport actual = new DeciderRunTestReport();
+        RunTestReport actual = new RunTestReport();
         actual.setWorkflowRunCount(10);
         actual.setMaxInputFiles(3);
         actual.setMinInputFiles(2);
