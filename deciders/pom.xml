@@ -120,6 +120,7 @@
         <dependency>
             <groupId>ca.on.oicr.pde</groupId>
             <artifactId>common-utilities</artifactId>
+            <version>1.7-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
