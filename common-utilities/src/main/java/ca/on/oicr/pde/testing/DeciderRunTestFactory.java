@@ -2,10 +2,11 @@ package ca.on.oicr.pde.testing;
 
 import ca.on.oicr.pde.dao.reader.SeqwareReadService;
 import ca.on.oicr.pde.dao.reader.SeqwareWebserviceImpl;
-import ca.on.oicr.pde.testing.decider.DeciderRunTest;
-import ca.on.oicr.pde.testing.decider.DeciderRunTestDefinition;
+import ca.on.oicr.pde.testing.decider.RunTest;
 import static ca.on.oicr.pde.utilities.Helpers.*;
 import ca.on.oicr.pde.dao.executor.ThreadedSeqwareExecutor;
+import ca.on.oicr.pde.testing.decider.RunTestSuiteDefinition;
+import ca.on.oicr.pde.testing.decider.RunTestDefinition;
 import ca.on.oicr.pde.utilities.Timer;
 import com.jcabi.manifests.Manifests;
 import java.io.File;
@@ -114,9 +115,9 @@ public class DeciderRunTestFactory {
             throw new RuntimeException(ioe);
         }
 
-        DeciderRunTestDefinition td;
+        RunTestSuiteDefinition td;
         try {
-            td = DeciderRunTestDefinition.buildFromJson(tdString);
+            td = RunTestSuiteDefinition.buildFromJson(tdString);
         } catch (IOException ioe) {
             log.error("Error deserializing test definition:", ioe);
             throw new RuntimeException(ioe);
@@ -128,13 +129,13 @@ public class DeciderRunTestFactory {
         seqwareService.update();
         log.printf(Level.INFO, "Completed loading of seqware metadata in %s", timer.stop());
 
-        List<DeciderRunTest> tests = new ArrayList<>();
+        List<RunTest> tests = new ArrayList<>();
         int count = 0;
 
         //Setup a shared thread pool for all tests to use
         ExecutorService sharedPool = Executors.newFixedThreadPool(50);
 
-        for (DeciderRunTestDefinition.Test t : td.getTests()) {
+        for (RunTestDefinition t : td.getTests()) {
 
             //Build test name
             StringBuilder b = new StringBuilder();
@@ -152,7 +153,7 @@ public class DeciderRunTestFactory {
             File testWorkingDir = generateTestWorkingDirectory(workingDirectory, prefix, testName, testId);
             File seqwareSettings = generateSeqwareSettings(testWorkingDir, webserviceUrl, schedulingSystem, schedulingHost);
 
-            DeciderRunTest test = new DeciderRunTest(seqwareService, seqwareDistribution, seqwareSettings, testWorkingDir, testName, deciderJar, bundledWorkflow, deciderClass, t);
+            RunTest test = new RunTest(seqwareService, seqwareDistribution, seqwareSettings, testWorkingDir, testName, deciderJar, bundledWorkflow, deciderClass, t);
             test.setSeqwareExecutor(new ThreadedSeqwareExecutor(testName, seqwareDistribution, seqwareSettings, testWorkingDir, sharedPool, seqwareService));
 
             tests.add(test);

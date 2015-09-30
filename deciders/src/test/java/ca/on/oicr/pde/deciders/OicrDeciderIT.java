@@ -251,7 +251,7 @@ public class OicrDeciderIT {
         //build the decider run report
         srs.update();
         srs.updateWorkflowRunRecords(w);
-        return DeciderRunTestReport.generateReport(srs, w, Collections.EMPTY_LIST, Collections.EMPTY_MAP);
+        return DeciderRunTestReport.generateReport(srs, w);
     }
 
     @AfterSuite

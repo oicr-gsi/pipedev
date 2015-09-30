@@ -192,6 +192,17 @@
             <version>1.6.2</version>
             <type>jar</type>
         </dependency>
+        <dependency>
+            <groupId>org.unitils</groupId>
+            <artifactId>unitils</artifactId>
+            <version>3.4.2</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>org.unitils</groupId>
+            <artifactId>unitils-core</artifactId>
+            <version>3.4.2</version>
+        </dependency>
     </dependencies>
 
     <repositories>

@@ -19,12 +19,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-public class DeciderRunTestReport {
+public class RunTestReport {
 
     private Integer workflowRunCount;
     private final Set<String> studies;
@@ -39,7 +40,7 @@ public class DeciderRunTestReport {
     private Integer totalInputFiles;
     private List<WorkflowRunReport> workflowRuns;
 
-    public DeciderRunTestReport() {
+    public RunTestReport() {
         studies = new TreeSet<>();
         sequencerRuns = new TreeSet<>();
         lanes = new TreeSet<>();
@@ -54,19 +55,19 @@ public class DeciderRunTestReport {
         workflowRuns = new ArrayList<>();
     }
 
-    public static DeciderRunTestReport buildFromJson(File jsonPath) throws IOException {
+    public static RunTestReport buildFromJson(File jsonPath) throws IOException {
 
         ObjectMapper m = new ObjectMapper();
         m.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        return m.readValue(jsonPath, DeciderRunTestReport.class);
+        return m.readValue(jsonPath, RunTestReport.class);
 
     }
 
-    public static DeciderRunTestReport buildFromJson(String jsonPath) throws IOException {
+    public static RunTestReport buildFromJson(String jsonPath) throws IOException {
 
         ObjectMapper m = new ObjectMapper();
         m.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        return m.readValue(jsonPath, DeciderRunTestReport.class);
+        return m.readValue(jsonPath, RunTestReport.class);
 
     }
 
@@ -191,7 +192,7 @@ public class DeciderRunTestReport {
         return EqualsBuilder.reflectionEquals(this, obj);
     }
 
-    public static String diffHeader(DeciderRunTestReport actual, DeciderRunTestReport expected) {
+    public static String diffHeader(RunTestReport actual, RunTestReport expected) {
 
         StringBuilder sb = new StringBuilder();
 
@@ -243,11 +244,48 @@ public class DeciderRunTestReport {
         return mapper.writeValueAsString(this);
     }
 
-    public static DeciderRunTestReport generateReport(SeqwareReadService srs, Workflow workflow, Collection<String> iniExclusions,
-            Map<String, String> iniSubstitutions) {
+    public void applyIniExclusions(Collection<String> iniExclusions) {
+        for (WorkflowRunReport wrr : getWorkflowRuns()) {
+            Map<String, String> ini = wrr.getWorkflowIni();
+            for (String s : iniExclusions) {
+                ini.remove(s);
+            }
+        }
+    }
+
+    public void applyIniStringSubstitution(String searchString, String replacementString) {
+        for (WorkflowRunReport wrr : getWorkflowRuns()) {
+            Map<String, String> ini = wrr.getWorkflowIni();
+            for (Entry<String, String> iniEntry : ini.entrySet()) {
+                String modifiedValue = iniEntry.getValue().replaceAll(searchString, replacementString);
+                iniEntry.setValue(modifiedValue);
+            }
+        }
+    }
+
+    public void applyIniStringSubstitutions(Map<String, String> iniStringSubstitutions) {
+        for (Entry<String, String> substitutionEntry : iniStringSubstitutions.entrySet()) {
+            String searchString = substitutionEntry.getKey();
+            String replacementString = substitutionEntry.getValue();
+            applyIniStringSubstitution(searchString, replacementString);
+        }
+    }
+
+    public void applyIniSubstitutions(Map<String, String> iniSubstitutions) {
+        for (WorkflowRunReport wrr : getWorkflowRuns()) {
+            Map<String, String> ini = wrr.getWorkflowIni();
+            for (Entry<String, String> substitutionEntry : iniSubstitutions.entrySet()) {
+                if (ini.containsKey(substitutionEntry.getKey())) {
+                    ini.put(substitutionEntry.getKey(), substitutionEntry.getValue());
+                }
+            }
+        }
+    }
+
+    public static RunTestReport generateReport(SeqwareReadService srs, Workflow workflow) {
         List<WorkflowRunReportRecord> wrrs = srs.getWorkflowRunRecords(workflow);
-        
-        DeciderRunTestReport t = new DeciderRunTestReport();
+
+        RunTestReport t = new RunTestReport();
         t.setWorkflowRunCount(wrrs.size());
 
         for (WorkflowRunReportRecord wrr : wrrs) {
@@ -279,24 +317,11 @@ public class DeciderRunTestReport {
             if (files.size() < t.getMinInputFiles()) {
                 t.setMinInputFiles(files.size());
             }
-            
+
             t.setTotalInputFiles(t.getTotalInputFiles() + files.size());
 
             //get the ini that the decider scheduled
             Map<String, String> ini = srs.getWorkflowRunIni(wr);
-
-            //apply ini exclusions
-            for (String s : iniExclusions) {
-                ini.remove(s);
-            }
-
-            //apply ini substitutions
-            for (Entry<String, String> iniEntry : ini.entrySet()) {
-                for (Entry<String, String> substitutionEntry : iniSubstitutions.entrySet()) {
-                    String modifiedValue = iniEntry.getValue().replace(substitutionEntry.getKey(), substitutionEntry.getValue());
-                    iniEntry.setValue(modifiedValue);
-                }
-            }
 
             WorkflowRunReport x = new WorkflowRunReport();
             x.setWorkflowIni(ini);

@@ -1,30 +1,33 @@
 package ca.on.oicr.pde.testing.decider;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.common.collect.ImmutableMap;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+import org.unitils.reflectionassert.ReflectionAssert;
+import org.unitils.reflectionassert.ReflectionComparatorMode;
 
-public class DeciderRunTestDefinitionTest {
+public class RunTestSuiteDefinitionLoading {
 
-    DeciderRunTestDefinition expected;
+    RunTestSuiteDefinition expected;
 
     @BeforeTest
     public void setup() throws IOException {
         String jsonDoc = "{\n"
-                + "    \"defaultDescription\": \"BamQC decider test\",\n"
-                + "    \"defaultParameters\": {\"a\":[\"b\"],\"c\":\"d\"},\n"
-                + "    \"defaultMetricsDirectory\":\"/tmp\",\n"
-                + "    \"tests\": [\n"
+                + "     \"defaults\" : {\n"
+                + "         \"description\" : \"BamQC decider test\",\n"
+                + "         \"parameters\" : {\"a\":[\"b\"],\"c\":\"d\"},\n"
+                + "         \"metricsDirectory\" : \"/tmp\""
+                + "     }\n,"
+                + "     \"tests\": [\n"
                 + "        {\n"
                 + "            \"samples\": [\"a\",\"a\",\"a\",\"a\"]\n"
                 + "        },\n"
@@ -78,71 +81,126 @@ public class DeciderRunTestDefinitionTest {
                 + "    ]\n"
                 + "}";
 
-        expected = DeciderRunTestDefinition.buildFromJson(jsonDoc);
-        System.out.println(expected);
-
-        ObjectMapper m = new ObjectMapper();
-        m.enable(SerializationFeature.INDENT_OUTPUT);
-        System.out.println(m.writeValueAsString(expected));
-
+        expected = RunTestSuiteDefinition.buildFromJson(jsonDoc);
+//        ObjectMapper m = new ObjectMapper();
+//        m.enable(SerializationFeature.INDENT_OUTPUT);
+//        System.out.println(m.writeValueAsString(expected));
     }
 
     @Test
-    public void verifyBuildJson() {
-        DeciderRunTestDefinition actual = new DeciderRunTestDefinition();
-        actual.setDefaultDescription("BamQC decider test");
-        actual.setDefaultParameters(ImmutableMap.of("a", "b", "c", "d"));
-        actual.setDefaultMetricsDirectory("/tmp");
+    public void verifyBuildJson() throws JsonProcessingException {
+        RunTestSuiteDefinition actual = new RunTestSuiteDefinition();
 
-        DeciderRunTestDefinition.Test t;
+        RunTestDefinition defaults = new RunTestDefinition();
+        defaults.setDescription("BamQC decider test");
+        Map<String, Object> params = new HashMap<>();
+        params.put("a", "b");
+        params.put("c", "d");
+        defaults.setParameters(params);
+        defaults.setMetricsDirectory("/tmp");
+        actual.setDefaults(defaults);
 
-        t = new DeciderRunTestDefinition.Test();
+        RunTestDefinition t;
+
+        t = actual.getDeciderRunTestDefinition();
         t.setSamples(Sets.newHashSet("a", "a", "a", "a"));
         actual.add(t);
 
-        t = new DeciderRunTestDefinition.Test();
+        t = actual.getDeciderRunTestDefinition();
         t.setStudies(Sets.newHashSet("b", "a"));
         actual.add(t);
 
-        t = new DeciderRunTestDefinition.Test();
+        t = actual.getDeciderRunTestDefinition();
         t.setSequencerRuns(Sets.newHashSet("c", "a"));
         actual.add(t);
 
-        t = new DeciderRunTestDefinition.Test();
+        t = actual.getDeciderRunTestDefinition();
         t.setSamples(Sets.newHashSet("d"));
         actual.add(t);
 
-        t = new DeciderRunTestDefinition.Test();
+        t = actual.getDeciderRunTestDefinition();
         t.setSequencerRuns(Sets.newHashSet("e", "a"));
         actual.add(t);
 
-        t = new DeciderRunTestDefinition.Test();
+        t = actual.getDeciderRunTestDefinition();
         t.setId("parameter override test");
         t.setSequencerRuns(Sets.newHashSet("f", "a"));
-        t.setParameters(ImmutableMap.of("a", "overridden argument"));
+        params = new HashMap<>();
+        params.put("a", "overridden argument");
+        t.setParameters(params);
         actual.add(t);
 
-        t = new DeciderRunTestDefinition.Test();
+        t = actual.getDeciderRunTestDefinition();
         t.setId("parameter addition test");
         t.setSequencerRuns(Sets.newHashSet("g", "a"));
-        t.setParameters(ImmutableMap.of("e", "f"));
+        params = new HashMap<>();
+        params.put("e", "f");
+        t.setParameters(params);
         actual.add(t);
 
-        t = new DeciderRunTestDefinition.Test();
+        t = actual.getDeciderRunTestDefinition();
         actual.add(t);
 
-        t = new DeciderRunTestDefinition.Test();
+        t = actual.getDeciderRunTestDefinition();
         t.setSamples(Sets.newHashSet(""));
         t.setDescription("a different description");
         actual.add(t);
 
-        Assert.assertEquals(actual, expected);
+        t = actual.getDeciderRunTestDefinition();
+        t.setId("multiple parameters test");
+        t.setSamples(Sets.newHashSet("a"));
+        params = new HashMap<>();
+        params.put("e", Arrays.asList("f", "g"));
+        params.put("x", "y");
+        t.setParameters(params);
+        actual.add(t);
+
+        t = actual.getDeciderRunTestDefinition();
+        t.setId("no arguments test");
+        t.setSamples(Sets.newHashSet("a"));
+        params = new HashMap<>();
+        params.put("e", Collections.EMPTY_LIST);
+        params.put("x", Collections.EMPTY_LIST);
+        t.setParameters(params);
+        actual.add(t);
+
+        t = actual.getDeciderRunTestDefinition();
+        t.setId("backwards compatibility test");
+        params = new HashMap<>();
+        params.put("e", "f");
+        params.put("a", "b");
+        params.put("c", "d");
+        t.setParameters(params);
+        actual.add(t);
+
+        t = actual.getDeciderRunTestDefinition();
+        t.setId("remove defaults test");
+        params = new HashMap<>();
+        params.put("c", null);
+        t.setParameters(params);
+        actual.add(t);
+
+//        ObjectMapper m = new ObjectMapper();
+//        m.enable(SerializationFeature.INDENT_OUTPUT);
+//        System.out.println(m.writeValueAsString(actual));
+
+//        DiffNode root = ObjectDifferBuilder.buildDefault().compare(actual, expected);
+//        root.visit(new DiffNode.Visitor() {
+//
+//            @Override
+//            public void node(DiffNode node, Visit visit) {
+//                System.out.println(node.getPath() + " => " + node.getState());
+//            }
+//        });
+        ReflectionAssert.assertReflectionEquals(expected, actual, ReflectionComparatorMode.IGNORE_DEFAULTS);
+
+//        Assert.assertFalse(root.hasChanges());
     }
 
     @Test()
     public void checkForMissingTests() throws IOException {
         Assert.assertNotNull(expected);
-        Assert.assertEquals(9, expected.getTests().size());
+        Assert.assertEquals(13, expected.getTests().size());
     }
 
     @Test()
@@ -211,10 +269,10 @@ public class DeciderRunTestDefinitionTest {
         Assert.assertEquals(getTest("remove defaults test").getParameters(), expected);
     }
 
-    private DeciderRunTestDefinition.Test getTest(String id) {
+    private RunTestDefinition getTest(String id) {
         //Check that parameter additions are working:
-        DeciderRunTestDefinition.Test test = null;
-        for (DeciderRunTestDefinition.Test t : expected.getTests()) {
+        RunTestDefinition test = null;
+        for (RunTestDefinition t : expected.getTests()) {
             if (t.getId().equals(id)) {
                 test = t;
             }
