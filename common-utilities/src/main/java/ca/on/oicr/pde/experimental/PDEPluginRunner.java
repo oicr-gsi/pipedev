@@ -22,9 +22,7 @@ import net.sourceforge.seqware.pipeline.plugin.PluginInterface;
 public class PDEPluginRunner {
 
     private final Map config;
-    private final Metadata meta;
-    private final OptionParser parser;
-    private NonOptionArgumentSpec<String> nonOptionSpec;
+    private final Metadata metadata;
 
     public PDEPluginRunner() {
         this(ConfigTools.getSettings());
@@ -33,17 +31,64 @@ public class PDEPluginRunner {
     public PDEPluginRunner(Map config) {
         super();
         this.config = config;
-        this.meta = MetadataFactory.get(config);
-        this.parser = new OptionParser();
-        this.parser.acceptsAll(Arrays.asList("plugin", "p")).withRequiredArg();
-        this.nonOptionSpec = parser.nonOptions();
+        this.metadata = MetadataFactory.get(config);
+    }
+    
+        public PDEPluginRunner(Map config, Metadata metadata) {
+        super();
+        this.config = config;
+        this.metadata = metadata;
     }
 
     public ReturnValue runPlugin(List<String> args) {
         return runPlugin(args.toArray(new String[args.size()]));
     }
 
+    public ReturnValue runPlugin(PluginInterface instance, List<String> params) {
+
+        //args after "--"
+        instance.setParams(params);
+
+        //seqware settings
+        instance.setConfig(config);
+
+        //metadata connection
+        instance.setMetadata(metadata);
+
+        //execute the plugin
+        ReturnValue parseRv = instance.parse_parameters();
+        if (!Arrays.asList(ReturnValue.SUCCESS).contains(parseRv.getExitStatus())) {
+            throw new PluginRunException(instance.getClass().getName() + " parse_parameters failed with exit code = " + parseRv.getExitStatus());
+        }
+
+        ReturnValue initRv = instance.init();
+        if (!Arrays.asList(ReturnValue.SUCCESS).contains(initRv.getExitStatus())) {
+            throw new PluginRunException(instance.getClass().getName() + " init failed with exit code = " + initRv.getExitStatus());
+        }
+
+        ReturnValue testRv = instance.do_test();
+        if (!Arrays.asList(ReturnValue.SUCCESS, ReturnValue.NOTIMPLEMENTED).contains(testRv.getExitStatus())) {
+            throw new PluginRunException(instance.getClass().getName() + " do_test failed with exit code = " + testRv.getExitStatus());
+        }
+
+        ReturnValue runRv = instance.do_run();
+        if (!Arrays.asList(ReturnValue.SUCCESS, ReturnValue.QUEUED).contains(runRv.getExitStatus())) {
+            throw new PluginRunException(instance.getClass().getName() + " do_run failed with exit code = " + runRv.getExitStatus());
+        }
+
+        ReturnValue cleanRv = instance.clean_up();
+        if (!Arrays.asList(ReturnValue.SUCCESS, ReturnValue.NOTIMPLEMENTED).contains(cleanRv.getExitStatus())) {
+            throw new PluginRunException(instance.getClass().getName() + " clean_up failed with exit code = " + cleanRv.getExitStatus());
+        }
+
+        return runRv;
+    }
+
     public ReturnValue runPlugin(String[] args) {
+
+        OptionParser parser = new OptionParser();
+        NonOptionArgumentSpec<String> nonOptionSpec = parser.nonOptions();
+        parser.acceptsAll(Arrays.asList("plugin", "p")).withRequiredArg();
 
         //get options
         OptionSet options = parser.parse(args);
@@ -57,42 +102,7 @@ public class PDEPluginRunner {
             throw new RuntimeException(cnfe);
         }
 
-        //args after "--"
-        plugin.setParams(options.valuesOf(nonOptionSpec));
-
-        //seqware settings
-        plugin.setConfig(config);
-
-        //metadata connection
-        plugin.setMetadata(meta);
-
-        //execute the plugin
-        ReturnValue parseRv = plugin.parse_parameters();
-        if (!Arrays.asList(ReturnValue.SUCCESS).contains(parseRv.getExitStatus())) {
-            throw new PluginRunException(pluginName + " parse_parameters failed with exit code = " + parseRv.getExitStatus());
-        }
-
-        ReturnValue initRv = plugin.init();
-        if (!Arrays.asList(ReturnValue.SUCCESS).contains(initRv.getExitStatus())) {
-            throw new PluginRunException(pluginName + " init failed with exit code = " + initRv.getExitStatus());
-        }
-
-        ReturnValue testRv = plugin.do_test();
-        if (!Arrays.asList(ReturnValue.SUCCESS, ReturnValue.NOTIMPLEMENTED).contains(testRv.getExitStatus())) {
-            throw new PluginRunException(pluginName + " do_test failed with exit code = " + testRv.getExitStatus());
-        }
-
-        ReturnValue runRv = plugin.do_run();
-        if (!Arrays.asList(ReturnValue.SUCCESS, ReturnValue.QUEUED).contains(runRv.getExitStatus())) {
-            throw new PluginRunException(pluginName + " do_run failed with exit code = " + runRv.getExitStatus());
-        }
-
-        ReturnValue cleanRv = plugin.clean_up();
-        if (!Arrays.asList(ReturnValue.SUCCESS, ReturnValue.NOTIMPLEMENTED).contains(cleanRv.getExitStatus())) {
-            throw new PluginRunException(pluginName + " clean_up failed with exit code = " + cleanRv.getExitStatus());
-        }
-
-        return runRv;
+        return runPlugin(plugin, options.valuesOf(nonOptionSpec));
     }
 
     public class PluginRunException extends RuntimeException {
