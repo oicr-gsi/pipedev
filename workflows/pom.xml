@@ -4,14 +4,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>ca.on.oicr.pde.config</groupId>
-        <artifactId>common</artifactId>
-        <version>3.1</version>
+        <groupId>ca.on.oicr.gsi</groupId>
+        <artifactId>pipedev</artifactId>
+        <version>1.7-SNAPSHOT</version>
     </parent>
 
     <groupId>ca.on.oicr.pde</groupId>
     <artifactId>workflow-utilities</artifactId>
-    <version>1.6.2</version>
+    <version>1.7-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>workflow-utilities</name>
