@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import net.sourceforge.seqware.common.util.workflowtools.WorkflowInfo;
 import net.sourceforge.seqware.pipeline.bundle.Bundle;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
@@ -65,12 +66,19 @@ public class RunTest extends RunTestBase {
         studies.addAll(testDefinition.getStudies());
         samples.addAll(testDefinition.getSamples());
         sequencerRuns.addAll(testDefinition.getSequencerRuns());
+
+        WorkflowInfo wi = Bundle.findBundleInfo(bundledWorkflow).getWorkflowInfo().get(0);
+        String workflowName = wi.getName();
+        String workflowVersion = wi.getVersion();
+
         expectedReportFile = testDefinition.getMetrics();
         if (expectedReportFile != null) {
             try {
                 expected = RunTestReport.buildFromJson(expectedReportFile);
                 expected.applyIniExclusions(testDefinition.getIniExclusions());
 
+                expected.applyIniStringSubstitution("\\$\\{workflow_bundle_dir\\}/Workflow_Bundle_[^/]+/[^/]+/",
+                        "\\$\\{workflow_bundle_dir\\}/Workflow_Bundle_" + workflowName + "/" + workflowVersion + "/");
                 //expected.applyIniSubstitutions(testDefinition.getIniSubstitutions());
                 expected.applyIniSubstitutions(testDefinition.getIniSubstitutions());
 
