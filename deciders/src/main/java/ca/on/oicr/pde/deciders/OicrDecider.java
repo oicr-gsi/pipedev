@@ -1,9 +1,6 @@
 package ca.on.oicr.pde.deciders;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -125,8 +122,8 @@ public class OicrDecider extends BasicDecider {
         parser.acceptsAll(Arrays.asList("check-file-exists", "cf"), "Optional: only launch on the file if the file exists");
         parser.accepts("skip-status-check", "Optional: If enabled will skip the check for the status of the sequencer run/lane/IUS/workflow run");
         parser.acceptsAll(Arrays.asList("help", "h"), "Prints this help message");
-        defineArgument("output-path", "The absolute path of the directory to put the final file(s).  This directory must exist and be writable.", false);
-        defineArgument("output-folder", "The relative path to put the final result(s).  This directory will be created.", false);
+        defineArgument("output-path", "The absolute path of the directory to put the final file(s) (workflow output-prefix option).", false);
+        defineArgument("output-folder", "The relative path to put the final result(s) (workflow output-dir option).", false);
         defineArgument("after-date", "Optional: Format YYYY-MM-DD. Only run on files that have been modified after a certain date, not inclusive.", false);
         defineArgument("before-date", "Optional: Format YYYY-MM-DD. Only run on files that have been modified before a certain date, not inclusive.", false);
         files = new HashMap<>();
@@ -136,10 +133,10 @@ public class OicrDecider extends BasicDecider {
     /**
      * Define an argument for the Decider to use on the command line.
      *
-     * @param command     the argument to use. Single letters will use -, and more characters will use --
+     * @param command the argument to use. Single letters will use -, and more characters will use --
      * @param description the description of the argument to give when giving help
-     * @param required    whether or not the argument is required for the decider to function. The presence of this argument is tested in the
-     *                    {@link #init() init} method, which will throw an exception if the argument is not present.
+     * @param required whether or not the argument is required for the decider to function. The presence of this argument is tested in the
+     * {@link #init() init} method, which will throw an exception if the argument is not present.
      */
     protected final void defineArgument(String command, String description, boolean required) {
         parser.accepts(command, description).withRequiredArg();
@@ -157,7 +154,6 @@ public class OicrDecider extends BasicDecider {
      *
      *
      * @param arg an argument previously defined by 'defineArgument'.
-     *
      * @return the value provided on the command line, or empty string if none provided.
      */
     protected String getArgument(String arg) {
@@ -210,13 +206,6 @@ public class OicrDecider extends BasicDecider {
                 beforeDate = format.parse(dateString);
             } catch (ParseException e) {
                 Log.error("Before Date should be in the format: " + format.toPattern(), e);
-                ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
-            }
-        }
-        if (options.has("output-path")) {
-            Path outputPath = Paths.get(getArgument("output-path"));
-            if (!Files.exists(outputPath) || !Files.isDirectory(outputPath) || !Files.isWritable(outputPath)) {
-                Log.error("The output-path is not accessible.");
                 ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
             }
         }
@@ -280,8 +269,7 @@ public class OicrDecider extends BasicDecider {
      * Helper method that determines if a date string is after a reference date.
      *
      * @param dateString the date to check against a reference date
-     * @param afterDate  the reference date
-     *
+     * @param afterDate the reference date
      * @return true if dateString is after "afterDate", false otherwise
      */
     public boolean isAfterDate(String dateString, Date afterDate) {
@@ -302,7 +290,6 @@ public class OicrDecider extends BasicDecider {
      *
      * @param dateString the date to check against a reference date
      * @param beforeDate the reference date
-     *
      * @return true if dateString is before "beforeDate", false otherwise
      */
     public boolean isBeforeDate(String dateString, Date beforeDate) {
@@ -396,17 +383,17 @@ public class OicrDecider extends BasicDecider {
     }
 
     @Override
-    public ReturnValue do_summary() {
+    public ReturnValue do_summary(){
         ReturnValue rv = super.do_summary();
 
         //decider run failed somewhere, but some how the decider did not terminate - set the exit code to non-zero
-        if (isFailed) {
+        if(isFailed){
             rv.setReturnValue(ReturnValue.FAILURE);
         }
         return rv;
     }
 
-    private void setFinalStatusToFailed() {
+    private void setFinalStatusToFailed(){
         isFailed = true;
     }
 
@@ -437,8 +424,8 @@ public class OicrDecider extends BasicDecider {
      * Files produced by sequencer runs with the same name. <li> Group.FILE : Files with the same absolute file path </ul>
      *
      *
-     * @param groupBy      one of Group.STUDY, Group.EXPERIMENT, Group.DONOR, Group.LIBRARY, Group.BARCODE, Group.LANE, Group.SEQUENCER_RUN,
-     *                     Group.FILE
+     * @param groupBy one of Group.STUDY, Group.EXPERIMENT, Group.DONOR, Group.LIBRARY, Group.BARCODE, Group.LANE, Group.SEQUENCER_RUN,
+     * Group.FILE
      * @param groupSimilar whether or not to group items with identical names
      */
     public void setGroupBy(Group groupBy, boolean groupSimilar) {
@@ -448,6 +435,20 @@ public class OicrDecider extends BasicDecider {
         } else {
             this.setGroupingStrategy(groupBy.getSwaHeader());
         }
+    }
+    
+    /**
+     * Get the OicrDecider Group (a simplified version of "FindAllTheFiles" header fields)
+     * 
+     * @return the OicrDecider grouping strategy (Group) or null if not set
+     * 
+     * @see Group
+     * @see FindAllTheFiles.Header
+     * @see OicrDecider#setGroupBy()
+     * @see BasicDecider#getGroupingStrategy()
+     */
+    public Group getGroupBy() {
+        return this.groupBy;
     }
 
     /**
@@ -474,7 +475,6 @@ public class OicrDecider extends BasicDecider {
      * [0-9A-Za-z _-] to their corresponding html code.
      *
      * @param input string to be escaped
-     *
      * @return the input string with special characters escaped
      */
     public String escapeString(String input) {
@@ -504,8 +504,8 @@ public class OicrDecider extends BasicDecider {
     /**
      * <p>
      * Creates a new file name from the input files given to it. The new filename contains, in order: the donor, the tissue origin, the
-     * tissue type, the library type, the library size, the library template type, and the IUS ids. Duplicate values are only listed once,
-     * and multiple values are separated by hyphens.</p>
+     * tissue type, the library type, the library size, the library template type, the group id, and the IUS ids. Duplicate values are
+     * only listed once, and multiple values are separated by hyphens.</p>
      *
      * <p>
      * E.g. Two files ABCD_0001_Ly_R_420_EX.bam and ABCD_0001_Pa_P_369_EX.bam produce combined file name
@@ -515,12 +515,11 @@ public class OicrDecider extends BasicDecider {
      * This method uses the metadata associated with the file, not the filename itself, in order to determine these values.</p>
      *
      * @param inputFiles the list of files from WorkflowRun.getFiles();
-     *
      * @see WorkflowRun#getFiles()
      * @return a String representing the combined filename
      */
     protected String getCombinedFileName(FileAttributes[] inputFiles) {
-        SortedSet<String> donor = null, origin = null, tType = null, lType = null, lSize = null, lTemplate = null, ius = null;
+        SortedSet<String> donor = null, origin = null, tType = null, lType = null, lSize = null, lTemplate = null, lGroupid = null, ius = null;
         for (FileAttributes fileAtt : inputFiles) {
             donor = addToSet(donor, fileAtt.getDonor());
             origin = addToSet(origin, fileAtt.getLimsValue(Lims.TISSUE_ORIGIN));
@@ -528,6 +527,7 @@ public class OicrDecider extends BasicDecider {
             lType = addToSet(lType, fileAtt.getLimsValue(Lims.LIBRARY_TYPE));
             lSize = addToSet(lSize, fileAtt.getLimsValue(Lims.LIBRARY_SIZE));
             lTemplate = addToSet(lTemplate, fileAtt.getLimsValue(Lims.LIBRARY_TEMPLATE_TYPE));
+            lGroupid = addToSet(lGroupid, fileAtt.getLimsValue(Lims.GROUP_ID));
             ius = addToSet(ius, fileAtt.getOtherAttribute(FindAllTheFiles.Header.IUS_SWA));
         }
 
@@ -538,6 +538,7 @@ public class OicrDecider extends BasicDecider {
         root.append(appendAll(lType, "_"));
         root.append(appendAll(lSize, "_"));
         root.append(appendAll(lTemplate, "_"));
+        root.append(appendAll(lGroupid, "_"));
         root.append("ius").append(appendAll(ius, ""));
 
         return root.toString();
@@ -572,7 +573,6 @@ public class OicrDecider extends BasicDecider {
      * mate info is unavailable if no pattern detected).
      *
      * @param filePath file path to identify if mate 1 or 2
-     *
      * @return 1 if mate 1, 2 if mate 2, 0 if not able to find mate value
      */
     public static int idMate(String filePath) {
@@ -593,7 +593,6 @@ public class OicrDecider extends BasicDecider {
      * reads are sensible. If it encounters a problem, it returns the same set you passed in originally along with printing a warning.
      *
      * @param files input files to be sorted
-     *
      * @return sorted array of files
      */
     public FileAttributes[] arrangeFastqs(FileAttributes[] files) {
@@ -616,5 +615,82 @@ public class OicrDecider extends BasicDecider {
             }
         }
         return inputs;
+    }
+
+    /**
+     * Gets the key (Lims or FindAllTheFiles.Header) value from the FileAttributes object, throws a RuntimeException if the value is missing.
+     * Use getOptionalAttribute() if the RuntimeException is undesired.
+     *
+     * @param fa  FileAttribute object to search through.
+     * @param key The FindAllTheFiles.Header or Lims enum key.
+     *
+     * @return A string value for the FileAttribute key requested.
+     *
+     * @throws RuntimeException if a value is not set for the key in the FileAttributes object.
+     */
+    public String getRequiredAttribute(FileAttributes fa, Enum key) {
+        String value = getAttribute(fa, key);
+        if (value == null) {
+            throw new RuntimeException(String.format("File swid = [%s] is missing a required metadata attribute = [%s].",
+                    fa.getOtherAttribute(FindAllTheFiles.Header.FILE_SWA), key));
+        }
+        return value;
+    }
+
+    /**
+     * Gets the key (Lims or FindAllTheFiles.Header) value from the FileAttributes object, returns empty string if the value is missing.
+     * Use getRequiredAttribute() if the "empty string on missing value" is undesired.
+     *
+     * @param fa  FileAttribute object to search through.
+     * @param key The FindAllTheFiles.Header or Lims enum key.
+     *
+     * @return A string value for the requested FileAttribute key or empty string if the key value is null.
+     *
+     */
+    public String getOptionalAttribute(FileAttributes fa, Enum key) {
+        String value = getAttribute(fa, key);
+        if (value == null) {
+            value = "";
+        }
+        return value;
+    }
+
+    private String getAttribute(FileAttributes fa, Enum key) {
+        String value;
+        if (key == null || fa == null) {
+            throw new IllegalArgumentException("Null arguments");
+        } else if (key instanceof FindAllTheFiles.Header) {
+            value = fa.getOtherAttribute((FindAllTheFiles.Header) key);
+        } else if (key instanceof Lims) {
+            value = fa.getLimsValue((Lims) key);
+        } else {
+            throw new IllegalArgumentException("Only Header and Lims key type supported");
+        }
+        return value;
+    }
+
+    /**
+     * Builds a standard prefix from a FileAttributes.
+     * Uses Lims and FindAllTheFiles.Header enum keys to build a prefix string from a FileAttributes object.
+     *
+     * @param fa FileAttribute object to build prefix from.
+     *
+     * @return A prefix string with the format "SWID_{IUS_SWA}_{SAMPLE_NAME}[_{GROUP_ID}]_{SEQUENCER_RUN_NAME}_{IUS_TAG}_L00{LANE_NUM}_R1_001_"
+     *
+     */
+    public String getPrefixFromFileMetadata(FileAttributes fa) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SWID").append("_").append(getRequiredAttribute(fa, FindAllTheFiles.Header.IUS_SWA));
+        sb.append("_").append(getRequiredAttribute(fa, FindAllTheFiles.Header.SAMPLE_NAME));
+        if (getAttribute(fa, Lims.GROUP_ID) != null) {
+            sb.append("_").append(getRequiredAttribute(fa, Lims.GROUP_ID));
+        }
+        sb.append("_").append(getRequiredAttribute(fa, FindAllTheFiles.Header.SEQUENCER_RUN_NAME));
+        sb.append("_").append(getRequiredAttribute(fa, FindAllTheFiles.Header.IUS_TAG));
+        sb.append("_").append("L00").append(getRequiredAttribute(fa, FindAllTheFiles.Header.LANE_NUM));
+        sb.append("_").append("R1");
+        sb.append("_").append("001");
+        sb.append("_");
+        return sb.toString();
     }
 }

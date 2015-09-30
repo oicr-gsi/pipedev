@@ -5,12 +5,12 @@
     <parent>
         <groupId>ca.on.oicr.pde.config</groupId>
         <artifactId>common</artifactId>
-        <version>4-SNAPSHOT</version>
+        <version>3.1</version>
     </parent>
 
     <groupId>ca.on.oicr.pde</groupId>
     <artifactId>common-utilities</artifactId>
-    <version>1.7-SNAPSHOT</version>
+    <version>1.6.4</version>
     <packaging>jar</packaging>
 
     <name>common-utilities</name>
@@ -184,6 +184,12 @@
             <groupId>commons-configuration</groupId>
             <artifactId>commons-configuration</artifactId>
             <version>1.10</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito</artifactId>
+            <version>1.6.2</version>
             <type>jar</type>
         </dependency>
     </dependencies>

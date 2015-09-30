@@ -7,12 +7,13 @@
     <parent>
         <groupId>ca.on.oicr.pde.config</groupId>
         <artifactId>common</artifactId>
-        <version>4-SNAPSHOT</version>
+        <version>3.1</version>
         <relativePath>common-parent-pom.xml</relativePath>
     </parent>
     
     <groupId>ca.on.oicr.pde.config</groupId>
     <artifactId>deciders</artifactId>
+    <version>3.1.1</version>
     <packaging>pom</packaging>
     <url>http://maven.apache.org</url>
 
@@ -68,7 +69,7 @@
     </dependencies>
     
     <build>
-        <finalName>${final-name}</finalName>
+        <finalName>${project.artifactId}-${project.version}</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -110,27 +111,41 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>${main-class}</mainClass>
-                        </manifest>
-                        <manifestEntries>
-                            <Implementation-Version>${seqware-version}</Implementation-Version>
-                        </manifestEntries>
-                    </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
+                <artifactId>maven-shade-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>make-assembly</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>single</goal>
+                            <goal>shade</goal>
                         </goals>
+                        <configuration>
+                            <finalName>${final-name}</finalName>
+                            <!-- silence ide warnings -->
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>*:*:zip:*</exclude>
+                                    <exclude>*:*:tar.gz:*</exclude>
+                                    <exclude>*:*:gz:*</exclude>
+                                </excludes>
+                            </artifactSet>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <manifestEntries>
+                                        <Main-Class>${main-class}</Main-Class>
+                                        <Implementation-Version>${seqware-version}</Implementation-Version>
+                                    </manifestEntries>
+                                </transformer>
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>com.github.seqware:seqware-common</artifact>
+                                    <excludes>
+                                        <exclude>net/sourceforge/seqware/common/hibernate/FindAllTheFiles**</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -206,10 +221,31 @@
                                 </requireProperty>
                                 <requireFilesDontExist>
                                     <files>
-                                        <file>${releaseDirectory}/${project.build.finalName}-jar-with-dependencies.jar</file>
+                                        <file>${releaseDirectory}/${final-name}.jar</file>
                                     </files>
                                 </requireFilesDontExist>
                             </rules>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>check-decider-jar-size</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <rules>
+                                <requireFilesSize>
+                                    <!-- the final jar size should be between 50-60MB -->
+                                    <maxsize>62914560</maxsize>
+                                    <minsize>52428800</minsize>
+                                    <files>
+                                        <file>${project.build.directory}/${final-name}.jar</file>
+                                    </files>
+                                    <message>Unexpected final decider jar file size</message>
+                                </requireFilesSize>
+                            </rules>
+                            <fail>true</fail>
                         </configuration>
                     </execution>
                 </executions>
@@ -225,7 +261,7 @@
                         <dbUser>${dbUser}</dbUser>
                         <dbPassword>${dbPassword}</dbPassword>
                         <seqwareWar>${seqwareWar}</seqwareWar>
-                        <deciderJar>${project.build.directory}/${project.build.finalName}-jar-with-dependencies.jar</deciderJar>
+                        <deciderJar>${project.build.directory}/${final-name}.jar</deciderJar>
                         <deciderClass>${main-class}</deciderClass>
                         <deciderName>${project.artifactId}</deciderName>
                         <deciderVersion>${project.version}</deciderVersion>
@@ -291,7 +327,7 @@
                         </goals>
                         <configuration>
                             <!--<skip>${skipReleasePackage}</skip>-->
-                            <fromFile>${project.build.directory}/${final-name}-jar-with-dependencies.jar</fromFile>
+                            <fromFile>${project.build.directory}/${final-name}.jar</fromFile>
                             <url>file://${releaseDirectory}</url>
                         </configuration>
                     </execution>
