@@ -10,9 +10,9 @@
     <url>http://maven.apache.org</url>
 
     <modules>
-        <module>workflows</module>
-        <module>deciders</module>
-        <module>common-utilities</module>
+        <module>workflow-utils</module>
+        <module>decider-utils</module>
+        <module>test-utils</module>
         <module>tools</module>
         <module>configs</module>
     </modules>
@@ -40,9 +40,9 @@
         <maven-javadoc-plugin.version>2.10.3</maven-javadoc-plugin.version>
         <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
         
-        <decider-utilities.version>1.7-SNAPSHOT</decider-utilities.version>
-        <workflow-utilities.version>1.7-SNAPSHOT</workflow-utilities.version>
-        <common-utilities.version>1.7-SNAPSHOT</common-utilities.version>
+        <decider-utils.version>1.7-SNAPSHOT</decider-utils.version>
+        <workflow-utils.version>1.7-SNAPSHOT</workflow-utils.version>
+        <test-utils.version>1.7-SNAPSHOT</test-utils.version>
         
         <seqware-version>1.1.0</seqware-version>
     </properties>
@@ -183,18 +183,18 @@
             
             <dependency>
                 <groupId>ca.on.oicr.pde</groupId>
-                <artifactId>decider-utilities</artifactId>
-                <version>${decider-utilities.version}</version>
+                <artifactId>decider-utils</artifactId>
+                <version>${decider-utils.version}</version>
             </dependency>
             <dependency>
                 <groupId>ca.on.oicr.pde</groupId>
-                <artifactId>workflow-utilities</artifactId>
-                <version>${workflow-utilities.version}</version>
+                <artifactId>workflow-utils</artifactId>
+                <version>${workflow-utils.version}</version>
             </dependency>
             <dependency>
                 <groupId>ca.on.oicr.pde</groupId>
-                <artifactId>common-utilities</artifactId>
-                <version>${common-utilities.version}</version>
+                <artifactId>test-utils</artifactId>
+                <version>${test-utils.version}</version>
             </dependency>
             
             <dependency>

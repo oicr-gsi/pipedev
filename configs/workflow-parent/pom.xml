@@ -65,13 +65,13 @@
                 </dependency>
                 <dependency>
                     <groupId>ca.on.oicr.pde</groupId>
-                    <artifactId>workflow-utilities</artifactId>
+                    <artifactId>workflow-utils</artifactId>
                 </dependency>
         
                 <!-- test dependencies -->
                 <dependency>
                     <groupId>ca.on.oicr.pde</groupId>
-                    <artifactId>common-utilities</artifactId>
+                    <artifactId>test-utils</artifactId>
                     <scope>test</scope>
                 </dependency>
                 <dependency>

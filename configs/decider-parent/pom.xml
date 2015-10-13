@@ -59,14 +59,14 @@
                 </dependency>
                 <dependency>
                     <groupId>ca.on.oicr.pde</groupId>
-                    <artifactId>decider-utilities</artifactId>
+                    <artifactId>decider-utils</artifactId>
                     <scope>compile</scope>
                 </dependency>
 
                 <!-- test dependencies -->
                 <dependency>
                     <groupId>ca.on.oicr.pde</groupId>
-                    <artifactId>common-utilities</artifactId>
+                    <artifactId>test-utils</artifactId>
                     <scope>test</scope>
                 </dependency>
                 <dependency>
