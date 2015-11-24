@@ -84,7 +84,7 @@ public class GSIOntologyManagerTest {
         String term = "format_2573";
         GSIOntologyManager instance = new GSIOntologyManager(null);
         String expResult = "SAM";
-        String result = instance.termToLabel(ontID, term);
+        String result = instance.termToLabel(term, ontID);
         assertEquals(expResult, result);
 
     }
@@ -99,7 +99,7 @@ public class GSIOntologyManagerTest {
         String label = "BAM";
         GSIOntologyManager instance = new GSIOntologyManager(null);
         String expResult = "format_2572";
-        String result = instance.labelToTerm(ontID, label);
+        String result = instance.labelToTerm(label, ontID);
         assertEquals(expResult, result);
 
     }

@@ -92,6 +92,15 @@ public class GSIOntologyManager {
     }
 
     /**
+     * A check method that may be useful for term vetting
+     * @param ontID
+     * @return 
+     */
+    public boolean isOntologySupported(String ontID) {
+        return this.ontSupported.containsKey(ontID);
+    }
+    
+    /**
      * Test term passed to this method - such as data_0005 (EDAM)
      *
      * @param ontID string identifying ontology (EDAM, OBI, MGED...)
@@ -163,7 +172,7 @@ public class GSIOntologyManager {
      * @param term alphanumeric ontology class id such as data_0005 (EDAM)
      * @return
      */
-    public String termToLabel(String ontID, String term) {
+    public String termToLabel(String term, String ontID) {
 
         String NS = this.ontSupported.get(ontID).getNS();
         String SOURCE = this.ontSupported.get(ontID).getSOURCE();
@@ -199,7 +208,7 @@ public class GSIOntologyManager {
      * @param label human-readable ontology label
      * @return
      */
-    public String labelToTerm(String ontID, String label) {
+    public String labelToTerm(String label, String ontID) {
 
         String NS = this.ontSupported.get(ontID).getNS();
         String SOURCE = this.ontSupported.get(ontID).getSOURCE();
