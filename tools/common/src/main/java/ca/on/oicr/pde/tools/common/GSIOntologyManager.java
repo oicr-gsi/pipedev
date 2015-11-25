@@ -28,51 +28,56 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * Class for manipulating CV terms
- * Changes to OICR Decider/Workflow are required to standardize access to this class (for JUnit testing)
+ * Class for manipulating CV terms Changes to OICR Decider/Workflow are required
+ * to standardize access to this class (for JUnit testing)
+ *
  * @author pruzanov
  */
 public class GSIOntologyManager {
-    
- // Default config with supported ontologies and paths to owl files
- protected static final String DEFAULT_CONFIG = "/.mounts/labs/PDE/data/reference/ontology/ontologies.conf";
- private Map<String, OntoData> ontSupported;
- 
- /**
-  * Constructor that accepts configFile as an argument
-  * @param configFile path to config file (external classes using GSIOntologyManager may supply a custom file)
-  */
- public GSIOntologyManager (String configFile) {
-    
-    String configPath = null != configFile ? configFile : DEFAULT_CONFIG;
+
+    // Default config with supported ontologies and paths to owl files
+    public static final String DEFAULT_CONFIG = "/.mounts/labs/PDE/data/reference/ontology/ontologies.conf";
+    private Map<String, OntoData> ontSupported;
+    public boolean initialized = false;
+
+    /**
+     * Constructor that accepts configFile as an argument
+     *
+     * @param configFile path to config file (external classes using
+     * GSIOntologyManager may supply a custom file)
+     */
+    public GSIOntologyManager(String configFile) {
+
+        String configPath = null != configFile ? configFile : DEFAULT_CONFIG;
         try {
             this.init(configPath);
         } catch (IllegalArgumentException e) {
             System.err.append("There was an error Initializing OntoTester");
             System.exit(0);
         }
- }
- 
- /**
-  * Load supported oOntologies and write this information into private Map
-  * @param config
-  * @throws IllegalArgumentException 
-  */
- private void init(String config) throws IllegalArgumentException {
+    }
+
+    /**
+     * Load supported oOntologies and write this information into private Map
+     *
+     * @param config
+     * @throws IllegalArgumentException
+     */
+    private void init(String config) throws IllegalArgumentException {
         this.ontSupported = this.loadSupportedOntologies(config);
         if (null == this.ontSupported) {
             throw new IllegalArgumentException("Error Initializing Ontologies");
         }
+        this.initialized = true;
     }
- 
 
- /**
-     * loadIfNeeded checks if we have an appropriate OntModel available, 
-     * if not tries to load it
-     * returns a booleans value indicating success
+    /**
+     * loadIfNeeded checks if we have an appropriate OntModel available, if not
+     * tries to load it returns a booleans value indicating success
+     *
      * @param ONT
      * @return
-     * @throws FileNotFoundException 
+     * @throws FileNotFoundException
      */
     private boolean loadIfNeeded(String ONT) throws FileNotFoundException {
 
@@ -93,13 +98,14 @@ public class GSIOntologyManager {
 
     /**
      * A check method that may be useful for term vetting
+     *
      * @param ontID
-     * @return 
+     * @return
      */
     public boolean isOntologySupported(String ontID) {
         return this.ontSupported.containsKey(ontID);
     }
-    
+
     /**
      * Test term passed to this method - such as data_0005 (EDAM)
      *
@@ -173,16 +179,19 @@ public class GSIOntologyManager {
      * @return
      */
     public String termToLabel(String term, String ontID) {
-
-        String NS = this.ontSupported.get(ontID).getNS();
+        String NS     = this.ontSupported.get(ontID).getNS();
         String SOURCE = this.ontSupported.get(ontID).getSOURCE();
-        // If Model is null, load it
+
         try {
+            // If Model is null, load it
             if (!this.loadIfNeeded(ontID)) {
                 return null;
             }
         } catch (FileNotFoundException e) {
             System.err.println("Couldn't load Ontologies");
+            return null;
+        } catch (NullPointerException np) {
+            System.err.println("Ontology is not supported");
             return null;
         }
 
@@ -210,15 +219,19 @@ public class GSIOntologyManager {
      */
     public String labelToTerm(String label, String ontID) {
 
-        String NS = this.ontSupported.get(ontID).getNS();
+        String NS     = this.ontSupported.get(ontID).getNS();;
         String SOURCE = this.ontSupported.get(ontID).getSOURCE();
 
         try {
+            // If Model is null, load it
             if (!this.loadIfNeeded(ontID)) {
                 return null;
             }
         } catch (FileNotFoundException e) {
             System.err.println("Couldn't load Ontologies");
+            return null;
+        } catch (NullPointerException np) {
+            System.err.println("Ontology is not supported");
             return null;
         }
 
@@ -249,9 +262,8 @@ public class GSIOntologyManager {
 
         return null;
     }
- 
- 
- /**
+
+    /**
      * ========================Utility Methods===================== Loading
      * ontology meta data and reading actual RDFS/OWL files
      * ============================================================
@@ -325,6 +337,5 @@ public class GSIOntologyManager {
         }
         return ontsMapped;
     }
-
 
 }
