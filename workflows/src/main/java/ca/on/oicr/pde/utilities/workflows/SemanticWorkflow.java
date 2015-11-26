@@ -21,7 +21,7 @@ public abstract class SemanticWorkflow extends OicrWorkflow {
      *
      * @return Map container with all CV terms used by a workflow
      */
-    abstract Map<String, Set<String>> getTerms();
+    protected abstract Map<String, Set<String>> getTerms();
 
     /**
      * Method for Accessing OntologyManager

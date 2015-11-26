@@ -36,7 +36,7 @@ public class SemanticWorkflowTest {
         this.instance = new SemanticWorkflow() {
 
             @Override
-            Map<String, Set<String>> getTerms() {
+            protected Map<String, Set<String>> getTerms() {
                 Map<String, Set<String>> myTerms = new HashMap<String, Set<String>>();
                 myTerms.putAll(testTerms);
                 return myTerms;
