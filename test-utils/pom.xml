@@ -203,8 +203,14 @@
             <artifactId>unitils-core</artifactId>
             <version>3.4.2</version>
         </dependency>
+        <!-- this dependency is required by hadoop-common:2.0.0-cdh4.5.0-->
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2.1</version>
+        </dependency>
     </dependencies>
-
+    
     <repositories>
         <repository>
             <id>com.github.seqware</id>
