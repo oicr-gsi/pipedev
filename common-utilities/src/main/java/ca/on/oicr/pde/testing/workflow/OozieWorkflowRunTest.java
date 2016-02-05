@@ -27,7 +27,7 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
     public OozieWorkflowRunTest(File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName,
             File workflowBundlePath, String workflowName, String workflowVersion, File workflowBundleBinPath,
             List<File> workflowInis, String actualOutputFileName, File expectedOutput, File calculateMetricsScript, File compareMetricsScript,
-            Map<String, String> environmentVariables, Map<String,String> parameters) throws IOException {
+            Map<String, String> environmentVariables, Map<String, String> parameters) throws IOException {
 
         super(seqwareDistribution, seqwareSettings, workingDirectory, testName, workflowBundlePath, workflowName, workflowVersion, workflowBundleBinPath,
                 workflowInis, actualOutputFileName, expectedOutput, calculateMetricsScript, compareMetricsScript, environmentVariables, parameters);
@@ -59,14 +59,7 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
         }
     }
 
-//    @Test(groups = "preExecution")
-//    public void checkEnvironment() {
-//
-//        //TODO: verify webservice url is accessible
-//        //TODO: verify scheduling host is accessible
-//        
-//    }
-        @Test(groups = "preExecution")
+    @Test(groups = "preExecution")
     public void installWorkflow() throws IOException {
 
         workflowSwid = seqwareExecutor.installWorkflow(workflowBundlePath);
@@ -109,11 +102,4 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
         Assert.assertEquals(workflowRunStatus, "completed");
 
     }
-
-//    @Test(dependsOnGroups = "execution", groups = "postExecution")
-//    public void testCommand3() {
-//
-//        //TODO: check db state
-//
-//    }
 }
