@@ -9,6 +9,7 @@ import com.google.common.base.Joiner;
 import static com.google.common.base.Preconditions.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ public class ShellExecutor implements SeqwareExecutor {
     protected final Map<String, String> environmentVariables;
     protected final String id;
     protected final File loggingDirectory;
+    protected final List<String> classPath;
 
     public ShellExecutor(String id, File seqwareDistrubution, File seqwareSettings, File workingDirectory) {
 
@@ -48,6 +50,8 @@ public class ShellExecutor implements SeqwareExecutor {
         loggingDirectory = new File(workingDirectory + "/" + "logs");
         loggingDirectory.mkdir();
 
+        classPath = new ArrayList<>();
+        classPath.add(seqwareDistrubution.getAbsolutePath());
     }
 
     @Override
@@ -67,7 +71,7 @@ public class ShellExecutor implements SeqwareExecutor {
     }
 
     @Override
-    public void deciderRunSchedule(File deciderJar, Workflow workflow, List<String> studies, List<String> sequencerRuns, 
+    public void deciderRunSchedule(File deciderJar, Workflow workflow, List<String> studies, List<String> sequencerRuns,
             List<String> samples, String extraArgs) throws IOException {
 
         StringBuilder cmd = new StringBuilder();
@@ -86,7 +90,7 @@ public class ShellExecutor implements SeqwareExecutor {
     }
 
     @Override
-    public SeqwareAccession workflowRunSchedule(SeqwareAccession workflowSwid, List<File> workflowIniFiles, 
+    public SeqwareAccession workflowRunSchedule(SeqwareAccession workflowSwid, List<File> workflowIniFiles,
             Map<String, String> parameters) throws IOException {
 
         //Temporary fix, see parameters handling section below
@@ -99,7 +103,7 @@ public class ShellExecutor implements SeqwareExecutor {
         }
 
         StringBuilder cmd = new StringBuilder();
-        cmd.append("java -cp ").append(seqwareDistribution);
+        cmd.append("java -cp ").append(getClassPathAsString());
         cmd.append(" io.seqware.cli.Main workflow schedule");
         cmd.append(" --accession ").append(workflowSwid.getSwid());
         cmd.append(" --host no");
@@ -125,7 +129,7 @@ public class ShellExecutor implements SeqwareExecutor {
     public void workflowRunLaunch(SeqwareAccession workflowRunSwid) throws IOException {
 
         StringBuilder cmd = new StringBuilder();
-        cmd.append("java -cp ").append(seqwareDistribution);
+        cmd.append("java -cp ").append(getClassPathAsString());
         cmd.append(" io.seqware.cli.Main workflow-run launch-scheduled");
         cmd.append(" --accession ").append(workflowRunSwid.getSwid());
 
@@ -136,7 +140,7 @@ public class ShellExecutor implements SeqwareExecutor {
     }
 
     @Override
-    public void workflowRunLaunch(File workflowBundle, List<File> workflowIniFiles, String workflowName, 
+    public void workflowRunLaunch(File workflowBundle, List<File> workflowIniFiles, String workflowName,
             String workflowVersion) throws IOException {
 
         StringBuilder cmd = new StringBuilder();
@@ -164,7 +168,7 @@ public class ShellExecutor implements SeqwareExecutor {
     public void workflowRunUpdateStatus(SeqwareAccession workflowRunSwid) throws IOException {
 
         StringBuilder cmd = new StringBuilder();
-        cmd.append("java -cp ").append(seqwareDistribution);
+        cmd.append("java -cp ").append(getClassPathAsString());
         cmd.append(" io.seqware.cli.Main workflow-run propagate-statuses");
         cmd.append(" --accession ").append(workflowRunSwid.getSwid());
 
@@ -178,7 +182,7 @@ public class ShellExecutor implements SeqwareExecutor {
     public String workflowRunReport(SeqwareAccession workflowRunSwid) throws IOException {
 
         StringBuilder cmd = new StringBuilder();
-        cmd.append("java -cp ").append(seqwareDistribution);
+        cmd.append("java -cp ").append(getClassPathAsString());
         cmd.append(" io.seqware.cli.Main workflow-run report");
         cmd.append(" --accession ").append(workflowRunSwid.getSwid());
 
@@ -193,7 +197,7 @@ public class ShellExecutor implements SeqwareExecutor {
     public void cancelWorkflowRun(WorkflowRun wr) throws IOException {
 
         StringBuilder cmd = new StringBuilder();
-        cmd.append("java -cp ").append(seqwareDistribution);
+        cmd.append("java -cp ").append(getClassPathAsString());
         cmd.append(" io.seqware.cli.Main workflow-run cancel");
         cmd.append(" --accession ").append(wr.getSwid());
 
@@ -236,5 +240,12 @@ public class ShellExecutor implements SeqwareExecutor {
     public void deciderRunSchedule(String decider, Workflow workflow, String... deciderArgs) throws IOException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+    
+    private String getClassPathAsString() {
+        return "\"" + Joiner.on(":").join(classPath) + "\"";
+    }
 
+    public void addToClassPath(String path) {
+        classPath.add(path);
+    }
 }
