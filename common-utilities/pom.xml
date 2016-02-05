@@ -10,7 +10,7 @@
 
     <groupId>ca.on.oicr.pde</groupId>
     <artifactId>common-utilities</artifactId>
-    <version>1.6.4</version>
+    <version>1.6.5</version>
     <packaging>jar</packaging>
 
     <name>common-utilities</name>
@@ -191,6 +191,12 @@
             <artifactId>powermock-api-mockito</artifactId>
             <version>1.6.2</version>
             <type>jar</type>
+        </dependency>
+        <!-- this dependency is required by hadoop-common:2.0.0-cdh4.5.0-->
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2.1</version>
         </dependency>
     </dependencies>
 

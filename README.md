@@ -23,7 +23,7 @@ Build
 To build our utilities, use Maven.
 
 ```bash
-mvn clean install -f utility-modules-pom.xml
+mvn clean install
 ```
 Afterwards, they will be available in your local Maven repository.
 
@@ -31,7 +31,7 @@ Afterwards, they will be available in your local Maven repository.
 <dependency>
     <groupId>ca.on.oicr.pde</groupId>
     <artifactId>common-utilities</artifactId>
-    <version>1.6.2</version>
+    <version>1.6.5</version>
 </dependency>
 
 <dependency>
