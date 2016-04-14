@@ -10,11 +10,12 @@
     <url>http://maven.apache.org</url>
 
     <modules>
-        <module>workflow-utils</module>
-        <module>decider-utils</module>
-        <module>test-utils</module>
         <module>tools</module>
         <module>configs</module>
+        <module>provenance-impl</module>
+        <module>test-utils</module>
+        <module>workflow-utils</module>
+        <module>decider-utils</module>
     </modules>
 
     <properties>
@@ -42,8 +43,9 @@
         
         <decider-utils.version>2.0-SNAPSHOT</decider-utils.version>
         <workflow-utils.version>2.0-SNAPSHOT</workflow-utils.version>
+        <provenance-impl.version>2.0-SNAPSHOT</provenance-impl.version>
         <test-utils.version>2.0-SNAPSHOT</test-utils.version>
-
+        <provenance-version>1.0-SNAPSHOT</provenance-version>
         <seqware-version>1.1.1-gsi-SNAPSHOT</seqware-version>
     </properties>
     
@@ -182,6 +184,21 @@
             </dependency>
             
             <dependency>
+                <groupId>ca.on.oicr.gsi</groupId>
+                <artifactId>provenance-core</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.on.oicr.gsi</groupId>
+                <artifactId>provenance-api</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>ca.on.oicr</groupId>
+                <artifactId>pinery-client</artifactId>
+                <version>2.0-SNAPSHOT</version>
+            </dependency>
                 <groupId>ca.on.oicr.pde</groupId>
                 <artifactId>decider-utils</artifactId>
                 <version>${decider-utils.version}</version>
@@ -190,6 +207,11 @@
                 <groupId>ca.on.oicr.pde</groupId>
                 <artifactId>workflow-utils</artifactId>
                 <version>${workflow-utils.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.on.oicr.pde</groupId>
+                <artifactId>provenance-impl</artifactId>
+                <version>${provenance-impl.version}</version>
             </dependency>
             <dependency>
                 <groupId>ca.on.oicr.pde</groupId>
