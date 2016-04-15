@@ -1,5 +1,7 @@
 package ca.on.oicr.pde.testing.decider;
 
+import ca.on.oicr.pde.reports.WorkflowRunReport;
+import ca.on.oicr.pde.reports.WorkflowReport;
 import ca.on.oicr.pde.diff.ObjectDiff;
 import ca.on.oicr.pde.model.FileProvenanceReportRecord;
 import ca.on.oicr.pde.model.ReducedFileProvenanceReportRecord;
@@ -108,8 +110,8 @@ public class RunTestReportComparison {
                 + "    } ] } ] }";
 
         //Assert.assertTrue(compareReports(actual, expected));
-        RunTestReport actual = RunTestReport.buildFromJson(actualJson);
-        RunTestReport expected = RunTestReport.buildFromJson(expectedJson);
+        WorkflowReport actual = WorkflowReport.buildFromJson(actualJson);
+        WorkflowReport expected = WorkflowReport.buildFromJson(expectedJson);
 
         Assert.assertTrue(actual.equals(expected), ObjectDiff.diff(actual, expected).toString());
 
@@ -118,7 +120,7 @@ public class RunTestReportComparison {
     @Test
     public void compareUnordered() throws IOException {
 
-        RunTestReport expected = new RunTestReport();
+        WorkflowReport expected = new WorkflowReport();
         expected.setWorkflowRunCount(1);
         expected.addStudies(Arrays.asList("TestStudy"));
         expected.addSequencerRuns(Arrays.asList("TestSequencerRun1"));
@@ -134,7 +136,7 @@ public class RunTestReportComparison {
 
         //Simulate files that are part of decider run test workflow run
         for (int i = 0; i < 10; i++) {
-            ReducedFileProvenanceReportRecord r = new ReducedFileProvenanceReportRecord(new FileProvenanceReportRecord.Builder(0)
+            ReducedFileProvenanceReportRecord r = ReducedFileProvenanceReportRecord.from(new FileProvenanceReportRecord.Builder(0)
                     .setExperimentName("TestExperiment")
                     .setFileMetaType("application/bam")
                     .setFilePath(String.format("/tmp/file%s.bam", i))
@@ -156,7 +158,7 @@ public class RunTestReportComparison {
         expected.addWorkflowRun(expectedWR);
 
         //Test to json and conversion back
-        RunTestReport actual = RunTestReport.buildFromJson(expected.toJson());
+        WorkflowReport actual = WorkflowReport.buildFromJson(expected.toJson());
 
         //Shuffle workflow run file list order
         for (WorkflowRunReport w : actual.getWorkflowRuns()) {
@@ -242,8 +244,8 @@ public class RunTestReportComparison {
                 + "    } ]\n"
                 + "  } ] }";
 
-        RunTestReport actualObject = RunTestReport.buildFromJson(actual);
-        RunTestReport expectedObject = RunTestReport.buildFromJson(expected);
+        WorkflowReport actualObject = WorkflowReport.buildFromJson(actual);
+        WorkflowReport expectedObject = WorkflowReport.buildFromJson(expected);
 
         Assert.assertEquals(2, actualObject.getWorkflowRuns().size());
         Assert.assertEquals(2, expectedObject.getWorkflowRuns().size());
@@ -318,9 +320,9 @@ public class RunTestReportComparison {
         List<FileProvenanceReportRecord> fs = FileProvenanceReport.parseFileProvenanceReport(Helpers.getFileFromResource("fileprovenance/valid.tsv"));
 
         WorkflowRunReport wrr = new WorkflowRunReport();
-        wrr.setFiles(Arrays.asList(new ReducedFileProvenanceReportRecord(fs)));
+        wrr.setFiles(Arrays.asList(ReducedFileProvenanceReportRecord.from(fs)));
 
-        RunTestReport t = new RunTestReport();
+        WorkflowReport t = new WorkflowReport();
         t.setWorkflowRuns(Arrays.asList(wrr));
 
         String actualJson = t.toJson();
@@ -331,13 +333,13 @@ public class RunTestReportComparison {
 
     @Test
     public void differencesTest() throws IOException {
-        RunTestReport expected = new RunTestReport();
+        WorkflowReport expected = new WorkflowReport();
         expected.setWorkflowRunCount(10);
         expected.setMaxInputFiles(2);
         expected.setMinInputFiles(1);
         expected.addSamples(Arrays.asList("Sample2", "Sample3", "Sample1"));
 
-        RunTestReport actual = new RunTestReport();
+        WorkflowReport actual = new WorkflowReport();
         actual.setWorkflowRunCount(10);
         actual.setMaxInputFiles(3);
         actual.setMinInputFiles(2);
@@ -370,10 +372,10 @@ public class RunTestReportComparison {
         FileProvenanceReportRecord f2 = new FileProvenanceReportRecord.Builder(2).setExperimentName("Test2").setFilePath("/tmp/2").setFileSwid("2").build();
 
         WorkflowRunReport expected = new WorkflowRunReport();
-        expected.setFiles(Arrays.asList(new ReducedFileProvenanceReportRecord(f1), new ReducedFileProvenanceReportRecord(f2)));
+        expected.setFiles(Arrays.asList(ReducedFileProvenanceReportRecord.from(f1), ReducedFileProvenanceReportRecord.from(f2)));
 
         WorkflowRunReport actual = new WorkflowRunReport();
-        actual.setFiles(Arrays.asList(new ReducedFileProvenanceReportRecord(f2), new ReducedFileProvenanceReportRecord(f1)));
+        actual.setFiles(Arrays.asList(ReducedFileProvenanceReportRecord.from(f2), ReducedFileProvenanceReportRecord.from(f1)));
 
         Assert.assertEquals(actual, expected);
 

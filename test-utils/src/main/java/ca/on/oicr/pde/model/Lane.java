@@ -9,7 +9,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public class Lane implements SeqwareObject, Name {
+public class Lane implements PdeObject, Name {
 
     private static final Map<String, Lane> cache = new ConcurrentHashMap<>();
 

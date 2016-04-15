@@ -1,8 +1,5 @@
 package ca.on.oicr.pde.dao.executor;
 
-import ca.on.oicr.pde.dao.reader.SeqwareReadService;
-import ca.on.oicr.pde.model.Workflow;
-import ca.on.oicr.pde.model.WorkflowRun;
 import ca.on.oicr.pde.model.WorkflowRunReportRecord;
 import java.io.File;
 import java.io.IOException;
@@ -12,36 +9,36 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import net.sourceforge.seqware.common.model.Workflow;
+import net.sourceforge.seqware.common.model.WorkflowRun;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ca.on.oicr.pde.client.SeqwareClient;
 
 public class ThreadedSeqwareExecutor extends ShellExecutor {
 
     private final ExecutorService sharedPool;
-    private final SeqwareReadService seqwareService;
+    private final SeqwareClient seqwareClient;
     private final static Logger log = LogManager.getLogger(ThreadedSeqwareExecutor.class);
 
     public ThreadedSeqwareExecutor(String id, File seqwareDistrubution, File seqwareSettings, File workingDirectory, 
-            ExecutorService sharedPool, SeqwareReadService seqwareService) {
+            ExecutorService sharedPool, SeqwareClient seqwareClient) {
         super(id, seqwareDistrubution, seqwareSettings, workingDirectory);
-
         this.sharedPool = sharedPool;
-
-        this.seqwareService = seqwareService;
-
+        this.seqwareClient = seqwareClient;
     }
 
     @Override
     public void cancelWorkflowRun(WorkflowRun wr) throws IOException {
-        executeTask(Executors.callable(new CancelTask(wr.getSwid())));
+        executeTask(Executors.callable(new CancelTask(wr.getSwAccession())));
     }
 
     @Override
     public void cancelWorkflowRuns(Workflow w) {
         List<Callable<Object>> tasks = new ArrayList<>();
-        for (WorkflowRunReportRecord wr : seqwareService.getWorkflowRunRecords(w)) {
-            tasks.add(Executors.callable(new CancelTask(wr.getWorkflowRunSwid())));
+        for (WorkflowRunReportRecord wr : seqwareClient.getWorkflowRunRecords(w)) {
+            tasks.add(Executors.callable(new CancelTask(Integer.parseInt(wr.getWorkflowRunSwid()))));
         }
         executeTasks(tasks);
     }
@@ -63,11 +60,11 @@ public class ThreadedSeqwareExecutor extends ShellExecutor {
         Integer workflowRunSwid;
 
         public CancelTask(WorkflowRun wr) {
-            workflowRunSwid = Integer.parseInt(wr.getSwid());
+            workflowRunSwid = wr.getSwAccession();
         }
 
-        public CancelTask(String id) {
-            workflowRunSwid = Integer.parseInt(id);
+        public CancelTask(Integer id) {
+            workflowRunSwid = id;
         }
 
         @Override

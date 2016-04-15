@@ -1,5 +1,6 @@
 package ca.on.oicr.pde.model;
 
+import ca.on.oicr.gsi.provenance.model.FileProvenance;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
@@ -73,33 +74,103 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
         fileHash = 0;
     }
 
-    public ReducedFileProvenanceReportRecord(FileProvenanceReportRecord f) {
+    public ReducedFileProvenanceReportRecord(FileProvenance f) {
         this(Arrays.asList(f));
     }
 
-    public ReducedFileProvenanceReportRecord(Collection<FileProvenanceReportRecord> fs) {
+    public ReducedFileProvenanceReportRecord(Collection<FileProvenance> fs) {
         this();
-        for (FileProvenanceReportRecord f : fs) {
-            this.studyTitle.add(f.getStudyTitle());
-            this.studyAttributes.putAll(Multimaps.forMap(f.getStudyAttributes()));
-            this.experimentName.add(f.getExperimentName());
-            this.experimentAttributes.putAll(Multimaps.forMap(f.getExperimentAttributes()));
-            this.sampleName.add(f.getSampleName());
-            this.sampleAttributes.putAll(Multimaps.forMap(f.getSampleAttributes()));
-            this.sequencerRunName.add(f.getSequencerRunName());
-            this.sequencerRunAttributes.putAll(Multimaps.forMap(f.getSequencerRunAttributes()));
-            this.laneName.add(f.getLaneName());
-            this.laneAttributes.putAll(Multimaps.forMap(f.getLaneAttributes()));
-            this.iusTag.add(f.getIusTag());
-            this.iusAttributes.putAll(Multimaps.forMap(f.getIusAttributes()));
-            this.workflowName.add(f.getWorkflowName());
-            this.processingAlgorithm.add(f.getProcessingAlgorithm());
-            this.processingAttributes.putAll(Multimaps.forMap(f.getProcessingAttributes()));
-            this.fileMetaType.add(f.getFileMetaType());
-            this.fileAttributes.putAll(Multimaps.forMap(f.getFileAttributes()));
-            this.skip = this.skip == true ? skip : Boolean.valueOf(f.getSkip());
-            this.fileHash = f.getFilePath().hashCode();
+        for (FileProvenance f : fs) {
+            if (f.getStudyTitles() != null) {
+                this.studyTitle.addAll(f.getStudyTitles());
+            }
+            if (f.getSampleAttributes() != null) {
+                this.studyAttributes.putAll(Multimaps.forMap(f.getStudyAttributes()));
+            }
+            if (f.getExperimentNames() != null) {
+                this.experimentName.addAll(f.getExperimentNames());
+            }
+            if (f.getExperimentAttributes() != null) {
+                this.experimentAttributes.putAll(Multimaps.forMap(f.getExperimentAttributes()));
+            }
+            if (f.getSampleNames() != null) {
+                this.sampleName.addAll(f.getSampleNames());
+            }
+            if (f.getSampleAttributes() != null) {
+                this.sampleAttributes.putAll(Multimaps.forMap(f.getSampleAttributes()));
+            }
+            if (f.getSequencerRunNames() != null) {
+                this.sequencerRunName.addAll(f.getSequencerRunNames());
+            }
+            if (f.getSequencerRunAttributes() != null) {
+                this.sequencerRunAttributes.putAll(Multimaps.forMap(f.getSequencerRunAttributes()));
+            }
+            if (f.getLaneNames() != null) {
+                this.laneName.addAll(f.getLaneNames());
+            }
+            if (f.getLaneAttributes() != null) {
+                this.laneAttributes.putAll(Multimaps.forMap(f.getLaneAttributes()));
+            }
+            //this.iusTag.add(f.getIusTag());
+            //this.iusAttributes.putAll(Multimaps.forMap(f.getIusAttributes()));
+            if (f.getWorkflowName() != null) {
+                this.workflowName.add(f.getWorkflowName());
+            }
+            if (f.getProcessingAlgorithm() != null) {
+                this.processingAlgorithm.add(f.getProcessingAlgorithm());
+            }
+            if (f.getProcessingAttributes() != null) {
+                this.processingAttributes.putAll(Multimaps.forMap(f.getProcessingAttributes()));
+            }
+            if (f.getFileMetaType() != null) {
+                this.fileMetaType.add(f.getFileMetaType());
+            }
+            if (f.getFileAttributes() != null) {
+                this.fileAttributes.putAll(Multimaps.forMap(f.getFileAttributes()));
+            }
+            if (f.getSkip() != null && !this.skip) {
+                this.skip = Boolean.valueOf(f.getSkip());
+            }
+            if (f.getFilePath() != null) {
+                this.fileHash = f.getFilePath().hashCode();
+            }
         }
+    }
+
+    public static ReducedFileProvenanceReportRecord from(FileProvenanceReportRecord f) {
+        return from(Arrays.asList(f));
+    }
+
+    public static ReducedFileProvenanceReportRecord from(Collection<FileProvenanceReportRecord> fs) {
+        ReducedFileProvenanceReportRecord rfp = new ReducedFileProvenanceReportRecord();
+        boolean skip = false;
+        for (FileProvenanceReportRecord f : fs) {
+            rfp.studyTitle.add(f.getStudyTitle());
+            rfp.studyAttributes.putAll(Multimaps.forMap(f.getStudyAttributes()));
+            rfp.experimentName.add(f.getExperimentName());
+            rfp.experimentAttributes.putAll(Multimaps.forMap(f.getExperimentAttributes()));
+            rfp.sampleName.add(f.getSampleName());
+            rfp.sampleAttributes.putAll(Multimaps.forMap(f.getSampleAttributes()));
+            rfp.sequencerRunName.add(f.getSequencerRunName());
+            rfp.sequencerRunAttributes.putAll(Multimaps.forMap(f.getSequencerRunAttributes()));
+            rfp.laneName.add(f.getLaneName());
+            rfp.laneAttributes.putAll(Multimaps.forMap(f.getLaneAttributes()));
+            rfp.iusTag.add(f.getIusTag());
+            rfp.iusAttributes.putAll(Multimaps.forMap(f.getIusAttributes()));
+            rfp.workflowName.add(f.getWorkflowName());
+            rfp.processingAlgorithm.add(f.getProcessingAlgorithm());
+            rfp.processingAttributes.putAll(Multimaps.forMap(f.getProcessingAttributes()));
+            rfp.fileMetaType.add(f.getFileMetaType());
+            rfp.fileAttributes.putAll(Multimaps.forMap(f.getFileAttributes()));
+            rfp.fileHash = f.getFilePath().hashCode();
+
+            if (Boolean.valueOf(f.getSkip())) {
+                skip = true;
+            }
+        }
+        rfp.skip = skip;
+
+        return rfp;
     }
 
     public Set getStudyTitle() {

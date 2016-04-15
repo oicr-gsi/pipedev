@@ -1,31 +1,36 @@
-package ca.on.oicr.pde.testing.decider;
+package ca.on.oicr.pde.reports;
 
-import ca.on.oicr.pde.dao.reader.SeqwareReadService;
-import ca.on.oicr.pde.model.Accessionable;
+import ca.on.oicr.gsi.provenance.model.FileProvenance;
+import ca.on.oicr.gsi.provenance.ProvenanceClient;
+import ca.on.oicr.pde.dao.reader.FileProvenanceClient;
 import ca.on.oicr.pde.model.ReducedFileProvenanceReportRecord;
-import ca.on.oicr.pde.model.Workflow;
-import ca.on.oicr.pde.model.WorkflowRun;
 import ca.on.oicr.pde.model.WorkflowRunReportRecord;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.regex.Pattern;
+import net.sourceforge.seqware.common.model.FileProvenanceParam;
+import net.sourceforge.seqware.common.model.Workflow;
+import net.sourceforge.seqware.common.model.WorkflowRun;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import ca.on.oicr.pde.client.SeqwareClient;
 
-public class RunTestReport {
+public class WorkflowReport {
 
     private Integer workflowRunCount;
     private final Set<String> studies;
@@ -40,7 +45,7 @@ public class RunTestReport {
     private Integer totalInputFiles;
     private List<WorkflowRunReport> workflowRuns;
 
-    public RunTestReport() {
+    public WorkflowReport() {
         studies = new TreeSet<>();
         sequencerRuns = new TreeSet<>();
         lanes = new TreeSet<>();
@@ -55,19 +60,19 @@ public class RunTestReport {
         workflowRuns = new ArrayList<>();
     }
 
-    public static RunTestReport buildFromJson(File jsonPath) throws IOException {
+    public static WorkflowReport buildFromJson(File jsonPath) throws IOException {
 
         ObjectMapper m = new ObjectMapper();
         m.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        return m.readValue(jsonPath, RunTestReport.class);
+        return m.readValue(jsonPath, WorkflowReport.class);
 
     }
 
-    public static RunTestReport buildFromJson(String jsonPath) throws IOException {
+    public static WorkflowReport buildFromJson(String jsonPath) throws IOException {
 
         ObjectMapper m = new ObjectMapper();
         m.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        return m.readValue(jsonPath, RunTestReport.class);
+        return m.readValue(jsonPath, WorkflowReport.class);
 
     }
 
@@ -140,31 +145,31 @@ public class RunTestReport {
         return workflowRuns;
     }
 
-    public void addStudies(Collection studies) {
+    public void addStudies(Collection<String> studies) {
         this.studies.addAll(studies);
     }
 
-    public void addSequencerRuns(Collection sequencerRuns) {
+    public void addSequencerRuns(Collection<String> sequencerRuns) {
         this.sequencerRuns.addAll(sequencerRuns);
     }
 
-    public void addLanes(Collection lanes) {
+    public void addLanes(Collection<String> lanes) {
         this.lanes.addAll(lanes);
     }
 
-    public void addSamples(Collection samples) {
+    public void addSamples(Collection<String> samples) {
         this.samples.addAll(samples);
     }
 
-    public void addWorkflows(Collection workflows) {
+    public void addWorkflows(Collection<String> workflows) {
         this.workflows.addAll(workflows);
     }
 
-    public void addProcessingAlgorithms(Collection processingAlgorithms) {
+    public void addProcessingAlgorithms(Collection<String> processingAlgorithms) {
         this.processingAlgorithms.addAll(processingAlgorithms);
     }
 
-    public void addFileMetaTypes(Collection fileMetaTypes) {
+    public void addFileMetaTypes(Collection<String> fileMetaTypes) {
         this.fileMetaTypes.addAll(fileMetaTypes);
     }
 
@@ -192,7 +197,7 @@ public class RunTestReport {
         return EqualsBuilder.reflectionEquals(this, obj);
     }
 
-    public static String diffHeader(RunTestReport actual, RunTestReport expected) {
+    public static String diffHeader(WorkflowReport actual, WorkflowReport expected) {
 
         StringBuilder sb = new StringBuilder();
 
@@ -282,24 +287,30 @@ public class RunTestReport {
         }
     }
 
-    public static RunTestReport generateReport(SeqwareReadService srs, Workflow workflow) {
-        List<WorkflowRunReportRecord> wrrs = srs.getWorkflowRunRecords(workflow);
+    public static WorkflowReport generateReport(SeqwareClient seqwareClient, ProvenanceClient provenanceClient, Workflow workflow) {
+        List<WorkflowRunReportRecord> wrrs = seqwareClient.getWorkflowRunRecords(workflow);
 
-        RunTestReport t = new RunTestReport();
+        WorkflowReport t = new WorkflowReport();
         t.setWorkflowRunCount(wrrs.size());
+        
+                Map<String, Set<String>> filters = new HashMap<>();
+        filters.put(FileProvenanceParam.workflow.toString(), Sets.newHashSet(workflow.getSwAccession().toString()));
+
+        Collection<FileProvenance> fps = provenanceClient.getFileProvenance(filters);
+        
+        FileProvenanceClient srs = new FileProvenanceClient(Lists.newArrayList(fps));
 
         for (WorkflowRunReportRecord wrr : wrrs) {
 
             //TODO: get workflow run object from workflow run report record
-            WorkflowRun.Builder workflowRunBuilder = new WorkflowRun.Builder();
-            workflowRunBuilder.setSwid(wrr.getWorkflowRunSwid());
-            WorkflowRun wr = workflowRunBuilder.build();
+            WorkflowRun workflowRun = new WorkflowRun();
+            workflowRun.setSwAccession(Integer.parseInt(wrr.getWorkflowRunSwid()));
 
             //Get the workflow run's parent accession(s) (processing accession(s))
-            List<Accessionable> parentAccessions = srs.getParentAccessions(wr);
+            List<Integer> parentAccessions = seqwareClient.getParentAccession(workflowRun);
 
             //Get the workflow run's input file(s) (file accession(s))
-            List<Accessionable> inputFileAccessions = srs.getInputFileAccessions(wr);
+            List<Integer> inputFileAccessions = seqwareClient.getWorkflowRunInputFiles(workflowRun);
 
             t.addStudies(srs.getStudy(parentAccessions));
             t.addSamples(srs.getSamples(parentAccessions));
@@ -321,7 +332,7 @@ public class RunTestReport {
             t.setTotalInputFiles(t.getTotalInputFiles() + files.size());
 
             //get the ini that the decider scheduled
-            Map<String, String> ini = srs.getWorkflowRunIni(wr);
+            Map<String, String> ini = seqwareClient.getWorkflowRunIni(workflowRun);
 
             WorkflowRunReport x = new WorkflowRunReport();
             x.setWorkflowIni(ini);

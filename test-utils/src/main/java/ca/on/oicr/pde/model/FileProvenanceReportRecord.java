@@ -309,7 +309,7 @@ public class FileProvenanceReportRecord implements Serializable {
 
     public ReducedFileProvenanceReportRecord getSimpleFileProvenanceReportRecord() {
 
-        return new ReducedFileProvenanceReportRecord(this);
+        return ReducedFileProvenanceReportRecord.from(this);
 
     }
 

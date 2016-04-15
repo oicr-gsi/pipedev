@@ -1,5 +1,7 @@
 package ca.on.oicr.pde.testing.decider;
 
+import ca.on.oicr.pde.reports.WorkflowRunReport;
+import ca.on.oicr.pde.reports.WorkflowReport;
 import java.util.HashMap;
 import java.util.Map;
 import org.testng.Assert;
@@ -8,7 +10,7 @@ import org.testng.annotations.Test;
 
 public class RunTestComparison {
 
-    RunTestReport testReport;
+    WorkflowReport testReport;
 
     @BeforeTest
     public void buildDeciderRunTestReport() {
@@ -19,7 +21,7 @@ public class RunTestComparison {
         WorkflowRunReport runReport = new WorkflowRunReport();
         runReport.setWorkflowIni(ini);
 
-        testReport = new RunTestReport();
+        testReport = new WorkflowReport();
         testReport.addWorkflowRun(runReport);
     }
 
