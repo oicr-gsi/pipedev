@@ -1,19 +1,18 @@
 package ca.on.oicr.pde.testing.metadata;
 
-import ca.on.oicr.pde.dao.writer.SeqwareWriteService;
-import ca.on.oicr.pde.dao.reader.SeqwareReadService;
-import ca.on.oicr.pde.model.Experiment;
-import ca.on.oicr.pde.model.Ius;
-import ca.on.oicr.pde.model.Lane;
-import ca.on.oicr.pde.model.Sample;
-import ca.on.oicr.pde.model.SequencerRun;
 import ca.on.oicr.pde.model.SeqwareObject;
-import ca.on.oicr.pde.model.Study;
-import ca.on.oicr.pde.dao.executor.SeqwareExecutor;
-import java.io.File;
-import java.util.Collections;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 import java.util.HashMap;
-import java.util.Map;
+import net.sourceforge.seqware.common.model.Annotatable;
+import net.sourceforge.seqware.common.model.Experiment;
+import net.sourceforge.seqware.common.model.FirstTierModel;
+import net.sourceforge.seqware.common.model.Lane;
+import net.sourceforge.seqware.common.model.Sample;
+import net.sourceforge.seqware.common.model.SequencerRun;
+import net.sourceforge.seqware.common.model.Study;
+import net.sourceforge.seqware.common.model.IUS;
+import ca.on.oicr.pde.client.SeqwareLimsClient;
 
 /**
  *
@@ -21,353 +20,369 @@ import java.util.Map;
  */
 public class RegressionTestStudy {
 
-    private final TestEnvironment te;
-    private final Map<String, SeqwareObject> objects;
+//    private final Map<String, SeqwareObject> objects;
+//    public RegressionTestStudy(String host, String port, String user, String password, File seqwareWar) {
+//        this(new TestEnvironment(host, port, user, password, seqwareWar).getWriteService());
+//    }
+    SeqwareObjects s;
 
-    public RegressionTestStudy(String host, String port, String user, String password, File seqwareWar) {
+    public class SeqwareObjects {
 
-        te = new TestEnvironment(host, port, user, password, seqwareWar);
-        SeqwareWriteService writeService = te.getWriteService();
+        private final Table<String, Class<?>, Object> data = HashBasedTable.create();
+        private final HashMap<String, SeqwareObject> data2 = new HashMap<>();
 
-        objects = new HashMap<>();
+        public <T extends FirstTierModel & Annotatable> void add(String key, T t) {
+            data.put(key, t.getClass(), t);
+            data2.put(key, new SeqwareObject(t));
+        }
 
-        Study study = writeService.createStudy("111", "OICR", "PDE_TEST", null, "11", "PDE_TEST");
-        Experiment experiment = writeService.createExperiment(null, "20", study, "PDE_ILLUMINA");
+        public Sample getSample(String key) {
+            return (Sample) data.get(key, Sample.class);
+        }
 
-        objects.put("TEST_SEQUENCER_RUN_001", writeService.createSequencerRun(null, "/tmp/data1/", "TEST_SEQUENCER_RUN_001", true, "20", false));
-        objects.put("TEST_SEQUENCER_RUN_002", writeService.createSequencerRun(null, "/tmp/data2/", "TEST_SEQUENCER_RUN_002", true, "20", false));
-        objects.put("TEST_SEQUENCER_RUN_003", writeService.createSequencerRun(null, "/tmp/data3/", "TEST_SEQUENCER_RUN_003", true, "20", false));
+        public SequencerRun getSequencerRun(String key) {
+            return (SequencerRun) data.get(key, SequencerRun.class);
+        }
 
-        objects.put("TEST_0001", writeService.createSample(" ", experiment, "34", "TEST_0001", null));
-        objects.put("TEST_0001_Ly_R", writeService.createSample(null, experiment, "34", "TEST_0001_Ly_R", (Sample) objects.get("TEST_0001")));
-        objects.put("TEST_0001_Pa_P", writeService.createSample(null, experiment, "34", "TEST_0001_Pa_P", (Sample) objects.get("TEST_0001")));
-        objects.put("TEST_0001_Pa_X", writeService.createSample(null, experiment, "34", "TEST_0001_Pa_X", (Sample) objects.get("TEST_0001")));
-        objects.put("TEST_0001_Pa_C", writeService.createSample(null, experiment, "34", "TEST_0001_Pa_C", (Sample) objects.get("TEST_0001")));
+        public Lane getLane(String key) {
+            return (Lane) data.get(key, Lane.class);
+        }
 
-        objects.put("TEST_0002", writeService.createSample(null, experiment, "34", "TEST_0002", null));
-        objects.put("TEST_0002_Pa_P", writeService.createSample(null, experiment, "34", "TEST_0002_Pa_P", (Sample) objects.get("TEST_0002")));
-        objects.put("TEST_0002_Ly_R", writeService.createSample(null, experiment, "34", "TEST_0002_Ly_R", (Sample) objects.get("TEST_0002")));
+        public Study getStudy(String key) {
+            return (Study) data.get(key, Study.class);
+        }
 
-        objects.put("TEST_0003", writeService.createSample(null, experiment, "34", "TEST_0003", null));
-        objects.put("TEST_0003_Pa_X", writeService.createSample(null, experiment, "34", "TEST_0003_Pa_X", (Sample) objects.get("TEST_0003")));
-        objects.put("TEST_0003_Ly_R", writeService.createSample(null, experiment, "34", "TEST_0003_Ly_R", (Sample) objects.get("TEST_0003")));
+        public Experiment getExperiment(String key) {
+            return (Experiment) data.get(key, Experiment.class);
+        }
 
-        objects.put("TEST_0004", writeService.createSample(null, experiment, "34", "TEST_0004", null));
-        objects.put("TEST_0004_Pa_C", writeService.createSample(null, experiment, "34", "TEST_0004_Pa_C", (Sample) objects.get("TEST_0004")));
+        public IUS getIus(String key) {
+            return (IUS) data.get(key, IUS.class);
+        }
 
-        objects.put("TEST_0005", writeService.createSample(null, experiment, "34", "TEST_0005", null));
-        objects.put("TEST_0005_Pa_X", writeService.createSample(null, experiment, "34", "TEST_0005_Pa_X", (Sample) objects.get("TEST_0005")));
+        public SeqwareObject get(String key) {
+            return data2.get(key);
+        }
+
+    }
+
+    public RegressionTestStudy(SeqwareLimsClient lims) {
+
+        s = new SeqwareObjects();
+
+        Study study = lims.createStudy("111", "OICR", "PDE_TEST", null, "11", "PDE_TEST");
+        Experiment experiment = lims.createExperiment(null, "20", study, "PDE_ILLUMINA");
+
+        s.add("TEST_SEQUENCER_RUN_001", lims.createSequencerRun(null, "/tmp/data1/", "TEST_SEQUENCER_RUN_001", true, "20", false));
+        s.add("TEST_SEQUENCER_RUN_002", lims.createSequencerRun(null, "/tmp/data2/", "TEST_SEQUENCER_RUN_002", true, "20", false));
+        s.add("TEST_SEQUENCER_RUN_003", lims.createSequencerRun(null, "/tmp/data3/", "TEST_SEQUENCER_RUN_003", true, "20", false));
+
+        s.add("TEST_0001", lims.createSample(" ", experiment, "34", "TEST_0001", null));
+        s.add("TEST_0001_Ly_R", lims.createSample(null, experiment, "34", "TEST_0001_Ly_R", s.getSample("TEST_0001")));
+        s.add("TEST_0001_Pa_P", lims.createSample(null, experiment, "34", "TEST_0001_Pa_P", s.getSample("TEST_0001")));
+        s.add("TEST_0001_Pa_X", lims.createSample(null, experiment, "34", "TEST_0001_Pa_X", s.getSample("TEST_0001")));
+        s.add("TEST_0001_Pa_C", lims.createSample(null, experiment, "34", "TEST_0001_Pa_C", s.getSample("TEST_0001")));
+
+        s.add("TEST_0002", lims.createSample(null, experiment, "34", "TEST_0002", null));
+        s.add("TEST_0002_Pa_P", lims.createSample(null, experiment, "34", "TEST_0002_Pa_P", s.getSample("TEST_0002")));
+        s.add("TEST_0002_Ly_R", lims.createSample(null, experiment, "34", "TEST_0002_Ly_R", s.getSample("TEST_0002")));
+
+        s.add("TEST_0003", lims.createSample(null, experiment, "34", "TEST_0003", null));
+        s.add("TEST_0003_Pa_X", lims.createSample(null, experiment, "34", "TEST_0003_Pa_X", s.getSample("TEST_0003")));
+        s.add("TEST_0003_Ly_R", lims.createSample(null, experiment, "34", "TEST_0003_Ly_R", s.getSample("TEST_0003")));
+
+        s.add("TEST_0004", lims.createSample(null, experiment, "34", "TEST_0004", null));
+        s.add("TEST_0004_Pa_C", lims.createSample(null, experiment, "34", "TEST_0004_Pa_C", s.getSample("TEST_0004")));
+
+        s.add("TEST_0005", lims.createSample(null, experiment, "34", "TEST_0005", null));
+        s.add("TEST_0005_Pa_X", lims.createSample(null, experiment, "34", "TEST_0005_Pa_X", s.getSample("TEST_0005")));
 
         Lane lane;
         Sample sample;
-        Ius ius;
+        IUS ius;
 
         //TEST_SEQUENCER_RUN_001
         //lane 1
-        lane = writeService.createLane(null, null, "1", LibraryType.PE.getId(), "5", "14", null, (SequencerRun) objects.get("TEST_SEQUENCER_RUN_001"), false, "11");
-        objects.put("TEST_SEQUENCER_RUN_001_1", lane);
+        lane = lims.createLane(null, null, "1", LibraryType.PE.getId(), "5", "14", null, s.getSequencerRun("TEST_SEQUENCER_RUN_001"), false, "11");
+        s.add("TEST_SEQUENCER_RUN_001_1", lane);
 
-        sample = writeService.createSample(null, experiment, "34", "TEST_0001_Ly_R_PE_500_WG", (Sample) objects.get("TEST_0001_Ly_R"));
-        objects.put("TEST_0001_Ly_R_PE_500_WG", sample);
-        writeService.annotate(sample, "geo_tissue_origin", TissueOrigin.Ly.toString());
-        writeService.annotate(sample, "geo_tissue_type", TissueType.R.toString());
-        writeService.annotate(sample, "geo_library_size_code", "500");
-        writeService.annotate(sample, "geo_library_source_template_type", TemplateType.WG.toString());
-        ius = writeService.createIus("Noindex", null, lane, null, sample, false);
-        objects.put("IUS1", ius);
+        sample = lims.createSample(null, experiment, "34", "TEST_0001_Ly_R_PE_500_WG", s.getSample("TEST_0001_Ly_R"));
+        s.add("TEST_0001_Ly_R_PE_500_WG", sample);
+        lims.annotate(sample, "geo_tissue_origin", TissueOrigin.Ly.toString());
+        lims.annotate(sample, "geo_tissue_type", TissueType.R.toString());
+        lims.annotate(sample, "geo_library_size_code", "500");
+        lims.annotate(sample, "geo_library_source_template_type", TemplateType.WG.toString());
+        ius = lims.createIus("Noindex", null, lane, null, sample, false);
+        s.add("IUS1", ius);
 
         //lane 2
-        lane = writeService.createLane(null, null, "2", LibraryType.PE.getId(), "5", "14", null, (SequencerRun) objects.get("TEST_SEQUENCER_RUN_001"), false, "11");
-        objects.put("TEST_SEQUENCER_RUN_001_2", lane);
+        lane = lims.createLane(null, null, "2", LibraryType.PE.getId(), "5", "14", null, s.getSequencerRun("TEST_SEQUENCER_RUN_001"), false, "11");
+        s.add("TEST_SEQUENCER_RUN_001_2", lane);
 
-        sample = writeService.createSample(null, experiment, "34", "TEST_0001_Ly_R_PE_600_WG", (Sample) objects.get("TEST_0001_Ly_R"));
-        objects.put("TEST_0001_Ly_R_PE_600_WG", sample);
-        writeService.annotate(sample, "geo_tissue_origin", TissueOrigin.Ly.toString());
-        writeService.annotate(sample, "geo_tissue_type", TissueType.R.toString());
-        writeService.annotate(sample, "geo_library_size_code", "600");
-        writeService.annotate(sample, "geo_library_source_template_type", TemplateType.WG.toString());
-        ius = writeService.createIus("Noindex", null, lane, null, sample, false);
-        objects.put("IUS2", ius);
+        sample = lims.createSample(null, experiment, "34", "TEST_0001_Ly_R_PE_600_WG", s.getSample("TEST_0001_Ly_R"));
+        s.add("TEST_0001_Ly_R_PE_600_WG", sample);
+        lims.annotate(sample, "geo_tissue_origin", TissueOrigin.Ly.toString());
+        lims.annotate(sample, "geo_tissue_type", TissueType.R.toString());
+        lims.annotate(sample, "geo_library_size_code", "600");
+        lims.annotate(sample, "geo_library_source_template_type", TemplateType.WG.toString());
+        ius = lims.createIus("Noindex", null, lane, null, sample, false);
+        s.add("IUS2", ius);
 
         //lane 3
-        lane = writeService.createLane(null, null, "3", LibraryType.PE.getId(), "5", "14", null, (SequencerRun) objects.get("TEST_SEQUENCER_RUN_001"), false, "11");
-        objects.put("TEST_SEQUENCER_RUN_001_3", lane);
+        lane = lims.createLane(null, null, "3", LibraryType.PE.getId(), "5", "14", null, s.getSequencerRun("TEST_SEQUENCER_RUN_001"), false, "11");
+        s.add("TEST_SEQUENCER_RUN_001_3", lane);
 
-        sample = writeService.createSample(null, experiment, "34", "TEST_0001_Pa_P_PE_400_WG", (Sample) objects.get("TEST_0001_Pa_P"));
-        objects.put("TEST_0001_Pa_P_PE_400_WG", sample);
-        writeService.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
-        writeService.annotate(sample, "geo_tissue_type", TissueType.P.toString());
-        writeService.annotate(sample, "geo_library_size_code", "400");
-        writeService.annotate(sample, "geo_library_source_template_type", TemplateType.WG.toString());
-        ius = writeService.createIus("Noindex", null, lane, null, sample, false);
-        objects.put("IUS3", ius);
+        sample = lims.createSample(null, experiment, "34", "TEST_0001_Pa_P_PE_400_WG", s.getSample("TEST_0001_Pa_P"));
+        s.add("TEST_0001_Pa_P_PE_400_WG", sample);
+        lims.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
+        lims.annotate(sample, "geo_tissue_type", TissueType.P.toString());
+        lims.annotate(sample, "geo_library_size_code", "400");
+        lims.annotate(sample, "geo_library_source_template_type", TemplateType.WG.toString());
+        ius = lims.createIus("Noindex", null, lane, null, sample, false);
+        s.add("IUS3", ius);
 
         //lane 4
-        lane = writeService.createLane(null, null, "4", LibraryType.PE.getId(), "5", "14", null, (SequencerRun) objects.get("TEST_SEQUENCER_RUN_001"), false, "11");
-        objects.put("TEST_SEQUENCER_RUN_001_4", lane);
+        lane = lims.createLane(null, null, "4", LibraryType.PE.getId(), "5", "14", null, s.getSequencerRun("TEST_SEQUENCER_RUN_001"), false, "11");
+        s.add("TEST_SEQUENCER_RUN_001_4", lane);
 
-        sample = writeService.createSample(null, experiment, "34", "TEST_0001_Pa_P_PE_300_WG", (Sample) objects.get("TEST_0001_Pa_P"));
-        objects.put("TEST_0001_Pa_P_PE_300_WG", sample);
-        writeService.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
-        writeService.annotate(sample, "geo_tissue_type", TissueType.P.toString());
-        writeService.annotate(sample, "geo_library_size_code", "300");
-        writeService.annotate(sample, "geo_library_source_template_type", TemplateType.WG.toString());
-        ius = writeService.createIus("Noindex", null, lane, null, sample, false);
-        objects.put("IUS4", ius);
+        sample = lims.createSample(null, experiment, "34", "TEST_0001_Pa_P_PE_300_WG", s.getSample("TEST_0001_Pa_P"));
+        s.add("TEST_0001_Pa_P_PE_300_WG", sample);
+        lims.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
+        lims.annotate(sample, "geo_tissue_type", TissueType.P.toString());
+        lims.annotate(sample, "geo_library_size_code", "300");
+        lims.annotate(sample, "geo_library_source_template_type", TemplateType.WG.toString());
+        ius = lims.createIus("Noindex", null, lane, null, sample, false);
+        s.add("IUS4", ius);
 
         //lane 5
-        lane = writeService.createLane(null, null, "5", LibraryType.PE.getId(), "5", "14", null, (SequencerRun) objects.get("TEST_SEQUENCER_RUN_001"), false, "11");
-        objects.put("TEST_SEQUENCER_RUN_001_5", lane);
+        lane = lims.createLane(null, null, "5", LibraryType.PE.getId(), "5", "14", null, s.getSequencerRun("TEST_SEQUENCER_RUN_001"), false, "11");
+        s.add("TEST_SEQUENCER_RUN_001_5", lane);
 
-        sample = writeService.createSample(null, experiment, "34", "TEST_0001_Pa_P_PE_396_MR", (Sample) objects.get("TEST_0001_Pa_P"));
-        objects.put("TEST_0001_Pa_P_PE_396_MR", sample);
-        writeService.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
-        writeService.annotate(sample, "geo_tissue_type", TissueType.P.toString());
-        writeService.annotate(sample, "geo_library_size_code", "396");
-        writeService.annotate(sample, "geo_library_source_template_type", TemplateType.MR.toString());
-        ius = writeService.createIus("Noindex", null, lane, null, sample, false);
-        objects.put("IUS5", ius);
+        sample = lims.createSample(null, experiment, "34", "TEST_0001_Pa_P_PE_396_MR", s.getSample("TEST_0001_Pa_P"));
+        s.add("TEST_0001_Pa_P_PE_396_MR", sample);
+        lims.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
+        lims.annotate(sample, "geo_tissue_type", TissueType.P.toString());
+        lims.annotate(sample, "geo_library_size_code", "396");
+        lims.annotate(sample, "geo_library_source_template_type", TemplateType.MR.toString());
+        ius = lims.createIus("Noindex", null, lane, null, sample, false);
+        s.add("IUS5", ius);
 
         //lane 6
-        lane = writeService.createLane(null, null, "6", LibraryType.PE.getId(), "5", "14", null, (SequencerRun) objects.get("TEST_SEQUENCER_RUN_001"), false, "11");
-        objects.put("TEST_SEQUENCER_RUN_001_6", lane);
+        lane = lims.createLane(null, null, "6", LibraryType.PE.getId(), "5", "14", null, s.getSequencerRun("TEST_SEQUENCER_RUN_001"), false, "11");
+        s.add("TEST_SEQUENCER_RUN_001_6", lane);
 
-        sample = writeService.createSample(null, experiment, "34", "TEST_0001_Pa_P_PE_296_WT", (Sample) objects.get("TEST_0001_Pa_P"));
-        objects.put("TEST_0001_Pa_P_PE_296_WT", sample);
-        writeService.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
-        writeService.annotate(sample, "geo_tissue_type", TissueType.P.toString());
-        writeService.annotate(sample, "geo_library_size_code", "296");
-        writeService.annotate(sample, "geo_library_source_template_type", TemplateType.WT.toString());
-        ius = writeService.createIus("Noindex", null, lane, null, sample, false);
-        objects.put("IUS6", ius);
+        sample = lims.createSample(null, experiment, "34", "TEST_0001_Pa_P_PE_296_WT", s.getSample("TEST_0001_Pa_P"));
+        s.add("TEST_0001_Pa_P_PE_296_WT", sample);
+        lims.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
+        lims.annotate(sample, "geo_tissue_type", TissueType.P.toString());
+        lims.annotate(sample, "geo_library_size_code", "296");
+        lims.annotate(sample, "geo_library_source_template_type", TemplateType.WT.toString());
+        ius = lims.createIus("Noindex", null, lane, null, sample, false);
+        s.add("IUS6", ius);
 
         //lane 7
-        lane = writeService.createLane(null, null, "7", LibraryType.PE.getId(), "5", "14", null, (SequencerRun) objects.get("TEST_SEQUENCER_RUN_001"), false, "11");
-        objects.put("TEST_SEQUENCER_RUN_001_7", lane);
+        lane = lims.createLane(null, null, "7", LibraryType.PE.getId(), "5", "14", null, s.getSequencerRun("TEST_SEQUENCER_RUN_001"), false, "11");
+        s.add("TEST_SEQUENCER_RUN_001_7", lane);
 
-        sample = writeService.createSample(null, experiment, "34", "TEST_0001_Ly_R_PE_250_EX", (Sample) objects.get("TEST_0001_Ly_R"));
-        objects.put("TEST_0001_Ly_R_PE_250_EX", sample);
-        writeService.annotate(sample, "geo_tissue_origin", TissueOrigin.Ly.toString());
-        writeService.annotate(sample, "geo_tissue_type", TissueType.R.toString());
-        writeService.annotate(sample, "geo_library_size_code", "250");
-        writeService.annotate(sample, "geo_library_source_template_type", TemplateType.EX.toString());
-        ius = writeService.createIus("Noindex", null, lane, null, sample, false);
-        objects.put("IUS7", ius);
+        sample = lims.createSample(null, experiment, "34", "TEST_0001_Ly_R_PE_250_EX", s.getSample("TEST_0001_Ly_R"));
+        s.add("TEST_0001_Ly_R_PE_250_EX", sample);
+        lims.annotate(sample, "geo_tissue_origin", TissueOrigin.Ly.toString());
+        lims.annotate(sample, "geo_tissue_type", TissueType.R.toString());
+        lims.annotate(sample, "geo_library_size_code", "250");
+        lims.annotate(sample, "geo_library_source_template_type", TemplateType.EX.toString());
+        ius = lims.createIus("Noindex", null, lane, null, sample, false);
+        s.add("IUS7", ius);
 
         //lane 8
-        lane = writeService.createLane(null, null, "8", LibraryType.PE.getId(), "5", "14", null, (SequencerRun) objects.get("TEST_SEQUENCER_RUN_001"), false, "11");
-        objects.put("TEST_SEQUENCER_RUN_001_8", lane);
+        lane = lims.createLane(null, null, "8", LibraryType.PE.getId(), "5", "14", null, s.getSequencerRun("TEST_SEQUENCER_RUN_001"), false, "11");
+        s.add("TEST_SEQUENCER_RUN_001_8", lane);
 
-        sample = writeService.createSample(null, experiment, "34", "TEST_0001_Pa_P_PE_350_EX", (Sample) objects.get("TEST_0001_Pa_P"));
-        objects.put("TEST_0001_Pa_P_PE_350_EX", sample);
-        writeService.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
-        writeService.annotate(sample, "geo_tissue_type", TissueType.P.toString());
-        writeService.annotate(sample, "geo_library_size_code", "350");
-        writeService.annotate(sample, "geo_library_source_template_type", TemplateType.EX.toString());
-        ius = writeService.createIus("Noindex", null, lane, null, sample, false);
-        objects.put("IUS8", ius);
+        sample = lims.createSample(null, experiment, "34", "TEST_0001_Pa_P_PE_350_EX", s.getSample("TEST_0001_Pa_P"));
+        s.add("TEST_0001_Pa_P_PE_350_EX", sample);
+        lims.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
+        lims.annotate(sample, "geo_tissue_type", TissueType.P.toString());
+        lims.annotate(sample, "geo_library_size_code", "350");
+        lims.annotate(sample, "geo_library_source_template_type", TemplateType.EX.toString());
+        ius = lims.createIus("Noindex", null, lane, null, sample, false);
+        s.add("IUS8", ius);
 
         //TEST_SEQUENCER_RUN_002
         //lane 1
-        lane = writeService.createLane(null, null, "1", LibraryType.PE.getId(), "5", "14", null, (SequencerRun) objects.get("TEST_SEQUENCER_RUN_002"), false, "11");
-        objects.put("TEST_SEQUENCER_RUN_002_1", lane);
+        lane = lims.createLane(null, null, "1", LibraryType.PE.getId(), "5", "14", null, s.getSequencerRun("TEST_SEQUENCER_RUN_002"), false, "11");
+        s.add("TEST_SEQUENCER_RUN_002_1", lane);
 
-        sample = writeService.createSample(null, experiment, "34", "TEST_0001_Ly_R_PE_500_WG", (Sample) objects.get("TEST_0001_Ly_R"));
-        objects.put("TEST_0001_Ly_R_PE_500_WG", sample);
-        writeService.annotate(sample, "geo_tissue_origin", TissueOrigin.Ly.toString());
-        writeService.annotate(sample, "geo_tissue_type", TissueType.R.toString());
-        writeService.annotate(sample, "geo_library_size_code", "500");
-        writeService.annotate(sample, "geo_library_source_template_type", TemplateType.WG.toString());
-        ius = writeService.createIus("Noindex", null, lane, null, sample, false);
-        objects.put("IUS9", ius);
+        sample = lims.createSample(null, experiment, "34", "TEST_0001_Ly_R_PE_500_WG", s.getSample("TEST_0001_Ly_R"));
+        s.add("TEST_0001_Ly_R_PE_500_WG", sample);
+        lims.annotate(sample, "geo_tissue_origin", TissueOrigin.Ly.toString());
+        lims.annotate(sample, "geo_tissue_type", TissueType.R.toString());
+        lims.annotate(sample, "geo_library_size_code", "500");
+        lims.annotate(sample, "geo_library_source_template_type", TemplateType.WG.toString());
+        ius = lims.createIus("Noindex", null, lane, null, sample, false);
+        s.add("IUS9", ius);
 
         //lane 2
-        lane = writeService.createLane(null, null, "2", LibraryType.PE.getId(), "5", "14", null, (SequencerRun) objects.get("TEST_SEQUENCER_RUN_002"), false, "11");
-        objects.put("TEST_SEQUENCER_RUN_002_2", lane);
+        lane = lims.createLane(null, null, "2", LibraryType.PE.getId(), "5", "14", null, s.getSequencerRun("TEST_SEQUENCER_RUN_002"), false, "11");
+        s.add("TEST_SEQUENCER_RUN_002_2", lane);
 
-        sample = writeService.createSample(null, experiment, "34", "TEST_0001_Pa_P_PE_300_WG", (Sample) objects.get("TEST_0001_Pa_P"));
-        objects.put("TEST_0001_Pa_P_PE_300_WG", sample);
-        writeService.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
-        writeService.annotate(sample, "geo_tissue_type", TissueType.P.toString());
-        writeService.annotate(sample, "geo_library_size_code", "300");
-        writeService.annotate(sample, "geo_library_source_template_type", TemplateType.WG.toString());
-        ius = writeService.createIus("Noindex", null, lane, null, sample, false);
-        objects.put("IUS10", ius);
+        sample = lims.createSample(null, experiment, "34", "TEST_0001_Pa_P_PE_300_WG", s.getSample("TEST_0001_Pa_P"));
+        s.add("TEST_0001_Pa_P_PE_300_WG", sample);
+        lims.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
+        lims.annotate(sample, "geo_tissue_type", TissueType.P.toString());
+        lims.annotate(sample, "geo_library_size_code", "300");
+        lims.annotate(sample, "geo_library_source_template_type", TemplateType.WG.toString());
+        ius = lims.createIus("Noindex", null, lane, null, sample, false);
+        s.add("IUS10", ius);
 
         //lane 3
-        lane = writeService.createLane(null, null, "3", LibraryType.PE.getId(), "5", "14", null, (SequencerRun) objects.get("TEST_SEQUENCER_RUN_002"), false, "11");
-        objects.put("TEST_SEQUENCER_RUN_002_3", lane);
+        lane = lims.createLane(null, null, "3", LibraryType.PE.getId(), "5", "14", null, s.getSequencerRun("TEST_SEQUENCER_RUN_002"), false, "11");
+        s.add("TEST_SEQUENCER_RUN_002_3", lane);
 
-        sample = writeService.createSample(null, experiment, "34", "TEST_0002_Pa_P_PE_400_EX", (Sample) objects.get("TEST_0002_Pa_P"));
-        objects.put("TEST_0002_Pa_P_PE_400_EX", sample);
-        writeService.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
-        writeService.annotate(sample, "geo_tissue_type", TissueType.P.toString());
-        writeService.annotate(sample, "geo_library_size_code", "400");
-        writeService.annotate(sample, "geo_library_source_template_type", TemplateType.EX.toString());
-        ius = writeService.createIus("ACAGTG", null, lane, null, sample, false);
-        objects.put("IUS11", ius);
+        sample = lims.createSample(null, experiment, "34", "TEST_0002_Pa_P_PE_400_EX", s.getSample("TEST_0002_Pa_P"));
+        s.add("TEST_0002_Pa_P_PE_400_EX", sample);
+        lims.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
+        lims.annotate(sample, "geo_tissue_type", TissueType.P.toString());
+        lims.annotate(sample, "geo_library_size_code", "400");
+        lims.annotate(sample, "geo_library_source_template_type", TemplateType.EX.toString());
+        ius = lims.createIus("ACAGTG", null, lane, null, sample, false);
+        s.add("IUS11", ius);
 
-        sample = writeService.createSample(null, experiment, "34", "TEST_0003_Pa_X_PE_401_EX", (Sample) objects.get("TEST_0003_Pa_X"));
-        objects.put("TEST_0003_Pa_X_PE_401_EX", sample);
-        writeService.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
-        writeService.annotate(sample, "geo_tissue_type", TissueType.X.toString());
-        writeService.annotate(sample, "geo_library_size_code", "401");
-        writeService.annotate(sample, "geo_library_source_template_type", TemplateType.EX.toString());
-        ius = writeService.createIus("TTAGGC", null, lane, null, sample, false);
-        objects.put("IUS12", ius);
+        sample = lims.createSample(null, experiment, "34", "TEST_0003_Pa_X_PE_401_EX", s.getSample("TEST_0003_Pa_X"));
+        s.add("TEST_0003_Pa_X_PE_401_EX", sample);
+        lims.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
+        lims.annotate(sample, "geo_tissue_type", TissueType.X.toString());
+        lims.annotate(sample, "geo_library_size_code", "401");
+        lims.annotate(sample, "geo_library_source_template_type", TemplateType.EX.toString());
+        ius = lims.createIus("TTAGGC", null, lane, null, sample, false);
+        s.add("IUS12", ius);
 
-        sample = writeService.createSample(null, experiment, "34", "TEST_0004_Pa_C_PE_501_EX", (Sample) objects.get("TEST_0004_Pa_C"));
-        objects.put("TEST_0004_Pa_C_PE_501_EX", sample);
-        writeService.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
-        writeService.annotate(sample, "geo_tissue_type", TissueType.C.toString());
-        writeService.annotate(sample, "geo_library_size_code", "501");
-        writeService.annotate(sample, "geo_library_source_template_type", TemplateType.EX.toString());
-        ius = writeService.createIus("CGATGT", null, lane, null, sample, false);
-        objects.put("IUS13", ius);
+        sample = lims.createSample(null, experiment, "34", "TEST_0004_Pa_C_PE_501_EX", s.getSample("TEST_0004_Pa_C"));
+        s.add("TEST_0004_Pa_C_PE_501_EX", sample);
+        lims.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
+        lims.annotate(sample, "geo_tissue_type", TissueType.C.toString());
+        lims.annotate(sample, "geo_library_size_code", "501");
+        lims.annotate(sample, "geo_library_source_template_type", TemplateType.EX.toString());
+        ius = lims.createIus("CGATGT", null, lane, null, sample, false);
+        s.add("IUS13", ius);
 
-        sample = writeService.createSample(null, experiment, "34", "TEST_0005_Pa_X_PE_150_WG", (Sample) objects.get("TEST_0005_Pa_X"));
-        objects.put("TEST_0005_Pa_X_PE_150_WG", sample);
-        writeService.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
-        writeService.annotate(sample, "geo_tissue_type", TissueType.X.toString());
-        writeService.annotate(sample, "geo_library_size_code", "150");
-        writeService.annotate(sample, "geo_library_source_template_type", TemplateType.WG.toString());
-        ius = writeService.createIus("ATCACG", null, lane, null, sample, false);
-        objects.put("IUS14", ius);
+        sample = lims.createSample(null, experiment, "34", "TEST_0005_Pa_X_PE_150_WG", s.getSample("TEST_0005_Pa_X"));
+        s.add("TEST_0005_Pa_X_PE_150_WG", sample);
+        lims.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
+        lims.annotate(sample, "geo_tissue_type", TissueType.X.toString());
+        lims.annotate(sample, "geo_library_size_code", "150");
+        lims.annotate(sample, "geo_library_source_template_type", TemplateType.WG.toString());
+        ius = lims.createIus("ATCACG", null, lane, null, sample, false);
+        s.add("IUS14", ius);
 
         //lane 4
-        lane = writeService.createLane(null, null, "4", LibraryType.PE.getId(), "5", "14", null, (SequencerRun) objects.get("TEST_SEQUENCER_RUN_002"), false, "11");
-        objects.put("TEST_SEQUENCER_RUN_002_4", lane);
+        lane = lims.createLane(null, null, "4", LibraryType.PE.getId(), "5", "14", null, s.getSequencerRun("TEST_SEQUENCER_RUN_002"), false, "11");
+        s.add("TEST_SEQUENCER_RUN_002_4", lane);
 
-        sample = writeService.createSample(null, experiment, "34", "TEST_0002_Pa_P_PE_400_EX", (Sample) objects.get("TEST_0002_Pa_P"));
-        objects.put("TEST_0002_Pa_P_PE_400_EX", sample);
-        writeService.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
-        writeService.annotate(sample, "geo_tissue_type", TissueType.P.toString());
-        writeService.annotate(sample, "geo_library_size_code", "400");
-        writeService.annotate(sample, "geo_library_source_template_type", TemplateType.EX.toString());
-        ius = writeService.createIus("TGACCA", null, lane, null, sample, false);
-        objects.put("IUS15", ius);
+        sample = lims.createSample(null, experiment, "34", "TEST_0002_Pa_P_PE_400_EX", s.getSample("TEST_0002_Pa_P"));
+        s.add("TEST_0002_Pa_P_PE_400_EX", sample);
+        lims.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
+        lims.annotate(sample, "geo_tissue_type", TissueType.P.toString());
+        lims.annotate(sample, "geo_library_size_code", "400");
+        lims.annotate(sample, "geo_library_source_template_type", TemplateType.EX.toString());
+        ius = lims.createIus("TGACCA", null, lane, null, sample, false);
+        s.add("IUS15", ius);
 
-        sample = writeService.createSample(null, experiment, "34", "TEST_0003_Pa_X_PE_401_EX", (Sample) objects.get("TEST_0003_Pa_X"));
-        objects.put("TEST_0003_Pa_X_PE_401_EX", sample);
-        writeService.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
-        writeService.annotate(sample, "geo_tissue_type", TissueType.X.toString());
-        writeService.annotate(sample, "geo_library_size_code", "401");
-        writeService.annotate(sample, "geo_library_source_template_type", TemplateType.EX.toString());
-        writeService.createIus("ACAGTG", null, lane, null, sample, false);
-        objects.put("IUS16", ius);
+        sample = lims.createSample(null, experiment, "34", "TEST_0003_Pa_X_PE_401_EX", s.getSample("TEST_0003_Pa_X"));
+        s.add("TEST_0003_Pa_X_PE_401_EX", sample);
+        lims.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
+        lims.annotate(sample, "geo_tissue_type", TissueType.X.toString());
+        lims.annotate(sample, "geo_library_size_code", "401");
+        lims.annotate(sample, "geo_library_source_template_type", TemplateType.EX.toString());
+        lims.createIus("ACAGTG", null, lane, null, sample, false);
+        s.add("IUS16", ius);
 
         //lane 5
-        lane = writeService.createLane(null, null, "5", LibraryType.PE.getId(), "5", "14", null, (SequencerRun) objects.get("TEST_SEQUENCER_RUN_002"), false, "11");
-        objects.put("TEST_SEQUENCER_RUN_002_5", lane);
+        lane = lims.createLane(null, null, "5", LibraryType.PE.getId(), "5", "14", null, s.getSequencerRun("TEST_SEQUENCER_RUN_002"), false, "11");
+        s.add("TEST_SEQUENCER_RUN_002_5", lane);
 
-        sample = writeService.createSample(null, experiment, "34", "TEST_0001_Pa_X_PE_200_WG", (Sample) objects.get("TEST_0001_Pa_X"));
-        objects.put("TEST_0001_Pa_X_PE_200_WG", sample);
-        writeService.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
-        writeService.annotate(sample, "geo_tissue_type", TissueType.X.toString());
-        writeService.annotate(sample, "geo_library_size_code", "200");
-        writeService.annotate(sample, "geo_library_source_template_type", TemplateType.WG.toString());
-        ius = writeService.createIus("Noindex", null, lane, null, sample, false);
-        objects.put("IUS17", ius);
+        sample = lims.createSample(null, experiment, "34", "TEST_0001_Pa_X_PE_200_WG", s.getSample("TEST_0001_Pa_X"));
+        s.add("TEST_0001_Pa_X_PE_200_WG", sample);
+        lims.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
+        lims.annotate(sample, "geo_tissue_type", TissueType.X.toString());
+        lims.annotate(sample, "geo_library_size_code", "200");
+        lims.annotate(sample, "geo_library_source_template_type", TemplateType.WG.toString());
+        ius = lims.createIus("Noindex", null, lane, null, sample, false);
+        s.add("IUS17", ius);
 
         //lane 6
-        lane = writeService.createLane(null, null, "6", LibraryType.PE.getId(), "5", "14", null, (SequencerRun) objects.get("TEST_SEQUENCER_RUN_002"), false, "11");
-        objects.put("TEST_SEQUENCER_RUN_002_6", lane);
+        lane = lims.createLane(null, null, "6", LibraryType.PE.getId(), "5", "14", null, s.getSequencerRun("TEST_SEQUENCER_RUN_002"), false, "11");
+        s.add("TEST_SEQUENCER_RUN_002_6", lane);
 
-        sample = writeService.createSample(null, experiment, "34", "TEST_0001_Pa_C_PE_700_WG", (Sample) objects.get("TEST_0001_Pa_C"));
-        objects.put("TEST_0001_Pa_C_PE_700_WG", sample);
-        writeService.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
-        writeService.annotate(sample, "geo_tissue_type", TissueType.C.toString());
-        writeService.annotate(sample, "geo_library_size_code", "700");
-        writeService.annotate(sample, "geo_library_source_template_type", TemplateType.WG.toString());
-        ius = writeService.createIus("Noindex", null, lane, null, sample, false);
-        objects.put("IUS18", ius);
+        sample = lims.createSample(null, experiment, "34", "TEST_0001_Pa_C_PE_700_WG", s.getSample("TEST_0001_Pa_C"));
+        s.add("TEST_0001_Pa_C_PE_700_WG", sample);
+        lims.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
+        lims.annotate(sample, "geo_tissue_type", TissueType.C.toString());
+        lims.annotate(sample, "geo_library_size_code", "700");
+        lims.annotate(sample, "geo_library_source_template_type", TemplateType.WG.toString());
+        ius = lims.createIus("Noindex", null, lane, null, sample, false);
+        s.add("IUS18", ius);
 
         //lane 7
-        lane = writeService.createLane(null, null, "7", LibraryType.PE.getId(), "5", "14", null, (SequencerRun) objects.get("TEST_SEQUENCER_RUN_002"), false, "11");
-        objects.put("TEST_SEQUENCER_RUN_002_7", lane);
+        lane = lims.createLane(null, null, "7", LibraryType.PE.getId(), "5", "14", null, s.getSequencerRun("TEST_SEQUENCER_RUN_002"), false, "11");
+        s.add("TEST_SEQUENCER_RUN_002_7", lane);
 
-        sample = writeService.createSample(null, experiment, "34", "TEST_0002_Ly_R_PE_500_EX", (Sample) objects.get("TEST_0002_Ly_R"));
-        objects.put("TEST_0002_Ly_R_PE_500_EX", sample);
-        writeService.annotate(sample, "geo_tissue_origin", TissueOrigin.Ly.toString());
-        writeService.annotate(sample, "geo_tissue_type", TissueType.R.toString());
-        writeService.annotate(sample, "geo_library_size_code", "500");
-        writeService.annotate(sample, "geo_library_source_template_type", TemplateType.EX.toString());
-        ius = writeService.createIus("Noindex", null, lane, null, sample, false);
-        objects.put("IUS19", ius);
+        sample = lims.createSample(null, experiment, "34", "TEST_0002_Ly_R_PE_500_EX", s.getSample("TEST_0002_Ly_R"));
+        s.add("TEST_0002_Ly_R_PE_500_EX", sample);
+        lims.annotate(sample, "geo_tissue_origin", TissueOrigin.Ly.toString());
+        lims.annotate(sample, "geo_tissue_type", TissueType.R.toString());
+        lims.annotate(sample, "geo_library_size_code", "500");
+        lims.annotate(sample, "geo_library_source_template_type", TemplateType.EX.toString());
+        ius = lims.createIus("Noindex", null, lane, null, sample, false);
+        s.add("IUS19", ius);
 
         //lane 8
-        lane = writeService.createLane(null, null, "8", LibraryType.PE.getId(), "5", "14", null, (SequencerRun) objects.get("TEST_SEQUENCER_RUN_002"), false, "11");
-        objects.put("TEST_SEQUENCER_RUN_002_8", lane);
+        lane = lims.createLane(null, null, "8", LibraryType.PE.getId(), "5", "14", null, s.getSequencerRun("TEST_SEQUENCER_RUN_002"), false, "11");
+        s.add("TEST_SEQUENCER_RUN_002_8", lane);
 
-        sample = writeService.createSample(null, experiment, "34", "TEST_0003_Ly_R_PE_402_EX", (Sample) objects.get("TEST_0003_Ly_R"));
-        objects.put("TEST_0003_Ly_R_PE_402_EX", sample);
-        writeService.annotate(sample, "geo_tissue_origin", TissueOrigin.Ly.toString());
-        writeService.annotate(sample, "geo_tissue_type", TissueType.R.toString());
-        writeService.annotate(sample, "geo_library_size_code", "402");
-        writeService.annotate(sample, "geo_library_source_template_type", TemplateType.EX.toString());
-        ius = writeService.createIus("Noindex", null, lane, null, sample, false);
-        objects.put("IUS20", ius);
+        sample = lims.createSample(null, experiment, "34", "TEST_0003_Ly_R_PE_402_EX", s.getSample("TEST_0003_Ly_R"));
+        s.add("TEST_0003_Ly_R_PE_402_EX", sample);
+        lims.annotate(sample, "geo_tissue_origin", TissueOrigin.Ly.toString());
+        lims.annotate(sample, "geo_tissue_type", TissueType.R.toString());
+        lims.annotate(sample, "geo_library_size_code", "402");
+        lims.annotate(sample, "geo_library_source_template_type", TemplateType.EX.toString());
+        ius = lims.createIus("Noindex", null, lane, null, sample, false);
+        s.add("IUS20", ius);
 
         //TEST_SEQUENCER_RUN_003
         //lane 1
-        lane = writeService.createLane(null, null, "1", LibraryType.PE.getId(), "5", "14", null, (SequencerRun) objects.get("TEST_SEQUENCER_RUN_003"), false, "11");
-        objects.put("TEST_SEQUENCER_RUN_003_1", lane);
+        lane = lims.createLane(null, null, "1", LibraryType.PE.getId(), "5", "14", null, s.getSequencerRun("TEST_SEQUENCER_RUN_003"), false, "11");
+        s.add("TEST_SEQUENCER_RUN_003_1", lane);
 
-        sample = writeService.createSample(null, experiment, "34", "TEST_0001_Ly_R_PE_500_WG", (Sample) objects.get("TEST_0001_Ly_R"));
-        objects.put("TEST_0001_Ly_R_PE_500_WG", sample);
-        writeService.annotate(sample, "geo_tissue_origin", TissueOrigin.Ly.toString());
-        writeService.annotate(sample, "geo_tissue_type", TissueType.R.toString());
-        writeService.annotate(sample, "geo_library_size_code", "500");
-        writeService.annotate(sample, "geo_library_source_template_type", TemplateType.WG.toString());
-        ius = writeService.createIus("Noindex", null, lane, null, sample, false);
-        objects.put("IUS21", ius);
+        sample = lims.createSample(null, experiment, "34", "TEST_0001_Ly_R_PE_500_WG", s.getSample("TEST_0001_Ly_R"));
+        s.add("TEST_0001_Ly_R_PE_500_WG", sample);
+        lims.annotate(sample, "geo_tissue_origin", TissueOrigin.Ly.toString());
+        lims.annotate(sample, "geo_tissue_type", TissueType.R.toString());
+        lims.annotate(sample, "geo_library_size_code", "500");
+        lims.annotate(sample, "geo_library_source_template_type", TemplateType.WG.toString());
+        ius = lims.createIus("Noindex", null, lane, null, sample, false);
+        s.add("IUS21", ius);
 
         //lane 2
-        lane = writeService.createLane(null, null, "2", LibraryType.PE.getId(), "5", "14", null, (SequencerRun) objects.get("TEST_SEQUENCER_RUN_003"), false, "11");
-        objects.put("TEST_SEQUENCER_RUN_003_2", lane);
+        lane = lims.createLane(null, null, "2", LibraryType.PE.getId(), "5", "14", null, s.getSequencerRun("TEST_SEQUENCER_RUN_003"), false, "11");
+        s.add("TEST_SEQUENCER_RUN_003_2", lane);
 
-        sample = writeService.createSample(null, experiment, "34", "TEST_0001_Pa_P_PE_400_WG", (Sample) objects.get("TEST_0001_Pa_P"));
-        objects.put("TEST_0001_Pa_P_PE_400_WG", sample);
-        writeService.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
-        writeService.annotate(sample, "geo_tissue_type", TissueType.P.toString());
-        writeService.annotate(sample, "geo_library_size_code", "400");
-        writeService.annotate(sample, "geo_library_source_template_type", TemplateType.WG.toString());
-        ius = writeService.createIus("Noindex", null, lane, null, sample, false);
-        objects.put("IUS22", ius);
+        sample = lims.createSample(null, experiment, "34", "TEST_0001_Pa_P_PE_400_WG", s.getSample("TEST_0001_Pa_P"));
+        s.add("TEST_0001_Pa_P_PE_400_WG", sample);
+        lims.annotate(sample, "geo_tissue_origin", TissueOrigin.Pa.toString());
+        lims.annotate(sample, "geo_tissue_type", TissueType.P.toString());
+        lims.annotate(sample, "geo_library_size_code", "400");
+        lims.annotate(sample, "geo_library_source_template_type", TemplateType.WG.toString());
+        ius = lims.createIus("Noindex", null, lane, null, sample, false);
+        s.add("IUS22", ius);
 
-        writeService.annotate(objects.get("TEST_SEQUENCER_RUN_002_4"), true, "lane skip test");
-        writeService.annotate(objects.get("TEST_SEQUENCER_RUN_003"), true, "sequencer run skip test");
-        writeService.annotate(objects.get("IUS13"), true, "ius skip test");
-        writeService.annotate(objects.get("IUS19"), true, "ius skip test");
+        lims.annotate(s.getLane("TEST_SEQUENCER_RUN_002_4"), true, "lane skip test");
+        lims.annotate(s.getSequencerRun("TEST_SEQUENCER_RUN_003"), true, "sequencer run skip test");
+        lims.annotate(s.getIus("IUS13"), true, "ius skip test");
+        lims.annotate(s.getIus("IUS19"), true, "ius skip test");
 
     }
 
-    public Map<String, SeqwareObject> getSeqwareObjects() {
-        return Collections.unmodifiableMap(objects);
-    }
-
-    public SeqwareWriteService getSeqwareWriteService() {
-        return te.getWriteService();
-    }
-
-    public SeqwareReadService getSeqwareReadService() {
-        return te.getReadService();
-    }
-
-    public SeqwareExecutor getSeqwareExecutor() {
-        return te.getSeqwareExecutor();
-    }
-
-    public Map<String, String> getSeqwareConfig() {
-        return te.getSeqwareConfig();
-    }
-
-    public File getSeqwareSettings() {
-        return te.getSeqwareSettings();
-    }
-
-    public void shutdown() {
-        te.shutdown();
+    public SeqwareObjects getSeqwareObjects() {
+        return s;
     }
 
     public enum LibraryType {

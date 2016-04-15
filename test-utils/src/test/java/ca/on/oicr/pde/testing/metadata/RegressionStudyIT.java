@@ -1,16 +1,18 @@
 package ca.on.oicr.pde.testing.metadata;
 
+import ca.on.oicr.pde.testing.metadata.base.RegressionStudy;
 import ca.on.oicr.pde.testing.metadata.base.WebserviceTestContext;
-import ca.on.oicr.pde.testing.metadata.base.MergedFiles;
 
 /**
  *
  * @author mlaszloffy
  */
-public class MergedFilesIT extends MergedFiles {
+public class RegressionStudyIT extends RegressionStudy {
 
-    public MergedFilesIT(){
+    public RegressionStudyIT() {
         super(new WebserviceTestContext());
+
+        numberOfThreads = 200;
     }
 
 }
