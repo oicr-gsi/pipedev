@@ -280,6 +280,39 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
+        <repository>
+            <id>dependencies.gsi</id>
+            <name>GSI Dependencies Maven Snapshot Repository</name>
+            <url>https://seqwaremaven.oicr.on.ca/artifactory/gsi-dependencies</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>release.gsi</id>
+            <name>GSI Snapshots Maven Snapshot Repository</name>
+            <url>https://seqwaremaven.oicr.on.ca/artifactory/gsi-release</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>snapshots.gsi</id>
+            <name>GSI Snapshots Maven Snapshot Repository</name>
+            <url>https://seqwaremaven.oicr.on.ca/artifactory/gsi-snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
     </repositories>
 
 </project>
