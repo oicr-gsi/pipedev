@@ -13,39 +13,9 @@ This repository houses the open-source workflows, deciders and utilities that ar
 
 Our utilities are available from our Maven repository.
 
-* Releases: [seqware-dependencies](http://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies)
-* Nightly snapshots: [seqware-dependencies-snapshot](https://seqwaremaven.oicr.on.ca/artifactory/simple/seqware-dependencies-snapshot)
+* Releases: [gsi-dependencies](https://seqwaremaven.oicr.on.ca/artifactory/simple/gsi-dependencies)
+* Nightly snapshots: [gsi-snapshots](https://seqwaremaven.oicr.on.ca/artifactory/simple/gsi-snapshots)
   
-Add the appropriate repository to your pom.xml or settings.xml:
-
-```html
-<repositories>
-    <repository>
-        <id>dependencies.com.github.seqware</id>
-        <name>SeqWare Dependencies Maven Repository</name>
-        <url>http://seqwaremaven.oicr.on.ca/artifactory/seqware-dependencies</url>
-        <releases>
-            <enabled>true</enabled>
-        </releases>
-        <snapshots>
-            <enabled>false</enabled>
-        </snapshots>
-    </repository>
-    <repository>
-        <id>snapshots.dependencies.com.github.seqware</id>
-        <name>SeqWare Dependencies Maven Snapshot Repository</name>
-        <url>http://seqwaremaven.oicr.on.ca/artifactory/seqware-dependencies-snapshot</url>
-        <releases>  
-            <enabled>false</enabled>
-        </releases>
-        <snapshots>
-            <enabled>true</enabled>
-        </snapshots>
-    </repository>
-<repositories>
-```
-
-
 ##Build
 
 To build our utilities, use Maven.
@@ -75,7 +45,7 @@ Add workflow-utils as a maven dependency:
 <dependency>
     <groupId>ca.on.oicr.pde</groupId>
     <artifactId>workflow-utils</artifactId>
-    <version>1.7</version>
+    <version>2.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -94,7 +64,7 @@ Add decider-utils as a maven dependency:
 <dependency>
     <groupId>ca.on.oicr.pde</groupId>
     <artifactId>decider-utils</artifactId>
-    <version>1.7</version>
+    <version>2.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -114,7 +84,7 @@ Add test-utils as a maven dependency:
 <dependency>
     <groupId>ca.on.oicr.pde</groupId>
     <artifactId>test-utils</artifactId>
-    <version>1.7</version>
+    <version>2.0-SNAPSHOT</version>
     <scope>test</scope>
 </dependency>
 ```
@@ -132,7 +102,7 @@ PDE's [workflow parent pom](configs/workflow-parent/pom.xml) can be used as a te
 <parent>
     <groupId>ca.on.oicr.gsi</groupId>
     <artifactId>workflow-parent</artifactId>
-    <version>1.7</version>
+    <version>2.0-SNAPSHOT</version>
     <relativePath/>
 </parent>
 ```
@@ -143,7 +113,7 @@ PDE's [decider parent pom](configs/decider-parent/pom.xml) can be used as a temp
 <parent>
     <groupId>ca.on.oicr.gsi</groupId>
     <artifactId>decider-parent</artifactId>
-    <version>1.7</version>
+    <version>2.0-SNAPSHOT</version>
     <relativePath/>
 </parent>
 ```
