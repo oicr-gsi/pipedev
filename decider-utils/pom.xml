@@ -21,6 +21,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <seqwareWar>${com.github.seqware:seqware-webservice:war}</seqwareWar>
+        <pineryWar>${ca.on.oicr:pinery-ws:war}</pineryWar>
         <skipITs>true</skipITs>
     </properties>
 
@@ -59,6 +60,7 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>2.18.1</version>
                 <configuration>
+                    <argLine>-XX:PermSize=256M -XX:MaxPermSize=512M -Xmx4096M</argLine>
                     <skip>${skipITs}</skip>
                     <systemPropertyVariables>
                         <dbHost>${dbHost}</dbHost>
@@ -66,6 +68,7 @@
                         <dbUser>${dbUser}</dbUser>
                         <dbPassword>${dbPassword}</dbPassword>
                         <seqwareWar>${seqwareWar}</seqwareWar>
+                        <pineryWar>${pineryWar}</pineryWar>
                     </systemPropertyVariables>
                 </configuration>
                 <executions>
@@ -114,23 +117,77 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.github.seqware</groupId>
-            <artifactId>seqware-pipeline</artifactId>
-        </dependency>
-        <dependency>
             <groupId>ca.on.oicr.pde</groupId>
             <artifactId>test-utils</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.seqware</groupId>
-            <artifactId>seqware-distribution</artifactId>
-            <classifier>full</classifier>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>ca.on.oicr.pde</groupId>
+            <artifactId>provenance-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ca.on.oicr</groupId>
+            <artifactId>pinery-client</artifactId>
+            <version>2.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>ca.on.oicr</groupId>
+            <artifactId>pinery-service</artifactId>
+            <version>2.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
+            <groupId>ca.on.oicr</groupId>
+            <artifactId>pinery-api</artifactId>
+            <version>2.0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ca.on.oicr</groupId>
+            <artifactId>pinery-ws</artifactId>
+            <version>2.0-SNAPSHOT</version>
+            <scope>test</scope>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-pipeline</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.github.seqware</groupId>
+                    <artifactId>seqware-admin-webservice</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-hdfs</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-common</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.jersey</groupId>
+                    <artifactId>jersey-client</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-distribution</artifactId>
+            <classifier>full</classifier>
             <scope>test</scope>
         </dependency>
     </dependencies>

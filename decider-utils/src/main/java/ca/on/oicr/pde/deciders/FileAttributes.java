@@ -14,7 +14,7 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author mtaschuk
  */
-public class FileAttributes {
+public class FileAttributes implements Iterable<String>{
 
     private String path;
     private String metatype;
@@ -86,6 +86,7 @@ public class FileAttributes {
      *
      * @return all of attribute keys associated with this file.
      */
+    @Override
     public Iterator<String> iterator() {
         return otherAttributes.keySet().iterator();
     }
@@ -315,7 +316,7 @@ public class FileAttributes {
     private Integer assignInt(Map<String, String> atts, Header header) {
         Integer variable = null;
         String intSt = atts.get(header.getTitle());
-        if (intSt != null) {
+        if (intSt != null && !intSt.isEmpty()) {
             variable = Integer.parseInt(intSt);
         }
         return variable;
