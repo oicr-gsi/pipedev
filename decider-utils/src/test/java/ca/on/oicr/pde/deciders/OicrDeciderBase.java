@@ -71,7 +71,7 @@ public class OicrDeciderBase {
         sample.setName("TEST_SAMPLE");
         sample.setProject("TEST_PROJECT");
         sample.setAttributes(Sets.newHashSet(a));
-        sample.setId(1);
+        sample.setId("1");
         sample.setModified(DateTime.parse("2015-01-01T00:00:00.000Z").toDate());
         samples.add(sample);
 
@@ -80,7 +80,7 @@ public class OicrDeciderBase {
         a.setValue("R");
 
         runSample = new DefaultRunSample();
-        runSample.setId(1);
+        runSample.setId("1");
         runSample.setAttributes(Sets.newHashSet(a));
 
         lane = new DefaultRunPosition();
