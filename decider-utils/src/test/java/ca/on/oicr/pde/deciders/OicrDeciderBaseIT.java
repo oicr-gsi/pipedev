@@ -78,11 +78,20 @@ public class OicrDeciderBaseIT extends OicrDeciderBase {
 
     @BeforeMethod(groups = "setup")
     public void setupSeqware() throws NamingException, HttpResponseException {
+        String dbHost = System.getProperty("dbHost");
+        String dbPort = System.getProperty("dbPort");
+        String dbUser = System.getProperty("dbUser");
+        String dbPassword = System.getProperty("dbPassword");
+
+        assertNotNull(dbHost, "dbHost is not set");
+        assertNotNull(dbPort, "dbPort is not set");
+        assertNotNull(dbUser, "dbUser is not set");
+
         assertNotNull(System.getProperty("seqwareWar"), "seqwareWar is null");
         File seqwareWar = FileUtils.getFile(System.getProperty("seqwareWar"));
         assertTrue(seqwareWar.exists(), "seqwareWar [ " + System.getProperty("seqwareWar") + "] does not exist");
 
-        seqwareTestEnvironment = new SeqwareTestEnvironment("127.0.0.1", "54323", "postgres", "mypass3", seqwareWar);
+        seqwareTestEnvironment = new SeqwareTestEnvironment(dbHost, dbPort, dbUser, dbPassword, seqwareWar);
         config = seqwareTestEnvironment.getSeqwareConfig();
         metadata = seqwareTestEnvironment.getMetadata();
         seqwareClient = new MetadataBackedSeqwareClient(metadata, config);
