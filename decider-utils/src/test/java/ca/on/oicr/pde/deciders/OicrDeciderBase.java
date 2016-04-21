@@ -95,41 +95,36 @@ public class OicrDeciderBase {
         when(limsMock.getSampleProjects()).thenReturn(Lists.newArrayList(project));
         when(limsMock.getSamples(null, null, null, null, null)).thenReturn(samples);
         when(limsMock.getRuns()).thenReturn(Lists.newArrayList(run));
+
+        //check preconditions
+        assertEquals(provenanceClient.getSampleProvenance().size(), 1);
+        assertEquals(provenanceClient.getFileProvenance().size(), 0);
+        assertEquals(Iterables.getOnlyElement(provenanceClient.getSampleProvenance()).getSampleName(), "TEST_SAMPLE");
     }
 
-    @Test(enabled = true)
-    public void pineryTest1() {
+    @Test
+    public void noMetadataChange() {
         SampleProvenance before = Iterables.getFirst(provenanceClient.getSampleProvenance(), null);
         SampleProvenance after = Iterables.getFirst(provenanceClient.getSampleProvenance(), null);
         assertEquals(before.getVersion(), after.getVersion());
     }
 
-    @Test(enabled = true)
-    public void pineryTest() {
+    @Test
+    public void sampleNameChange() {
         SampleProvenance before = Iterables.getFirst(provenanceClient.getSampleProvenance(), null);
         sample.setName("TEST_SAMPLE_mod");
         SampleProvenance after = Iterables.getFirst(provenanceClient.getSampleProvenance(), null);
         assertNotEquals(before.getVersion(), after.getVersion());
     }
 
-    @Test(enabled = true)
-    public void pineryTest3() {
-        SampleProvenance before = Iterables.getFirst(provenanceClient.getSampleProvenance(), null);
-        assertEquals(before.getSampleName(), "TEST_SAMPLE");
-    }
-
-    @Test(enabled = true)
+    @Test
     public void deciderOperationModes() throws HttpResponseException {
-
-        //check preconditions
-        assertEquals(provenanceClient.getSampleProvenance().size(), 1);
-        assertEquals(provenanceClient.getFileProvenance().size(), 0);
 
         //create a file in seqware
         Workflow upstreamWorkflow = seqwareClient.createWorkflow("UpstreamWorkflow", "0.0", "", ImmutableMap.of("test_param", "test_value"));
         IUS ius;
         FileMetadata file;
-        ius = seqwareClient.addLims("seqware", "1_1_1", "1", new DateTime());
+        ius = seqwareClient.addLims("pinery", "1_1_1", "1", new DateTime());
         file = new FileMetadata();
         file.setDescription("description");
         file.setMd5sum("md5sum");
@@ -176,16 +171,12 @@ public class OicrDeciderBase {
     @Test
     public void deciderForMergingWorkflow() {
 
-        //check preconditions
-        assertEquals(provenanceClient.getSampleProvenance().size(), 1);
-        assertEquals(provenanceClient.getFileProvenance().size(), 0);
-
         //setup files in seqware
         Workflow workflow1 = seqwareClient.createWorkflow("TestWorkflow1", "0.0", "", ImmutableMap.of("test_param", "test_value"));
         IUS ius;
         FileMetadata file;
 
-        ius = seqwareClient.addLims("seqware", "1_1_1", "1", new DateTime());
+        ius = seqwareClient.addLims("pinery", "1_1_1", "1", new DateTime());
         file = new FileMetadata();
         file.setDescription("description");
         file.setMd5sum("md5sum");
@@ -195,7 +186,7 @@ public class OicrDeciderBase {
         file.setSize(1L);
         seqwareClient.createWorkflowRun(workflow1, Sets.newHashSet(ius), Collections.EMPTY_LIST, Arrays.asList(file));
 
-        ius = seqwareClient.addLims("seqware", "1_1_1", "1", new DateTime());
+        ius = seqwareClient.addLims("pinery", "1_1_1", "1", new DateTime());
         file = new FileMetadata();
         file.setDescription("description");
         file.setMd5sum("md5sum");
