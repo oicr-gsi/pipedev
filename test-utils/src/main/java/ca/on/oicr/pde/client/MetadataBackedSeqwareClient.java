@@ -6,7 +6,6 @@ import ca.on.oicr.pde.parsers.WorkflowRunReport;
 import com.google.common.primitives.Ints;
 import io.seqware.common.model.ProcessingStatus;
 import io.seqware.common.model.WorkflowRunStatus;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
@@ -29,9 +28,11 @@ import net.sourceforge.seqware.common.util.maptools.MapTools;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
-import ca.on.oicr.pde.client.SeqwareClient;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.collect.Sets;
+import java.util.HashSet;
+import net.sourceforge.seqware.common.model.File;
+import net.sourceforge.seqware.common.model.Processing;
 
 /**
  *
@@ -48,12 +49,11 @@ public class MetadataBackedSeqwareClient implements SeqwareClient {
     }
 
     @Override
-    public <T extends FirstTierModel> WorkflowRun createWorkflowRun(Workflow workflow, Set<IUS> limsKeys, Collection<T> parents, List<FileMetadata> files) {
-
+    public <T extends FirstTierModel> WorkflowRun createWorkflowRun(Workflow workflow, Set<IUS> limsKeys, Collection<T> parents, Set<Processing> processings) {
         checkNotNull(workflow);
         checkNotNull(limsKeys);
         checkNotNull(parents);
-        checkNotNull(files);
+        checkNotNull(processings);
 
         List<Integer> parentSwids = new ArrayList<>();
         for (T so : parents) {
@@ -61,6 +61,7 @@ public class MetadataBackedSeqwareClient implements SeqwareClient {
         }
 
         Integer workflowRunId = metadata.add_workflow_run(workflow.getSwAccession());
+        Integer workflowRunSwid = metadata.get_workflow_run_accession(workflowRunId);
 
         //Link workflow run (and all associated files to IUS/LimsKey
         for (IUS ius : limsKeys) {
@@ -71,25 +72,78 @@ public class MetadataBackedSeqwareClient implements SeqwareClient {
             }
         }
 
-        Integer workflowRunSwid = metadata.get_workflow_run_accession(workflowRunId);
+        //Create "start" processing, link it to parents and the workflow run       
+        Integer startProcessingId = metadata.add_empty_processing_event_by_parent_accession(Ints.toArray(parentSwids)).getReturnValue();
+        Integer startProcessingSwid = metadata.mapProcessingIdToAccession(startProcessingId);
+        metadata.update_processing_status(startProcessingId, ProcessingStatus.success);
+        metadata.update_processing_workflow_run(startProcessingId, workflowRunSwid);
 
-        //Link workflow run processing to upstream processing
-        ReturnValue processingRv = metadata.add_empty_processing_event_by_parent_accession(Ints.toArray(parentSwids));
-        Integer processingId = processingRv.getReturnValue();
-        ReturnValue newRet = new ReturnValue();
-        newRet.setFiles(new ArrayList<>(files));
-        metadata.update_processing_event(processingId, newRet);
-        //Integer mapProcessingIdToSwid = metadata.mapProcessingIdToAccession(processingId);
-        metadata.update_processing_workflow_run(processingId, workflowRunSwid);
-        metadata.update_processing_status(processingId, ProcessingStatus.success);
+        for (Processing processing : processings) {
+            Set<FileMetadata> files = new HashSet<>();
+            for (File f : processing.getFiles()) {
+                FileMetadata fileMetadata = new FileMetadata();
+                fileMetadata.setDescription(f.getDescription() == null ? "empty" : f.getDescription());
+                fileMetadata.setFilePath(f.getFilePath() == null ? "empty" : f.getFilePath());
+                fileMetadata.setMd5sum(f.getMd5sum() == null ? "empty" : f.getMd5sum());
+                fileMetadata.setMetaType(f.getMetaType() == null ? "empty" : f.getMetaType());
+                fileMetadata.setSize(f.getSize() == null ? -1L : f.getSize());
+                fileMetadata.setType(f.getType() == null ? "empty" : f.getType());
+                files.add(fileMetadata);
+            }
+
+            Set<Integer> processingParentSwids = new HashSet<>();
+            processingParentSwids.add(startProcessingSwid);
+            for (FirstTierModel i : processing.getIUS()) {
+                processingParentSwids.add(i.getSwAccession());
+            }
+
+            Integer processingId = metadata.add_empty_processing_event_by_parent_accession(Ints.toArray(processingParentSwids)).getReturnValue();
+
+            if (!files.isEmpty()) {
+                ReturnValue newRet = new ReturnValue();
+                newRet.setFiles(new ArrayList<>(files));
+                metadata.update_processing_event(processingId, newRet);
+            }
+
+            metadata.add_workflow_run_ancestor(workflowRunSwid, processingId);
+            metadata.update_processing_status(processingId, ProcessingStatus.success);
+        }
+
         WorkflowRun wr = metadata.getWorkflowRun(workflowRunSwid);
         wr.setStatus(WorkflowRunStatus.completed);
-        //wr.setStdOut("");
-        //wr.setStdErr("");
         ReturnValue rv = metadata.update_workflow_run(wr.getWorkflowRunId(), wr.getCommand(), wr.getTemplate(), wr.getStatus(), wr.getStatusCmd(), wr.getCurrentWorkingDir(), wr.getDax(), wr.getIniFile(), wr.getHost(), wr.getStdErr(), wr.getStdOut(), wr.getWorkflowEngine(), wr.getInputFileAccessions());
-        //return rv.getAttribute("sw_accession");
 
         return metadata.getWorkflowRun(rv.getReturnValue());
+    }
+
+    @Override
+    public <T extends FirstTierModel> WorkflowRun createWorkflowRun(Workflow workflow, Set<IUS> limsKeys, Collection<T> parents, List<FileMetadata> files) {
+
+        checkNotNull(workflow);
+        checkNotNull(limsKeys);
+        checkNotNull(parents);
+        checkNotNull(files);
+
+        int id = 1;
+        List<File> newFiles = new ArrayList<>();
+        for (FileMetadata fileMetadata : files) {
+            File file = new File();
+            file.setFileId(id++);
+            file.setDescription(fileMetadata.getDescription());
+            file.setFilePath(fileMetadata.getFilePath());
+            file.setMd5sum(fileMetadata.getMd5sum());
+            file.setMetaType(fileMetadata.getMetaType());
+            file.setSize(fileMetadata.getSize());
+            file.setType(fileMetadata.getType());
+            newFiles.add(file);
+        }
+
+        Processing p = new Processing();
+        p.setProcessingId(id++);
+        p.setAlgorithm("provision_file_out");
+        p.setFiles(Sets.newHashSet(newFiles)); //link file to processing
+
+        return createWorkflowRun(workflow, limsKeys, parents, Sets.newHashSet(p));
     }
 
     @Override
@@ -108,9 +162,9 @@ public class MetadataBackedSeqwareClient implements SeqwareClient {
         Properties p = new Properties();
         p.putAll(defaultParameters);
 
-        File defaultParametersFile = null;
+        java.io.File defaultParametersFile = null;
         try {
-            defaultParametersFile = File.createTempFile("defaults", ".ini");
+            defaultParametersFile = java.io.File.createTempFile("defaults", ".ini");
             p.store(FileUtils.openOutputStream(defaultParametersFile), "");
         } catch (IOException ioe) {
             throw new RuntimeException(ioe);
