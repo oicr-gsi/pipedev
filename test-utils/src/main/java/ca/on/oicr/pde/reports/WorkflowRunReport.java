@@ -1,4 +1,4 @@
-package ca.on.oicr.pde.testing.decider;
+package ca.on.oicr.pde.reports;
 
 import ca.on.oicr.pde.model.ReducedFileProvenanceReportRecord;
 import java.util.ArrayList;

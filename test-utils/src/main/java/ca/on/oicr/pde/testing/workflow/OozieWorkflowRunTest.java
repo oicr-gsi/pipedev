@@ -1,7 +1,6 @@
 package ca.on.oicr.pde.testing.workflow;
 
 import ca.on.oicr.pde.dao.executor.ShellExecutor;
-import ca.on.oicr.pde.model.SeqwareAccession;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -11,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import net.sourceforge.seqware.common.metadata.Metadata;
 import net.sourceforge.seqware.common.metadata.MetadataFactory;
+import net.sourceforge.seqware.common.model.Workflow;
+import net.sourceforge.seqware.common.model.WorkflowRun;
 import net.sourceforge.seqware.common.util.maptools.MapTools;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -19,8 +20,8 @@ import org.testng.annotations.Test;
 
 public class OozieWorkflowRunTest extends WorkflowRunTest {
 
-    SeqwareAccession workflowSwid;
-    SeqwareAccession workflowRunSwid;
+    Workflow workflow;
+    WorkflowRun workflowRun;
 
     Metadata metadb;
 
@@ -62,18 +63,18 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
     @Test(groups = "preExecution")
     public void installWorkflow() throws IOException {
 
-        workflowSwid = seqwareExecutor.installWorkflow(workflowBundlePath);
+        workflow = seqwareExecutor.installWorkflow(workflowBundlePath);
 
-        Assert.assertNotNull(workflowSwid);
+        Assert.assertNotNull(workflow);
 
     }
 
     @Test(groups = "preExecution", dependsOnMethods = "installWorkflow")
     public void scheduleWorkflow() throws IOException {
 
-        workflowRunSwid = seqwareExecutor.workflowRunSchedule(workflowSwid, workflowInis, parameters);
+        workflowRun = seqwareExecutor.workflowRunSchedule(workflow, workflowInis, parameters);
 
-        Assert.assertNotNull(workflowRunSwid);
+        Assert.assertNotNull(workflowRun);
 
     }
 
@@ -81,7 +82,7 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
     public void executeWorkflow() throws IOException {
 
         //TODO: integrate this process into SeqwareExecutor
-        seqwareExecutor.workflowRunLaunch(workflowRunSwid);
+        seqwareExecutor.workflowRunLaunch(workflowRun);
 
         String workflowRunStatus = "pending";
         while (Arrays.asList("running", "pending").contains(workflowRunStatus)) {
@@ -92,8 +93,8 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
                 System.out.println(ie.getStackTrace());
             }
 
-            seqwareExecutor.workflowRunUpdateStatus(workflowRunSwid);
-            workflowRunStatus = seqwareExecutor.workflowRunReport(workflowRunSwid);
+            seqwareExecutor.workflowRunUpdateStatus(workflowRun);
+            workflowRunStatus = seqwareExecutor.workflowRunReport(workflowRun);
 
         }
 

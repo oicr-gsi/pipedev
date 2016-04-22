@@ -1,15 +1,31 @@
 package ca.on.oicr.pde.deciders;
 
+import ca.on.oicr.gsi.provenance.DefaultProvenanceClient;
+import ca.on.oicr.gsi.provenance.PinerySampleProvenanceProvider;
+import ca.on.oicr.gsi.provenance.SeqwareMetadataAnalysisProvenanceProvider;
+import ca.on.oicr.gsi.provenance.model.FileProvenance;
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 import java.io.File;
 import java.util.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import net.sourceforge.seqware.common.hibernate.FindAllTheFiles;
+import net.sourceforge.seqware.common.model.FileProvenanceParam;
 import net.sourceforge.seqware.common.module.FileMetadata;
 import net.sourceforge.seqware.common.module.ReturnValue;
 import net.sourceforge.seqware.common.util.Log;
 import net.sourceforge.seqware.pipeline.deciders.BasicDecider;
+import net.sourceforge.seqware.pipeline.plugins.fileprovenance.ProvenanceUtility.HumanProvenanceFilters;
+import ca.on.oicr.gsi.provenance.ProvenanceClient;
+import ca.on.oicr.gsi.provenance.model.IusLimsKey;
+import ca.on.oicr.gsi.provenance.model.LimsKey;
+import ca.on.oicr.pinery.client.PineryClient;
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 
 /**
  * <p>
@@ -102,6 +118,7 @@ public class OicrDecider extends BasicDecider {
     private SimpleDateFormat format;
     private WorkflowRun run;
     private boolean isFailed = false;
+    private ProvenanceClient provenanceClient;
 
     /**
      * <p>
@@ -118,6 +135,10 @@ public class OicrDecider extends BasicDecider {
      *
      */
     public OicrDecider() {
+        this(null);
+    }
+
+    public OicrDecider(ProvenanceClient provenanceClient) {
         super();
         parser.acceptsAll(Arrays.asList("check-file-exists", "cf"), "Optional: only launch on the file if the file exists");
         parser.accepts("skip-status-check", "Optional: If enabled will skip the check for the status of the sequencer run/lane/IUS/workflow run");
@@ -126,17 +147,18 @@ public class OicrDecider extends BasicDecider {
         defineArgument("output-folder", "The relative path to put the final result(s) (workflow output-dir option).", false);
         defineArgument("after-date", "Optional: Format YYYY-MM-DD. Only run on files that have been modified after a certain date, not inclusive.", false);
         defineArgument("before-date", "Optional: Format YYYY-MM-DD. Only run on files that have been modified before a certain date, not inclusive.", false);
-        files = new HashMap<>();
+        defineArgument("pinery-url", "The Pinery URL that should be used to get SampleProvenance LIMS metadata (eg, http://localhost:8080).", false);
         format = new SimpleDateFormat("yyyy-MM-dd");
+        this.provenanceClient = provenanceClient;
     }
 
     /**
      * Define an argument for the Decider to use on the command line.
      *
-     * @param command the argument to use. Single letters will use -, and more characters will use --
+     * @param command     the argument to use. Single letters will use -, and more characters will use --
      * @param description the description of the argument to give when giving help
-     * @param required whether or not the argument is required for the decider to function. The presence of this argument is tested in the
-     * {@link #init() init} method, which will throw an exception if the argument is not present.
+     * @param required    whether or not the argument is required for the decider to function. The presence of this argument is tested in the
+     *                    {@link #init() init} method, which will throw an exception if the argument is not present.
      */
     protected final void defineArgument(String command, String description, boolean required) {
         parser.accepts(command, description).withRequiredArg();
@@ -154,6 +176,7 @@ public class OicrDecider extends BasicDecider {
      *
      *
      * @param arg an argument previously defined by 'defineArgument'.
+     *
      * @return the value provided on the command line, or empty string if none provided.
      */
     protected String getArgument(String arg) {
@@ -175,7 +198,10 @@ public class OicrDecider extends BasicDecider {
     @Override
     public ReturnValue init() {
         ReturnValue ret = new ReturnValue();
-
+        
+        //initialize collections
+        files = new HashMap<>();
+        
         if (options.has("help")) {
             System.err.println(get_syntax());
             ret.setExitStatus(ReturnValue.RETURNEDHELPMSG);
@@ -209,6 +235,12 @@ public class OicrDecider extends BasicDecider {
                 ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
             }
         }
+        if(options.has("pinery-url")){
+            PineryClient pineryClient = new PineryClient(options.valueOf("pinery-url").toString(), false);
+            provenanceClient = new DefaultProvenanceClient(new SeqwareMetadataAnalysisProvenanceProvider(metadata), 
+                    new PinerySampleProvenanceProvider(pineryClient));
+        }
+        
         return ret;
     }
 
@@ -238,15 +270,13 @@ public class OicrDecider extends BasicDecider {
             return false;
         }
         if (!options.has("skip-status-check")) {
-            for (Iterator<String> it = attributes.iterator(); it.hasNext();) {
-                String next = it.next();
-                if (next.contains("Status")) {
-                    if (attributes.getOtherAttribute(next).equals("failed")) {
+            for (String attribute : attributes) {
+                if (attribute.contains("Status")) {
+                    if (attributes.getOtherAttribute(attribute).equals("failed")) {
                         Log.debug("Skipping file because the workflow run status is failed" + fm.getFilePath());
                         return false;
                     }
                 }
-
             }
         }
         String dateString = attributes.getOtherAttribute(FindAllTheFiles.Header.PROCESSING_DATE);
@@ -269,7 +299,8 @@ public class OicrDecider extends BasicDecider {
      * Helper method that determines if a date string is after a reference date.
      *
      * @param dateString the date to check against a reference date
-     * @param afterDate the reference date
+     * @param afterDate  the reference date
+     *
      * @return true if dateString is after "afterDate", false otherwise
      */
     public boolean isAfterDate(String dateString, Date afterDate) {
@@ -290,6 +321,7 @@ public class OicrDecider extends BasicDecider {
      *
      * @param dateString the date to check against a reference date
      * @param beforeDate the reference date
+     *
      * @return true if dateString is before "beforeDate", false otherwise
      */
     public boolean isBeforeDate(String dateString, Date beforeDate) {
@@ -351,6 +383,53 @@ public class OicrDecider extends BasicDecider {
         return r;
     }
 
+    /**
+     * OicrDecider's implementation of getSwidsToLinkWorkflowRunTo() clones the input IusLimsKey object(s)
+     * @param iusLimsKeySwids
+     * @return the IUS accessions of the cloned IusLimsKeys, null if there was an error when building the list
+     * @throws java.lang.Exception if LimsKey cannot be found
+     */
+    @Override
+    protected Set<String> getSwidsToLinkWorkflowRunTo(Set<String> iusLimsKeySwids) throws Exception {
+        if (getMetadataWriteback()) {
+            //TODO: each file provenance record already has its associated IusLimsKey(s)
+            //refactor this implementation to use file provenance rather than getting the LimsKey(s) again from seqware
+            //refactor this implementation to clone all LimsKeys in one seqware call/transaction
+            
+            //Get all the LimsKey(s) info from seqware
+            Set<LimsKey> limsKeys = new HashSet<>();
+            for (String swid : iusLimsKeySwids) {
+                LimsKey limsKey = metadata.getLimsKeyFrom(Integer.parseInt(swid));
+                if (limsKey == null) {
+                    throw new Exception("No LimsKey found for SWID = [" + swid + "]");
+                }
+                limsKeys.add(limsKey);
+            }
+            
+            //Clone the upstream LimsKeys 
+            if (isDryRunMode()) {
+                //dry run mode enabled - do nothing
+                return Collections.EMPTY_SET;
+            } else {
+                Set<String> newIusSwids = new HashSet<>();
+                for (LimsKey limsKey : limsKeys) {
+                    //Create a LimsKey -> create IUS -> link LimsKey to IUS
+                    Integer newLimsKeySwid = metadata.addLimsKey(
+                            limsKey.getProvider(),
+                            limsKey.getId(),
+                            limsKey.getVersion(),
+                            limsKey.getLastModified());
+                    Integer newIusSwid = metadata.addIUS(newLimsKeySwid, false);
+                    newIusSwids.add(newIusSwid.toString());
+                }
+                return newIusSwids;
+            }
+        } else {
+            //metadata writeback disabled - do nothing
+            return Collections.EMPTY_SET;
+        }
+    }
+
     @Deprecated
     public ReturnValue customizeRun(WorkflowRun run) {
 
@@ -383,17 +462,17 @@ public class OicrDecider extends BasicDecider {
     }
 
     @Override
-    public ReturnValue do_summary(){
+    public ReturnValue do_summary() {
         ReturnValue rv = super.do_summary();
 
         //decider run failed somewhere, but some how the decider did not terminate - set the exit code to non-zero
-        if(isFailed){
+        if (isFailed) {
             rv.setReturnValue(ReturnValue.FAILURE);
         }
         return rv;
     }
 
-    private void setFinalStatusToFailed(){
+    private void setFinalStatusToFailed() {
         isFailed = true;
     }
 
@@ -424,8 +503,8 @@ public class OicrDecider extends BasicDecider {
      * Files produced by sequencer runs with the same name. <li> Group.FILE : Files with the same absolute file path </ul>
      *
      *
-     * @param groupBy one of Group.STUDY, Group.EXPERIMENT, Group.DONOR, Group.LIBRARY, Group.BARCODE, Group.LANE, Group.SEQUENCER_RUN,
-     * Group.FILE
+     * @param groupBy      one of Group.STUDY, Group.EXPERIMENT, Group.DONOR, Group.LIBRARY, Group.BARCODE, Group.LANE, Group.SEQUENCER_RUN,
+     *                     Group.FILE
      * @param groupSimilar whether or not to group items with identical names
      */
     public void setGroupBy(Group groupBy, boolean groupSimilar) {
@@ -436,12 +515,12 @@ public class OicrDecider extends BasicDecider {
             this.setGroupingStrategy(groupBy.getSwaHeader());
         }
     }
-    
+
     /**
      * Get the OicrDecider Group (a simplified version of "FindAllTheFiles" header fields)
-     * 
+     *
      * @return the OicrDecider grouping strategy (Group) or null if not set
-     * 
+     *
      * @see Group
      * @see FindAllTheFiles.Header
      * @see OicrDecider#setGroupBy()
@@ -475,6 +554,7 @@ public class OicrDecider extends BasicDecider {
      * [0-9A-Za-z _-] to their corresponding html code.
      *
      * @param input string to be escaped
+     *
      * @return the input string with special characters escaped
      */
     public String escapeString(String input) {
@@ -515,6 +595,7 @@ public class OicrDecider extends BasicDecider {
      * This method uses the metadata associated with the file, not the filename itself, in order to determine these values.</p>
      *
      * @param inputFiles the list of files from WorkflowRun.getFiles();
+     *
      * @see WorkflowRun#getFiles()
      * @return a String representing the combined filename
      */
@@ -573,6 +654,7 @@ public class OicrDecider extends BasicDecider {
      * mate info is unavailable if no pattern detected).
      *
      * @param filePath file path to identify if mate 1 or 2
+     *
      * @return 1 if mate 1, 2 if mate 2, 0 if not able to find mate value
      */
     public static int idMate(String filePath) {
@@ -593,6 +675,7 @@ public class OicrDecider extends BasicDecider {
      * reads are sensible. If it encounters a problem, it returns the same set you passed in originally along with printing a warning.
      *
      * @param files input files to be sorted
+     *
      * @return sorted array of files
      */
     public FileAttributes[] arrangeFastqs(FileAttributes[] files) {
@@ -693,4 +776,108 @@ public class OicrDecider extends BasicDecider {
         sb.append("_");
         return sb.toString();
     }
+
+    private final Function MAP_OF_SETS_TO_STRING = new Function<Entry<String, Set<String>>, String>() {
+        @Override
+        public String apply(Entry<String, Set<String>> s) {
+            return s.getKey() + "=" + Joiner.on("&").join(s.getValue());
+        }
+    };
+
+    @Override
+    protected List<Map<String, String>> getFileProvenanceReport(Map<FileProvenanceParam, List<String>> params) {
+        if (provenanceClient != null) {
+
+            Map<String, Set<String>> params2 = new HashMap<>();
+            for (Entry<FileProvenanceParam, List<String>> e : params.entrySet()) {
+                params2.put(e.getKey().toString(), Sets.newHashSet(e.getValue()));
+            }
+            params2.put(FileProvenanceParam.processing_status.toString(), Sets.newHashSet("success"));
+            params2.put(FileProvenanceParam.workflow_run_status.toString(), Sets.newHashSet("completed"));
+
+            List<Map<String, String>> fpList = new ArrayList<>();
+            for (FileProvenance fp : provenanceClient.getFileProvenance(params2)) {
+                Map<String, String> f = new HashMap<>();
+                f.put("Study Title", Joiner.on(",").skipNulls().join(fp.getStudyTitles()));
+                f.put("Study Attributes", Joiner.on(";").join(Iterables.transform(fp.getStudyAttributes().entrySet(), MAP_OF_SETS_TO_STRING)));
+                f.put("Experiment Name", Joiner.on(",").skipNulls().join(fp.getExperimentNames()));
+                f.put("Experiment Attributes", Joiner.on(";").join(Iterables.transform(fp.getExperimentAttributes().entrySet(), MAP_OF_SETS_TO_STRING)));
+                f.put("Root Sample Name", Joiner.on(",").skipNulls().join(fp.getRootSampleNames()));
+                f.put("Parent Sample Name", Joiner.on(",").skipNulls().join(fp.getParentSampleNames()));
+                f.put("Parent Sample Organism IDs", Joiner.on(",").skipNulls().join(fp.getParentSampleOrganismIDs()));
+                f.put("Parent Sample Attributes", Joiner.on(";").join(Iterables.transform(fp.getParentSampleAttributes().entrySet(), MAP_OF_SETS_TO_STRING)));
+                f.put("Sample Name", Joiner.on(",").skipNulls().join(fp.getSampleNames()));
+                f.put("Sample Organism ID", Joiner.on(",").skipNulls().join(fp.getSampleOrganismIDs()));
+                f.put("Sample Organism Code", Joiner.on(",").skipNulls().join(fp.getSampleOrganismCodes()));
+                f.put("Sample Attributes", Joiner.on(";").join(Iterables.transform(fp.getSampleAttributes().entrySet(), MAP_OF_SETS_TO_STRING)));
+                f.put("Sequencer Run Name", Joiner.on(",").skipNulls().join(fp.getSequencerRunNames()));
+                f.put("Sequencer Run Attributes", Joiner.on(";").join(Iterables.transform(fp.getSequencerRunAttributes().entrySet(), MAP_OF_SETS_TO_STRING)));
+                f.put("Sequencer Run Platform ID", Joiner.on(",").skipNulls().join(fp.getSequencerRunPlatformIDs()));
+                f.put("Sequencer Run Platform Name", Joiner.on(",").skipNulls().join(fp.getSequencerRunPlatformNames()));
+                f.put("Lane Name", Joiner.on(",").skipNulls().join(fp.getLaneNames()));
+                f.put("Lane Number", Joiner.on(",").skipNulls().join(fp.getLaneNumbers()));
+                f.put("Lane Attributes", Joiner.on(",").join(Iterables.transform(fp.getLaneAttributes().entrySet(), MAP_OF_SETS_TO_STRING)));
+
+                f.put("Last Modified", fp.getLastModified());
+                f.put("Workflow Name", fp.getWorkflowName());
+                f.put("Workflow Version", fp.getWorkflowVersion());
+                f.put("Workflow SWID", fp.getWorkflowSWID().toString());
+                f.put("Workflow Attributes", Joiner.on(";").join(Iterables.transform(fp.getWorkflowAttributes().entrySet(), MAP_OF_SETS_TO_STRING)));
+                f.put("Workflow Run Name", fp.getWorkflowRunName());
+                f.put("Workflow Run Status", fp.getWorkflowRunStatus());
+                f.put("Workflow Run SWID", fp.getWorkflowRunSWID().toString());
+                f.put("Workflow Run Attributes", Joiner.on(";").join(Iterables.transform(fp.getWorkflowRunAttributes().entrySet(), MAP_OF_SETS_TO_STRING)));
+                f.put("Workflow Run Input File SWAs", Joiner.on(",").skipNulls().join(fp.getWorkflowRunInputFileSWIDs()));
+                f.put("Processing Algorithm", fp.getProcessingAlgorithm());
+                f.put("Processing SWID", fp.getProcessingSWID().toString());
+                f.put("Processing Attributes", Joiner.on(",").join(Iterables.transform(fp.getProcessingAttributes().entrySet(), MAP_OF_SETS_TO_STRING)));
+                f.put("Processing Status", fp.getProcessingStatus());
+                f.put("File Meta-Type", fp.getFileMetaType());
+                f.put("File SWID", fp.getFileSWID().toString());
+                f.put("File Attributes", Joiner.on(",").join(Iterables.transform(fp.getFileAttributes().entrySet(), MAP_OF_SETS_TO_STRING)));
+                f.put("File Path", fp.getFilePath());
+                f.put("File Md5sum", fp.getFileMd5sum());
+                f.put("File Size", fp.getFileSize());
+                f.put("File Description", fp.getFileDescription());
+                f.put("Skip", fp.getSkip());
+
+                f.put("IUS Attributes", "");
+
+                Collection<IusLimsKey> iusLimsKeys = fp.getIusLimsKeys();
+                f.put("IUS SWID", Joiner.on(",").join(fp.getIusSWIDs()));
+
+                //f.put("Status", fp.getS);
+                fpList.add(f);
+            }
+            return fpList;
+        } else {
+            return super.getFileProvenanceReport(params);
+        }
+    }
+
+    @Override
+    protected Map<FileProvenanceParam, List<String>> parseOptions() {
+        if (provenanceClient != null) {
+            Map<FileProvenanceParam, List<String>> map = new EnumMap<>(FileProvenanceParam.class);
+            Set<HumanProvenanceFilters> supportedFilters = Sets.newHashSet(HumanProvenanceFilters.STUDY_NAME,
+                    HumanProvenanceFilters.SAMPLE_NAME, HumanProvenanceFilters.ROOT_SAMPLE_NAME, HumanProvenanceFilters.SEQUENCER_RUN_NAME);
+            if (options.has("all")) {
+                /**
+                 * nothing special
+                 */
+            } else {
+                for (HumanProvenanceFilters filter : supportedFilters) {
+                    List<?> optionValues = options.valuesOf(filter.toString());
+                    if (!optionValues.isEmpty()) {
+                        map.put(filter.mappedParam, new ImmutableList.Builder<String>().addAll((List<String>) optionValues).build());
+                    }
+                }
+            }
+            return map;
+        } else {
+            return super.parseOptions();
+        }
+
+    }
+
 }

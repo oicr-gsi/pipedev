@@ -1,13 +1,15 @@
 package ca.on.oicr.pde.testing;
 
-import ca.on.oicr.pde.dao.reader.SeqwareReadService;
-import ca.on.oicr.pde.dao.reader.SeqwareWebserviceImpl;
+import ca.on.oicr.gsi.provenance.DefaultProvenanceClient;
+import ca.on.oicr.gsi.provenance.ProvenanceClient;
+import ca.on.oicr.gsi.provenance.SeqwareMetadataAnalysisProvenanceProvider;
+import ca.on.oicr.gsi.provenance.SeqwareMetadataSampleProvenanceProvider;
+import ca.on.oicr.pde.client.MetadataBackedSeqwareClient;
 import ca.on.oicr.pde.testing.decider.RunTest;
 import static ca.on.oicr.pde.utilities.Helpers.*;
 import ca.on.oicr.pde.dao.executor.ThreadedSeqwareExecutor;
 import ca.on.oicr.pde.testing.decider.RunTestSuiteDefinition;
 import ca.on.oicr.pde.testing.decider.RunTestDefinition;
-import ca.on.oicr.pde.utilities.Timer;
 import com.jcabi.manifests.Manifests;
 import java.io.File;
 import java.io.IOException;
@@ -17,8 +19,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import net.sourceforge.seqware.common.metadata.Metadata;
+import net.sourceforge.seqware.common.metadata.MetadataFactory;
+import net.sourceforge.seqware.common.util.maptools.MapTools;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.WordUtils;
@@ -27,6 +34,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Parameters;
+import ca.on.oicr.pde.client.SeqwareClient;
 
 public class DeciderRunTestFactory {
 
@@ -123,12 +131,6 @@ public class DeciderRunTestFactory {
             throw new RuntimeException(ioe);
         }
 
-        //TODO: provide user a way to specify impl
-        Timer timer = Timer.start();
-        SeqwareReadService seqwareService = new SeqwareWebserviceImpl(webserviceUrl, "admin@admin.com", "admin");
-        seqwareService.update();
-        log.printf(Level.INFO, "Completed loading of seqware metadata in %s", timer.stop());
-
         List<RunTest> tests = new ArrayList<>();
         int count = 0;
 
@@ -152,9 +154,18 @@ public class DeciderRunTestFactory {
 
             File testWorkingDir = generateTestWorkingDirectory(workingDirectory, prefix, testName, testId);
             File seqwareSettings = generateSeqwareSettings(testWorkingDir, webserviceUrl, schedulingSystem, schedulingHost);
-
-            RunTest test = new RunTest(seqwareService, seqwareDistribution, seqwareSettings, testWorkingDir, testName, deciderJar, bundledWorkflow, deciderClass, t);
-            test.setSeqwareExecutor(new ThreadedSeqwareExecutor(testName, seqwareDistribution, seqwareSettings, testWorkingDir, sharedPool, seqwareService));
+            
+            Map<String,String> config = new HashMap<>();
+            MapTools.ini2Map(seqwareSettings.getAbsolutePath(), config, true);
+            Metadata metadata = MetadataFactory.get(config);
+            
+            SeqwareClient seqwareClient = new MetadataBackedSeqwareClient(metadata, config);
+            
+            ProvenanceClient provenanceClient = new DefaultProvenanceClient(new SeqwareMetadataAnalysisProvenanceProvider(metadata),
+                new SeqwareMetadataSampleProvenanceProvider(metadata));
+            
+            RunTest test = new RunTest(seqwareClient, provenanceClient, seqwareDistribution, seqwareSettings, testWorkingDir, testName, deciderJar, bundledWorkflow, deciderClass, t);
+            test.setSeqwareExecutor(new ThreadedSeqwareExecutor(testName, seqwareDistribution, seqwareSettings, testWorkingDir, sharedPool, seqwareClient));
 
             tests.add(test);
 

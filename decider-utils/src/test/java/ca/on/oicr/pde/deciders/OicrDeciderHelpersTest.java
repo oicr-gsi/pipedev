@@ -9,11 +9,11 @@ import net.sourceforge.seqware.common.hibernate.FindAllTheFiles;
 import net.sourceforge.seqware.common.module.FileMetadata;
 import net.sourceforge.seqware.common.module.ReturnValue;
 import org.testng.annotations.*;
-import org.testng.Assert;
+import static org.testng.Assert.*;
 
-public class OicrDeciderTest {
+public class OicrDeciderHelpersTest {
 
-    public OicrDeciderTest() {
+    public OicrDeciderHelpersTest() {
     }
 
     /**
@@ -26,7 +26,7 @@ public class OicrDeciderTest {
         OicrDecider instance = new OicrDecider();
         String expResult = "&#39; &#33;&#34;&#35;&#36;&#37;&#38;&#39;&#40;&#41;&#42;&#43;&#44;-&#46;&#47;0123456789&#58;&#59;&#60;&#61;&#62;&#63;&#64;ABCDEFGHIJKLMNOPQRSTUVWXYZ&#91;&#92;&#92;&#93;&#94;_&#96;abcdefghijklmnopqrstuvwxyz&#123;&#124;&#125;&#126;&#39;";
         String result = instance.escapeString(input);
-        Assert.assertEquals(result, expResult);
+        assertEquals(result, expResult);
     }
 
     @Test
@@ -41,10 +41,9 @@ public class OicrDeciderTest {
 
         OicrDecider instance = new OicrDecider();
 
-        Assert.assertTrue(instance.isBeforeDate(jan1, jan2Date), "isBeforeDate Test for: Jan 1 before Jan 2?");
-        Assert.assertFalse(instance.isBeforeDate(jan2, jan2Date), "isBeforeDate Test for: Jan 2 before Jan 2?");
-        Assert.assertFalse(instance.isBeforeDate(jan2, jan1Date), "isBeforeDate Test for: Jan 2 before Jan 1?");
-
+        assertTrue(instance.isBeforeDate(jan1, jan2Date), "isBeforeDate Test for: Jan 1 before Jan 2?");
+        assertFalse(instance.isBeforeDate(jan2, jan2Date), "isBeforeDate Test for: Jan 2 before Jan 2?");
+        assertFalse(instance.isBeforeDate(jan2, jan1Date), "isBeforeDate Test for: Jan 2 before Jan 1?");
     }
 
     @Test
@@ -60,10 +59,9 @@ public class OicrDeciderTest {
 
         OicrDecider instance = new OicrDecider();
 
-        Assert.assertTrue(instance.isAfterDate(jan2, jan1Date), "isAfterDate Test for: Jan 2 after Jan 1?");
-        Assert.assertFalse(instance.isAfterDate(jan1, jan1Date), "isAfterDate Test for: Jan 1 after Jan 1?");
-        Assert.assertFalse(instance.isAfterDate(jan1, jan2Date), "isAfterDate Test for: Jan 1 after Jan 2?");
-
+        assertTrue(instance.isAfterDate(jan2, jan1Date), "isAfterDate Test for: Jan 2 after Jan 1?");
+        assertFalse(instance.isAfterDate(jan1, jan1Date), "isAfterDate Test for: Jan 1 after Jan 1?");
+        assertFalse(instance.isAfterDate(jan1, jan2Date), "isAfterDate Test for: Jan 1 after Jan 2?");
     }
 
     @Test
@@ -82,12 +80,13 @@ public class OicrDeciderTest {
         rv = new ReturnValue();
         rv.setAttributes(attributes);
         fa = new FileAttributes(rv, new FileMetadata());
-        Assert.assertEquals(od.getPrefixFromFileMetadata(fa), "SWID_IUSSWA_SAMPLENAME_SEQUENCERRUNNAME_IUSTAG_L001_R1_001_");
+        assertEquals(od.getPrefixFromFileMetadata(fa), "SWID_IUSSWA_SAMPLENAME_SEQUENCERRUNNAME_IUSTAG_L001_R1_001_");
 
         attributes.put(Lims.GROUP_ID.getAttributeTitle(), "GROUPID");
         rv = new ReturnValue();
         rv.setAttributes(attributes);
         fa = new FileAttributes(rv, new FileMetadata());
-        Assert.assertEquals(od.getPrefixFromFileMetadata(fa), "SWID_IUSSWA_SAMPLENAME_GROUPID_SEQUENCERRUNNAME_IUSTAG_L001_R1_001_");
+        assertEquals(od.getPrefixFromFileMetadata(fa), "SWID_IUSSWA_SAMPLENAME_GROUPID_SEQUENCERRUNNAME_IUSTAG_L001_R1_001_");
     }
+
 }

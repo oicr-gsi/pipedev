@@ -1,8 +1,8 @@
 package ca.on.oicr.pde.testing.decider;
 
-import ca.on.oicr.pde.dao.reader.SeqwareReadService;
+import ca.on.oicr.gsi.provenance.ProvenanceClient;
+import ca.on.oicr.pde.reports.WorkflowReport;
 import ca.on.oicr.pde.diff.ObjectDiff;
-import ca.on.oicr.pde.model.Workflow;
 import ca.on.oicr.pde.testing.common.RunTestBase;
 import ca.on.oicr.pde.utilities.Timer;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import net.sourceforge.seqware.common.model.Workflow;
 import net.sourceforge.seqware.common.util.workflowtools.WorkflowInfo;
 import net.sourceforge.seqware.pipeline.bundle.Bundle;
 import org.apache.commons.io.FileUtils;
@@ -24,6 +25,7 @@ import org.apache.logging.log4j.LogManager;
 import org.testng.Assert;
 import org.testng.annotations.*;
 import org.testng.annotations.Test;
+import ca.on.oicr.pde.client.SeqwareClient;
 
 @Listeners({ca.on.oicr.pde.testing.testng.TestCaseReporter.class})
 public class RunTest extends RunTestBase {
@@ -35,7 +37,7 @@ public class RunTest extends RunTestBase {
     private final String deciderClass;
     private final File bundledWorkflow;
 
-    private SeqwareReadService seqwareService;
+//    private FileProvenanceClient seqwareService;
     private Workflow workflow;
 
     private final List<String> studies = new ArrayList<>();
@@ -45,19 +47,23 @@ public class RunTest extends RunTestBase {
     File actualReportFile;
     File expectedReportFile;
 
-    RunTestReport actual;
-    RunTestReport expected;
+    WorkflowReport actual;
+    WorkflowReport expected;
 
     RunTestDefinition testDefinition;
 
     private Timer executionTimer;
 
-    public RunTest(SeqwareReadService seqwareService, File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName,
+    private SeqwareClient seqwareClient;
+    private ProvenanceClient provenanceClient;
+
+    public RunTest(SeqwareClient seqwareClient, ProvenanceClient provenanceClient, File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName,
             File deciderJar, File bundledWorkflow, String deciderClass, RunTestDefinition definition) throws IOException {
 
         super(seqwareDistribution, seqwareSettings, workingDirectory, testName);
-
-        this.seqwareService = seqwareService;
+        this.seqwareClient = seqwareClient;
+        this.provenanceClient = provenanceClient;
+//        this.seqwareService = seqwareService;
         this.deciderJar = deciderJar;
         this.bundledWorkflow = bundledWorkflow;
         this.deciderClass = deciderClass;
@@ -74,7 +80,7 @@ public class RunTest extends RunTestBase {
         expectedReportFile = testDefinition.getMetrics();
         if (expectedReportFile != null) {
             try {
-                expected = RunTestReport.buildFromJson(expectedReportFile);
+                expected = WorkflowReport.buildFromJson(expectedReportFile);
                 expected.applyIniExclusions(testDefinition.getIniExclusions());
 
                 expected.applyIniStringSubstitution("\\$\\{workflow_bundle_dir\\}/Workflow_Bundle_[^/]+/[^/]+/",
@@ -165,11 +171,9 @@ public class RunTest extends RunTestBase {
     @Test(groups = "preExecution")
     public void installWorkflow() throws IOException {
         Timer timer = Timer.start();
-        Workflow.Builder b = new Workflow.Builder();
-        b.setSwid(seqwareExecutor.installWorkflow(bundledWorkflow).getSwid());
-        workflow = b.build();
+        workflow = seqwareExecutor.installWorkflow(bundledWorkflow);
 
-        Assert.assertNotNull(workflow.getSwid(), "Installation of the workflow bundle failed");
+        Assert.assertNotNull(workflow.getSwAccession(), "Installation of the workflow bundle failed");
         log.printf(Level.INFO, "[%s] Completed installing workflow bundle in %s", testName, timer.stop());
     }
 
@@ -217,7 +221,7 @@ public class RunTest extends RunTestBase {
     public void calculateWorkflowRunReport() throws JsonProcessingException, IOException {
         Timer timer = Timer.start();
 
-        actual = RunTestReport.generateReport(seqwareService, workflow);
+        actual = WorkflowReport.generateReport(seqwareClient, provenanceClient, workflow);
         File actualUnmodifiedReportFile = new File(workingDirectory.getAbsolutePath() + "/tmp/" + testDefinition.outputName());
         if (actualUnmodifiedReportFile.exists()) {
             throw new RuntimeException("File already exists.");
@@ -258,7 +262,7 @@ public class RunTest extends RunTestBase {
             sb.append("Actual run report: ").append(actualReportFile.getAbsolutePath()).append("\n");
 
             //Build the summary report
-            String headerSummary = RunTestReport.diffHeader(actual, expected);
+            String headerSummary = WorkflowReport.diffHeader(actual, expected);
             if (!headerSummary.isEmpty()) {
                 sb.append("Change summary:\n");
                 sb.append(headerSummary);

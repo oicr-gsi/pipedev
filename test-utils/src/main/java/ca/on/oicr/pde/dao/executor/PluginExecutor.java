@@ -1,15 +1,13 @@
 package ca.on.oicr.pde.dao.executor;
 
 import ca.on.oicr.pde.experimental.PDEPluginRunner;
-import ca.on.oicr.pde.model.SeqwareAccession;
-import ca.on.oicr.pde.model.Workflow;
-import ca.on.oicr.pde.model.WorkflowRun;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import net.sourceforge.seqware.common.model.Workflow;
 import net.sourceforge.seqware.common.module.ReturnValue;
 import net.sourceforge.seqware.pipeline.runner.PluginRunner;
 
@@ -26,7 +24,7 @@ public class PluginExecutor implements SeqwareExecutor {
     }
 
     @Override
-    public SeqwareAccession installWorkflow(File bundledWorkflowPath) throws IOException {
+    public Workflow installWorkflow(File bundledWorkflowPath) throws IOException {
 
         List<String> params = new ArrayList<>();
         params.add("--plugin");
@@ -41,8 +39,9 @@ public class PluginExecutor implements SeqwareExecutor {
             throw new RuntimeException("Failed to install bundled workflow");
         }
 
-        return new SeqwareAccession(rv.getAttribute("sw_accession"));
-
+        Workflow workflow = new Workflow();
+        workflow.setSwAccession(Integer.parseInt(rv.getAttribute("sw_accession")));
+        return workflow;
     }
 
     @Override
@@ -53,7 +52,7 @@ public class PluginExecutor implements SeqwareExecutor {
         params.add(decider);
         params.add("--");
         params.add("--wf-accession");
-        params.add(workflow.getSwid());
+        params.add(workflow.getSwAccession().toString());
         for (String args : deciderArgs) {
             //no spaces in args allowed
             params.addAll(Arrays.asList(args.split(" ")));
@@ -65,38 +64,45 @@ public class PluginExecutor implements SeqwareExecutor {
         }
 
         ReturnValue rv = runner.runPlugin(params);
-
     }
 
     @Override
-    public SeqwareAccession workflowRunSchedule(SeqwareAccession workflowSwid, List<File> workflowIniFiles,
-            Map<String, String> parameters) throws IOException {
+    public void deciderRunSchedule(File deciderJar, net.sourceforge.seqware.common.model.Workflow workflow, List<String> studies, List<String> sequencerRuns, List<String> samples, String extraArgs) throws IOException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void workflowRunLaunch(SeqwareAccession workflowRunSwid) throws IOException {
+    public net.sourceforge.seqware.common.model.WorkflowRun workflowRunSchedule(net.sourceforge.seqware.common.model.Workflow workflow, List<File> workflowIniFiles, Map<String, String> parameters) throws IOException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void workflowRunLaunch(File workflowBundle, List<File> workflowIniFiles, String workflowName,
-            String workflowVersion) throws IOException {
+    public void workflowRunLaunch(net.sourceforge.seqware.common.model.WorkflowRun workflowRun) throws IOException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void workflowRunUpdateStatus(SeqwareAccession workflowRunSwid) throws IOException {
+    public void workflowRunLaunch(File workflowBundle, List<File> workflowIniFiles, String workflowName, String workflowVersion) throws IOException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public String workflowRunReport(SeqwareAccession workflowRunSwid) throws IOException {
+    public void workflowRunUpdateStatus(net.sourceforge.seqware.common.model.WorkflowRun workflowRun) throws IOException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void cancelWorkflowRun(WorkflowRun wr) throws IOException {
+    public String workflowRunReport(net.sourceforge.seqware.common.model.WorkflowRun workflowRun) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void cancelWorkflowRun(net.sourceforge.seqware.common.model.WorkflowRun workflowRun) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void cancelWorkflowRuns(net.sourceforge.seqware.common.model.Workflow workflow) throws IOException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -122,16 +128,6 @@ public class PluginExecutor implements SeqwareExecutor {
         result = result.replaceAll(" ", "\\\\ ");
 
         return result;
-    }
-
-    @Override
-    public void cancelWorkflowRuns(Workflow w) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void deciderRunSchedule(File deciderJar, Workflow workflowSwid, List<String> studies, List<String> sequencerRuns, List<String> samples, String extraArgs) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }
