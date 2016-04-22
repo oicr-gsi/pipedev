@@ -1,6 +1,7 @@
 package ca.on.oicr.pde.deciders;
 
 import ca.on.oicr.gsi.provenance.ProvenanceClient;
+import ca.on.oicr.gsi.provenance.model.FileProvenance;
 import ca.on.oicr.gsi.provenance.model.SampleProvenance;
 import java.util.Arrays;
 import java.util.List;
@@ -34,6 +35,10 @@ import net.sourceforge.seqware.common.model.Workflow;
 import org.joda.time.DateTime;
 import static org.mockito.Mockito.when;
 import ca.on.oicr.pde.client.SeqwareClient;
+import java.util.HashSet;
+import java.util.Set;
+import net.sourceforge.seqware.common.model.File;
+import net.sourceforge.seqware.common.model.Processing;
 
 public class OicrDeciderBase {
 
@@ -95,41 +100,36 @@ public class OicrDeciderBase {
         when(limsMock.getSampleProjects()).thenReturn(Lists.newArrayList(project));
         when(limsMock.getSamples(null, null, null, null, null)).thenReturn(samples);
         when(limsMock.getRuns()).thenReturn(Lists.newArrayList(run));
+
+        //check preconditions
+        assertEquals(provenanceClient.getSampleProvenance().size(), 1);
+        assertEquals(provenanceClient.getFileProvenance().size(), 0);
+        assertEquals(Iterables.getOnlyElement(provenanceClient.getSampleProvenance()).getSampleName(), "TEST_SAMPLE");
     }
 
-    @Test(enabled = true)
-    public void pineryTest1() {
+    @Test
+    public void noMetadataChange() {
         SampleProvenance before = Iterables.getFirst(provenanceClient.getSampleProvenance(), null);
         SampleProvenance after = Iterables.getFirst(provenanceClient.getSampleProvenance(), null);
         assertEquals(before.getVersion(), after.getVersion());
     }
 
-    @Test(enabled = true)
-    public void pineryTest() {
+    @Test
+    public void sampleNameChange() {
         SampleProvenance before = Iterables.getFirst(provenanceClient.getSampleProvenance(), null);
         sample.setName("TEST_SAMPLE_mod");
         SampleProvenance after = Iterables.getFirst(provenanceClient.getSampleProvenance(), null);
         assertNotEquals(before.getVersion(), after.getVersion());
     }
 
-    @Test(enabled = true)
-    public void pineryTest3() {
-        SampleProvenance before = Iterables.getFirst(provenanceClient.getSampleProvenance(), null);
-        assertEquals(before.getSampleName(), "TEST_SAMPLE");
-    }
-
-    @Test(enabled = true)
+    @Test
     public void deciderOperationModes() throws HttpResponseException {
-
-        //check preconditions
-        assertEquals(provenanceClient.getSampleProvenance().size(), 1);
-        assertEquals(provenanceClient.getFileProvenance().size(), 0);
 
         //create a file in seqware
         Workflow upstreamWorkflow = seqwareClient.createWorkflow("UpstreamWorkflow", "0.0", "", ImmutableMap.of("test_param", "test_value"));
         IUS ius;
         FileMetadata file;
-        ius = seqwareClient.addLims("seqware", "1_1_1", "1", new DateTime());
+        ius = seqwareClient.addLims("pinery", "1_1_1", "1", new DateTime());
         file = new FileMetadata();
         file.setDescription("description");
         file.setMd5sum("md5sum");
@@ -176,16 +176,12 @@ public class OicrDeciderBase {
     @Test
     public void deciderForMergingWorkflow() {
 
-        //check preconditions
-        assertEquals(provenanceClient.getSampleProvenance().size(), 1);
-        assertEquals(provenanceClient.getFileProvenance().size(), 0);
-
         //setup files in seqware
         Workflow workflow1 = seqwareClient.createWorkflow("TestWorkflow1", "0.0", "", ImmutableMap.of("test_param", "test_value"));
         IUS ius;
         FileMetadata file;
 
-        ius = seqwareClient.addLims("seqware", "1_1_1", "1", new DateTime());
+        ius = seqwareClient.addLims("pinery", "1_1_1", "1", new DateTime());
         file = new FileMetadata();
         file.setDescription("description");
         file.setMd5sum("md5sum");
@@ -195,7 +191,7 @@ public class OicrDeciderBase {
         file.setSize(1L);
         seqwareClient.createWorkflowRun(workflow1, Sets.newHashSet(ius), Collections.EMPTY_LIST, Arrays.asList(file));
 
-        ius = seqwareClient.addLims("seqware", "1_1_1", "1", new DateTime());
+        ius = seqwareClient.addLims("pinery", "1_1_1", "1", new DateTime());
         file = new FileMetadata();
         file.setDescription("description");
         file.setMd5sum("md5sum");
@@ -226,6 +222,49 @@ public class OicrDeciderBase {
         run(decider, Arrays.asList("--all"));
         assertEquals(decider.getWorkflowRuns().size(), 1);
         assertEquals(provenanceClient.getFileProvenance().size(), 4);
+    }
+
+    @Test
+    public void demultiplexingWorkflow() {
+
+        //sequence "sample" on 7 more lanes
+        Set<RunPosition> lanes = new HashSet<>();
+        for (int laneNumber = 2; laneNumber <= 8; laneNumber++) {
+            RunPosition l = new DefaultRunPosition();
+            l.setPosition(laneNumber);
+            l.setRunSample(Sets.newHashSet(runSample));
+            lanes.add(l);
+        }
+        run.getSamples().addAll(lanes);
+        assertEquals(provenanceClient.getSampleProvenance().size(), 8);
+
+        //setup a fake seqware workflow run that takes as input all samples and provisions out one file per sample (so only one IusLimsKey link per file)
+        String workflowName = "bcl2fastq";
+        Workflow wf1 = seqwareClient.createWorkflow(workflowName, "0.0", "", ImmutableMap.of("test_param", "test_value"));
+        Set<IUS> iuses = new HashSet<>();
+        Set<Processing> processings = new HashSet<>();
+        int id = 1;
+        for (SampleProvenance sp : provenanceClient.getSampleProvenance()) {
+            IUS ius = seqwareClient.addLims("pinery", sp.getSampleProvenanceId(), sp.getVersion(), sp.getLastModified());
+            iuses.add(ius);
+
+            File f2 = new File();
+            f2.setFileId(id++);
+            f2.setFilePath("/tmp/file1.bam");
+
+            Processing p = new Processing();
+            p.setProcessingId(id++);
+            p.setFiles(Sets.newHashSet(f2)); //link file to processing
+            p.setIUS(Sets.newHashSet(ius)); //link ius to processing
+            processings.add(p);
+        }
+        seqwareClient.createWorkflowRun(wf1, iuses, Collections.EMPTY_LIST, processings);
+
+        assertEquals(provenanceClient.getFileProvenance().size(), 8);
+        for (FileProvenance fp : provenanceClient.getFileProvenance()) {
+            assertEquals(fp.getIusLimsKeys().size(), 1);
+            assertEquals(fp.getWorkflowName(), workflowName);
+        }
     }
 
     protected void run(OicrDecider decider, List<String> params) {
