@@ -820,7 +820,7 @@ public class OicrDecider extends BasicDecider {
                 f.put("Lane Number", Joiner.on(",").skipNulls().join(fp.getLaneNumbers()));
                 f.put("Lane Attributes", Joiner.on(",").join(Iterables.transform(fp.getLaneAttributes().entrySet(), MAP_OF_SETS_TO_STRING)));
 
-                f.put("Last Modified", fp.getLastModified());
+                f.put("Last Modified", fp.getLastModified().toString());
                 f.put("Workflow Name", fp.getWorkflowName());
                 f.put("Workflow Version", fp.getWorkflowVersion());
                 f.put("Workflow SWID", fp.getWorkflowSWID().toString());
