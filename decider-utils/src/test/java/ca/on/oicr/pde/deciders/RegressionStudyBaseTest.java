@@ -1,8 +1,9 @@
 package ca.on.oicr.pde.deciders;
 
 import ca.on.oicr.gsi.provenance.DefaultProvenanceClient;
+import ca.on.oicr.gsi.provenance.PineryProvenanceProvider;
 import ca.on.oicr.gsi.provenance.SeqwareMetadataAnalysisProvenanceProvider;
-import ca.on.oicr.gsi.provenance.SeqwareMetadataSampleProvenanceProvider;
+import ca.on.oicr.gsi.provenance.SeqwareMetadataLimsMetadataProvenanceProvider;
 import ca.on.oicr.gsi.provenance.model.SampleProvenance;
 import ca.on.oicr.pde.client.MetadataBackedSeqwareClient;
 import ca.on.oicr.pde.client.MetadataBackedSeqwareLimsClient;
@@ -33,8 +34,10 @@ public class RegressionStudyBaseTest extends RegressionStudyBase {
         config.put("SW_METADATA_METHOD", "inmemory");
         seqwareClient = new MetadataBackedSeqwareClient(metadata, config);
         seqwareLimsClient = new MetadataBackedSeqwareLimsClient(metadata, config);
+        
+        SeqwareMetadataLimsMetadataProvenanceProvider seqwareProvenanceProvider = new SeqwareMetadataLimsMetadataProvenanceProvider(metadata);
         provenanceClient = new DefaultProvenanceClient(new SeqwareMetadataAnalysisProvenanceProvider(metadata),
-                new SeqwareMetadataSampleProvenanceProvider(metadata));
+                seqwareProvenanceProvider, seqwareProvenanceProvider);
 
         RegressionTestStudy regressionTestStudy = new RegressionTestStudy(seqwareLimsClient);
     }

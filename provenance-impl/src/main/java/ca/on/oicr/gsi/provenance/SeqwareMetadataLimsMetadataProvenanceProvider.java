@@ -1,5 +1,6 @@
 package ca.on.oicr.gsi.provenance;
 
+import ca.on.oicr.gsi.provenance.model.LaneProvenance;
 import ca.on.oicr.gsi.provenance.model.SampleProvenance;
 import java.util.Collection;
 import java.util.HashSet;
@@ -13,11 +14,11 @@ import net.sourceforge.seqware.common.model.FileProvenanceParam;
  *
  * @author mlaszloffy
  */
-public class SeqwareMetadataSampleProvenanceProvider implements SampleProvenanceProvider {
+public class SeqwareMetadataLimsMetadataProvenanceProvider implements SampleProvenanceProvider, LaneProvenanceProvider {
 
     private final Metadata metadata;
 
-    public SeqwareMetadataSampleProvenanceProvider(Metadata metadata) {
+    public SeqwareMetadataLimsMetadataProvenanceProvider(Metadata metadata) {
         this.metadata = metadata;
     }
 
@@ -38,6 +39,16 @@ public class SeqwareMetadataSampleProvenanceProvider implements SampleProvenance
             sps.add(sp);
         }
         return sps;
+    }
+
+    @Override
+    public Collection<LaneProvenance> getLaneProvenance() {
+        return (List<LaneProvenance>) (List<?>) metadata.getLaneProvenance();
+    }
+
+    @Override
+    public Collection<LaneProvenance> getLaneProvenance(Map<String, Set<String>> filters) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }

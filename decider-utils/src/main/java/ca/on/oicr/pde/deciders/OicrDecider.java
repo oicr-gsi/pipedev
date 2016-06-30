@@ -1,7 +1,7 @@
 package ca.on.oicr.pde.deciders;
 
 import ca.on.oicr.gsi.provenance.DefaultProvenanceClient;
-import ca.on.oicr.gsi.provenance.PinerySampleProvenanceProvider;
+import ca.on.oicr.gsi.provenance.PineryProvenanceProvider;
 import ca.on.oicr.gsi.provenance.SeqwareMetadataAnalysisProvenanceProvider;
 import ca.on.oicr.gsi.provenance.model.FileProvenance;
 import com.google.common.base.Joiner;
@@ -21,6 +21,7 @@ import net.sourceforge.seqware.common.util.Log;
 import net.sourceforge.seqware.pipeline.deciders.BasicDecider;
 import net.sourceforge.seqware.pipeline.plugins.fileprovenance.ProvenanceUtility.HumanProvenanceFilters;
 import ca.on.oicr.gsi.provenance.ProvenanceClient;
+import ca.on.oicr.gsi.provenance.SeqwareMetadataLimsMetadataProvenanceProvider;
 import ca.on.oicr.gsi.provenance.model.IusLimsKey;
 import ca.on.oicr.gsi.provenance.model.LimsKey;
 import ca.on.oicr.pinery.client.PineryClient;
@@ -235,10 +236,11 @@ public class OicrDecider extends BasicDecider {
                 ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
             }
         }
-        if(options.has("pinery-url")){
+        if (options.has("pinery-url")) {
             PineryClient pineryClient = new PineryClient(options.valueOf("pinery-url").toString(), false);
-            provenanceClient = new DefaultProvenanceClient(new SeqwareMetadataAnalysisProvenanceProvider(metadata), 
-                    new PinerySampleProvenanceProvider(pineryClient));
+            PineryProvenanceProvider pineryProvenanceProvider = new PineryProvenanceProvider(pineryClient);
+            provenanceClient = new DefaultProvenanceClient(new SeqwareMetadataAnalysisProvenanceProvider(metadata),
+                    pineryProvenanceProvider, pineryProvenanceProvider);
         }
         
         return ret;

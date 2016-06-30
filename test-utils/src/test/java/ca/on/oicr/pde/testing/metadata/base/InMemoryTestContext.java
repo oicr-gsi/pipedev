@@ -2,7 +2,7 @@ package ca.on.oicr.pde.testing.metadata.base;
 
 import ca.on.oicr.gsi.provenance.DefaultProvenanceClient;
 import ca.on.oicr.gsi.provenance.SeqwareMetadataAnalysisProvenanceProvider;
-import ca.on.oicr.gsi.provenance.SeqwareMetadataSampleProvenanceProvider;
+import ca.on.oicr.gsi.provenance.SeqwareMetadataLimsMetadataProvenanceProvider;
 import ca.on.oicr.pde.client.MetadataBackedSeqwareLimsClient;
 import ca.on.oicr.pde.client.MetadataBackedSeqwareClient;
 import ca.on.oicr.pde.testing.metadata.RegressionTestStudy;
@@ -24,8 +24,10 @@ public class InMemoryTestContext extends TestContext {
         config.put("SW_METADATA_METHOD", "inmemory");
         seqwareClient = new MetadataBackedSeqwareClient(metadata, config);
         seqwareLimsClient = new MetadataBackedSeqwareLimsClient(metadata, config);
+        
+        SeqwareMetadataLimsMetadataProvenanceProvider seqwareMetadataProvider = new SeqwareMetadataLimsMetadataProvenanceProvider(metadata);
         provenanceClient = new DefaultProvenanceClient(new SeqwareMetadataAnalysisProvenanceProvider(metadata),
-                new SeqwareMetadataSampleProvenanceProvider(metadata));
+                seqwareMetadataProvider, seqwareMetadataProvider);
 
         r = new RegressionTestStudy(seqwareLimsClient);
         seqwareObjects = r.getSeqwareObjects();

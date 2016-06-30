@@ -2,7 +2,7 @@ package ca.on.oicr.pde.testing.metadata.base;
 
 import ca.on.oicr.gsi.provenance.DefaultProvenanceClient;
 import ca.on.oicr.gsi.provenance.SeqwareMetadataAnalysisProvenanceProvider;
-import ca.on.oicr.gsi.provenance.SeqwareMetadataSampleProvenanceProvider;
+import ca.on.oicr.gsi.provenance.SeqwareMetadataLimsMetadataProvenanceProvider;
 import ca.on.oicr.pde.testing.metadata.RegressionTestStudy;
 import ca.on.oicr.pde.testing.metadata.SeqwareTestEnvironment;
 import java.io.File;
@@ -48,8 +48,10 @@ public class WebserviceTestContext extends TestContext {
         seqwareClient = te.getSeqwareClient();
         seqwareLimsClient = te.getSeqwareLimsClient();
         seqwareObjects = r.getSeqwareObjects();
+        
+        SeqwareMetadataLimsMetadataProvenanceProvider seqwareMetadataProvider = new SeqwareMetadataLimsMetadataProvenanceProvider(te.getMetadata());
         provenanceClient = new DefaultProvenanceClient(new SeqwareMetadataAnalysisProvenanceProvider(te.getMetadata()),
-                new SeqwareMetadataSampleProvenanceProvider(te.getMetadata()));
+                seqwareMetadataProvider, seqwareMetadataProvider);
     }
 
     @Override

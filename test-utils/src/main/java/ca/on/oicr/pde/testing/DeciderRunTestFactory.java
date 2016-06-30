@@ -3,7 +3,7 @@ package ca.on.oicr.pde.testing;
 import ca.on.oicr.gsi.provenance.DefaultProvenanceClient;
 import ca.on.oicr.gsi.provenance.ProvenanceClient;
 import ca.on.oicr.gsi.provenance.SeqwareMetadataAnalysisProvenanceProvider;
-import ca.on.oicr.gsi.provenance.SeqwareMetadataSampleProvenanceProvider;
+import ca.on.oicr.gsi.provenance.SeqwareMetadataLimsMetadataProvenanceProvider;
 import ca.on.oicr.pde.client.MetadataBackedSeqwareClient;
 import ca.on.oicr.pde.testing.decider.RunTest;
 import static ca.on.oicr.pde.utilities.Helpers.*;
@@ -161,8 +161,9 @@ public class DeciderRunTestFactory {
             
             SeqwareClient seqwareClient = new MetadataBackedSeqwareClient(metadata, config);
             
+            SeqwareMetadataLimsMetadataProvenanceProvider seqwareMetadataProvider = new SeqwareMetadataLimsMetadataProvenanceProvider(metadata);
             ProvenanceClient provenanceClient = new DefaultProvenanceClient(new SeqwareMetadataAnalysisProvenanceProvider(metadata),
-                new SeqwareMetadataSampleProvenanceProvider(metadata));
+                seqwareMetadataProvider, seqwareMetadataProvider);
             
             RunTest test = new RunTest(seqwareClient, provenanceClient, seqwareDistribution, seqwareSettings, testWorkingDir, testName, deciderJar, bundledWorkflow, deciderClass, t);
             test.setSeqwareExecutor(new ThreadedSeqwareExecutor(testName, seqwareDistribution, seqwareSettings, testWorkingDir, sharedPool, seqwareClient));

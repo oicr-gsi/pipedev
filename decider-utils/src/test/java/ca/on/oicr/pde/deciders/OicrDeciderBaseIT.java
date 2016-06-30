@@ -1,7 +1,7 @@
 package ca.on.oicr.pde.deciders;
 
 import ca.on.oicr.gsi.provenance.DefaultProvenanceClient;
-import ca.on.oicr.gsi.provenance.PinerySampleProvenanceProvider;
+import ca.on.oicr.gsi.provenance.PineryProvenanceProvider;
 import ca.on.oicr.gsi.provenance.SeqwareMetadataAnalysisProvenanceProvider;
 import ca.on.oicr.pde.client.MetadataBackedSeqwareClient;
 import ca.on.oicr.pde.testing.metadata.SeqwareTestEnvironment;
@@ -99,7 +99,9 @@ public class OicrDeciderBaseIT extends OicrDeciderBase {
 
     @BeforeMethod(dependsOnMethods = {"setupSeqware", "setupPinery"}, groups = "setup")
     public void setupProvenance() {
-        provenanceClient = new DefaultProvenanceClient(new SeqwareMetadataAnalysisProvenanceProvider(metadata), new PinerySampleProvenanceProvider(pineryClient));
+        PineryProvenanceProvider pineryProvenanceProvider = new PineryProvenanceProvider(pineryClient);
+        provenanceClient = new DefaultProvenanceClient(new SeqwareMetadataAnalysisProvenanceProvider(metadata),
+                pineryProvenanceProvider, pineryProvenanceProvider);
     }
 
     @Test

@@ -2,6 +2,7 @@ package ca.on.oicr.gsi.provenance;
 
 import ca.on.oicr.gsi.provenance.model.SampleProvenance;
 import ca.on.oicr.gsi.provenance.model.FileProvenanceParam;
+import ca.on.oicr.gsi.provenance.model.LaneProvenance;
 import ca.on.oicr.pinery.client.HttpResponseException;
 import ca.on.oicr.pinery.client.PineryClient;
 import java.util.Collection;
@@ -14,15 +15,15 @@ import java.util.Set;
  *
  * @author mlaszloffy
  */
-public class PinerySampleProvenanceProvider implements SampleProvenanceProvider {
+public class PineryProvenanceProvider implements SampleProvenanceProvider, LaneProvenanceProvider {
 
     private final PineryClient pineryClient;
 
-    public PinerySampleProvenanceProvider(String url) {
+    public PineryProvenanceProvider(String url) {
         this.pineryClient = new PineryClient(url, true);
     }
 
-    public PinerySampleProvenanceProvider(PineryClient pineryClient) {
+    public PineryProvenanceProvider(PineryClient pineryClient) {
         this.pineryClient = pineryClient;
     }
 
@@ -47,6 +48,20 @@ public class PinerySampleProvenanceProvider implements SampleProvenanceProvider 
             sps.add(sp);
         }
         return sps;
+    }
+
+    @Override
+    public Collection<LaneProvenance> getLaneProvenance() {
+        try {
+            return (List<LaneProvenance>) (List<?>) pineryClient.getLaneProvenance().all();
+        } catch (HttpResponseException hre) {
+            throw new RuntimeException(hre);
+        }
+    }
+
+    @Override
+    public Collection<LaneProvenance> getLaneProvenance(Map<String, Set<String>> filters) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }
