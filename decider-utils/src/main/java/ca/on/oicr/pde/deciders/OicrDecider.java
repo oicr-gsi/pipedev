@@ -239,8 +239,11 @@ public class OicrDecider extends BasicDecider {
         if (options.has("pinery-url")) {
             PineryClient pineryClient = new PineryClient(options.valueOf("pinery-url").toString(), false);
             PineryProvenanceProvider pineryProvenanceProvider = new PineryProvenanceProvider(pineryClient);
-            provenanceClient = new DefaultProvenanceClient(new SeqwareMetadataAnalysisProvenanceProvider(metadata),
-                    pineryProvenanceProvider, pineryProvenanceProvider);
+            DefaultProvenanceClient dpc = new DefaultProvenanceClient();
+            dpc.registerAnalysisProvenanceProvider("seqware", new SeqwareMetadataAnalysisProvenanceProvider(metadata));
+            dpc.registerSampleProvenanceProvider("pinery", pineryProvenanceProvider);
+            dpc.registerLaneProvenanceProvider("pinery", pineryProvenanceProvider);
+            provenanceClient = dpc;
         }
         
         return ret;

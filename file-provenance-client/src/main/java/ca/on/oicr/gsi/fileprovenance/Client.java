@@ -1,6 +1,5 @@
 package ca.on.oicr.gsi.fileprovenance;
 
-
 import ca.on.oicr.gsi.provenance.AnalysisProvenanceProvider;
 import ca.on.oicr.gsi.provenance.DefaultProvenanceClient;
 import ca.on.oicr.gsi.provenance.SeqwareMetadataAnalysisProvenanceProvider;
@@ -45,9 +44,15 @@ public class Client {
     public Client() {
         setupConfig();
         setupMetadata();
+
         AnalysisProvenanceProvider analysisProvenanceProvider = new SeqwareMetadataAnalysisProvenanceProvider(metadata);
         SeqwareMetadataLimsMetadataProvenanceProvider seqwareLimsMetadataProvider = new SeqwareMetadataLimsMetadataProvenanceProvider(metadata);
-        dpc = new DefaultProvenanceClient(analysisProvenanceProvider, seqwareLimsMetadataProvider, seqwareLimsMetadataProvider);
+
+        dpc = new DefaultProvenanceClient();
+        dpc.registerAnalysisProvenanceProvider("seqware", analysisProvenanceProvider);
+        dpc.registerLaneProvenanceProvider("seqware", seqwareLimsMetadataProvider);
+        dpc.registerSampleProvenanceProvider("seqware", seqwareLimsMetadataProvider);
+
     }
 
     private class StringSanitizerBuilder {

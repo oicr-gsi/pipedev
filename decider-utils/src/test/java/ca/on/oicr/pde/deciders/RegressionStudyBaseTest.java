@@ -36,8 +36,11 @@ public class RegressionStudyBaseTest extends RegressionStudyBase {
         seqwareLimsClient = new MetadataBackedSeqwareLimsClient(metadata, config);
         
         SeqwareMetadataLimsMetadataProvenanceProvider seqwareProvenanceProvider = new SeqwareMetadataLimsMetadataProvenanceProvider(metadata);
-        provenanceClient = new DefaultProvenanceClient(new SeqwareMetadataAnalysisProvenanceProvider(metadata),
-                seqwareProvenanceProvider, seqwareProvenanceProvider);
+        DefaultProvenanceClient dpc = new DefaultProvenanceClient();
+        dpc.registerAnalysisProvenanceProvider("seqware", new SeqwareMetadataAnalysisProvenanceProvider(metadata));
+        dpc.registerSampleProvenanceProvider("seqware", seqwareProvenanceProvider);
+        dpc.registerLaneProvenanceProvider("seqware", seqwareProvenanceProvider);
+        provenanceClient = dpc;
 
         RegressionTestStudy regressionTestStudy = new RegressionTestStudy(seqwareLimsClient);
     }

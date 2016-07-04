@@ -26,8 +26,11 @@ public class InMemoryTestContext extends TestContext {
         seqwareLimsClient = new MetadataBackedSeqwareLimsClient(metadata, config);
         
         SeqwareMetadataLimsMetadataProvenanceProvider seqwareMetadataProvider = new SeqwareMetadataLimsMetadataProvenanceProvider(metadata);
-        provenanceClient = new DefaultProvenanceClient(new SeqwareMetadataAnalysisProvenanceProvider(metadata),
-                seqwareMetadataProvider, seqwareMetadataProvider);
+        DefaultProvenanceClient dpc = new DefaultProvenanceClient();
+        dpc.registerAnalysisProvenanceProvider("seqware", new SeqwareMetadataAnalysisProvenanceProvider(metadata));
+        dpc.registerSampleProvenanceProvider("seqware", seqwareMetadataProvider);
+        dpc.registerLaneProvenanceProvider("seqware", seqwareMetadataProvider);
+        provenanceClient = dpc;
 
         r = new RegressionTestStudy(seqwareLimsClient);
         seqwareObjects = r.getSeqwareObjects();

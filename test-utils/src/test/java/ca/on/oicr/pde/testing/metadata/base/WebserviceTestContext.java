@@ -8,12 +8,6 @@ import ca.on.oicr.pde.testing.metadata.SeqwareTestEnvironment;
 import java.io.File;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 /**
  *
@@ -50,8 +44,11 @@ public class WebserviceTestContext extends TestContext {
         seqwareObjects = r.getSeqwareObjects();
         
         SeqwareMetadataLimsMetadataProvenanceProvider seqwareMetadataProvider = new SeqwareMetadataLimsMetadataProvenanceProvider(te.getMetadata());
-        provenanceClient = new DefaultProvenanceClient(new SeqwareMetadataAnalysisProvenanceProvider(te.getMetadata()),
-                seqwareMetadataProvider, seqwareMetadataProvider);
+        DefaultProvenanceClient dpc = new DefaultProvenanceClient();
+        dpc.registerAnalysisProvenanceProvider("seqware", new SeqwareMetadataAnalysisProvenanceProvider(te.getMetadata()));
+        dpc.registerSampleProvenanceProvider("seqware", seqwareMetadataProvider);
+        dpc.registerLaneProvenanceProvider("seqware", seqwareMetadataProvider);
+        provenanceClient = dpc;
     }
 
     @Override

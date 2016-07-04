@@ -100,8 +100,11 @@ public class OicrDeciderBaseIT extends OicrDeciderBase {
     @BeforeMethod(dependsOnMethods = {"setupSeqware", "setupPinery"}, groups = "setup")
     public void setupProvenance() {
         PineryProvenanceProvider pineryProvenanceProvider = new PineryProvenanceProvider(pineryClient);
-        provenanceClient = new DefaultProvenanceClient(new SeqwareMetadataAnalysisProvenanceProvider(metadata),
-                pineryProvenanceProvider, pineryProvenanceProvider);
+        DefaultProvenanceClient dpc = new DefaultProvenanceClient();
+        dpc.registerAnalysisProvenanceProvider("seqware", new SeqwareMetadataAnalysisProvenanceProvider(metadata));
+        dpc.registerSampleProvenanceProvider("pinery", pineryProvenanceProvider);
+        dpc.registerLaneProvenanceProvider("pinery", pineryProvenanceProvider);
+        provenanceClient = dpc;
     }
 
     @Test

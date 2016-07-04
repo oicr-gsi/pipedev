@@ -160,11 +160,13 @@ public class DeciderRunTestFactory {
             Metadata metadata = MetadataFactory.get(config);
             
             SeqwareClient seqwareClient = new MetadataBackedSeqwareClient(metadata, config);
-            
+
             SeqwareMetadataLimsMetadataProvenanceProvider seqwareMetadataProvider = new SeqwareMetadataLimsMetadataProvenanceProvider(metadata);
-            ProvenanceClient provenanceClient = new DefaultProvenanceClient(new SeqwareMetadataAnalysisProvenanceProvider(metadata),
-                seqwareMetadataProvider, seqwareMetadataProvider);
-            
+            DefaultProvenanceClient provenanceClient = new DefaultProvenanceClient();
+            provenanceClient.registerAnalysisProvenanceProvider("seqware", new SeqwareMetadataAnalysisProvenanceProvider(metadata));
+            provenanceClient.registerSampleProvenanceProvider("seqware", seqwareMetadataProvider);
+            provenanceClient.registerLaneProvenanceProvider("seqware", seqwareMetadataProvider);
+
             RunTest test = new RunTest(seqwareClient, provenanceClient, seqwareDistribution, seqwareSettings, testWorkingDir, testName, deciderJar, bundledWorkflow, deciderClass, t);
             test.setSeqwareExecutor(new ThreadedSeqwareExecutor(testName, seqwareDistribution, seqwareSettings, testWorkingDir, sharedPool, seqwareClient));
 
