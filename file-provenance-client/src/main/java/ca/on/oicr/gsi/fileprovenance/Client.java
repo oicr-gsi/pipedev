@@ -140,7 +140,8 @@ public class Client {
                         "Workflow Run Input File SWAs",
                         "Processing Algorithm", "Processing SWID", "Processing Attributes", "Processing Status",
                         "File Meta-Type", "File SWID", "File Attributes", "File Path", "File Md5sum", "File Size", "File Description",
-                        "Path Skip", "Skip"
+                        "Path Skip", "Skip",
+                        "Status"
                 );
         CSVPrinter cp;
         Stopwatch sw;
@@ -222,6 +223,8 @@ public class Client {
 
                 cs.add(stringSanitizer.apply(fp.getSkip())); //path skip
                 cs.add(stringSanitizer.apply(fp.getSkip()));
+                
+                cs.add(fp.getStatus().toString());
 
                 cp.printRecord(cs);
             }
