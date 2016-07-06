@@ -156,7 +156,7 @@ public class Client {
             for (FileProvenance fp : fps) {
                 List cs = new ArrayList<>();
 
-                cs.add(fp.getLastModified().withZone(DateTimeZone.forID("EST")).toString("YYYY-MM-dd HH:mm:ss.SSS"));
+                cs.add(fp.getLastModified().withZone(DateTimeZone.forID("America/Toronto")).toString("YYYY-MM-dd HH:mm:ss.SSS"));
 
                 cs.add(jjj.join(Iterables.transform(fp.getStudyTitles(), stringSanitizer)));
                 cs.add(nullString); //study swids not available
