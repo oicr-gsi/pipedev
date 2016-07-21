@@ -20,6 +20,9 @@
     </modules>
 
     <properties>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+        
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         
@@ -208,22 +211,22 @@
             </dependency>
             
             <dependency>
-                <groupId>ca.on.oicr.pde</groupId>
+                <groupId>ca.on.oicr.gsi</groupId>
                 <artifactId>decider-utils</artifactId>
                 <version>${decider-utils.version}</version>
             </dependency>
             <dependency>
-                <groupId>ca.on.oicr.pde</groupId>
+                <groupId>ca.on.oicr.gsi</groupId>
                 <artifactId>workflow-utils</artifactId>
                 <version>${workflow-utils.version}</version>
             </dependency>
             <dependency>
-                <groupId>ca.on.oicr.pde</groupId>
+                <groupId>ca.on.oicr.gsi</groupId>
                 <artifactId>provenance-impl</artifactId>
                 <version>${provenance-impl.version}</version>
             </dependency>
             <dependency>
-                <groupId>ca.on.oicr.pde</groupId>
+                <groupId>ca.on.oicr.gsi</groupId>
                 <artifactId>test-utils</artifactId>
                 <version>${test-utils.version}</version>
             </dependency>
