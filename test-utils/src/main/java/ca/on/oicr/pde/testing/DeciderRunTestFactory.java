@@ -1,9 +1,11 @@
 package ca.on.oicr.pde.testing;
 
+import ca.on.oicr.gsi.provenance.AnalysisProvenanceProvider;
 import ca.on.oicr.gsi.provenance.DefaultProvenanceClient;
-import ca.on.oicr.gsi.provenance.ProvenanceClient;
-import ca.on.oicr.gsi.provenance.SeqwareMetadataAnalysisProvenanceProvider;
-import ca.on.oicr.gsi.provenance.SeqwareMetadataLimsMetadataProvenanceProvider;
+import ca.on.oicr.gsi.provenance.LaneProvenanceProvider;
+import ca.on.oicr.gsi.provenance.MultiThreadedImpl;
+import ca.on.oicr.gsi.provenance.ProviderLoader;
+import ca.on.oicr.gsi.provenance.SampleProvenanceProvider;
 import ca.on.oicr.pde.client.MetadataBackedSeqwareClient;
 import ca.on.oicr.pde.testing.decider.RunTest;
 import static ca.on.oicr.pde.utilities.Helpers.*;
@@ -35,6 +37,9 @@ import org.apache.logging.log4j.LogManager;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Parameters;
 import ca.on.oicr.pde.client.SeqwareClient;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Map.Entry;
 
 public class DeciderRunTestFactory {
 
@@ -60,6 +65,8 @@ public class DeciderRunTestFactory {
     private String dbPass = null;
     private String seqwareWebserviceDir = null;
 
+    private Path provenanceSettingsPath = null;
+
     public DeciderRunTestFactory() {
 
         seqwareDistribution = getRequiredSystemPropertyAsFile("seqwareDistribution");
@@ -79,6 +86,10 @@ public class DeciderRunTestFactory {
         dbUser = System.getProperty("dbUser");
         dbPass = System.getProperty("dbPass");
         seqwareWebserviceDir = System.getProperty("seqwareWebserviceDir");
+
+        if (System.getProperty("provenanceSettingsPath") != null && !System.getProperty("provenanceSettingsPath").isEmpty()) {
+            provenanceSettingsPath = Paths.get(System.getProperty("provenanceSettingsPath"));
+        }
 
         if (System.getProperty("bundledWorkflow") != null && !System.getProperty("bundledWorkflow").isEmpty()) {
             bundledWorkflow = getRequiredSystemPropertyAsFile("bundledWorkflow");
@@ -154,28 +165,33 @@ public class DeciderRunTestFactory {
 
             File testWorkingDir = generateTestWorkingDirectory(workingDirectory, prefix, testName, testId);
             File seqwareSettings = generateSeqwareSettings(testWorkingDir, webserviceUrl, schedulingSystem, schedulingHost);
-            
-            Map<String,String> config = new HashMap<>();
+
+            Map<String, String> config = new HashMap<>();
             MapTools.ini2Map(seqwareSettings.getAbsolutePath(), config, true);
             Metadata metadata = MetadataFactory.get(config);
-            
+
             SeqwareClient seqwareClient = new MetadataBackedSeqwareClient(metadata, config);
 
-            SeqwareMetadataLimsMetadataProvenanceProvider seqwareMetadataProvider = new SeqwareMetadataLimsMetadataProvenanceProvider(metadata);
-            DefaultProvenanceClient provenanceClient = new DefaultProvenanceClient();
-            provenanceClient.registerAnalysisProvenanceProvider("seqware", new SeqwareMetadataAnalysisProvenanceProvider(metadata));
-            provenanceClient.registerSampleProvenanceProvider("seqware", seqwareMetadataProvider);
-            provenanceClient.registerLaneProvenanceProvider("seqware", seqwareMetadataProvider);
+            ProviderLoader providerLoader = new ProviderLoader(provenanceSettingsPath);
+            DefaultProvenanceClient provenanceClient = new MultiThreadedImpl();
+            for (Entry<String, AnalysisProvenanceProvider> e : providerLoader.getAnalysisProvenanceProviders().entrySet()) {
+                provenanceClient.registerAnalysisProvenanceProvider(e.getKey(), e.getValue());
+            }
+            for (Entry<String, SampleProvenanceProvider> e : providerLoader.getSampleProvenanceProviders().entrySet()) {
+                provenanceClient.registerSampleProvenanceProvider(e.getKey(), e.getValue());
+            }
+            for (Entry<String, LaneProvenanceProvider> e : providerLoader.getLaneProvenanceProviders().entrySet()) {
+                provenanceClient.registerLaneProvenanceProvider(e.getKey(), e.getValue());
+            }
 
             RunTest test = new RunTest(seqwareClient, provenanceClient, seqwareDistribution, seqwareSettings, testWorkingDir, testName, deciderJar, bundledWorkflow, deciderClass, t);
             test.setSeqwareExecutor(new ThreadedSeqwareExecutor(testName, seqwareDistribution, seqwareSettings, testWorkingDir, sharedPool, seqwareClient));
-
+            test.setProvenanceSettings(provenanceSettingsPath);
             tests.add(test);
-
         }
 
         return tests.toArray();
 
     }
-    
+
 }

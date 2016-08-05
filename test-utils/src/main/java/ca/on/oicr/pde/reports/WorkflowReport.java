@@ -9,19 +9,16 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
-import net.sourceforge.seqware.common.model.FileProvenanceParam;
 import net.sourceforge.seqware.common.model.Workflow;
 import net.sourceforge.seqware.common.model.WorkflowRun;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -29,17 +26,19 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import ca.on.oicr.pde.client.SeqwareClient;
+import java.util.Arrays;
+import java.util.SortedSet;
 
 public class WorkflowReport {
 
     private Integer workflowRunCount;
-    private final Set<String> studies;
-    private final Set<String> sequencerRuns;
-    private final Set<String> lanes;
-    private final Set<String> samples;
-    private final Set<String> workflows;
-    private final Set<String> processingAlgorithms;
-    private final Set<String> fileMetaTypes;
+    private final SortedSet<String> studies;
+    private final SortedSet<String> sequencerRuns;
+    private final SortedSet<String> lanes;
+    private final SortedSet<String> samples;
+    private final SortedSet<String> workflows;
+    private final SortedSet<String> processingAlgorithms;
+    private final SortedSet<String> fileMetaTypes;
     private Integer maxInputFiles;
     private Integer minInputFiles;
     private Integer totalInputFiles;
@@ -287,40 +286,33 @@ public class WorkflowReport {
         }
     }
 
-    public static WorkflowReport generateReport(SeqwareClient seqwareClient, ProvenanceClient provenanceClient, Workflow workflow) {
-        List<WorkflowRunReportRecord> wrrs = seqwareClient.getWorkflowRunRecords(workflow);
+    public static WorkflowReport generateReport(SeqwareClient seqwareClient, FileProvenanceClient fpc, List<WorkflowRunReportRecord> wrrs) {
 
         WorkflowReport t = new WorkflowReport();
         t.setWorkflowRunCount(wrrs.size());
-        
-                Map<String, Set<String>> filters = new HashMap<>();
-        filters.put(FileProvenanceParam.workflow.toString(), Sets.newHashSet(workflow.getSwAccession().toString()));
-
-        Collection<FileProvenance> fps = provenanceClient.getFileProvenance(filters);
-        
-        FileProvenanceClient srs = new FileProvenanceClient(Lists.newArrayList(fps));
 
         for (WorkflowRunReportRecord wrr : wrrs) {
 
+            Integer workflowRunSwid = Integer.parseInt(wrr.getWorkflowRunSwid());
+
             //TODO: get workflow run object from workflow run report record
             WorkflowRun workflowRun = new WorkflowRun();
-            workflowRun.setSwAccession(Integer.parseInt(wrr.getWorkflowRunSwid()));
+            workflowRun.setSwAccession(workflowRunSwid);
 
             //Get the workflow run's parent accession(s) (processing accession(s))
-            List<Integer> parentAccessions = seqwareClient.getParentAccession(workflowRun);
-
+//            List<Integer> parentAccessions = seqwareClient.getParentAccession(workflowRun);
             //Get the workflow run's input file(s) (file accession(s))
             List<Integer> inputFileAccessions = seqwareClient.getWorkflowRunInputFiles(workflowRun);
 
-            t.addStudies(srs.getStudy(parentAccessions));
-            t.addSamples(srs.getSamples(parentAccessions));
-            t.addSequencerRuns(srs.getSequencerRuns(parentAccessions));
-            t.addLanes(srs.getLanes(parentAccessions));
-            t.addWorkflows(srs.getWorkflows(inputFileAccessions));
-            t.addProcessingAlgorithms(srs.getProcessingAlgorithms(inputFileAccessions));
-            t.addFileMetaTypes(srs.getFileMetaTypes(inputFileAccessions));
+            t.addStudies(fpc.getStudy(Arrays.asList(workflowRunSwid)));
+            t.addSamples(fpc.getSamples(Arrays.asList(workflowRunSwid)));
+            t.addSequencerRuns(fpc.getSequencerRuns(Arrays.asList(workflowRunSwid)));
+            t.addLanes(fpc.getLanes(Arrays.asList(workflowRunSwid)));
+            t.addWorkflows(fpc.getWorkflows(inputFileAccessions));
+            t.addProcessingAlgorithms(fpc.getProcessingAlgorithms(inputFileAccessions));
+            t.addFileMetaTypes(fpc.getFileMetaTypes(inputFileAccessions));
 
-            List<ReducedFileProvenanceReportRecord> files = srs.getFiles(inputFileAccessions);
+            List<ReducedFileProvenanceReportRecord> files = fpc.getFiles(inputFileAccessions);
             if (files.size() > t.getMaxInputFiles()) {
                 t.setMaxInputFiles(files.size());
             }
@@ -334,14 +326,22 @@ public class WorkflowReport {
             //get the ini that the decider scheduled
             Map<String, String> ini = seqwareClient.getWorkflowRunIni(workflowRun);
 
-            WorkflowRunReport x = new WorkflowRunReport();
-            x.setWorkflowIni(ini);
-            x.setFiles(files);
+            WorkflowRunReport workflowRunReport = new WorkflowRunReport();
+            workflowRunReport.setWorkflowIni(ini);
+            workflowRunReport.setFiles(files);
 
-            t.addWorkflowRun(x);
-
+            t.addWorkflowRun(workflowRunReport);
         }
 
         return t;
+    }
+
+    public static WorkflowReport generateReport(SeqwareClient seqwareClient, ProvenanceClient provenanceClient, Workflow workflow) {
+        Collection<FileProvenance> fps = provenanceClient.getFileProvenance();
+        FileProvenanceClient fpc = new FileProvenanceClient(Lists.newArrayList(fps));
+
+        List<WorkflowRunReportRecord> wrrs = seqwareClient.getWorkflowRunRecords(workflow);
+
+        return generateReport(seqwareClient, fpc, wrrs);
     }
 }

@@ -87,12 +87,6 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
             if (f.getSampleAttributes() != null) {
                 this.studyAttributes.putAll(Multimaps.forMap(f.getStudyAttributes()));
             }
-            if (f.getExperimentNames() != null) {
-                this.experimentName.addAll(f.getExperimentNames());
-            }
-            if (f.getExperimentAttributes() != null) {
-                this.experimentAttributes.putAll(Multimaps.forMap(f.getExperimentAttributes()));
-            }
             if (f.getSampleNames() != null) {
                 this.sampleName.addAll(f.getSampleNames());
             }
@@ -111,8 +105,12 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
             if (f.getLaneAttributes() != null) {
                 this.laneAttributes.putAll(Multimaps.forMap(f.getLaneAttributes()));
             }
-            //this.iusTag.add(f.getIusTag());
-            //this.iusAttributes.putAll(Multimaps.forMap(f.getIusAttributes()));
+            if (f.getIusTags() != null) {
+                this.iusTag.addAll(f.getIusTags());
+            }
+            if (f.getIusAttributes() != null) {
+                this.iusAttributes.putAll(Multimaps.forMap(f.getIusAttributes()));
+            }
             if (f.getWorkflowName() != null) {
                 this.workflowName.add(f.getWorkflowName());
             }
@@ -173,11 +171,11 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
         return rfp;
     }
 
-    public Set getStudyTitle() {
+    public Set<String> getStudyTitle() {
         return studyTitle;
     }
 
-    public void setStudyTitle(Set studyTitle) {
+    public void setStudyTitle(Set<String> studyTitle) {
         this.studyTitle = new TreeSet<>(studyTitle);
     }
 
@@ -192,11 +190,11 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
         }
     }
 
-    public Set getExperimentName() {
+    public Set<String> getExperimentName() {
         return experimentName;
     }
 
-    public void setExperimentName(Set experimentName) {
+    public void setExperimentName(Set<String> experimentName) {
         this.experimentName = new TreeSet<>(experimentName);
     }
 
@@ -211,11 +209,11 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
         }
     }
 
-    public Set getSampleName() {
+    public Set<String> getSampleName() {
         return sampleName;
     }
 
-    public void setSampleName(Set sampleName) {
+    public void setSampleName(Set<String> sampleName) {
         this.sampleName = new TreeSet<>(sampleName);
     }
 
@@ -230,11 +228,11 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
         }
     }
 
-    public Set getSequencerRunName() {
+    public Set<String> getSequencerRunName() {
         return sequencerRunName;
     }
 
-    public void setSequencerRunName(Set sequencerRunName) {
+    public void setSequencerRunName(Set<String> sequencerRunName) {
         this.sequencerRunName = new TreeSet<>(sequencerRunName);
     }
 
@@ -249,11 +247,11 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
         }
     }
 
-    public Set getLaneName() {
+    public Set<String> getLaneName() {
         return laneName;
     }
 
-    public void setLaneName(Set laneName) {
+    public void setLaneName(Set<String> laneName) {
         this.laneName = new TreeSet<>(laneName);
     }
 
@@ -268,11 +266,11 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
         }
     }
 
-    public Set getIusTag() {
+    public Set<String> getIusTag() {
         return iusTag;
     }
 
-    public void setIusTag(Set iusTag) {
+    public void setIusTag(Set<String> iusTag) {
         this.iusTag = new TreeSet<>(iusTag);
     }
 
@@ -287,19 +285,19 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
         }
     }
 
-    public Set getWorkflowName() {
+    public Set<String> getWorkflowName() {
         return workflowName;
     }
 
-    public void setWorkflowName(Set workflowName) {
+    public void setWorkflowName(Set<String> workflowName) {
         this.workflowName = new TreeSet<>(workflowName);
     }
 
-    public Set getProcessingAlgorithm() {
+    public Set<String> getProcessingAlgorithm() {
         return processingAlgorithm;
     }
 
-    public void setProcessingAlgorithm(Set processingAlgorithm) {
+    public void setProcessingAlgorithm(Set<String> processingAlgorithm) {
         this.processingAlgorithm = new TreeSet<>(processingAlgorithm);
     }
 
@@ -319,11 +317,11 @@ public class ReducedFileProvenanceReportRecord implements Comparable<ReducedFile
         return skip;
     }
 
-    public Set getFileMetaType() {
+    public Set<String> getFileMetaType() {
         return fileMetaType;
     }
 
-    public void setFileMetaType(Set fileMetaType) {
+    public void setFileMetaType(Set<String> fileMetaType) {
         this.fileMetaType = new TreeSet<>(fileMetaType);
     }
 

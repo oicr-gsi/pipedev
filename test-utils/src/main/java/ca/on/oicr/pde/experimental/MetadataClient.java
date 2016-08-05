@@ -80,11 +80,11 @@ public class MetadataClient {
             workflowRun.setSwAccession(fp.getWorkflowRunSWID());
             Map<String, String> ini = seqwareClient.getWorkflowRunIni(workflowRun);
 
-            WorkflowRunReport x = new WorkflowRunReport();
-            x.setWorkflowIni(ini);
+            WorkflowRunReport workflowRunReport = new WorkflowRunReport();
+            workflowRunReport.setWorkflowIni(ini);
             //x.setFiles(files);
 
-            t.addWorkflowRun(x);
+            t.addWorkflowRun(workflowRunReport);
         }
 
         return t;

@@ -1,6 +1,7 @@
 package ca.on.oicr.pde.testing.decider;
 
 import ca.on.oicr.gsi.provenance.ProvenanceClient;
+import ca.on.oicr.gsi.provenance.model.FileProvenance;
 import ca.on.oicr.pde.reports.WorkflowReport;
 import ca.on.oicr.pde.diff.ObjectDiff;
 import ca.on.oicr.pde.testing.common.RunTestBase;
@@ -26,6 +27,16 @@ import org.testng.Assert;
 import org.testng.annotations.*;
 import org.testng.annotations.Test;
 import ca.on.oicr.pde.client.SeqwareClient;
+import ca.on.oicr.pde.dao.reader.FileProvenanceClient;
+import ca.on.oicr.pde.model.ReducedFileProvenanceReportRecord;
+import ca.on.oicr.pde.model.WorkflowRunReportRecord;
+import ca.on.oicr.pde.reports.WorkflowRunReport;
+import com.google.common.collect.Lists;
+import java.nio.file.Path;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 @Listeners({ca.on.oicr.pde.testing.testng.TestCaseReporter.class})
 public class RunTest extends RunTestBase {
@@ -56,6 +67,48 @@ public class RunTest extends RunTestBase {
 
     private SeqwareClient seqwareClient;
     private ProvenanceClient provenanceClient;
+    private Path provenanceSettings;
+
+    private static final Comparator<WorkflowRunReport> WORKFLOW_RUN_REPORT_COMPARATOR = new Comparator<WorkflowRunReport>() {
+        @Override
+        public int compare(WorkflowRunReport o1, WorkflowRunReport o2) {
+            SortedSet<String> sampleNames1 = new TreeSet();
+            SortedSet<String> laneNames1 = new TreeSet();
+            SortedSet<Integer> fileIds1 = new TreeSet();
+            for (ReducedFileProvenanceReportRecord r : o1.getFiles()) {
+
+                for (String sampleName : r.getSampleName()) {
+                    sampleNames1.add(sampleName);
+                }
+
+                for (String laneName : r.getLaneName()) {
+                    laneNames1.add(laneName);
+                }
+
+                fileIds1.add(r.getFileId());
+            }
+            String o1key = Joiner.on("").join(sampleNames1) + Joiner.on("").join(laneNames1) + Joiner.on("").join(fileIds1);
+
+            SortedSet<String> sampleNames2 = new TreeSet();
+            SortedSet<String> laneNames2 = new TreeSet();
+            SortedSet<Integer> fileIds2 = new TreeSet();
+            for (ReducedFileProvenanceReportRecord r : o2.getFiles()) {
+
+                for (String sampleName : r.getSampleName()) {
+                    sampleNames2.add(sampleName);
+                }
+
+                for (String laneName : r.getLaneName()) {
+                    laneNames2.add(laneName);
+                }
+
+                fileIds2.add(r.getFileId());
+            }
+            String o2key = Joiner.on("").join(sampleNames2) + Joiner.on("").join(laneNames2) + Joiner.on("").join(fileIds2);
+
+            return o1key.compareTo(o2key);
+        }
+    };
 
     public RunTest(SeqwareClient seqwareClient, ProvenanceClient provenanceClient, File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName,
             File deciderJar, File bundledWorkflow, String deciderClass, RunTestDefinition definition) throws IOException {
@@ -85,8 +138,11 @@ public class RunTest extends RunTestBase {
 
                 expected.applyIniStringSubstitution("\\$\\{workflow_bundle_dir\\}/Workflow_Bundle_[^/]+/[^/]+/",
                         "\\$\\{workflow_bundle_dir\\}/Workflow_Bundle_" + workflowName + "/" + workflowVersion + "/");
-                //expected.applyIniSubstitutions(testDefinition.getIniSubstitutions());
+                expected.applyIniStringSubstitutions(testDefinition.getIniStringSubstitutions());
                 expected.applyIniSubstitutions(testDefinition.getIniSubstitutions());
+
+                List<WorkflowRunReport> expectedWorkflowRunReports = expected.getWorkflowRuns();
+                Collections.sort(expectedWorkflowRunReports, WORKFLOW_RUN_REPORT_COMPARATOR);
 
                 expectedReportFile = new File(workingDirectory.getAbsolutePath() + "/" + "expected_" + testDefinition.outputName());
                 if (expectedReportFile.exists()) {
@@ -105,6 +161,10 @@ public class RunTest extends RunTestBase {
             log.printf(Level.WARN, "[%s] Missing an expected output metrics file. Skipping comparison step", testName);
         }
 
+    }
+
+    public void setProvenanceSettings(Path provenanceSettings) {
+        this.provenanceSettings = provenanceSettings;
     }
 
     @BeforeSuite
@@ -163,6 +223,10 @@ public class RunTest extends RunTestBase {
 
     }
 
+    @BeforeGroups(groups = "preExecution")
+    public static void loadPreExecutionSharedData() {
+    }
+
     @Test(groups = "preExecution")
     public void initializeEnvironment() throws IOException {
 
@@ -177,25 +241,6 @@ public class RunTest extends RunTestBase {
         log.printf(Level.INFO, "[%s] Completed installing workflow bundle in %s", testName, timer.stop());
     }
 
-//    @Test(groups = "preExecution", expectedExceptions = Exception.class)
-//    public void getDeciderObject() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-//        //get decider object + all parameters
-//        System.out.println(deciderClass);
-//        Class c = Class.forName(deciderClass);
-//        BasicDecider b = (BasicDecider) c.newInstance();
-//        System.out.println("Metatype: " + b.getMetaType());
-//        System.out.println("Syntax" + b.get_syntax());
-//
-//        b.setParams(Arrays.asList("--study", "AshPC"));
-//        b.parse_parameters();
-//        ReturnValue rv = b.init();
-//
-//        System.out.println("rv: " + rv.getParameters());
-//
-//        System.out.println("Metatype: " + b.getMetaType());
-//        System.out.println("Syntax" + b.get_syntax());
-//
-//    }
     @Test(dependsOnGroups = "preExecution", groups = "execution")
     public void executeDecider() throws IOException, InstantiationException, ClassNotFoundException, IllegalAccessException {
         Timer timer = Timer.start();
@@ -213,15 +258,29 @@ public class RunTest extends RunTestBase {
                 }
             }
         }
+
+        //configure decider to use provenance settings file
+        extraArgs.append(" ").append("--provenance-settings").append(" ").append(provenanceSettings.toAbsolutePath().toString());
+
         seqwareExecutor.deciderRunSchedule(deciderJar, workflow, studies, sequencerRuns, samples, extraArgs.toString());
         log.printf(Level.INFO, "[%s] Completed workflow run scheduling in %s", testName, timer.stop());
+    }
+
+    private static FileProvenanceClient postExecutionFpc;
+
+    @AfterGroups(groups = "execution")
+    public void loadPostExecutionSharedData() {
+        Collection<FileProvenance> fps = provenanceClient.getFileProvenance();
+        postExecutionFpc = new FileProvenanceClient(Lists.newArrayList(fps));
     }
 
     @Test(dependsOnGroups = "execution", groups = "postExecution")
     public void calculateWorkflowRunReport() throws JsonProcessingException, IOException {
         Timer timer = Timer.start();
 
-        actual = WorkflowReport.generateReport(seqwareClient, provenanceClient, workflow);
+        List<WorkflowRunReportRecord> wrrs = seqwareClient.getWorkflowRunRecords(workflow);
+        actual = WorkflowReport.generateReport(seqwareClient, postExecutionFpc, wrrs);
+
         File actualUnmodifiedReportFile = new File(workingDirectory.getAbsolutePath() + "/tmp/" + testDefinition.outputName());
         if (actualUnmodifiedReportFile.exists()) {
             throw new RuntimeException("File already exists.");
@@ -234,8 +293,11 @@ public class RunTest extends RunTestBase {
         iniStringSubstitutions.putAll(testDefinition.getIniStringSubstitutions());
 
         actual.applyIniExclusions(testDefinition.getIniExclusions());
-        //actual.applyIniSubstitutions(testDefinition.getIniSubstitutions());
-        actual.applyIniStringSubstitutions(iniStringSubstitutions);
+        actual.applyIniStringSubstitutions(testDefinition.getIniStringSubstitutions());
+        actual.applyIniSubstitutions(testDefinition.getIniSubstitutions());
+
+        List<WorkflowRunReport> actualWorkflowRunReports = actual.getWorkflowRuns();
+        Collections.sort(actualWorkflowRunReports, WORKFLOW_RUN_REPORT_COMPARATOR);
 
         actualReportFile = new File(workingDirectory.getAbsolutePath() + "/" + testDefinition.outputName());
         if (actualReportFile.exists()) {

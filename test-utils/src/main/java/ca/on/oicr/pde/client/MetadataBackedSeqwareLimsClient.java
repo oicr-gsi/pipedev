@@ -18,10 +18,6 @@ import net.sourceforge.seqware.common.model.Study;
 import net.sourceforge.seqware.common.module.ReturnValue;
 import net.sourceforge.seqware.pipeline.plugins.AttributeAnnotator;
 import org.apache.commons.lang3.math.NumberUtils;
-import ca.on.oicr.pde.client.SeqwareLimsClient;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
