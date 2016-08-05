@@ -17,6 +17,7 @@
         <module>decider-utils</module>
         <module>provenance-impl</module>
         <module>file-provenance-client</module>
+        <module>pipedev-common</module>
     </modules>
 
     <properties>
