@@ -119,8 +119,8 @@ public class OicrDecider extends BasicDecider {
     public static final int MATE_UNDEF = 0;
     public static final int MATE_1 = 1;
     public static final int MATE_2 = 2;
-    private Date afterDate = null;
-    private Date beforeDate = null;
+    protected Date afterDate = null;
+    protected Date beforeDate = null;
     private SimpleDateFormat format;
     private WorkflowRun run;
     private boolean isFailed = false;
