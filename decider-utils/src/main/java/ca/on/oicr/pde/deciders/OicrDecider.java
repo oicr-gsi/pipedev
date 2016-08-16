@@ -477,9 +477,7 @@ public class OicrDecider extends BasicDecider {
         run.addProperty(super.modifyIniFile(commaSeparatedFilePaths, commaSeparatedParentAccessions));
 
         //Common decider ini modifications
-        run.addProperty("output_prefix", getArgument("output-path").isEmpty()
-                ? "" : (getArgument("output-path").endsWith("/") ? getArgument("output-path") : getArgument("output-path").concat("/")), "./");
-        run.addProperty("output_dir", getArgument("output-folder"), "seqware-results");
+        run.addProperty(getCommonIniProperties());
 
         //Set the final return value to non-zero as the return value from customizeRun does not actually affect the run state.
         ReturnValue ignoredReturnValue = customizeRun(run);
@@ -489,6 +487,18 @@ public class OicrDecider extends BasicDecider {
         }
 
         return run.getIniFile();
+    }
+
+    protected Map<String, String> getCommonIniProperties() {
+        Map<String, String> commonIniProperties = new HashMap<>();
+
+        commonIniProperties.put("output_prefix",
+                getArgument("output-path").isEmpty() ? "./" : (getArgument("output-path").endsWith("/") ? getArgument("output-path") : getArgument("output-path").concat("/")));
+
+        commonIniProperties.put("output_dir",
+                getArgument("output-folder").isEmpty() ? "seqware-results" : getArgument("output-folder"));
+
+        return commonIniProperties;
     }
 
     @Override
