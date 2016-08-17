@@ -265,6 +265,14 @@ public class RunTest extends RunTestBase {
         //configure decider to use provenance settings file
         extraArgs.append(" ").append("--provenance-settings").append(" ").append(provenanceSettings.toAbsolutePath().toString());
 
+        if (!testDefinition.getProperties().isEmpty()) {
+            extraArgs.append(" --");
+            for (Entry<String, List<String>> e : testDefinition.getProperties().entrySet()) {
+                extraArgs.append(" --").append(e.getKey()).append(" ");
+                extraArgs.append(Joiner.on(",").join(e.getValue()));
+            }
+        }
+
         seqwareExecutor.deciderRunSchedule(deciderJar, workflow, studies, sequencerRuns, samples, extraArgs.toString());
         log.printf(Level.INFO, "[%s] Completed workflow run scheduling in %s", testName, timer.stop());
     }
