@@ -17,8 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import net.sourceforge.seqware.common.model.Workflow;
-import net.sourceforge.seqware.common.util.workflowtools.WorkflowInfo;
-import net.sourceforge.seqware.pipeline.bundle.Bundle;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
@@ -37,6 +35,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import static org.testng.Assert.fail;
 
 @Listeners({ca.on.oicr.pde.testing.testng.TestCaseReporter.class})
 public class RunTest extends RunTestBase {
@@ -46,10 +45,8 @@ public class RunTest extends RunTestBase {
 
     private final File deciderJar;
     private final String deciderClass;
-    private final File bundledWorkflow;
 
-//    private FileProvenanceClient seqwareService;
-    private Workflow workflow;
+    private final Workflow workflow;
 
     private final List<String> studies = new ArrayList<>();
     private final List<String> sequencerRuns = new ArrayList<>();
@@ -111,24 +108,19 @@ public class RunTest extends RunTestBase {
     };
 
     public RunTest(SeqwareClient seqwareClient, ProvenanceClient provenanceClient, File seqwareDistribution, File seqwareSettings, File workingDirectory, String testName,
-            File deciderJar, File bundledWorkflow, String deciderClass, RunTestDefinition definition) throws IOException {
+            File deciderJar, Workflow workflow, String deciderClass, RunTestDefinition definition) throws IOException {
 
         super(seqwareDistribution, seqwareSettings, workingDirectory, testName);
         this.seqwareClient = seqwareClient;
         this.provenanceClient = provenanceClient;
-//        this.seqwareService = seqwareService;
         this.deciderJar = deciderJar;
-        this.bundledWorkflow = bundledWorkflow;
         this.deciderClass = deciderClass;
         this.testDefinition = definition;
+        this.workflow = workflow;
 
         studies.addAll(testDefinition.getStudies());
         samples.addAll(testDefinition.getSamples());
         sequencerRuns.addAll(testDefinition.getSequencerRuns());
-
-        WorkflowInfo wi = Bundle.findBundleInfo(bundledWorkflow).getWorkflowInfo().get(0);
-        String workflowName = wi.getName();
-        String workflowVersion = wi.getVersion();
 
         expectedReportFile = testDefinition.getMetrics();
         if (expectedReportFile != null) {
@@ -137,7 +129,7 @@ public class RunTest extends RunTestBase {
                 expected.applyIniExclusions(testDefinition.getIniExclusions());
 
                 expected.applyIniStringSubstitution("\\$\\{workflow_bundle_dir\\}/Workflow_Bundle_[^/]+/[^/]+/",
-                        "\\$\\{workflow_bundle_dir\\}/Workflow_Bundle_" + workflowName + "/" + workflowVersion + "/");
+                        "\\$\\{workflow_bundle_dir\\}/Workflow_Bundle_" + workflow.getName() + "/" + workflow.getVersion() + "/");
                 expected.applyIniStringSubstitutions(testDefinition.getIniStringSubstitutions());
                 expected.applyIniSubstitutions(testDefinition.getIniSubstitutions());
 
@@ -235,9 +227,20 @@ public class RunTest extends RunTestBase {
     @Test(groups = "preExecution")
     public void installWorkflow() throws IOException {
         Timer timer = Timer.start();
-        workflow = seqwareExecutor.installWorkflow(bundledWorkflow);
 
-        Assert.assertNotNull(workflow.getSwAccession(), "Installation of the workflow bundle failed");
+        if (workflow.getPermanentBundleLocation() != null) {
+            workflow.setSwAccession(seqwareExecutor.installWorkflow(new File(workflow.getPermanentBundleLocation())).getSwAccession());
+        } else if (workflow.getName() != null && workflow.getVersion() != null) {
+            Map<String, String> defaultWorkflowProperties = new HashMap<>();
+            defaultWorkflowProperties.put("output_prefix", "./");
+
+            workflow.setSwAccession(seqwareClient.createWorkflow(workflow.getName(), workflow.getVersion(), "", defaultWorkflowProperties).getSwAccession());
+        } else {
+            // unable to install bundle or workflow name + version was not specified
+        }
+
+        Assert.assertNotNull(workflow.getSwAccession(), "Installation of the workflow failed");
+
         log.printf(Level.INFO, "[%s] Completed installing workflow bundle in %s", testName, timer.stop());
     }
 
@@ -289,7 +292,9 @@ public class RunTest extends RunTestBase {
         }
 
         Map<String, String> iniStringSubstitutions = new HashMap<>();
-        iniStringSubstitutions.put(bundledWorkflow.getAbsolutePath(), "\\$\\{workflow_bundle_dir\\}");
+        if (workflow.getPermanentBundleLocation() != null) {
+            iniStringSubstitutions.put(workflow.getPermanentBundleLocation(), "\\$\\{workflow_bundle_dir\\}");
+        }
         iniStringSubstitutions.putAll(testDefinition.getIniStringSubstitutions());
 
         actual.applyIniExclusions(testDefinition.getIniExclusions());

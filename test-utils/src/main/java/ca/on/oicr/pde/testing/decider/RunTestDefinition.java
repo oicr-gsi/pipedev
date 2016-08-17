@@ -32,6 +32,8 @@ public class RunTestDefinition {
     private Set<String> studies;
     private Set<String> sequencerRuns;
     private Set<String> samples;
+    private String workflowName;
+    private String workflowVersion;
     private final Map<String, List<String>> parameters;
     private String metricsDirectory;
     private String metricsResources;
@@ -106,6 +108,22 @@ public class RunTestDefinition {
 
     public void setSamples(Set<String> samples) {
         this.samples = new TreeSet<>(samples);
+    }
+
+    public String getWorkflowName() {
+        return workflowName;
+    }
+
+    public void setWorkflowName(String workflowName) {
+        this.workflowName = workflowName;
+    }
+
+    public String getWorkflowVersion() {
+        return workflowVersion;
+    }
+
+    public void setWorkflowVersion(String workflowVersion) {
+        this.workflowVersion = workflowVersion;
     }
 
     public Map<String, List<String>> getParameters() {

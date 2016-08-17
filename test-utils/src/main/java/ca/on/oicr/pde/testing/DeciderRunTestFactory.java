@@ -40,6 +40,7 @@ import ca.on.oicr.pde.client.SeqwareClient;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map.Entry;
+import net.sourceforge.seqware.common.model.Workflow;
 
 public class DeciderRunTestFactory {
 
@@ -93,7 +94,7 @@ public class DeciderRunTestFactory {
 
         if (System.getProperty("bundledWorkflow") != null && !System.getProperty("bundledWorkflow").isEmpty()) {
             bundledWorkflow = getRequiredSystemPropertyAsFile("bundledWorkflow");
-        } else if (Manifests.read("Workflow-Bundle-Path") != null && !Manifests.read("Workflow-Bundle-Path").isEmpty()) {
+        } else if (Manifests.exists("Workflow-Bundle-Path") && Manifests.read("Workflow-Bundle-Path") != null && !Manifests.read("Workflow-Bundle-Path").isEmpty()) {
             bundledWorkflow = new File(Manifests.read("Workflow-Bundle-Path"));
         } else {
             bundledWorkflow = null;
@@ -104,7 +105,6 @@ public class DeciderRunTestFactory {
     @Parameters({"testDefinition"})
     @Factory
     public Object[] createTests(String testDefinitionFilePath) throws IOException {
-
         if (System.getProperty("testDefinition") != null) {
             testDefinitionFilePath = System.getProperty("testDefinition");
             log.printf(Level.WARN, "test defintion has been overridden by jvm argument");
@@ -184,7 +184,17 @@ public class DeciderRunTestFactory {
                 provenanceClient.registerLaneProvenanceProvider(e.getKey(), e.getValue());
             }
 
-            RunTest test = new RunTest(seqwareClient, provenanceClient, seqwareDistribution, seqwareSettings, testWorkingDir, testName, deciderJar, bundledWorkflow, deciderClass, t);
+            Workflow workflow = new Workflow();
+            if (bundledWorkflow != null) {
+                workflow.setPermanentBundleLocation(bundledWorkflow.getAbsolutePath());
+            } else if (t.getWorkflowName() != null && t.getWorkflowVersion() != null) {
+                workflow.setName(t.getWorkflowName());
+                workflow.setVersion(t.getWorkflowVersion());
+            } else {
+                System.out.println("fail");
+            }
+
+            RunTest test = new RunTest(seqwareClient, provenanceClient, seqwareDistribution, seqwareSettings, testWorkingDir, testName, deciderJar, workflow, deciderClass, t);
             test.setSeqwareExecutor(new ThreadedSeqwareExecutor(testName, seqwareDistribution, seqwareSettings, testWorkingDir, sharedPool, seqwareClient));
             test.setProvenanceSettings(provenanceSettingsPath);
             tests.add(test);
