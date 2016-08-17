@@ -1,6 +1,6 @@
 package ca.on.oicr.pde.deciders;
 
-import ca.on.oicr.gsi.provenance.ProvenanceClient;
+import ca.on.oicr.gsi.provenance.ExtendedProvenanceClient;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +15,7 @@ import ca.on.oicr.pde.client.SeqwareClient;
 
 public class RegressionStudyBase {
 
-    protected ProvenanceClient provenanceClient;
+    protected ExtendedProvenanceClient provenanceClient;
     protected Metadata metadata;
     protected Map<String, String> config;
     protected SeqwareClient seqwareClient;
