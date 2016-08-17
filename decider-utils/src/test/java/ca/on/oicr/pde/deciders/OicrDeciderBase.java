@@ -1,7 +1,8 @@
 package ca.on.oicr.pde.deciders;
 
-import ca.on.oicr.gsi.provenance.ProvenanceClient;
+import ca.on.oicr.gsi.provenance.ExtendedProvenanceClient;
 import ca.on.oicr.gsi.provenance.model.FileProvenance;
+import ca.on.oicr.gsi.provenance.model.FileProvenance.Status;
 import ca.on.oicr.gsi.provenance.model.SampleProvenance;
 import java.util.Arrays;
 import java.util.List;
@@ -49,7 +50,7 @@ public class OicrDeciderBase {
     protected RunPosition lane;
     protected Run run;
 
-    protected ProvenanceClient provenanceClient;
+    protected ExtendedProvenanceClient provenanceClient;
     protected Metadata metadata;
     protected Map<String, String> config;
     protected SeqwareClient seqwareClient;
@@ -222,6 +223,34 @@ public class OicrDeciderBase {
         run(decider, Arrays.asList("--all"));
         assertEquals(decider.getWorkflowRuns().size(), 1);
         assertEquals(provenanceClient.getFileProvenance().size(), 4);
+    }
+
+    @Test
+    public void sampleNameChangeCheckFileProvenanceStatus() {
+
+        //setup files in seqware
+        Workflow workflow1 = seqwareClient.createWorkflow("TestWorkflow1", "0.0", "", ImmutableMap.of("test_param", "test_value"));
+        IUS ius;
+        FileMetadata file;
+
+        SampleProvenance sp = Iterables.getFirst(provenanceClient.getSampleProvenance(), null);
+        assertNotNull(sp);
+
+        ius = seqwareClient.addLims("pinery", "1_1_1", sp.getVersion(), sp.getLastModified());
+        file = new FileMetadata();
+        file.setDescription("description");
+        file.setMd5sum("md5sum");
+        file.setFilePath("/tmp/file1.bam");
+        file.setMetaType("text/plain");
+        file.setType("type?");
+        file.setSize(1L);
+        seqwareClient.createWorkflowRun(workflow1, Sets.newHashSet(ius), Collections.EMPTY_LIST, Arrays.asList(file));
+
+        assertEquals(provenanceClient.getFileProvenance().size(), 1);
+        assertEquals(Iterables.getOnlyElement(provenanceClient.getFileProvenance()).getStatus(), Status.OKAY);
+
+        sample.setName("TEST_SAMPLE_modified");
+        assertEquals(Iterables.getOnlyElement(provenanceClient.getFileProvenance()).getStatus(), Status.ERROR);
     }
 
     @Test
