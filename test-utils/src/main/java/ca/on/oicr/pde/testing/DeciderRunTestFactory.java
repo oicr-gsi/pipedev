@@ -3,7 +3,7 @@ package ca.on.oicr.pde.testing;
 import ca.on.oicr.gsi.provenance.AnalysisProvenanceProvider;
 import ca.on.oicr.gsi.provenance.DefaultProvenanceClient;
 import ca.on.oicr.gsi.provenance.LaneProvenanceProvider;
-import ca.on.oicr.gsi.provenance.MultiThreadedImpl;
+import ca.on.oicr.gsi.provenance.MultiThreadedDefaultProvenanceClient;
 import ca.on.oicr.gsi.provenance.ProviderLoader;
 import ca.on.oicr.gsi.provenance.SampleProvenanceProvider;
 import ca.on.oicr.pde.client.MetadataBackedSeqwareClient;
@@ -173,7 +173,7 @@ public class DeciderRunTestFactory {
             SeqwareClient seqwareClient = new MetadataBackedSeqwareClient(metadata, config);
 
             ProviderLoader providerLoader = new ProviderLoader(provenanceSettingsPath);
-            DefaultProvenanceClient provenanceClient = new MultiThreadedImpl();
+            DefaultProvenanceClient provenanceClient = new MultiThreadedDefaultProvenanceClient();
             for (Entry<String, AnalysisProvenanceProvider> e : providerLoader.getAnalysisProvenanceProviders().entrySet()) {
                 provenanceClient.registerAnalysisProvenanceProvider(e.getKey(), e.getValue());
             }
