@@ -1,5 +1,6 @@
 package ca.on.oicr.gsi.provenance;
 
+import ca.on.oicr.gsi.provenance.model.FileProvenanceParam;
 import ca.on.oicr.gsi.provenance.model.LaneProvenance;
 import ca.on.oicr.gsi.provenance.model.SampleProvenance;
 import com.google.common.collect.Sets;
@@ -9,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.sourceforge.seqware.common.metadata.Metadata;
-import net.sourceforge.seqware.common.model.FileProvenanceParam;
+import net.sourceforge.seqware.common.metadata.MetadataFactory;
 
 /**
  *
@@ -18,6 +19,10 @@ import net.sourceforge.seqware.common.model.FileProvenanceParam;
 public class SeqwareMetadataLimsMetadataProvenanceProvider implements SampleProvenanceProvider, LaneProvenanceProvider {
 
     private final Metadata metadata;
+
+    public SeqwareMetadataLimsMetadataProvenanceProvider(Map<String, String> settings) {
+        this.metadata = MetadataFactory.get(settings);
+    }
 
     public SeqwareMetadataLimsMetadataProvenanceProvider(Metadata metadata) {
         this.metadata = metadata;

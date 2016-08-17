@@ -20,6 +20,13 @@ public class PineryProvenanceProvider implements SampleProvenanceProvider, LaneP
 
     private final PineryClient pineryClient;
 
+    public PineryProvenanceProvider(Map<String, String> settings) {
+        if (!settings.containsKey("url")) {
+            throw new RuntimeException("PineryProvenanceProvider \"url\" setting is missing");
+        }
+        this.pineryClient = new PineryClient(settings.get("url"), true);
+    }
+
     public PineryProvenanceProvider(String url) {
         this.pineryClient = new PineryClient(url, true);
     }

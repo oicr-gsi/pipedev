@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.sourceforge.seqware.common.metadata.Metadata;
+import net.sourceforge.seqware.common.metadata.MetadataFactory;
 
 /**
  *
@@ -14,6 +15,10 @@ import net.sourceforge.seqware.common.metadata.Metadata;
 public class SeqwareMetadataAnalysisProvenanceProvider implements AnalysisProvenanceProvider {
 
     private final Metadata metadata;
+
+    public SeqwareMetadataAnalysisProvenanceProvider(Map<String, String> settings) {
+        this.metadata = MetadataFactory.get(settings);
+    }
 
     public SeqwareMetadataAnalysisProvenanceProvider(Metadata metadata) {
         this.metadata = metadata;
