@@ -209,10 +209,10 @@ public class RunTest extends RunTestBase {
 
     @AfterSuite
     public void afterAllRunTests() {
-
-        log.warn("Report file paths: " + reports.toString());
-        log.warn("cp " + Joiner.on(" ").join(reports) + " " + "/tmp");
-
+        if (!reports.isEmpty()) {
+            log.warn("Report file paths: " + reports.toString());
+            log.warn("cp " + Joiner.on(" ").join(reports) + " " + "/tmp");
+        }
     }
 
     @BeforeGroups(groups = "preExecution")
