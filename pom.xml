@@ -10,14 +10,14 @@
     <url>http://maven.apache.org</url>
 
     <modules>
+        <module>pipedev-common</module>
         <module>tools</module>
         <module>configs</module>
+        <module>provenance-impl</module>
         <module>test-utils</module>
         <module>workflow-utils</module>
         <module>decider-utils</module>
-        <module>provenance-impl</module>
         <module>file-provenance-client</module>
-        <module>pipedev-common</module>
     </modules>
 
     <properties>
