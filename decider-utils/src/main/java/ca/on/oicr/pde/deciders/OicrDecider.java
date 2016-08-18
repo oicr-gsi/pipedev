@@ -2,7 +2,11 @@ package ca.on.oicr.pde.deciders;
 
 import ca.on.oicr.gsi.common.transformation.FunctionBuilder;
 import ca.on.oicr.gsi.common.transformation.StringSanitizerBuilder;
+import ca.on.oicr.gsi.provenance.AnalysisProvenanceProvider;
 import ca.on.oicr.gsi.provenance.DefaultProvenanceClient;
+import ca.on.oicr.gsi.provenance.ExtendedProvenanceClient;
+import ca.on.oicr.gsi.provenance.LaneProvenanceProvider;
+import ca.on.oicr.gsi.provenance.MultiThreadedDefaultProvenanceClient;
 import ca.on.oicr.gsi.provenance.PineryProvenanceProvider;
 import ca.on.oicr.gsi.provenance.SeqwareMetadataAnalysisProvenanceProvider;
 import ca.on.oicr.gsi.provenance.model.FileProvenance;
@@ -22,13 +26,15 @@ import net.sourceforge.seqware.common.module.ReturnValue;
 import net.sourceforge.seqware.common.util.Log;
 import net.sourceforge.seqware.pipeline.deciders.BasicDecider;
 import net.sourceforge.seqware.pipeline.plugins.fileprovenance.ProvenanceUtility.HumanProvenanceFilters;
-import ca.on.oicr.gsi.provenance.ProvenanceClient;
-import ca.on.oicr.gsi.provenance.SeqwareMetadataLimsMetadataProvenanceProvider;
+import ca.on.oicr.gsi.provenance.ProviderLoader;
+import ca.on.oicr.gsi.provenance.SampleProvenanceProvider;
 import ca.on.oicr.gsi.provenance.model.IusLimsKey;
 import ca.on.oicr.gsi.provenance.model.LimsKey;
 import ca.on.oicr.pinery.client.PineryClient;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import java.io.IOException;
+import java.nio.file.Paths;
 import net.sourceforge.seqware.common.hibernate.FindAllTheFiles.Header;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTimeZone;
@@ -124,7 +130,7 @@ public class OicrDecider extends BasicDecider {
     private SimpleDateFormat format;
     private WorkflowRun run;
     private boolean isFailed = false;
-    private ProvenanceClient provenanceClient;
+    protected ExtendedProvenanceClient provenanceClient;
     private final Function<String, String> stringSanitizer;
     private final Function mapOfSetsToString;
 
@@ -175,6 +181,12 @@ public class OicrDecider extends BasicDecider {
         mapOfSetsToString = fb.getFunction();
     }
 
+    public OicrDecider(ExtendedProvenanceClient provenanceClient) {
+        this();
+        this.provenanceClient = provenanceClient;
+    }
+
+    public void setProvenanceClient(ExtendedProvenanceClient provenanceClient) {
         this.provenanceClient = provenanceClient;
     }
 
@@ -224,7 +236,29 @@ public class OicrDecider extends BasicDecider {
     @Override
     public ReturnValue init() {
         ReturnValue ret = new ReturnValue();
-        
+
+        if (provenanceClient == null && options.has("provenance-settings")) {
+            ProviderLoader providerLoader;
+            try {
+                providerLoader = new ProviderLoader(Paths.get(options.valueOf("provenance-settings").toString()));
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+
+            MultiThreadedDefaultProvenanceClient provenanceClientImpl = new MultiThreadedDefaultProvenanceClient();
+            for (Entry<String, AnalysisProvenanceProvider> e : providerLoader.getAnalysisProvenanceProviders().entrySet()) {
+                provenanceClientImpl.registerAnalysisProvenanceProvider(e.getKey(), e.getValue());
+            }
+            for (Entry<String, LaneProvenanceProvider> e : providerLoader.getLaneProvenanceProviders().entrySet()) {
+                provenanceClientImpl.registerLaneProvenanceProvider(e.getKey(), e.getValue());
+            }
+            for (Entry<String, SampleProvenanceProvider> e : providerLoader.getSampleProvenanceProviders().entrySet()) {
+                provenanceClientImpl.registerSampleProvenanceProvider(e.getKey(), e.getValue());
+            }
+
+            provenanceClient = provenanceClientImpl;
+        }
+
         //initialize collections
         files = new HashMap<>();
         
