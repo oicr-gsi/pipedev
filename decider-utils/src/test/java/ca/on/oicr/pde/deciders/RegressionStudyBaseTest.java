@@ -1,8 +1,9 @@
 package ca.on.oicr.pde.deciders;
 
 import ca.on.oicr.gsi.provenance.DefaultProvenanceClient;
+import ca.on.oicr.gsi.provenance.PineryProvenanceProvider;
 import ca.on.oicr.gsi.provenance.SeqwareMetadataAnalysisProvenanceProvider;
-import ca.on.oicr.gsi.provenance.SeqwareMetadataSampleProvenanceProvider;
+import ca.on.oicr.gsi.provenance.SeqwareMetadataLimsMetadataProvenanceProvider;
 import ca.on.oicr.gsi.provenance.model.SampleProvenance;
 import ca.on.oicr.pde.client.MetadataBackedSeqwareClient;
 import ca.on.oicr.pde.client.MetadataBackedSeqwareLimsClient;
@@ -33,8 +34,13 @@ public class RegressionStudyBaseTest extends RegressionStudyBase {
         config.put("SW_METADATA_METHOD", "inmemory");
         seqwareClient = new MetadataBackedSeqwareClient(metadata, config);
         seqwareLimsClient = new MetadataBackedSeqwareLimsClient(metadata, config);
-        provenanceClient = new DefaultProvenanceClient(new SeqwareMetadataAnalysisProvenanceProvider(metadata),
-                new SeqwareMetadataSampleProvenanceProvider(metadata));
+        
+        SeqwareMetadataLimsMetadataProvenanceProvider seqwareProvenanceProvider = new SeqwareMetadataLimsMetadataProvenanceProvider(metadata);
+        DefaultProvenanceClient dpc = new DefaultProvenanceClient();
+        dpc.registerAnalysisProvenanceProvider("seqware", new SeqwareMetadataAnalysisProvenanceProvider(metadata));
+        dpc.registerSampleProvenanceProvider("seqware", seqwareProvenanceProvider);
+        dpc.registerLaneProvenanceProvider("seqware", seqwareProvenanceProvider);
+        provenanceClient = dpc;
 
         RegressionTestStudy regressionTestStudy = new RegressionTestStudy(seqwareLimsClient);
     }

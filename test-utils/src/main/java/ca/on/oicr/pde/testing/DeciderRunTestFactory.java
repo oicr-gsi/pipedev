@@ -1,9 +1,11 @@
 package ca.on.oicr.pde.testing;
 
+import ca.on.oicr.gsi.provenance.AnalysisProvenanceProvider;
 import ca.on.oicr.gsi.provenance.DefaultProvenanceClient;
-import ca.on.oicr.gsi.provenance.ProvenanceClient;
-import ca.on.oicr.gsi.provenance.SeqwareMetadataAnalysisProvenanceProvider;
-import ca.on.oicr.gsi.provenance.SeqwareMetadataSampleProvenanceProvider;
+import ca.on.oicr.gsi.provenance.LaneProvenanceProvider;
+import ca.on.oicr.gsi.provenance.MultiThreadedDefaultProvenanceClient;
+import ca.on.oicr.gsi.provenance.ProviderLoader;
+import ca.on.oicr.gsi.provenance.SampleProvenanceProvider;
 import ca.on.oicr.pde.client.MetadataBackedSeqwareClient;
 import ca.on.oicr.pde.testing.decider.RunTest;
 import static ca.on.oicr.pde.utilities.Helpers.*;
@@ -35,6 +37,10 @@ import org.apache.logging.log4j.LogManager;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Parameters;
 import ca.on.oicr.pde.client.SeqwareClient;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Map.Entry;
+import net.sourceforge.seqware.common.model.Workflow;
 
 public class DeciderRunTestFactory {
 
@@ -60,6 +66,8 @@ public class DeciderRunTestFactory {
     private String dbPass = null;
     private String seqwareWebserviceDir = null;
 
+    private Path provenanceSettingsPath = null;
+
     public DeciderRunTestFactory() {
 
         seqwareDistribution = getRequiredSystemPropertyAsFile("seqwareDistribution");
@@ -80,9 +88,13 @@ public class DeciderRunTestFactory {
         dbPass = System.getProperty("dbPass");
         seqwareWebserviceDir = System.getProperty("seqwareWebserviceDir");
 
+        if (System.getProperty("provenanceSettingsPath") != null && !System.getProperty("provenanceSettingsPath").isEmpty()) {
+            provenanceSettingsPath = Paths.get(System.getProperty("provenanceSettingsPath"));
+        }
+
         if (System.getProperty("bundledWorkflow") != null && !System.getProperty("bundledWorkflow").isEmpty()) {
             bundledWorkflow = getRequiredSystemPropertyAsFile("bundledWorkflow");
-        } else if (Manifests.read("Workflow-Bundle-Path") != null && !Manifests.read("Workflow-Bundle-Path").isEmpty()) {
+        } else if (Manifests.exists("Workflow-Bundle-Path") && Manifests.read("Workflow-Bundle-Path") != null && !Manifests.read("Workflow-Bundle-Path").isEmpty()) {
             bundledWorkflow = new File(Manifests.read("Workflow-Bundle-Path"));
         } else {
             bundledWorkflow = null;
@@ -93,7 +105,6 @@ public class DeciderRunTestFactory {
     @Parameters({"testDefinition"})
     @Factory
     public Object[] createTests(String testDefinitionFilePath) throws IOException {
-
         if (System.getProperty("testDefinition") != null) {
             testDefinitionFilePath = System.getProperty("testDefinition");
             log.printf(Level.WARN, "test defintion has been overridden by jvm argument");
@@ -154,25 +165,43 @@ public class DeciderRunTestFactory {
 
             File testWorkingDir = generateTestWorkingDirectory(workingDirectory, prefix, testName, testId);
             File seqwareSettings = generateSeqwareSettings(testWorkingDir, webserviceUrl, schedulingSystem, schedulingHost);
-            
-            Map<String,String> config = new HashMap<>();
+
+            Map<String, String> config = new HashMap<>();
             MapTools.ini2Map(seqwareSettings.getAbsolutePath(), config, true);
             Metadata metadata = MetadataFactory.get(config);
-            
+
             SeqwareClient seqwareClient = new MetadataBackedSeqwareClient(metadata, config);
-            
-            ProvenanceClient provenanceClient = new DefaultProvenanceClient(new SeqwareMetadataAnalysisProvenanceProvider(metadata),
-                new SeqwareMetadataSampleProvenanceProvider(metadata));
-            
-            RunTest test = new RunTest(seqwareClient, provenanceClient, seqwareDistribution, seqwareSettings, testWorkingDir, testName, deciderJar, bundledWorkflow, deciderClass, t);
+
+            ProviderLoader providerLoader = new ProviderLoader(provenanceSettingsPath);
+            DefaultProvenanceClient provenanceClient = new MultiThreadedDefaultProvenanceClient();
+            for (Entry<String, AnalysisProvenanceProvider> e : providerLoader.getAnalysisProvenanceProviders().entrySet()) {
+                provenanceClient.registerAnalysisProvenanceProvider(e.getKey(), e.getValue());
+            }
+            for (Entry<String, SampleProvenanceProvider> e : providerLoader.getSampleProvenanceProviders().entrySet()) {
+                provenanceClient.registerSampleProvenanceProvider(e.getKey(), e.getValue());
+            }
+            for (Entry<String, LaneProvenanceProvider> e : providerLoader.getLaneProvenanceProviders().entrySet()) {
+                provenanceClient.registerLaneProvenanceProvider(e.getKey(), e.getValue());
+            }
+
+            Workflow workflow = new Workflow();
+            if (bundledWorkflow != null) {
+                workflow.setPermanentBundleLocation(bundledWorkflow.getAbsolutePath());
+            } else if (t.getWorkflowName() != null && t.getWorkflowVersion() != null) {
+                workflow.setName(t.getWorkflowName());
+                workflow.setVersion(t.getWorkflowVersion());
+            } else {
+                System.out.println("fail");
+            }
+
+            RunTest test = new RunTest(seqwareClient, provenanceClient, seqwareDistribution, seqwareSettings, testWorkingDir, testName, deciderJar, workflow, deciderClass, t);
             test.setSeqwareExecutor(new ThreadedSeqwareExecutor(testName, seqwareDistribution, seqwareSettings, testWorkingDir, sharedPool, seqwareClient));
-
+            test.setProvenanceSettings(provenanceSettingsPath);
             tests.add(test);
-
         }
 
         return tests.toArray();
 
     }
-    
+
 }

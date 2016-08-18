@@ -56,7 +56,9 @@ public class FileProvenanceClient {
         for (FileProvenance f : fileProvenanceReportRecords) {
             List<Integer> swids = Arrays.asList(f.getFileSWID(), f.getProcessingSWID(), f.getWorkflowSWID(), f.getWorkflowRunSWID());
             for (Integer swid : swids) {
-                accessionToFileProvenanceReportRecords.put(swid, f);
+                if (swid != null) {
+                    accessionToFileProvenanceReportRecords.put(swid, f);
+                }
             }
         }
     }
@@ -137,7 +139,9 @@ public class FileProvenanceClient {
         Set studies = new HashSet<>();
         for (Integer swid : swids) {
             for (FileProvenance fpr : accessionToFileProvenanceReportRecords.get(swid)) {
-                studies.addAll(fpr.getStudyTitles());
+                if (fpr.getStudyTitles() != null) {
+                    studies.addAll(fpr.getStudyTitles());
+                }
             }
         }
         return studies;
@@ -154,7 +158,9 @@ public class FileProvenanceClient {
         Set sequencerRuns = new HashSet<>();
         for (Integer swid : swids) {
             for (FileProvenance fpr : accessionToFileProvenanceReportRecords.get(swid)) {
-                sequencerRuns.addAll(fpr.getSequencerRunNames());
+                if (fpr.getSequencerRunNames() != null) {
+                    sequencerRuns.addAll(fpr.getSequencerRunNames());
+                }
             }
         }
         return sequencerRuns;
@@ -171,7 +177,9 @@ public class FileProvenanceClient {
         Set lanes = new HashSet<>();
         for (Integer swid : swids) {
             for (FileProvenance fpr : accessionToFileProvenanceReportRecords.get(swid)) {
-                lanes.addAll(fpr.getLaneNames());
+                if (fpr.getLaneNames() != null) {
+                    lanes.addAll(fpr.getLaneNames());
+                }
             }
         }
         return lanes;
@@ -188,7 +196,9 @@ public class FileProvenanceClient {
         Set samples = new HashSet<>();
         for (Integer swid : swids) {
             for (FileProvenance fpr : accessionToFileProvenanceReportRecords.get(swid)) {
-                samples.addAll(fpr.getSampleNames());
+                if (fpr.getSampleNames() != null) {
+                    samples.addAll(fpr.getSampleNames());
+                }
             }
         }
         return samples;
@@ -205,7 +215,9 @@ public class FileProvenanceClient {
         Set processingAlgorithms = new HashSet<>();
         for (Integer swid : swids) {
             for (FileProvenance fpr : accessionToFileProvenanceReportRecords.get(swid)) {
-                processingAlgorithms.add(fpr.getProcessingAlgorithm());
+                if (fpr.getProcessingAlgorithm() != null) {
+                    processingAlgorithms.add(fpr.getProcessingAlgorithm());
+                }
             }
         }
         return processingAlgorithms;
@@ -222,7 +234,9 @@ public class FileProvenanceClient {
         Set fileTypes = new HashSet<>();
         for (Integer swid : swids) {
             for (FileProvenance fpr : accessionToFileProvenanceReportRecords.get(swid)) {
-                fileTypes.add(fpr.getFileMetaType());
+                if (fpr.getFileMetaType() != null) {
+                    fileTypes.add(fpr.getFileMetaType());
+                }
             }
         }
         return fileTypes;
@@ -239,94 +253,12 @@ public class FileProvenanceClient {
         Set workflows = new HashSet<>();
         for (Integer swid : swids) {
             for (FileProvenance fpr : accessionToFileProvenanceReportRecords.get(swid)) {
-                workflows.add(fpr.getWorkflowName());
+                if (fpr.getWorkflowName() != null) {
+                    workflows.add(fpr.getWorkflowName());
+                }
             }
         }
         return workflows;
     }
 
-//    /**
-//     * Get all workflow run records that are associated with the specified workflow.
-//     *
-//     * @param workflow the search workflow object
-//     * @return A list of workflow run report records
-//     */
-//    public List<WorkflowRunReportRecord> getWorkflowRunRecords(Workflow workflow) {
-//        if (!workflowToWorkflowRunReportRecords.containsKey(workflow)) {
-//            updateWorkflowRunRecords(workflow);
-//        }
-//        return new ArrayList<>(workflowToWorkflowRunReportRecords.get(workflow));
-//    }
-//    /**
-//     * Get all parent accessions for the specified workflow run.
-//     *
-//     * @param wr the search workflow run object
-//     * @return A list of accessionable objects
-//     */
-//    public List<Accessionable> getParentAccessions(WorkflowRun wr) {
-//        Map ini = getWorkflowRunIni(wr);
-//        StringTokenizer st = new StringTokenizer(ini.get("parent-accessions").toString(), ",");
-//        List<Accessionable> ps = new ArrayList<>();
-//        while (st.hasMoreTokens()) {
-//            ps.add(new SeqwareAccession(st.nextToken()));
-//        }
-//        return ps;
-//    }
-//    /**
-//     * Get all input file accessions for the specified workflow run (using getWorkflowRunInputFiles).
-//     *
-//     * @param wr the search workflow run object
-//     * @return A list of accessionable objects
-//     * @see #getWorkflowRunInputFiles(ca.on.oicr.pde.model.WorkflowRun)
-//     */
-//    public List<Accessionable> getInputFileAccessions(WorkflowRun wr) {
-//        return getWorkflowRunInputFiles(wr);
-//    }
-//    /**
-//     * Updates the local Seqware metadate repesentation.
-//     *
-//     * Should be called after a major metadata change or to populate the local data store.
-//     */
-//    public final void update() {
-//
-//        Experiment.clearCache();
-//        File.clearCache();
-//        Ius.clearCache();
-//        Lane.clearCache();
-//        Processing.clearCache();
-//        Sample.clearCache();
-//        SequencerRun.clearCache();
-//        Study.clearCache();
-//        Workflow.clearCache();
-//        WorkflowRun.clearCache();
-//
-//        updateFileProvenanceRecords();
-//        //TODO: updateWorkflowRunRecords();
-//
-//    }
-//    /**
-//     * Update the local file provenance data.
-//     */
-//    public abstract void updateFileProvenanceRecords();
-//    /**
-//     * Update the local workflow run report data for the file specified workflow.
-//     *
-//     * @param workflow a workflow object
-//     */
-//    public abstract void updateWorkflowRunRecords(Workflow workflow);
-//    /**
-//     * Get the Seqware workflow run ini for the specified workflow run.
-//     *
-//     * @param workflowRun a workflow run object
-//     * @return Seqware workflow run properties
-//     */
-//    public abstract Map<String, String> getWorkflowRunIni(WorkflowRun workflowRun);
-//
-//    /**
-//     * Get all input files for the workflow run.
-//     *
-//     * @param workflowRun the search workflow run object
-//     * @return A list of file objects
-//     */
-//    protected abstract List<Accessionable> getWorkflowRunInputFiles(WorkflowRun workflowRun);
 }

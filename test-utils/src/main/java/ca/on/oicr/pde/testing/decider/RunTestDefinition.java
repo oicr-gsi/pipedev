@@ -32,7 +32,10 @@ public class RunTestDefinition {
     private Set<String> studies;
     private Set<String> sequencerRuns;
     private Set<String> samples;
+    private String workflowName;
+    private String workflowVersion;
     private final Map<String, List<String>> parameters;
+    private final Map<String, List<String>> properties;
     private String metricsDirectory;
     private String metricsResources;
     private String metricsFile;
@@ -42,6 +45,7 @@ public class RunTestDefinition {
 
     public RunTestDefinition() {
         parameters = new LinkedHashMap<>();
+        properties = new LinkedHashMap<>();
         id = "";
         description = "";
         studies = new HashSet<>();
@@ -61,6 +65,7 @@ public class RunTestDefinition {
         sequencerRuns = defaults.getSequencerRuns();
         samples = defaults.getSamples();
         parameters.putAll(defaults.getParameters());
+        properties.putAll(defaults.getProperties());
         metricsDirectory = defaults.getMetricsDirectory();
         metricsResources = defaults.getMetricsResources();
         iniExclusions = defaults.getIniExclusions();
@@ -108,12 +113,36 @@ public class RunTestDefinition {
         this.samples = new TreeSet<>(samples);
     }
 
+    public String getWorkflowName() {
+        return workflowName;
+    }
+
+    public void setWorkflowName(String workflowName) {
+        this.workflowName = workflowName;
+    }
+
+    public String getWorkflowVersion() {
+        return workflowVersion;
+    }
+
+    public void setWorkflowVersion(String workflowVersion) {
+        this.workflowVersion = workflowVersion;
+    }
+
     public Map<String, List<String>> getParameters() {
         return Collections.unmodifiableMap(parameters);
     }
 
     public void setParameters(Map<String, Object> parameters) {
-        this.parameters.putAll(parseParameters(parameters));
+        this.parameters.putAll(parseObjectMap(parameters));
+    }
+
+    public Map<String, List<String>> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, Object> properties) {
+        this.properties.putAll(parseObjectMap(properties));
     }
 
     public String getMetricsDirectory() {
@@ -227,7 +256,7 @@ public class RunTestDefinition {
         }
     }
 
-    private Map<String, List<String>> parseParameters(Map<String, Object> parameters) {
+    private Map<String, List<String>> parseObjectMap(Map<String, Object> parameters) {
         Map<String, List<String>> ps = new LinkedHashMap<>();
         for (Map.Entry<String, Object> e : parameters.entrySet()) {
             String key = e.getKey();

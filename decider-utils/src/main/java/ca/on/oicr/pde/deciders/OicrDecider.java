@@ -1,7 +1,13 @@
 package ca.on.oicr.pde.deciders;
 
+import ca.on.oicr.gsi.common.transformation.FunctionBuilder;
+import ca.on.oicr.gsi.common.transformation.StringSanitizerBuilder;
+import ca.on.oicr.gsi.provenance.AnalysisProvenanceProvider;
 import ca.on.oicr.gsi.provenance.DefaultProvenanceClient;
-import ca.on.oicr.gsi.provenance.PinerySampleProvenanceProvider;
+import ca.on.oicr.gsi.provenance.ExtendedProvenanceClient;
+import ca.on.oicr.gsi.provenance.LaneProvenanceProvider;
+import ca.on.oicr.gsi.provenance.MultiThreadedDefaultProvenanceClient;
+import ca.on.oicr.gsi.provenance.PineryProvenanceProvider;
 import ca.on.oicr.gsi.provenance.SeqwareMetadataAnalysisProvenanceProvider;
 import ca.on.oicr.gsi.provenance.model.FileProvenance;
 import com.google.common.base.Joiner;
@@ -20,12 +26,18 @@ import net.sourceforge.seqware.common.module.ReturnValue;
 import net.sourceforge.seqware.common.util.Log;
 import net.sourceforge.seqware.pipeline.deciders.BasicDecider;
 import net.sourceforge.seqware.pipeline.plugins.fileprovenance.ProvenanceUtility.HumanProvenanceFilters;
-import ca.on.oicr.gsi.provenance.ProvenanceClient;
+import ca.on.oicr.gsi.provenance.ProviderLoader;
+import ca.on.oicr.gsi.provenance.SampleProvenanceProvider;
 import ca.on.oicr.gsi.provenance.model.IusLimsKey;
 import ca.on.oicr.gsi.provenance.model.LimsKey;
 import ca.on.oicr.pinery.client.PineryClient;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import java.io.IOException;
+import java.nio.file.Paths;
+import net.sourceforge.seqware.common.hibernate.FindAllTheFiles.Header;
+import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTimeZone;
 
 /**
  * <p>
@@ -113,12 +125,14 @@ public class OicrDecider extends BasicDecider {
     public static final int MATE_UNDEF = 0;
     public static final int MATE_1 = 1;
     public static final int MATE_2 = 2;
-    private Date afterDate = null;
-    private Date beforeDate = null;
+    protected Date afterDate = null;
+    protected Date beforeDate = null;
     private SimpleDateFormat format;
     private WorkflowRun run;
     private boolean isFailed = false;
-    private ProvenanceClient provenanceClient;
+    protected ExtendedProvenanceClient provenanceClient;
+    private final Function<String, String> stringSanitizer;
+    private final Function mapOfSetsToString;
 
     /**
      * <p>
@@ -135,20 +149,44 @@ public class OicrDecider extends BasicDecider {
      *
      */
     public OicrDecider() {
-        this(null);
-    }
-
-    public OicrDecider(ProvenanceClient provenanceClient) {
         super();
+
         parser.acceptsAll(Arrays.asList("check-file-exists", "cf"), "Optional: only launch on the file if the file exists");
         parser.accepts("skip-status-check", "Optional: If enabled will skip the check for the status of the sequencer run/lane/IUS/workflow run");
         parser.acceptsAll(Arrays.asList("help", "h"), "Prints this help message");
+        parser.accepts("verbose", "Enable debug logging");
         defineArgument("output-path", "The absolute path of the directory to put the final file(s) (workflow output-prefix option).", false);
         defineArgument("output-folder", "The relative path to put the final result(s) (workflow output-dir option).", false);
         defineArgument("after-date", "Optional: Format YYYY-MM-DD. Only run on files that have been modified after a certain date, not inclusive.", false);
         defineArgument("before-date", "Optional: Format YYYY-MM-DD. Only run on files that have been modified before a certain date, not inclusive.", false);
         defineArgument("pinery-url", "The Pinery URL that should be used to get SampleProvenance LIMS metadata (eg, http://localhost:8080).", false);
+        defineArgument("provenance-settings", "Path to provenance settings file.", false);
         format = new SimpleDateFormat("yyyy-MM-dd");
+
+        //functions used for converting file provenance objects to map data structure
+        StringSanitizerBuilder ssbForFields = new StringSanitizerBuilder();
+//        ssbForFields.add("\t", "\u2300");
+        ssbForFields.add(";", "\u2300");
+        ssbForFields.add("=", "\u2300");
+        ssbForFields.add("&", "\u2300");
+        ssbForFields.add(" ", "_");
+        stringSanitizer = ssbForFields.build();
+
+        StringSanitizerBuilder ssbForAttributes = new StringSanitizerBuilder();
+//        ssbForAttributes.add("\t", " ");
+        ssbForAttributes.add(";", "\u2300");
+        ssbForAttributes.add("=", "\u2300");
+        ssbForAttributes.add("&", "\u2300");
+        FunctionBuilder fb = new FunctionBuilder(ssbForAttributes.build());
+        mapOfSetsToString = fb.getFunction();
+    }
+
+    public OicrDecider(ExtendedProvenanceClient provenanceClient) {
+        this();
+        this.provenanceClient = provenanceClient;
+    }
+
+    public void setProvenanceClient(ExtendedProvenanceClient provenanceClient) {
         this.provenanceClient = provenanceClient;
     }
 
@@ -198,7 +236,29 @@ public class OicrDecider extends BasicDecider {
     @Override
     public ReturnValue init() {
         ReturnValue ret = new ReturnValue();
-        
+
+        if (provenanceClient == null && options.has("provenance-settings")) {
+            ProviderLoader providerLoader;
+            try {
+                providerLoader = new ProviderLoader(Paths.get(options.valueOf("provenance-settings").toString()));
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+
+            MultiThreadedDefaultProvenanceClient provenanceClientImpl = new MultiThreadedDefaultProvenanceClient();
+            for (Entry<String, AnalysisProvenanceProvider> e : providerLoader.getAnalysisProvenanceProviders().entrySet()) {
+                provenanceClientImpl.registerAnalysisProvenanceProvider(e.getKey(), e.getValue());
+            }
+            for (Entry<String, LaneProvenanceProvider> e : providerLoader.getLaneProvenanceProviders().entrySet()) {
+                provenanceClientImpl.registerLaneProvenanceProvider(e.getKey(), e.getValue());
+            }
+            for (Entry<String, SampleProvenanceProvider> e : providerLoader.getSampleProvenanceProviders().entrySet()) {
+                provenanceClientImpl.registerSampleProvenanceProvider(e.getKey(), e.getValue());
+            }
+
+            provenanceClient = provenanceClientImpl;
+        }
+
         //initialize collections
         files = new HashMap<>();
         
@@ -235,10 +295,14 @@ public class OicrDecider extends BasicDecider {
                 ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
             }
         }
-        if(options.has("pinery-url")){
+        if (options.has("pinery-url")) {
             PineryClient pineryClient = new PineryClient(options.valueOf("pinery-url").toString(), false);
-            provenanceClient = new DefaultProvenanceClient(new SeqwareMetadataAnalysisProvenanceProvider(metadata), 
-                    new PinerySampleProvenanceProvider(pineryClient));
+            PineryProvenanceProvider pineryProvenanceProvider = new PineryProvenanceProvider(pineryClient);
+            DefaultProvenanceClient dpc = new DefaultProvenanceClient();
+            dpc.registerAnalysisProvenanceProvider("seqware", new SeqwareMetadataAnalysisProvenanceProvider(metadata));
+            dpc.registerSampleProvenanceProvider("pinery", pineryProvenanceProvider);
+            dpc.registerLaneProvenanceProvider("pinery", pineryProvenanceProvider);
+            provenanceClient = dpc;
         }
         
         return ret;
@@ -447,9 +511,7 @@ public class OicrDecider extends BasicDecider {
         run.addProperty(super.modifyIniFile(commaSeparatedFilePaths, commaSeparatedParentAccessions));
 
         //Common decider ini modifications
-        run.addProperty("output_prefix", getArgument("output-path").isEmpty()
-                ? "" : (getArgument("output-path").endsWith("/") ? getArgument("output-path") : getArgument("output-path").concat("/")), "./");
-        run.addProperty("output_dir", getArgument("output-folder"), "seqware-results");
+        run.addProperty(getCommonIniProperties());
 
         //Set the final return value to non-zero as the return value from customizeRun does not actually affect the run state.
         ReturnValue ignoredReturnValue = customizeRun(run);
@@ -459,6 +521,18 @@ public class OicrDecider extends BasicDecider {
         }
 
         return run.getIniFile();
+    }
+
+    protected Map<String, String> getCommonIniProperties() {
+        Map<String, String> commonIniProperties = new HashMap<>();
+
+        commonIniProperties.put("output_prefix",
+                getArgument("output-path").isEmpty() ? "./" : (getArgument("output-path").endsWith("/") ? getArgument("output-path") : getArgument("output-path").concat("/")));
+
+        commonIniProperties.put("output_dir",
+                getArgument("output-folder").isEmpty() ? "seqware-results" : getArgument("output-folder"));
+
+        return commonIniProperties;
     }
 
     @Override
@@ -777,13 +851,6 @@ public class OicrDecider extends BasicDecider {
         return sb.toString();
     }
 
-    private final Function MAP_OF_SETS_TO_STRING = new Function<Entry<String, Set<String>>, String>() {
-        @Override
-        public String apply(Entry<String, Set<String>> s) {
-            return s.getKey() + "=" + Joiner.on("&").join(s.getValue());
-        }
-    };
-
     @Override
     protected List<Map<String, String>> getFileProvenanceReport(Map<FileProvenanceParam, List<String>> params) {
         if (provenanceClient != null) {
@@ -795,56 +862,67 @@ public class OicrDecider extends BasicDecider {
             params2.put(FileProvenanceParam.processing_status.toString(), Sets.newHashSet("success"));
             params2.put(FileProvenanceParam.workflow_run_status.toString(), Sets.newHashSet("completed"));
 
+            Joiner joiner = Joiner.on(";").skipNulls();
+            final String EMPTY_STRING = "";
+
+            String studyTagPrefix = Header.STUDY_TAG_PREFIX.getTitle();
+            String parentSampleTagPrefix = Header.PARENT_SAMPLE_TAG_PREFIX.getTitle();
+            String sampleTagPrefix = Header.SAMPLE_TAG_PREFIX.getTitle();
+            String sequencerRunTagPrefix = Header.SEQUENCER_RUN_TAG_PREFIX.getTitle();
+            String laneTagPrefix = Header.LANE_TAG_PREFIX.getTitle();
+
             List<Map<String, String>> fpList = new ArrayList<>();
             for (FileProvenance fp : provenanceClient.getFileProvenance(params2)) {
                 Map<String, String> f = new HashMap<>();
-                f.put("Study Title", Joiner.on(",").skipNulls().join(fp.getStudyTitles()));
-                f.put("Study Attributes", Joiner.on(";").join(Iterables.transform(fp.getStudyAttributes().entrySet(), MAP_OF_SETS_TO_STRING)));
-                f.put("Experiment Name", Joiner.on(",").skipNulls().join(fp.getExperimentNames()));
-                f.put("Experiment Attributes", Joiner.on(";").join(Iterables.transform(fp.getExperimentAttributes().entrySet(), MAP_OF_SETS_TO_STRING)));
-                f.put("Root Sample Name", Joiner.on(",").skipNulls().join(fp.getRootSampleNames()));
-                f.put("Parent Sample Name", Joiner.on(",").skipNulls().join(fp.getParentSampleNames()));
-                f.put("Parent Sample Organism IDs", Joiner.on(",").skipNulls().join(fp.getParentSampleOrganismIDs()));
-                f.put("Parent Sample Attributes", Joiner.on(";").join(Iterables.transform(fp.getParentSampleAttributes().entrySet(), MAP_OF_SETS_TO_STRING)));
-                f.put("Sample Name", Joiner.on(",").skipNulls().join(fp.getSampleNames()));
-                f.put("Sample Organism ID", Joiner.on(",").skipNulls().join(fp.getSampleOrganismIDs()));
-                f.put("Sample Organism Code", Joiner.on(",").skipNulls().join(fp.getSampleOrganismCodes()));
-                f.put("Sample Attributes", Joiner.on(";").join(Iterables.transform(fp.getSampleAttributes().entrySet(), MAP_OF_SETS_TO_STRING)));
-                f.put("Sequencer Run Name", Joiner.on(",").skipNulls().join(fp.getSequencerRunNames()));
-                f.put("Sequencer Run Attributes", Joiner.on(";").join(Iterables.transform(fp.getSequencerRunAttributes().entrySet(), MAP_OF_SETS_TO_STRING)));
-                f.put("Sequencer Run Platform ID", Joiner.on(",").skipNulls().join(fp.getSequencerRunPlatformIDs()));
-                f.put("Sequencer Run Platform Name", Joiner.on(",").skipNulls().join(fp.getSequencerRunPlatformNames()));
-                f.put("Lane Name", Joiner.on(",").skipNulls().join(fp.getLaneNames()));
-                f.put("Lane Number", Joiner.on(",").skipNulls().join(fp.getLaneNumbers()));
-                f.put("Lane Attributes", Joiner.on(",").join(Iterables.transform(fp.getLaneAttributes().entrySet(), MAP_OF_SETS_TO_STRING)));
+                f.put("Last Modified", StringUtils.defaultString(fp.getLastModified().withZone(DateTimeZone.forID("America/Toronto")).toString("YYYY-MM-dd HH:mm:ss.SSS")));
+                f.put("Study Title", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getStudyTitles(), stringSanitizer))));
+                f.put("Study Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(prefixMapKeys(fp.getStudyAttributes(), studyTagPrefix).entrySet(), mapOfSetsToString))));
+                f.put("Experiment Name", EMPTY_STRING);
+                f.put("Experiment Attributes", EMPTY_STRING);
+                f.put("Root Sample Name", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getRootSampleNames(), stringSanitizer))));
+                f.put("Parent Sample Name", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getParentSampleNames(), stringSanitizer))));
+                f.put("Parent Sample Organism IDs", StringUtils.defaultString(joiner.join(fp.getParentSampleOrganismIDs())));
+                f.put("Parent Sample Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(prefixMapKeys(fp.getParentSampleAttributes(), parentSampleTagPrefix).entrySet(), mapOfSetsToString))));
+                f.put("Sample Name", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getSampleNames(), stringSanitizer))));
+                f.put("Sample Organism ID", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getSampleOrganismIDs(), stringSanitizer))));
+                f.put("Sample Organism Code", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getSampleOrganismCodes(), stringSanitizer))));
+                f.put("Sample Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(prefixMapKeys(fp.getSampleAttributes(), sampleTagPrefix).entrySet(), mapOfSetsToString))));
+                f.put("Sequencer Run Name", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getSequencerRunNames(), stringSanitizer))));
+                f.put("Sequencer Run Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(prefixMapKeys(fp.getSequencerRunAttributes(), sequencerRunTagPrefix).entrySet(), mapOfSetsToString))));
+                f.put("Sequencer Run Platform ID", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getSequencerRunPlatformIDs(), stringSanitizer))));
+                f.put("Sequencer Run Platform Name", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getSequencerRunPlatformNames(), stringSanitizer))));
+                f.put("Lane Name", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getLaneNames(), stringSanitizer))));
+                f.put("Lane Number", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getLaneNumbers(), stringSanitizer))));
+                f.put("Lane Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(prefixMapKeys(fp.getLaneAttributes(), laneTagPrefix).entrySet(), mapOfSetsToString))));
+                f.put("IUS Tag", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getIusTags(), stringSanitizer))));
 
-                f.put("Last Modified", fp.getLastModified());
-                f.put("Workflow Name", fp.getWorkflowName());
-                f.put("Workflow Version", fp.getWorkflowVersion());
-                f.put("Workflow SWID", fp.getWorkflowSWID().toString());
-                f.put("Workflow Attributes", Joiner.on(";").join(Iterables.transform(fp.getWorkflowAttributes().entrySet(), MAP_OF_SETS_TO_STRING)));
-                f.put("Workflow Run Name", fp.getWorkflowRunName());
-                f.put("Workflow Run Status", fp.getWorkflowRunStatus());
-                f.put("Workflow Run SWID", fp.getWorkflowRunSWID().toString());
-                f.put("Workflow Run Attributes", Joiner.on(";").join(Iterables.transform(fp.getWorkflowRunAttributes().entrySet(), MAP_OF_SETS_TO_STRING)));
-                f.put("Workflow Run Input File SWAs", Joiner.on(",").skipNulls().join(fp.getWorkflowRunInputFileSWIDs()));
-                f.put("Processing Algorithm", fp.getProcessingAlgorithm());
-                f.put("Processing SWID", fp.getProcessingSWID().toString());
-                f.put("Processing Attributes", Joiner.on(",").join(Iterables.transform(fp.getProcessingAttributes().entrySet(), MAP_OF_SETS_TO_STRING)));
-                f.put("Processing Status", fp.getProcessingStatus());
-                f.put("File Meta-Type", fp.getFileMetaType());
-                f.put("File SWID", fp.getFileSWID().toString());
-                f.put("File Attributes", Joiner.on(",").join(Iterables.transform(fp.getFileAttributes().entrySet(), MAP_OF_SETS_TO_STRING)));
-                f.put("File Path", fp.getFilePath());
-                f.put("File Md5sum", fp.getFileMd5sum());
-                f.put("File Size", fp.getFileSize());
-                f.put("File Description", fp.getFileDescription());
-                f.put("Skip", fp.getSkip());
+                f.put("Workflow Name", StringUtils.defaultString(stringSanitizer.apply(fp.getWorkflowName())));
+                f.put("Workflow Version", StringUtils.defaultString(stringSanitizer.apply(fp.getWorkflowVersion())));
+                f.put("Workflow SWID", StringUtils.defaultString(fp.getWorkflowSWID().toString()));
+                f.put("Workflow Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getWorkflowAttributes().entrySet(), mapOfSetsToString))));
+                f.put("Workflow Run Name", StringUtils.defaultString(stringSanitizer.apply(fp.getWorkflowRunName())));
+                f.put("Workflow Run Status", StringUtils.defaultString(stringSanitizer.apply(fp.getWorkflowRunStatus())));
+                f.put("Workflow Run SWID", StringUtils.defaultString(fp.getWorkflowRunSWID().toString()));
+                f.put("Workflow Run Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getWorkflowRunAttributes().entrySet(), mapOfSetsToString))));
+                f.put("Workflow Run Input File SWAs", StringUtils.defaultString(joiner.join(fp.getWorkflowRunInputFileSWIDs())));
+                f.put("Processing Algorithm", StringUtils.defaultString(stringSanitizer.apply(fp.getProcessingAlgorithm())));
+                f.put("Processing SWID", StringUtils.defaultString(fp.getProcessingSWID().toString()));
+                f.put("Processing Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getProcessingAttributes().entrySet(), mapOfSetsToString))));
+                f.put("Processing Status", StringUtils.defaultString(stringSanitizer.apply(fp.getProcessingStatus())));
+                f.put("File Meta-Type", StringUtils.defaultString(stringSanitizer.apply(fp.getFileMetaType())));
+                f.put("File SWID", StringUtils.defaultString(fp.getFileSWID().toString()));
+                f.put("File Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getFileAttributes().entrySet(), mapOfSetsToString))));
+                f.put("File Path", StringUtils.defaultString(stringSanitizer.apply(fp.getFilePath())));
+                f.put("File Md5sum", StringUtils.defaultString(stringSanitizer.apply(fp.getFileMd5sum())));
+                f.put("File Size", StringUtils.defaultString(stringSanitizer.apply(fp.getFileSize())));
+                f.put("File Description", StringUtils.defaultString(stringSanitizer.apply(fp.getFileDescription())));
+                f.put("Path Skip", StringUtils.defaultString(stringSanitizer.apply(fp.getSkip())));
+                f.put("Skip", StringUtils.defaultString(stringSanitizer.apply(fp.getSkip())));
 
-                f.put("IUS Attributes", "");
+                f.put("IUS Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getIusAttributes().entrySet(), mapOfSetsToString))));
 
                 Collection<IusLimsKey> iusLimsKeys = fp.getIusLimsKeys();
-                f.put("IUS SWID", Joiner.on(",").join(fp.getIusSWIDs()));
+                f.put("IUS SWID", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getIusSWIDs(), stringSanitizer))));
 
                 //f.put("Status", fp.getS);
                 fpList.add(f);
@@ -853,6 +931,14 @@ public class OicrDecider extends BasicDecider {
         } else {
             return super.getFileProvenanceReport(params);
         }
+    }
+
+    private SortedMap<String, SortedSet<String>> prefixMapKeys(SortedMap<String, SortedSet<String>> map, String prefix) {
+        SortedMap<String, SortedSet<String>> newMap = new TreeMap<>();
+        for (Entry<String, SortedSet<String>> e : map.entrySet()) {
+            newMap.put(prefix + e.getKey(), e.getValue());
+        }
+        return newMap;
     }
 
     @Override

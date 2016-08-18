@@ -10,15 +10,20 @@
     <url>http://maven.apache.org</url>
 
     <modules>
+        <module>pipedev-common</module>
         <module>tools</module>
         <module>configs</module>
         <module>provenance-impl</module>
         <module>test-utils</module>
         <module>workflow-utils</module>
         <module>decider-utils</module>
+        <module>file-provenance-client</module>
     </modules>
 
     <properties>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+        
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         
@@ -38,7 +43,7 @@
         <maven-shade-plugin.version>2.4.1</maven-shade-plugin.version>
         <maven-enforcer-plugin.version>1.4.1</maven-enforcer-plugin.version>
         <maven-source-plugin.version>2.4</maven-source-plugin.version>
-        <maven-javadoc-plugin.version>2.10.3</maven-javadoc-plugin.version>
+        <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
         <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
         
         <decider-utils.version>2.0-SNAPSHOT</decider-utils.version>
@@ -207,22 +212,22 @@
             </dependency>
             
             <dependency>
-                <groupId>ca.on.oicr.pde</groupId>
+                <groupId>ca.on.oicr.gsi</groupId>
                 <artifactId>decider-utils</artifactId>
                 <version>${decider-utils.version}</version>
             </dependency>
             <dependency>
-                <groupId>ca.on.oicr.pde</groupId>
+                <groupId>ca.on.oicr.gsi</groupId>
                 <artifactId>workflow-utils</artifactId>
                 <version>${workflow-utils.version}</version>
             </dependency>
             <dependency>
-                <groupId>ca.on.oicr.pde</groupId>
+                <groupId>ca.on.oicr.gsi</groupId>
                 <artifactId>provenance-impl</artifactId>
                 <version>${provenance-impl.version}</version>
             </dependency>
             <dependency>
-                <groupId>ca.on.oicr.pde</groupId>
+                <groupId>ca.on.oicr.gsi</groupId>
                 <artifactId>test-utils</artifactId>
                 <version>${test-utils.version}</version>
             </dependency>

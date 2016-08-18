@@ -1,15 +1,19 @@
 package ca.on.oicr.pde.deciders;
 
 import ca.on.oicr.gsi.provenance.DefaultProvenanceClient;
-import ca.on.oicr.gsi.provenance.PinerySampleProvenanceProvider;
+import ca.on.oicr.gsi.provenance.PineryProvenanceProvider;
 import ca.on.oicr.gsi.provenance.SeqwareMetadataAnalysisProvenanceProvider;
 import ca.on.oicr.pde.client.MetadataBackedSeqwareClient;
 import ca.on.oicr.pinery.client.HttpResponseException;
+import ca.on.oicr.pinery.client.LaneProvenanceClient;
 import ca.on.oicr.pinery.client.PineryClient;
 import ca.on.oicr.pinery.client.SampleProvenanceClient;
+import ca.on.oicr.pinery.service.LaneProvenanceService;
 import ca.on.oicr.pinery.service.SampleProvenanceService;
+import ca.on.oicr.pinery.service.impl.DefaultLaneProvenanceService;
 import ca.on.oicr.pinery.service.impl.DefaultSampleProvenanceService;
 import ca.on.oicr.ws.dto.Dtos;
+import ca.on.oicr.ws.dto.LaneProvenanceDto;
 import ca.on.oicr.ws.dto.SampleProvenanceDto;
 import com.google.common.collect.Table;
 import java.util.HashMap;
@@ -36,17 +40,32 @@ public class OicrDeciderBaseTest extends OicrDeciderBase {
     public void setupPinery() {
 
         // The following code mocks:
-        // Lims -> SampleProvenanceService -> ... (not mocked PineryWS) ... -> PineryClient -> ProvenanceClient
+        // Lims -> Sample/LaneProvenanceService -> ... (not mocked PineryWS) ... -> PineryClient -> ProvenanceClient
         limsMock = mock(ca.on.oicr.pinery.api.Lims.class);
-        final SampleProvenanceService sampleProvenanceService = new DefaultSampleProvenanceService(limsMock);
         pineryClient = pineryClientMock = mock(PineryClient.class);
+
+        final SampleProvenanceService sampleProvenanceService = new DefaultSampleProvenanceService(limsMock);
         SampleProvenanceClient sampleProvenanceClientMock = mock(SampleProvenanceClient.class);
         doReturn(sampleProvenanceClientMock).when(pineryClientMock).getSampleProvenance();
         try {
             when(sampleProvenanceClientMock.all()).thenAnswer(new Answer<List<SampleProvenanceDto>>() {
                 @Override
                 public List<SampleProvenanceDto> answer(InvocationOnMock invocation) throws Throwable {
-                    return Dtos.asDto(sampleProvenanceService.getSampleProvenance());
+                    return Dtos.sampleProvenanceCollectionAsDto(sampleProvenanceService.getSampleProvenance());
+                }
+            });
+        } catch (HttpResponseException ex) {
+            throw new RuntimeException(ex);
+        }
+
+        final LaneProvenanceService laneProvenanceService = new DefaultLaneProvenanceService(limsMock);
+        LaneProvenanceClient laneProvenanceClientMock = mock(LaneProvenanceClient.class);
+        doReturn(laneProvenanceClientMock).when(pineryClientMock).getLaneProvenance();
+        try {
+            when(laneProvenanceClientMock.all()).thenAnswer(new Answer<List<LaneProvenanceDto>>() {
+                @Override
+                public List<LaneProvenanceDto> answer(InvocationOnMock invocation) throws Throwable {
+                    return Dtos.laneProvenanceCollectionAsDto(laneProvenanceService.getLaneProvenance());
                 }
             });
         } catch (HttpResponseException ex) {
@@ -64,8 +83,12 @@ public class OicrDeciderBaseTest extends OicrDeciderBase {
 
     @BeforeMethod(dependsOnMethods = {"setupSeqware", "setupPinery"}, groups = "setup")
     public void setupProvenance() {
-        provenanceClient = new DefaultProvenanceClient(new SeqwareMetadataAnalysisProvenanceProvider(metadata), 
-                new PinerySampleProvenanceProvider(pineryClientMock));
+        PineryProvenanceProvider pineryProvenanceProvider = new PineryProvenanceProvider(pineryClientMock);
+        DefaultProvenanceClient dpc = new DefaultProvenanceClient();
+        dpc.registerAnalysisProvenanceProvider("seqware", new SeqwareMetadataAnalysisProvenanceProvider(metadata));
+        dpc.registerSampleProvenanceProvider("pinery", pineryProvenanceProvider);
+        dpc.registerLaneProvenanceProvider("pinery", pineryProvenanceProvider);
+        provenanceClient = dpc;
     }
 
     @AfterMethod
