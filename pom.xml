@@ -11,13 +11,13 @@
 
     <modules>
         <module>pipedev-common</module>
-        <module>tools</module>
-        <module>configs</module>
-        <module>provenance-impl</module>
-        <module>test-utils</module>
-        <module>workflow-utils</module>
-        <module>decider-utils</module>
-        <module>file-provenance-client</module>
+        <module>pipedev-tools</module>
+        <module>pipedev-configs</module>
+        <module>pipedev-provenance-impl</module>
+        <module>pipedev-test-utils</module>
+        <module>pipedev-workflow-utils</module>
+        <module>pipedev-decider-utils</module>
+        <module>pipedev-file-provenance-client</module>
     </modules>
 
     <properties>
@@ -46,12 +46,9 @@
         <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
         <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
         
-        <decider-utils.version>2.0-SNAPSHOT</decider-utils.version>
-        <workflow-utils.version>2.0-SNAPSHOT</workflow-utils.version>
-        <provenance-impl.version>2.0-SNAPSHOT</provenance-impl.version>
-        <test-utils.version>2.0-SNAPSHOT</test-utils.version>
         <provenance-version>1.0-SNAPSHOT</provenance-version>
         <seqware-version>1.1.1-gsi-SNAPSHOT</seqware-version>
+        <pinery-version>2.0-SNAPSHOT</pinery-version>
     </properties>
     
     <prerequisites>
@@ -166,6 +163,7 @@
                 <version>2.9</version>
             </dependency>
             
+            <!-- seqware -->
             <dependency>
                 <groupId>com.github.seqware</groupId>
                 <artifactId>seqware-pipeline</artifactId>
@@ -194,42 +192,66 @@
                 <type>war</type>
             </dependency>
             
+            <!-- provenance -->
             <dependency>
                 <groupId>ca.on.oicr.gsi</groupId>
                 <artifactId>provenance-core</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>${provenance-version}</version>
             </dependency>
             <dependency>
                 <groupId>ca.on.oicr.gsi</groupId>
                 <artifactId>provenance-api</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>${provenance-version}</version>
             </dependency>
             
+            <!-- pinery -->
             <dependency>
                 <groupId>ca.on.oicr</groupId>
                 <artifactId>pinery-client</artifactId>
-                <version>2.0-SNAPSHOT</version>
+                <version>${pinery-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.on.oicr</groupId>
+                <artifactId>pinery-service</artifactId>
+                <version>${pinery-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.on.oicr</groupId>
+                <artifactId>pinery-api</artifactId>
+                <version>${pinery-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.on.oicr</groupId>
+                <artifactId>pinery-ws</artifactId>
+                <version>${pinery-version}</version>
+                <type>war</type>
             </dependency>
             
+            <!-- pipedev -->
             <dependency>
                 <groupId>ca.on.oicr.gsi</groupId>
-                <artifactId>decider-utils</artifactId>
-                <version>${decider-utils.version}</version>
+                <artifactId>pipedev-common</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>ca.on.oicr.gsi</groupId>
-                <artifactId>workflow-utils</artifactId>
-                <version>${workflow-utils.version}</version>
+                <artifactId>pipedev-decider-utils</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>ca.on.oicr.gsi</groupId>
-                <artifactId>provenance-impl</artifactId>
-                <version>${provenance-impl.version}</version>
+                <artifactId>pipedev-workflow-utils</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>ca.on.oicr.gsi</groupId>
-                <artifactId>test-utils</artifactId>
-                <version>${test-utils.version}</version>
+                <artifactId>pipedev-provenance-impl</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.on.oicr.gsi</groupId>
+                <artifactId>pipedev-test-utils</artifactId>
+                <version>${project.version}</version>
             </dependency>
             
             <dependency>

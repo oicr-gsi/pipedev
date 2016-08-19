@@ -7,7 +7,7 @@
         <version>2.0-SNAPSHOT</version>
     </parent>
     
-    <artifactId>file-provenance-client</artifactId>
+    <artifactId>pipedev-file-provenance-client</artifactId>
     <packaging>jar</packaging>
     
     <properties>
@@ -53,9 +53,8 @@
             <version>5.0.2</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>ca.on.oicr.gsi</groupId>
             <artifactId>pipedev-common</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
     
@@ -86,5 +85,5 @@
             </plugin>
         </plugins>
     </build>
-            
+    <name>pipedev-file-provenance-client</name>
 </project>
