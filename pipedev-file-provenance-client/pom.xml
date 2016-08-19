@@ -53,9 +53,8 @@
             <version>5.0.2</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>ca.on.oicr.gsi</groupId>
             <artifactId>pipedev-common</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
     

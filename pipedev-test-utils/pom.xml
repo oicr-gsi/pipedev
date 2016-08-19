@@ -203,7 +203,7 @@
         </dependency>
         <dependency>
             <groupId>ca.on.oicr.gsi</groupId>
-            <artifactId>provenance-impl</artifactId>
+            <artifactId>pipedev-provenance-impl</artifactId>
         </dependency>
     </dependencies>
     

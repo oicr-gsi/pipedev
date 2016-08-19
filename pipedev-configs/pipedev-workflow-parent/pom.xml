@@ -64,13 +64,13 @@
                 </dependency>
                 <dependency>
                     <groupId>ca.on.oicr.gsi</groupId>
-                    <artifactId>workflow-utils</artifactId>
+                    <artifactId>pipedev-workflow-utils</artifactId>
                 </dependency>
         
                 <!-- test dependencies -->
                 <dependency>
                     <groupId>ca.on.oicr.gsi</groupId>
-                    <artifactId>test-utils</artifactId>
+                    <artifactId>pipedev-test-utils</artifactId>
                     <scope>test</scope>
                 </dependency>
                 <dependency>

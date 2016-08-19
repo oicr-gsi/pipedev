@@ -58,14 +58,14 @@
                 </dependency>
                 <dependency>
                     <groupId>ca.on.oicr.gsi</groupId>
-                    <artifactId>decider-utils</artifactId>
+                    <artifactId>pipedev-decider-utils</artifactId>
                     <scope>compile</scope>
                 </dependency>
 
                 <!-- test dependencies -->
                 <dependency>
                     <groupId>ca.on.oicr.gsi</groupId>
-                    <artifactId>test-utils</artifactId>
+                    <artifactId>pipedev-test-utils</artifactId>
                     <scope>test</scope>
                 </dependency>
                 <dependency>
