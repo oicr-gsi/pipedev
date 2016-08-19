@@ -9,10 +9,10 @@
         <version>2.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>workflow-utils</artifactId>
+    <artifactId>pipedev-workflow-utils</artifactId>
     <packaging>jar</packaging>
 
-    <name>workflow-utils</name>
+    <name>pipedev-workflow-utils</name>
     <url>http://maven.apache.org</url>
 
     <properties>

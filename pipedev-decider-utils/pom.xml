@@ -9,10 +9,10 @@
         <version>2.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>decider-utils</artifactId>
+    <artifactId>pipedev-decider-utils</artifactId>
     <packaging>jar</packaging>
 
-    <name>decider-utils</name>
+    <name>pipedev-decider-utils</name>
     <url>http://maven.apache.org</url>
 
     <properties>

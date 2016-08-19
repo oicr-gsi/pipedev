@@ -8,10 +8,10 @@
         <version>2.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>test-utils</artifactId>
+    <artifactId>pipedev-test-utils</artifactId>
     <packaging>jar</packaging>
 
-    <name>test-utils</name>
+    <name>pipedev-test-utils</name>
     <url>http://maven.apache.org</url>
 
     <properties>

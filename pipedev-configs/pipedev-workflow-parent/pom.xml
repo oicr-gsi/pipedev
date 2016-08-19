@@ -10,7 +10,7 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
     
-    <artifactId>workflow-parent</artifactId>
+    <artifactId>pipedev-workflow-parent</artifactId>
     <packaging>pom</packaging>
     <url>http://maven.apache.org</url>
 
@@ -512,4 +512,5 @@
             </build>
         </profile>
     </profiles>
+    <name>pipedev-workflow-parent</name>
 </project>

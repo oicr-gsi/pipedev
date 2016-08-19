@@ -10,7 +10,7 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
     
-    <artifactId>decider-parent</artifactId>
+    <artifactId>pipedev-decider-parent</artifactId>
     <packaging>pom</packaging>
     <url>http://maven.apache.org</url>
 
@@ -349,4 +349,5 @@
             </build>
         </profile>
     </profiles>
+    <name>pipedev-decider-parent</name>
 </project>

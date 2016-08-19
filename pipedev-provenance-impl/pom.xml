@@ -7,10 +7,10 @@
         <version>2.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>provenance-impl</artifactId>
+    <artifactId>pipedev-provenance-impl</artifactId>
     <packaging>jar</packaging>
     
-    <name>provenance-impl</name>
+    <name>pipedev-provenance-impl</name>
     <url>http://maven.apache.org</url>
     
     <properties>

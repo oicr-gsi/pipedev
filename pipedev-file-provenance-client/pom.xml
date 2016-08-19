@@ -7,7 +7,7 @@
         <version>2.0-SNAPSHOT</version>
     </parent>
     
-    <artifactId>file-provenance-client</artifactId>
+    <artifactId>pipedev-file-provenance-client</artifactId>
     <packaging>jar</packaging>
     
     <properties>
@@ -86,5 +86,5 @@
             </plugin>
         </plugins>
     </build>
-            
+    <name>pipedev-file-provenance-client</name>
 </project>

@@ -34,17 +34,17 @@ mvn clean install -DskipITs=false \
 
 ##Usage
 
-###workflow-utils
+###pipedev-workflow-utils
 Simplifies building of SeqWare workflows by providing:
 
 - helper methods to create jobs, provision input or output files, and safely get ini properties
 - unwrapping "ReturnValue" error states into an exception
 
-Add workflow-utils as a maven dependency:
+Add pipedev-workflow-utils as a maven dependency:
 ```html
 <dependency>
-    <groupId>ca.on.oicr.pde</groupId>
-    <artifactId>workflow-utils</artifactId>
+    <groupId>ca.on.oicr.gsi</groupId>
+    <artifactId>pipedev-workflow-utils</artifactId>
     <version>2.0-SNAPSHOT</version>
 </dependency>
 ```
@@ -53,17 +53,17 @@ Modify your workflow class to extend ```OicrWorkflow``` (instead of ```AbstractW
 
 Review [OicrWorkflow javadoc]() for documentation.
 
-###decider-utils
+###pipedev-decider-utils
 Simplifies building of SeqWare java deciders by providing:
 
 - helper methods to simplify command line execution and get file attributes
 - wrapping "ReturnValue" attributes and FileMetadata into a single FileAttribute object
 
-Add decider-utils as a maven dependency:
+Add pipedev-decider-utils as a maven dependency:
 ```html
 <dependency>
-    <groupId>ca.on.oicr.pde</groupId>
-    <artifactId>decider-utils</artifactId>
+    <groupId>ca.on.oicr.gsi</groupId>
+    <artifactId>pipedev-decider-utils</artifactId>
     <version>2.0-SNAPSHOT</version>
 </dependency>
 ```
@@ -72,18 +72,18 @@ Modify your workflow class to extend ```OicrDecider``` (instead of ```BasicDecid
 
 Review [OicrDecider javadoc]() for documentation.
 
-###test-utils
+###pipedev-test-utils
 Provides unit and integration testing utilities such as:
 
 - a common procedure to test run workflow and decider projects
 - mocking of SeqWare infrastructure for debugging or unit testing
 - helper methods to interact with SeqWare
 
-Add test-utils as a maven dependency:
+Add pipedev-test-utils as a maven dependency:
 ```html
 <dependency>
-    <groupId>ca.on.oicr.pde</groupId>
-    <artifactId>test-utils</artifactId>
+    <groupId>ca.on.oicr.gsi</groupId>
+    <artifactId>pipedev-test-utils</artifactId>
     <version>2.0-SNAPSHOT</version>
     <scope>test</scope>
 </dependency>
@@ -96,12 +96,12 @@ Review the [pipedev wiki](https://github.com/oicr-gsi/pipedev/wiki) for document
 
 Workflow projects or decider projects share a very similar maven configuration. To reduce configuration duplication and maintenance, common configuration can be moved to a parent pom.
 
-PDE's [workflow parent pom](configs/workflow-parent/pom.xml) can be used as a template or can be used directly by adding the following to your workflow's pom.xml:
+PDE's [workflow parent pom](pipedev-configs/pipedev-workflow-parent/pom.xml) can be used as a template or can be used directly by adding the following to your workflow's pom.xml:
 
 ```html
 <parent>
     <groupId>ca.on.oicr.gsi</groupId>
-    <artifactId>workflow-parent</artifactId>
+    <artifactId>pipedev-workflow-parent</artifactId>
     <version>2.0-SNAPSHOT</version>
     <relativePath/>
 </parent>
@@ -112,7 +112,7 @@ PDE's [decider parent pom](configs/decider-parent/pom.xml) can be used as a temp
 ```html
 <parent>
     <groupId>ca.on.oicr.gsi</groupId>
-    <artifactId>decider-parent</artifactId>
+    <artifactId>pipedev-decider-parent</artifactId>
     <version>2.0-SNAPSHOT</version>
     <relativePath/>
 </parent>
