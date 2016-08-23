@@ -329,15 +329,30 @@ public class OicrDecider extends BasicDecider {
 
         // SEQWARE-1809, PDE-474 ensure that deciders only use input from completed workflow runs
         FileAttributes attributes = new FileAttributes(returnValue, fm);
-        String status = returnValue.getAttribute(FindAllTheFiles.WORKFLOW_RUN_STATUS);
-        if (status == null || !status.equals("completed")) {
+        String workflowRunStatus = returnValue.getAttribute(FindAllTheFiles.WORKFLOW_RUN_STATUS);
+        if (workflowRunStatus == null || !workflowRunStatus.equals("completed")) {
             return false;
         }
+
+        //check if record should be skipped
+        boolean skip = Boolean.parseBoolean(returnValue.getAttribute("Skip"));
+        if (skip) {
+            Log.debug("Ignoring file because the file provenance record is skip status is set to true " + fm.getFilePath());
+            return false;
+        }
+
+        //check if record's provenance status is okay
+        FileProvenance.Status provenanceStatus = FileProvenance.Status.valueOf(returnValue.getAttribute("Status"));
+        if (!FileProvenance.Status.OKAY.equals(provenanceStatus)) {
+            Log.debug("Ignoring file because the file provenance record status is [" + provenanceStatus.toString() + "] " + fm.getFilePath());
+            return false;
+        }
+
         if (!options.has("skip-status-check")) {
             for (String attribute : attributes) {
                 if (attribute.contains("Status")) {
                     if (attributes.getOtherAttribute(attribute).equals("failed")) {
-                        Log.debug("Skipping file because the workflow run status is failed" + fm.getFilePath());
+                        Log.debug("Ignoring file because the workflow run status is failed " + fm.getFilePath());
                         return false;
                     }
                 }
@@ -924,7 +939,9 @@ public class OicrDecider extends BasicDecider {
                 Collection<IusLimsKey> iusLimsKeys = fp.getIusLimsKeys();
                 f.put("IUS SWID", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getIusSWIDs(), stringSanitizer))));
 
-                //f.put("Status", fp.getS);
+                f.put("Status", fp.getStatus().toString());
+                f.put("Status Reason", fp.getStatusReason());
+
                 fpList.add(f);
             }
             return fpList;

@@ -3,11 +3,13 @@ package ca.on.oicr.pde.deciders;
 import ca.on.oicr.gsi.provenance.DefaultProvenanceClient;
 import ca.on.oicr.gsi.provenance.PineryProvenanceProvider;
 import ca.on.oicr.gsi.provenance.SeqwareMetadataAnalysisProvenanceProvider;
+import ca.on.oicr.gsi.provenance.model.SampleProvenance;
 import ca.on.oicr.pde.client.MetadataBackedSeqwareClient;
 import ca.on.oicr.pde.testing.metadata.SeqwareTestEnvironment;
 import ca.on.oicr.pinery.client.HttpResponseException;
 import ca.on.oicr.pinery.client.PineryClient;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import java.io.File;
 import java.util.Arrays;
@@ -21,7 +23,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
-import org.joda.time.DateTime;
 import org.mortbay.log.Log;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -114,11 +115,13 @@ public class OicrDeciderBaseIT extends OicrDeciderBase {
         assertEquals(provenanceClient.getSampleProvenance().size(), 1);
         assertEquals(provenanceClient.getFileProvenance().size(), 0);
 
+        SampleProvenance sp = Iterables.getOnlyElement(provenanceClient.getSampleProvenance());
+
         //create a file in seqware
         Workflow upstreamWorkflow = seqwareClient.createWorkflow("UpstreamWorkflow", "0.0", "", ImmutableMap.of("test_param", "test_value"));
         IUS ius;
         FileMetadata file;
-        ius = seqwareClient.addLims("seqware", "1_1_1", "1", new DateTime());
+        ius = seqwareClient.addLims("pinery", sp.getSampleProvenanceId(), sp.getVersion(), sp.getLastModified());
         file = new FileMetadata();
         file.setDescription("description");
         file.setMd5sum("md5sum");
