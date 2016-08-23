@@ -46,6 +46,7 @@
         <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
         <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
         
+        <pipedev-version>2.0-SNAPSHOT</pipedev-version>
         <provenance-version>1.0-SNAPSHOT</provenance-version>
         <seqware-version>1.1.1-gsi-SNAPSHOT</seqware-version>
         <pinery-version>2.0-SNAPSHOT</pinery-version>
@@ -231,27 +232,27 @@
             <dependency>
                 <groupId>ca.on.oicr.gsi</groupId>
                 <artifactId>pipedev-common</artifactId>
-                <version>${project.version}</version>
+                <version>${pipedev-version}</version>
             </dependency>
             <dependency>
                 <groupId>ca.on.oicr.gsi</groupId>
                 <artifactId>pipedev-decider-utils</artifactId>
-                <version>${project.version}</version>
+                <version>${pipedev-version}</version>
             </dependency>
             <dependency>
                 <groupId>ca.on.oicr.gsi</groupId>
                 <artifactId>pipedev-workflow-utils</artifactId>
-                <version>${project.version}</version>
+                <version>${pipedev-version}</version>
             </dependency>
             <dependency>
                 <groupId>ca.on.oicr.gsi</groupId>
                 <artifactId>pipedev-provenance-impl</artifactId>
-                <version>${project.version}</version>
+                <version>${pipedev-version}</version>
             </dependency>
             <dependency>
                 <groupId>ca.on.oicr.gsi</groupId>
                 <artifactId>pipedev-test-utils</artifactId>
-                <version>${project.version}</version>
+                <version>${pipedev-version}</version>
             </dependency>
             
             <dependency>
