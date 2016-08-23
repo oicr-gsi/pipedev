@@ -126,11 +126,13 @@ public class OicrDeciderBase {
     @Test
     public void deciderOperationModes() throws HttpResponseException {
 
+        SampleProvenance sp = Iterables.getOnlyElement(provenanceClient.getSampleProvenance());
+
         //create a file in seqware
         Workflow upstreamWorkflow = seqwareClient.createWorkflow("UpstreamWorkflow", "0.0", "", ImmutableMap.of("test_param", "test_value"));
         IUS ius;
         FileMetadata file;
-        ius = seqwareClient.addLims("pinery", "1_1_1", "1", new DateTime());
+        ius = seqwareClient.addLims("pinery", sp.getSampleProvenanceId(), sp.getVersion(), sp.getLastModified());
         file = new FileMetadata();
         file.setDescription("description");
         file.setMd5sum("md5sum");
@@ -177,12 +179,14 @@ public class OicrDeciderBase {
     @Test
     public void deciderForMergingWorkflow() {
 
+        SampleProvenance sp = Iterables.getOnlyElement(provenanceClient.getSampleProvenance());
+
         //setup files in seqware
         Workflow workflow1 = seqwareClient.createWorkflow("TestWorkflow1", "0.0", "", ImmutableMap.of("test_param", "test_value"));
         IUS ius;
         FileMetadata file;
 
-        ius = seqwareClient.addLims("pinery", "1_1_1", "1", new DateTime());
+        ius = seqwareClient.addLims("pinery", sp.getSampleProvenanceId(), sp.getVersion(), sp.getLastModified());
         file = new FileMetadata();
         file.setDescription("description");
         file.setMd5sum("md5sum");
@@ -192,7 +196,7 @@ public class OicrDeciderBase {
         file.setSize(1L);
         seqwareClient.createWorkflowRun(workflow1, Sets.newHashSet(ius), Collections.EMPTY_LIST, Arrays.asList(file));
 
-        ius = seqwareClient.addLims("pinery", "1_1_1", "1", new DateTime());
+        ius = seqwareClient.addLims("pinery", sp.getSampleProvenanceId(), sp.getVersion(), sp.getLastModified());
         file = new FileMetadata();
         file.setDescription("description");
         file.setMd5sum("md5sum");
@@ -236,7 +240,7 @@ public class OicrDeciderBase {
         SampleProvenance sp = Iterables.getFirst(provenanceClient.getSampleProvenance(), null);
         assertNotNull(sp);
 
-        ius = seqwareClient.addLims("pinery", "1_1_1", sp.getVersion(), sp.getLastModified());
+        ius = seqwareClient.addLims("pinery", sp.getSampleProvenanceId(), sp.getVersion(), sp.getLastModified());
         file = new FileMetadata();
         file.setDescription("description");
         file.setMd5sum("md5sum");
@@ -249,7 +253,13 @@ public class OicrDeciderBase {
         assertEquals(provenanceClient.getFileProvenance().size(), 1);
         assertEquals(Iterables.getOnlyElement(provenanceClient.getFileProvenance()).getStatus(), Status.OKAY);
 
+        //modify sample provenance - version and last modified have changed
         sample.setName("TEST_SAMPLE_modified");
+        assertEquals(Iterables.getOnlyElement(provenanceClient.getFileProvenance()).getStatus(), Status.STALE);
+
+        //modify sample id - sample provenance id changed, so unable to join analysis provenance and sample provenance
+        runSample.setId("1-modified");
+        sample.setId("1-modified");
         assertEquals(Iterables.getOnlyElement(provenanceClient.getFileProvenance()).getStatus(), Status.ERROR);
     }
 
