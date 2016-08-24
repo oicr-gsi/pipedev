@@ -107,7 +107,7 @@ public class Client {
                         "Processing Algorithm", "Processing SWID", "Processing Attributes", "Processing Status",
                         "File Meta-Type", "File SWID", "File Attributes", "File Path", "File Md5sum", "File Size", "File Description",
                         "Path Skip", "Skip",
-                        "Status"
+                        "Status", "Status Reason"
                 );
         CSVPrinter cp;
         Stopwatch sw = Stopwatch.createStarted();
@@ -189,6 +189,7 @@ public class Client {
                 cs.add(stringSanitizer.apply(fp.getSkip()));
 
                 cs.add(fp.getStatus().toString());
+                cs.add(fp.getStatusReason());
 
                 cp.printRecord(cs);
             }
