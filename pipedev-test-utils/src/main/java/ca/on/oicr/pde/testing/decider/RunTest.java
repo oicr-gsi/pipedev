@@ -46,19 +46,19 @@ public class RunTest extends RunTestBase {
     private final File deciderJar;
     private final String deciderClass;
 
-    private final Workflow workflow;
+    private Workflow workflow;
 
     private final List<String> studies = new ArrayList<>();
     private final List<String> sequencerRuns = new ArrayList<>();
     private final List<String> samples = new ArrayList<>();
 
-    File actualReportFile;
-    File expectedReportFile;
+    private File actualReportFile;
+    private File expectedReportFile;
 
-    WorkflowReport actual;
-    WorkflowReport expected;
+    private WorkflowReport actual;
+    private WorkflowReport expected;
 
-    RunTestDefinition testDefinition;
+    private RunTestDefinition testDefinition;
 
     private Timer executionTimer;
 
@@ -202,20 +202,22 @@ public class RunTest extends RunTestBase {
     public void installWorkflow() throws IOException {
         Timer timer = Timer.start();
 
-        if (workflow.getPermanentBundleLocation() != null) {
-            workflow.setSwAccession(seqwareExecutor.installWorkflow(new File(workflow.getPermanentBundleLocation())).getSwAccession());
+        if (workflow.getCwd() != null) {
+            workflow.setSwAccession(seqwareExecutor.installWorkflow(new File(workflow.getCwd())).getSwAccession());
         } else if (workflow.getName() != null && workflow.getVersion() != null) {
             Map<String, String> defaultWorkflowProperties = new HashMap<>();
             defaultWorkflowProperties.put("output_prefix", "./");
 
             workflow.setSwAccession(seqwareClient.createWorkflow(workflow.getName(), workflow.getVersion(), "", defaultWorkflowProperties).getSwAccession());
         } else {
-            // unable to install bundle or workflow name + version was not specified
+            fail("Unable to install workflow - bundle or workflow name + version was not specified");
         }
 
+        //replace partial workflow object with the seqware workflow object
         Assert.assertNotNull(workflow.getSwAccession(), "Installation of the workflow failed");
+        workflow = metadata.getWorkflow(workflow.getSwAccession());
 
-        log.printf(Level.INFO, "[%s] Completed installing workflow bundle in %s", testName, timer.stop());
+        log.printf(Level.INFO, "[%s] Completed installing workflow in %s", testName, timer.stop());
     }
 
     @Test(dependsOnGroups = "preExecution", groups = "execution")
@@ -274,13 +276,13 @@ public class RunTest extends RunTestBase {
         }
 
         Map<String, String> iniStringSubstitutions = new HashMap<>();
-        if (workflow.getPermanentBundleLocation() != null) {
-            iniStringSubstitutions.put(workflow.getPermanentBundleLocation(), "\\$\\{workflow_bundle_dir\\}");
+        if (workflow.getCwd() != null) {
+            iniStringSubstitutions.put(workflow.getCwd(), "\\$\\{workflow_bundle_dir\\}");
         }
         iniStringSubstitutions.putAll(testDefinition.getIniStringSubstitutions());
 
         actual.applyIniExclusions(testDefinition.getIniExclusions());
-        actual.applyIniStringSubstitutions(testDefinition.getIniStringSubstitutions());
+        actual.applyIniStringSubstitutions(iniStringSubstitutions);
         actual.applyIniSubstitutions(testDefinition.getIniSubstitutions());
 
         List<WorkflowRunReport> actualWorkflowRunReports = actual.getWorkflowRuns();

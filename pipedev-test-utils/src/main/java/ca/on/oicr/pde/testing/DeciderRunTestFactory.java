@@ -186,7 +186,7 @@ public class DeciderRunTestFactory {
 
             Workflow workflow = new Workflow();
             if (bundledWorkflow != null) {
-                workflow.setPermanentBundleLocation(bundledWorkflow.getAbsolutePath());
+                workflow.setCwd(bundledWorkflow.getAbsolutePath());
             } else if (t.getWorkflowName() != null && t.getWorkflowVersion() != null) {
                 workflow.setName(t.getWorkflowName());
                 workflow.setVersion(t.getWorkflowVersion());
