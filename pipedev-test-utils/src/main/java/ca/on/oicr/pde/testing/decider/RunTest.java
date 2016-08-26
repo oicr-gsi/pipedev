@@ -123,33 +123,7 @@ public class RunTest extends RunTestBase {
         sequencerRuns.addAll(testDefinition.getSequencerRuns());
 
         expectedReportFile = testDefinition.getMetrics();
-        if (expectedReportFile != null) {
-            try {
-                expected = WorkflowReport.buildFromJson(expectedReportFile);
-                expected.applyIniExclusions(testDefinition.getIniExclusions());
-
-                expected.applyIniStringSubstitution("\\$\\{workflow_bundle_dir\\}/Workflow_Bundle_[^/]+/[^/]+/",
-                        "\\$\\{workflow_bundle_dir\\}/Workflow_Bundle_" + workflow.getName() + "/" + workflow.getVersion() + "/");
-                expected.applyIniStringSubstitutions(testDefinition.getIniStringSubstitutions());
-                expected.applyIniSubstitutions(testDefinition.getIniSubstitutions());
-
-                List<WorkflowRunReport> expectedWorkflowRunReports = expected.getWorkflowRuns();
-                Collections.sort(expectedWorkflowRunReports, WORKFLOW_RUN_REPORT_COMPARATOR);
-
-                expectedReportFile = new File(workingDirectory.getAbsolutePath() + "/" + "expected_" + testDefinition.outputName());
-                if (expectedReportFile.exists()) {
-                    throw new RuntimeException("File already exists.");
-                } else {
-                    FileUtils.write(expectedReportFile, expected.toJson());
-                }
-
-            } catch (IOException ioe) {
-                log.printf(Level.WARN, "[%s] There was a problem loading the metrics file: [%s].\n"
-                        + "The exception output:\n%s\nContinuing with test but comparision step will fail.",
-                        testName, expectedReportFile.getAbsolutePath(), ioe.toString());
-                expected = null;
-            }
-        } else {
+        if (expectedReportFile == null) {
             log.printf(Level.WARN, "[%s] Missing an expected output metrics file. Skipping comparison step", testName);
         }
 
@@ -321,6 +295,32 @@ public class RunTest extends RunTestBase {
 
         reports.add(actualReportFile);
 
+        if (expectedReportFile != null) {
+            try {
+                expected = WorkflowReport.buildFromJson(expectedReportFile);
+                expected.applyIniExclusions(testDefinition.getIniExclusions());
+
+                expected.applyIniStringSubstitution("\\$\\{workflow_bundle_dir\\}/Workflow_Bundle_[^/]+/[^/]+/",
+                        "\\$\\{workflow_bundle_dir\\}/Workflow_Bundle_" + workflow.getName() + "/" + workflow.getVersion() + "/");
+                expected.applyIniStringSubstitutions(testDefinition.getIniStringSubstitutions());
+                expected.applyIniSubstitutions(testDefinition.getIniSubstitutions());
+
+                List<WorkflowRunReport> expectedWorkflowRunReports = expected.getWorkflowRuns();
+                Collections.sort(expectedWorkflowRunReports, WORKFLOW_RUN_REPORT_COMPARATOR);
+
+                expectedReportFile = new File(workingDirectory.getAbsolutePath() + "/" + "expected_" + testDefinition.outputName());
+                if (expectedReportFile.exists()) {
+                    throw new RuntimeException("File already exists.");
+                } else {
+                    FileUtils.write(expectedReportFile, expected.toJson());
+                }
+
+            } catch (IOException ioe) {
+                log.printf(Level.WARN, "[%s] There was a problem loading expected output:\n" + ioe.getMessage());
+                expected = null;
+            }
+
+        }
         log.printf(Level.INFO, "[%s] Completed generating workflow run report in %s", testName, timer.stop());
     }
 
