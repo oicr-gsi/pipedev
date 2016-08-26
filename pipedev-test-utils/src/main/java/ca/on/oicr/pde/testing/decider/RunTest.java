@@ -238,6 +238,9 @@ public class RunTest extends RunTestBase {
             }
         }
 
+        //run all decider run tests in verbose mode
+        extraArgs.append(" ").append("--verbose");
+
         //configure decider to use provenance settings file
         extraArgs.append(" ").append("--provenance-settings").append(" ").append(provenanceSettings.toAbsolutePath().toString());
 
