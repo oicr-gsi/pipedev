@@ -37,6 +37,10 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import net.sourceforge.seqware.common.hibernate.FindAllTheFiles.Header;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
 import org.joda.time.DateTimeZone;
 
 /**
@@ -236,6 +240,13 @@ public class OicrDecider extends BasicDecider {
     @Override
     public ReturnValue init() {
         ReturnValue ret = new ReturnValue();
+
+        if (this.options.has("verbose")) {
+            Logger logger = Logger.getRootLogger().getLogger("ca.on.oicr");
+            logger.setLevel(Level.DEBUG);
+            logger.removeAllAppenders();
+            logger.addAppender(new ConsoleAppender(new PatternLayout("%p [%d{yyyy/MM/dd HH:mm:ss}] | %m%n")));
+        }
 
         if (provenanceClient == null && options.has("provenance-settings")) {
             ProviderLoader providerLoader;
