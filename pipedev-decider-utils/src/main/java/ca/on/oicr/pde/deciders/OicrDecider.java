@@ -885,6 +885,11 @@ public class OicrDecider extends BasicDecider {
             String sampleTagPrefix = Header.SAMPLE_TAG_PREFIX.getTitle();
             String sequencerRunTagPrefix = Header.SEQUENCER_RUN_TAG_PREFIX.getTitle();
             String laneTagPrefix = Header.LANE_TAG_PREFIX.getTitle();
+            String workflowTagPrefix = "workflow.";
+            String workflowRunTagPrefix = "workflow_run.";
+            String fileTagPrefix = "file.";
+            String iusTagPrefix = "ius.";
+            String processingTagPrefix = "processing.";
 
             List<Map<String, String>> fpList = new ArrayList<>();
             for (FileProvenance fp : provenanceClient.getFileProvenance(params2)) {
@@ -914,19 +919,19 @@ public class OicrDecider extends BasicDecider {
                 f.put("Workflow Name", StringUtils.defaultString(stringSanitizer.apply(fp.getWorkflowName())));
                 f.put("Workflow Version", StringUtils.defaultString(stringSanitizer.apply(fp.getWorkflowVersion())));
                 f.put("Workflow SWID", StringUtils.defaultString(fp.getWorkflowSWID().toString()));
-                f.put("Workflow Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getWorkflowAttributes().entrySet(), mapOfSetsToString))));
+                f.put("Workflow Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(prefixMapKeys(fp.getWorkflowAttributes(), workflowTagPrefix).entrySet(), mapOfSetsToString))));
                 f.put("Workflow Run Name", StringUtils.defaultString(stringSanitizer.apply(fp.getWorkflowRunName())));
                 f.put("Workflow Run Status", StringUtils.defaultString(stringSanitizer.apply(fp.getWorkflowRunStatus())));
                 f.put("Workflow Run SWID", StringUtils.defaultString(fp.getWorkflowRunSWID().toString()));
-                f.put("Workflow Run Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getWorkflowRunAttributes().entrySet(), mapOfSetsToString))));
+                f.put("Workflow Run Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(prefixMapKeys(fp.getWorkflowRunAttributes(), workflowRunTagPrefix).entrySet(), mapOfSetsToString))));
                 f.put("Workflow Run Input File SWAs", StringUtils.defaultString(joiner.join(fp.getWorkflowRunInputFileSWIDs())));
                 f.put("Processing Algorithm", StringUtils.defaultString(stringSanitizer.apply(fp.getProcessingAlgorithm())));
                 f.put("Processing SWID", StringUtils.defaultString(fp.getProcessingSWID().toString()));
-                f.put("Processing Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getProcessingAttributes().entrySet(), mapOfSetsToString))));
+                f.put("Processing Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(prefixMapKeys(fp.getProcessingAttributes(), processingTagPrefix).entrySet(), mapOfSetsToString))));
                 f.put("Processing Status", StringUtils.defaultString(stringSanitizer.apply(fp.getProcessingStatus())));
                 f.put("File Meta-Type", StringUtils.defaultString(stringSanitizer.apply(fp.getFileMetaType())));
                 f.put("File SWID", StringUtils.defaultString(fp.getFileSWID().toString()));
-                f.put("File Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getFileAttributes().entrySet(), mapOfSetsToString))));
+                f.put("File Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(prefixMapKeys(fp.getFileAttributes(), fileTagPrefix).entrySet(), mapOfSetsToString))));
                 f.put("File Path", StringUtils.defaultString(stringSanitizer.apply(fp.getFilePath())));
                 f.put("File Md5sum", StringUtils.defaultString(stringSanitizer.apply(fp.getFileMd5sum())));
                 f.put("File Size", StringUtils.defaultString(stringSanitizer.apply(fp.getFileSize())));
@@ -934,7 +939,7 @@ public class OicrDecider extends BasicDecider {
                 f.put("Path Skip", StringUtils.defaultString(stringSanitizer.apply(fp.getSkip())));
                 f.put("Skip", StringUtils.defaultString(stringSanitizer.apply(fp.getSkip())));
 
-                f.put("IUS Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getIusAttributes().entrySet(), mapOfSetsToString))));
+                f.put("IUS Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(prefixMapKeys(fp.getIusAttributes(), iusTagPrefix).entrySet(), mapOfSetsToString))));
 
                 Collection<IusLimsKey> iusLimsKeys = fp.getIusLimsKeys();
                 f.put("IUS SWID", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getIusSWIDs(), stringSanitizer))));
