@@ -978,8 +978,12 @@ public class OicrDecider extends BasicDecider {
     protected Map<FileProvenanceParam, List<String>> parseOptions() {
         if (provenanceClient != null) {
             Map<FileProvenanceParam, List<String>> map = new EnumMap<>(FileProvenanceParam.class);
-            Set<HumanProvenanceFilters> supportedFilters = Sets.newHashSet(HumanProvenanceFilters.STUDY_NAME,
-                    HumanProvenanceFilters.SAMPLE_NAME, HumanProvenanceFilters.ROOT_SAMPLE_NAME, HumanProvenanceFilters.SEQUENCER_RUN_NAME);
+            Set<HumanProvenanceFilters> supportedFilters = Sets.newHashSet(
+                    HumanProvenanceFilters.STUDY_NAME,
+                    HumanProvenanceFilters.SAMPLE_NAME,
+                    HumanProvenanceFilters.ROOT_SAMPLE_NAME,
+                    HumanProvenanceFilters.SEQUENCER_RUN_NAME,
+                    HumanProvenanceFilters.LANE_NAME);
             if (options.has("all")) {
                 /**
                  * nothing special
