@@ -35,6 +35,8 @@ import net.sourceforge.seqware.common.model.FileProvenanceParam;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.joda.time.DateTimeZone;
 
 /**
@@ -44,8 +46,11 @@ import org.joda.time.DateTimeZone;
 public class Client {
 
     private final DefaultProvenanceClient dpc;
+    private final Logger log;
 
     public Client(String providerSettings) {
+        log = Logger.getLogger(Client.class);
+        log.setLevel(Level.INFO);
 
         ProviderLoader providerLoader;
         try {
@@ -64,12 +69,9 @@ public class Client {
         for (Entry<String, SampleProvenanceProvider> e : providerLoader.getSampleProvenanceProviders().entrySet()) {
             dpc.registerSampleProvenanceProvider(e.getKey(), e.getValue());
         }
-
     }
 
     public void getFileProvenanceReport(String outputFilePath, Map<String, Set<String>> filters) throws IOException {
-        System.out.println("starting");
-
         StringSanitizerBuilder ssbForFields = new StringSanitizerBuilder();
         ssbForFields.add("\t", "\u2300");
         ssbForFields.add(";", "\u2300");
@@ -111,8 +113,9 @@ public class Client {
                 );
         CSVPrinter cp;
         Stopwatch sw = Stopwatch.createStarted();
+        log.info("Starting download of file provenance");
         Collection<FileProvenance> fps = dpc.getFileProvenance(filters);
-        System.out.println(fps.size() + " file provenance records retrieved in " + sw.stop());
+        log.info("Completed download of " + fps.size() + " file provenance records in " + sw.stop());
 
         try (BufferedWriter fw = Files.newBufferedWriter(Paths.get(outputFilePath), StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             cp = new CSVPrinter(fw, cf);
@@ -196,7 +199,7 @@ public class Client {
             fw.flush();
         }
         cp.close();
-        System.out.println("File provenance report formatted and writen to tsv in " + sw.stop());
+        log.info("File provenance report formatted and written to tsv in " + sw.stop());
     }
 
     public static Map<String, Set<String>> getDefaultFilters() {
