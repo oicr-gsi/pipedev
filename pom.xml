@@ -48,7 +48,7 @@
         
         <pipedev-version>2.0-SNAPSHOT</pipedev-version>
         <provenance-version>1.0-SNAPSHOT</provenance-version>
-        <seqware-version>1.1.1-gsi-SNAPSHOT</seqware-version>
+        <seqware-version>1.1.1-gsi-rc1</seqware-version>
         <pinery-version>2.0-SNAPSHOT</pinery-version>
     </properties>
     

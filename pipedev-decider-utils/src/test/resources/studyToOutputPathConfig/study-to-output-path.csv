@@ -1,0 +1,7 @@
+#comments are supported
+
+#also new lines
+TEST_STUDY,/test_study_output_prefix/
+
+#default value to return
+*,/default_study_output_prefix/

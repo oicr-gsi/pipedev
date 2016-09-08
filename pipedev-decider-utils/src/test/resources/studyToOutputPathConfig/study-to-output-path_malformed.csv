@@ -1,0 +1,3 @@
+TEST_STUDY,/test_study_output_prefix/
+TEST_STUDY,/test_study_output_prefix2/
+*,/default_study_output_prefix/

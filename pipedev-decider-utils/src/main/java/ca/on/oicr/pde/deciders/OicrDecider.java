@@ -30,11 +30,13 @@ import ca.on.oicr.gsi.provenance.ProviderLoader;
 import ca.on.oicr.gsi.provenance.SampleProvenanceProvider;
 import ca.on.oicr.gsi.provenance.model.IusLimsKey;
 import ca.on.oicr.gsi.provenance.model.LimsKey;
+import ca.on.oicr.pde.deciders.configuration.StudyToOutputPathConfig;
 import ca.on.oicr.pinery.client.PineryClient;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import java.io.IOException;
 import java.nio.file.Paths;
+import net.sourceforge.seqware.common.err.NotFoundException;
 import net.sourceforge.seqware.common.hibernate.FindAllTheFiles.Header;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.ConsoleAppender;
@@ -137,6 +139,7 @@ public class OicrDecider extends BasicDecider {
     protected ExtendedProvenanceClient provenanceClient;
     private final Function<String, String> stringSanitizer;
     private final Function mapOfSetsToString;
+    protected StudyToOutputPathConfig studyToOutputPathConfig = null;
 
     /**
      * <p>
@@ -160,6 +163,8 @@ public class OicrDecider extends BasicDecider {
         parser.acceptsAll(Arrays.asList("help", "h"), "Prints this help message");
         parser.accepts("verbose", "Enable debug logging");
         defineArgument("output-path", "The absolute path of the directory to put the final file(s) (workflow output-prefix option).", false);
+        defineArgument("study-to-output-path-csv",
+                "The absolulte path to the \"Study To Output Path\" CSV file that defines the workflow \"output-prefix\" (where the workflow output files should be written to)", false);
         defineArgument("output-folder", "The relative path to put the final result(s) (workflow output-dir option).", false);
         defineArgument("after-date", "Optional: Format YYYY-MM-DD. Only run on files that have been modified after a certain date, not inclusive.", false);
         defineArgument("before-date", "Optional: Format YYYY-MM-DD. Only run on files that have been modified before a certain date, not inclusive.", false);
@@ -272,7 +277,7 @@ public class OicrDecider extends BasicDecider {
 
         //initialize collections
         files = new HashMap<>();
-        
+
         if (options.has("help")) {
             System.err.println(get_syntax());
             ret.setExitStatus(ReturnValue.RETURNEDHELPMSG);
@@ -315,7 +320,21 @@ public class OicrDecider extends BasicDecider {
             dpc.registerLaneProvenanceProvider("pinery", pineryProvenanceProvider);
             provenanceClient = dpc;
         }
-        
+
+        if (options.has("study-to-output-path-csv")) {
+            if (options.has("output-path")) {
+                Log.error("Use \"study-to-output-path-csv\" or \"output-path\" - not both");
+                ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
+            }
+
+            try {
+                studyToOutputPathConfig = new StudyToOutputPathConfig(options.valueOf("study-to-output-path-csv").toString());
+            } catch (IOException ex) {
+                Log.error("\"study-to-output-path-csv\" is not accessible");
+                ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
+            }
+        }
+
         return ret;
     }
 
@@ -460,6 +479,40 @@ public class OicrDecider extends BasicDecider {
         //create a new workflow run (with a blank set of ini properties) for each final check
         run = new WorkflowRun(null, attributes);
 
+        //Common decider ini modifications
+        run.addProperty(getCommonIniProperties());
+
+        if (studyToOutputPathConfig != null) {
+            Set<String> studyTitles = new HashSet<>();
+            for (FileAttributes fa : attributes) {
+                if (fa.getStudy() != null) {
+                    studyTitles.add(fa.getStudy());
+                }
+            }
+
+            if (studyTitles.size() == 1) {
+                String studyTitle = Iterables.getOnlyElement(studyTitles);
+                if (studyTitle == null || studyTitle.isEmpty()) {
+                    Log.error("Blank study title for workflow run - expected one study title");
+                    r.setExitStatus(ReturnValue.INVALIDFILE);
+                    return r;
+                }
+
+                try {
+                    String outputPrefix = studyToOutputPathConfig.getOutputPathForStudy(Iterables.getOnlyElement(studyTitles));
+                    run.addProperty("output_prefix", outputPrefix);
+                } catch (NotFoundException nfe) {
+                    Log.error("Study title [" + studyTitle + "] was not found in study-to-output-path-csv");
+                    r.setExitStatus(ReturnValue.INVALIDFILE);
+                    return r;
+                }
+            } else {
+                Log.error("[" + studyTitles.size() + "] study title(s) found for workflow run - expected one study title");
+                r.setExitStatus(ReturnValue.INVALIDFILE);
+                return r;
+            }
+        }
+
         //Check for expected number of input files
         Log.debug("Number of files: " + run.getFiles().length);
         if (numberOfFilesPerGroup != Integer.MIN_VALUE) {
@@ -475,8 +528,11 @@ public class OicrDecider extends BasicDecider {
 
     /**
      * OicrDecider's implementation of getSwidsToLinkWorkflowRunTo() clones the input IusLimsKey object(s)
+     *
      * @param iusLimsKeySwids
+     *
      * @return the IUS accessions of the cloned IusLimsKeys, null if there was an error when building the list
+     *
      * @throws java.lang.Exception if LimsKey cannot be found
      */
     @Override
@@ -485,7 +541,7 @@ public class OicrDecider extends BasicDecider {
             //TODO: each file provenance record already has its associated IusLimsKey(s)
             //refactor this implementation to use file provenance rather than getting the LimsKey(s) again from seqware
             //refactor this implementation to clone all LimsKeys in one seqware call/transaction
-            
+
             //Get all the LimsKey(s) info from seqware
             Set<LimsKey> limsKeys = new HashSet<>();
             for (String swid : iusLimsKeySwids) {
@@ -495,7 +551,7 @@ public class OicrDecider extends BasicDecider {
                 }
                 limsKeys.add(limsKey);
             }
-            
+
             //Clone the upstream LimsKeys 
             if (isDryRunMode()) {
                 //dry run mode enabled - do nothing
@@ -535,9 +591,6 @@ public class OicrDecider extends BasicDecider {
 
         //Get default ini file
         run.addProperty(super.modifyIniFile(commaSeparatedFilePaths, commaSeparatedParentAccessions));
-
-        //Common decider ini modifications
-        run.addProperty(getCommonIniProperties());
 
         //Set the final return value to non-zero as the return value from customizeRun does not actually affect the run state.
         ReturnValue ignoredReturnValue = customizeRun(run);
