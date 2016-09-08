@@ -10,9 +10,13 @@
     <artifactId>pipedev-file-provenance-client</artifactId>
     <packaging>jar</packaging>
     
+    <name>pipedev-file-provenance-client</name>
+    
     <properties>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
+        <seqwareWar>${com.github.seqware:seqware-webservice:war}</seqwareWar>
+        <skipITs>true</skipITs>
     </properties>
     
     <dependencies>
@@ -50,16 +54,68 @@
         <dependency>
             <groupId>net.sf.jopt-simple</groupId>
             <artifactId>jopt-simple</artifactId>
-            <version>5.0.2</version>
+            <version>4.7</version>
         </dependency>
         <dependency>
             <groupId>ca.on.oicr.gsi</groupId>
             <artifactId>pipedev-common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>ca.on.oicr.gsi</groupId>
+            <artifactId>pipedev-test-utils</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.9</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>properties</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.18</version>
+                <configuration>
+                    <skip>${skipITs}</skip>
+                    <systemPropertyVariables>
+                        <dbHost>${dbHost}</dbHost>
+                        <dbPort>${dbPort}</dbPort>
+                        <dbUser>${dbUser}</dbUser>
+                        <dbPassword>${dbPassword}</dbPassword>
+                        <seqwareWar>${seqwareWar}</seqwareWar>
+                    </systemPropertyVariables>
+                    <argLine>-XX:PermSize=256M -XX:MaxPermSize=512M -Xmx4096M</argLine>
+                    <parallel>methods</parallel>
+                    <forkCount>2C</forkCount>
+                    <reuseForks>true</reuseForks>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                        <phase>integration-test</phase>
+                    </execution>
+                    <execution>
+                        <id>verify</id>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                        <phase>verify</phase>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -85,5 +141,4 @@
             </plugin>
         </plugins>
     </build>
-    <name>pipedev-file-provenance-client</name>
 </project>
