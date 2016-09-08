@@ -272,7 +272,7 @@ public class OicrDecider extends BasicDecider {
 
         //initialize collections
         files = new HashMap<>();
-        
+
         if (options.has("help")) {
             System.err.println(get_syntax());
             ret.setExitStatus(ReturnValue.RETURNEDHELPMSG);
@@ -315,7 +315,7 @@ public class OicrDecider extends BasicDecider {
             dpc.registerLaneProvenanceProvider("pinery", pineryProvenanceProvider);
             provenanceClient = dpc;
         }
-        
+
         return ret;
     }
 
@@ -475,8 +475,11 @@ public class OicrDecider extends BasicDecider {
 
     /**
      * OicrDecider's implementation of getSwidsToLinkWorkflowRunTo() clones the input IusLimsKey object(s)
+     *
      * @param iusLimsKeySwids
+     *
      * @return the IUS accessions of the cloned IusLimsKeys, null if there was an error when building the list
+     *
      * @throws java.lang.Exception if LimsKey cannot be found
      */
     @Override
@@ -485,7 +488,7 @@ public class OicrDecider extends BasicDecider {
             //TODO: each file provenance record already has its associated IusLimsKey(s)
             //refactor this implementation to use file provenance rather than getting the LimsKey(s) again from seqware
             //refactor this implementation to clone all LimsKeys in one seqware call/transaction
-            
+
             //Get all the LimsKey(s) info from seqware
             Set<LimsKey> limsKeys = new HashSet<>();
             for (String swid : iusLimsKeySwids) {
@@ -495,7 +498,7 @@ public class OicrDecider extends BasicDecider {
                 }
                 limsKeys.add(limsKey);
             }
-            
+
             //Clone the upstream LimsKeys 
             if (isDryRunMode()) {
                 //dry run mode enabled - do nothing
