@@ -31,7 +31,7 @@ import java.util.Set;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
-import net.sourceforge.seqware.common.model.FileProvenanceParam;
+import ca.on.oicr.gsi.provenance.model.FileProvenanceParam;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.FileUtils;
@@ -215,7 +215,17 @@ public class Client {
         OptionSpec helpOpt = parser.accepts("help").forHelp();
         OptionSpec<String> providerSettingFileOpt = parser.accepts("settings", "Provider settings json file (default: ~/.provenance/settings.json)").withRequiredArg();
         OptionSpec<String> outOpt = parser.accepts("out", "File provenance report TSV output file path").withRequiredArg().required();
+        OptionSpec allOpt = parser.accepts("all",
+                "Get all records rather than only the records that pass the default filters: [processing status = success, workflow run status = completed, skip = false]");
 
+        Map<String, OptionSpec<String>> filterOpts = new HashMap<>();
+        for (FileProvenanceParam fpp : FileProvenanceParam.values()) {
+            String fileProvenanceParamString = fpp.toString();
+            OptionSpec<String> opts = parser.accepts(fileProvenanceParamString, "Filter/select file provenance records by " + fpp.name()).withRequiredArg();
+            filterOpts.put(fileProvenanceParamString, opts);
+        }
+
+        //parse args provided on the command line
         OptionSet options = parser.parse(args);
 
         if (options.has(helpOpt)) {
@@ -236,8 +246,18 @@ public class Client {
             throw new RuntimeException("Output file [" + outputFilePath.toString() + "] already exists");
         }
 
+        Map<String, Set<String>> filterArgs = new HashMap<>();
+        for (Entry<String, OptionSpec<String>> e : filterOpts.entrySet()) {
+            if (options.has(e.getValue())) {
+                filterArgs.put(e.getKey(), Sets.newHashSet(options.valuesOf(e.getValue())));
+            }
+        }
+        if (filterArgs.isEmpty() && !options.has(allOpt)) {
+            filterArgs.putAll(Client.getDefaultFilters());
+        }
+
         Client client = new Client(FileUtils.readFileToString(providerSettingFile.toFile()));
-        client.getFileProvenanceReport(outputFilePath.toString(), Client.getDefaultFilters());
+        client.getFileProvenanceReport(outputFilePath.toString(), filterArgs);
     }
 
 }

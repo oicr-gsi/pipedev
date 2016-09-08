@@ -9,8 +9,6 @@ import com.google.common.collect.Sets;
 import java.util.Collections;
 import net.sourceforge.seqware.common.model.IUS;
 import net.sourceforge.seqware.common.module.FileMetadata;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import ca.on.oicr.gsi.provenance.ExtendedProvenanceClient;
 import ca.on.oicr.gsi.provenance.ProviderLoader;
 import ca.on.oicr.gsi.provenance.ProviderLoader.Provider;
@@ -22,16 +20,20 @@ import ca.on.oicr.pde.testing.metadata.RegressionTestStudy;
 import ca.on.oicr.pde.testing.metadata.SeqwareTestEnvironment;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.h2.util.IOUtils;
-import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 
 /**
  *
@@ -46,7 +48,7 @@ public class ClientIT {
     protected File providerSettings;
     protected File tmpDir;
 
-    @BeforeMethod
+    @BeforeClass
     public void setup() throws IOException {
         String dbHost = System.getProperty("dbHost");
         String dbPort = System.getProperty("dbPort");
@@ -86,12 +88,13 @@ public class ClientIT {
 
         ProviderLoader pl = new ProviderLoader(Arrays.asList(analysisProvider, limsProvenanceProvider));
         tmpDir = FileUtils.getTempDirectory();
-        providerSettings = FileUtils.getFile(tmpDir, "provider-settings.json");
+        providerSettings = File.createTempFile("provider-settings", ".json", tmpDir);
         providerSettings.deleteOnExit();
+        providerSettings.delete();
         FileUtils.writeStringToFile(providerSettings, pl.getProvidersAsJson());
     }
 
-    @BeforeMethod(dependsOnMethods = "setup")
+    @BeforeClass(dependsOnMethods = "setup")
     public void setupData() {
         Workflow upstreamWorkflow = seqwareClient.createWorkflow("UpstreamWorkflow", "0.0", "", DEFAULT_WORKFLOW_PARAMS);
         for (SampleProvenance sp : provenanceClient.getSampleProvenance()) {
@@ -108,21 +111,58 @@ public class ClientIT {
     }
 
     @Test
-    public void clientTest() throws IOException {
-        File output = FileUtils.getFile(tmpDir, "fpr.tsv");
+    public void defaultFiltersTest() throws IOException {
+        Map<String, CSVRecord> recs = executeClient(Collections.EMPTY_LIST);
+
+        //16 records okay, 6 skipped
+        assertEquals(recs.size(), 16);
+    }
+
+    @Test
+    public void noFiltersTest() throws IOException {
+        Map<String, CSVRecord> recs = executeClient(Arrays.asList(
+                "--all"
+        ));
+
+        //16 records okay, 6 skipped
+        assertEquals(recs.size(), 22);
+    }
+
+    @Test
+    public void rootSampleFilterTest() throws IOException {
+        Map<String, CSVRecord> recs = executeClient(Arrays.asList(
+                "--root-sample", "TEST_0003",
+                "--skip", "false"
+        ));
+
+        //2 records okay, 1 skipped
+        assertEquals(recs.size(), 2);
+    }
+
+    private Map<String, CSVRecord> executeClient(List<String> inputArgs) throws IOException {
+        File output = File.createTempFile("fpr", ".tsv", tmpDir);
         output.deleteOnExit();
         output.delete();
-        Client.main(new String[]{"--settings", providerSettings.getCanonicalPath(), "--out", output.getCanonicalPath()});
 
-        Iterable<CSVRecord> records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(IOUtils.getAsciiReader(FileUtils.openInputStream(output)));
+        List<String> args = new ArrayList<>();
+        args.addAll(Arrays.asList(
+                "--settings", providerSettings.getCanonicalPath(),
+                "--out", output.getCanonicalPath()
+        ));
+        args.addAll(inputArgs);
+
+        Client.main(args.toArray(new String[0]));
+
+        Iterable<CSVRecord> records = CSVFormat.newFormat('\t').withFirstRecordAsHeader().parse(IOUtils.getAsciiReader(FileUtils.openInputStream(output)));
         Map<String, CSVRecord> recs = new HashMap<>();
         for (CSVRecord rec : records) {
             recs.put(Long.toString(rec.getRecordNumber()), rec);
         }
-        assertEquals(recs.size(), 16);
+
+        return recs;
     }
 
-    @AfterMethod
+    @AfterClass
     public void destroySeqware() {
         te.shutdown();
     }
