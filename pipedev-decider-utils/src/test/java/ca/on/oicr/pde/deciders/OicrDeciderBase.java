@@ -4,6 +4,7 @@ import ca.on.oicr.gsi.provenance.ExtendedProvenanceClient;
 import ca.on.oicr.gsi.provenance.model.FileProvenance;
 import ca.on.oicr.gsi.provenance.model.FileProvenance.Status;
 import ca.on.oicr.gsi.provenance.model.SampleProvenance;
+import ca.on.oicr.pde.TestUtils;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -36,10 +37,15 @@ import net.sourceforge.seqware.common.model.Workflow;
 import org.joda.time.DateTime;
 import static org.mockito.Mockito.when;
 import ca.on.oicr.pde.client.SeqwareClient;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 import net.sourceforge.seqware.common.model.File;
 import net.sourceforge.seqware.common.model.Processing;
+import org.apache.commons.io.FileUtils;
 
 public class OicrDeciderBase {
 
@@ -124,7 +130,7 @@ public class OicrDeciderBase {
     }
 
     @Test
-    public void deciderOperationModes() throws HttpResponseException {
+    public void deciderOperationModes() throws HttpResponseException, IOException {
 
         SampleProvenance sp = Iterables.getOnlyElement(provenanceClient.getSampleProvenance());
 
@@ -174,6 +180,16 @@ public class OicrDeciderBase {
         run(decider, Arrays.asList("--all", "--ignore-previous-runs", "--launch-max", "0"));
         assertEquals(decider.getWorkflowRuns().size(), 0);
         assertEquals(provenanceClient.getFileProvenance().size(), 4);
+
+        run(decider, Arrays.asList("--all", "--ignore-previous-runs",
+                "--study-to-output-path-csv", TestUtils.getResourceFilePath("studyToOutputPathConfig/test-study-to-output-path.csv").getAbsolutePath(),
+                "--launch-max", "999999")); //TODO: BasicDecider should reset launch-max during init()
+        assertEquals(decider.getWorkflowRuns().size(), 1);
+        Properties p = new Properties();
+        p.load(FileUtils.openInputStream(Paths.get(Iterables.getOnlyElement(decider.getWorkflowRuns())).toFile()));
+        Map<String, String> iniProperties = new HashMap(p);
+        assertEquals(iniProperties.get("output_prefix"), "/tmp/output/path/123/");
+        assertEquals(provenanceClient.getFileProvenance().size(), 5);
     }
 
     @Test

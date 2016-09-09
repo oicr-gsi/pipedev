@@ -35,9 +35,9 @@
                 <display-name>workflow_${workflow-name}</display-name>
         
                 <skipITs>true</skipITs>
-                <skipRunITs>true</skipRunITs>
                 <skipBundleTest>true</skipBundleTest>
-        
+                <skipWorkflowRunITs>false</skipWorkflowRunITs>
+
                 <!--legacy-property-->
                 <workflow-directory-name>${workflow-name}</workflow-directory-name>
         
@@ -317,8 +317,8 @@
                                     <goal>enforce</goal>
                                 </goals>
                                 <configuration>
+                                    <skip>${skipWorkflowRunITs}</skip>
                                     <skip>${skipITs}</skip>
-                                    <skip>${skipRunITs}</skip>
                                     <rules>
                                         <requireProperty>
                                             <property>seqwareDistribution</property>
@@ -403,7 +403,7 @@
                                 </goals>
                                 <phase>integration-test</phase>
                                 <configuration>
-                                    <skip>${skipRunITs}</skip>
+                                    <skip>${skipWorkflowRunITs}</skip>
                                     <suiteXmlFiles>
                                         <suiteXmlFile>${testSuite}</suiteXmlFile>
                                     </suiteXmlFiles>

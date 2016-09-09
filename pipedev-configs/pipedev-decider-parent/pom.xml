@@ -33,8 +33,8 @@
                 <display-name>decider_${project.artifactId}</display-name>
 
                 <skipITs>true</skipITs>
-                <skipRunITs>true</skipRunITs>
-        
+                <skipDeciderRunITs>false</skipDeciderRunITs>
+
                 <!-- default testng test suite -->
                 <testSuite>src/test/resources/development.xml</testSuite>
         
@@ -188,8 +188,8 @@
                                     <goal>enforce</goal>
                                 </goals>
                                 <configuration>
+                                    <skip>${skipDeciderRunITs}</skip>
                                     <skip>${skipITs}</skip>
-                                    <skip>${skipRunITs}</skip>
                                     <rules>
                                         <requireProperty>
                                             <property>workingDirectory</property>
@@ -241,8 +241,8 @@
                                 <configuration>
                                     <rules>
                                         <requireFilesSize>
-                                            <!-- the final jar size should be between 50-60MB -->
-                                            <maxsize>62914560</maxsize>
+                                            <!-- the final jar size should be between 50-100MB -->
+                                            <maxsize>104857600</maxsize>
                                             <minsize>52428800</minsize>
                                             <files>
                                                 <file>${project.build.directory}/${final-name}.jar</file>
@@ -294,7 +294,7 @@
                                 </goals>
                                 <phase>integration-test</phase>
                                 <configuration>
-                                    <skip>${skipRunITs}</skip>
+                                    <skip>${skipDeciderRunITs}</skip>
                                     <suiteXmlFiles>
                                         <suiteXmlFile>${testSuite}</suiteXmlFile>
                                     </suiteXmlFiles>

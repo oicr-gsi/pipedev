@@ -30,13 +30,19 @@ import ca.on.oicr.gsi.provenance.ProviderLoader;
 import ca.on.oicr.gsi.provenance.SampleProvenanceProvider;
 import ca.on.oicr.gsi.provenance.model.IusLimsKey;
 import ca.on.oicr.gsi.provenance.model.LimsKey;
+import ca.on.oicr.pde.deciders.configuration.StudyToOutputPathConfig;
 import ca.on.oicr.pinery.client.PineryClient;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import java.io.IOException;
 import java.nio.file.Paths;
+import net.sourceforge.seqware.common.err.NotFoundException;
 import net.sourceforge.seqware.common.hibernate.FindAllTheFiles.Header;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
 import org.joda.time.DateTimeZone;
 
 /**
@@ -133,6 +139,7 @@ public class OicrDecider extends BasicDecider {
     protected ExtendedProvenanceClient provenanceClient;
     private final Function<String, String> stringSanitizer;
     private final Function mapOfSetsToString;
+    protected StudyToOutputPathConfig studyToOutputPathConfig = null;
 
     /**
      * <p>
@@ -156,6 +163,8 @@ public class OicrDecider extends BasicDecider {
         parser.acceptsAll(Arrays.asList("help", "h"), "Prints this help message");
         parser.accepts("verbose", "Enable debug logging");
         defineArgument("output-path", "The absolute path of the directory to put the final file(s) (workflow output-prefix option).", false);
+        defineArgument("study-to-output-path-csv",
+                "The absolulte path to the \"Study To Output Path\" CSV file that defines the workflow \"output-prefix\" (where the workflow output files should be written to)", false);
         defineArgument("output-folder", "The relative path to put the final result(s) (workflow output-dir option).", false);
         defineArgument("after-date", "Optional: Format YYYY-MM-DD. Only run on files that have been modified after a certain date, not inclusive.", false);
         defineArgument("before-date", "Optional: Format YYYY-MM-DD. Only run on files that have been modified before a certain date, not inclusive.", false);
@@ -237,6 +246,13 @@ public class OicrDecider extends BasicDecider {
     public ReturnValue init() {
         ReturnValue ret = new ReturnValue();
 
+        if (this.options.has("verbose")) {
+            Logger logger = Logger.getRootLogger().getLogger("ca.on.oicr");
+            logger.setLevel(Level.DEBUG);
+            logger.removeAllAppenders();
+            logger.addAppender(new ConsoleAppender(new PatternLayout("%p [%d{yyyy/MM/dd HH:mm:ss}] | %m%n")));
+        }
+
         if (provenanceClient == null && options.has("provenance-settings")) {
             ProviderLoader providerLoader;
             try {
@@ -261,7 +277,7 @@ public class OicrDecider extends BasicDecider {
 
         //initialize collections
         files = new HashMap<>();
-        
+
         if (options.has("help")) {
             System.err.println(get_syntax());
             ret.setExitStatus(ReturnValue.RETURNEDHELPMSG);
@@ -304,7 +320,21 @@ public class OicrDecider extends BasicDecider {
             dpc.registerLaneProvenanceProvider("pinery", pineryProvenanceProvider);
             provenanceClient = dpc;
         }
-        
+
+        if (options.has("study-to-output-path-csv")) {
+            if (options.has("output-path")) {
+                Log.error("Use \"study-to-output-path-csv\" or \"output-path\" - not both");
+                ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
+            }
+
+            try {
+                studyToOutputPathConfig = new StudyToOutputPathConfig(options.valueOf("study-to-output-path-csv").toString());
+            } catch (IOException ex) {
+                Log.error("\"study-to-output-path-csv\" is not accessible");
+                ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
+            }
+        }
+
         return ret;
     }
 
@@ -449,6 +479,40 @@ public class OicrDecider extends BasicDecider {
         //create a new workflow run (with a blank set of ini properties) for each final check
         run = new WorkflowRun(null, attributes);
 
+        //Common decider ini modifications
+        run.addProperty(getCommonIniProperties());
+
+        if (studyToOutputPathConfig != null) {
+            Set<String> studyTitles = new HashSet<>();
+            for (FileAttributes fa : attributes) {
+                if (fa.getStudy() != null) {
+                    studyTitles.add(fa.getStudy());
+                }
+            }
+
+            if (studyTitles.size() == 1) {
+                String studyTitle = Iterables.getOnlyElement(studyTitles);
+                if (studyTitle == null || studyTitle.isEmpty()) {
+                    Log.error("Blank study title for workflow run - expected one study title");
+                    r.setExitStatus(ReturnValue.INVALIDFILE);
+                    return r;
+                }
+
+                try {
+                    String outputPrefix = studyToOutputPathConfig.getOutputPathForStudy(Iterables.getOnlyElement(studyTitles));
+                    run.addProperty("output_prefix", outputPrefix);
+                } catch (NotFoundException nfe) {
+                    Log.error("Study title [" + studyTitle + "] was not found in study-to-output-path-csv");
+                    r.setExitStatus(ReturnValue.INVALIDFILE);
+                    return r;
+                }
+            } else {
+                Log.error("[" + studyTitles.size() + "] study title(s) found for workflow run - expected one study title");
+                r.setExitStatus(ReturnValue.INVALIDFILE);
+                return r;
+            }
+        }
+
         //Check for expected number of input files
         Log.debug("Number of files: " + run.getFiles().length);
         if (numberOfFilesPerGroup != Integer.MIN_VALUE) {
@@ -464,8 +528,11 @@ public class OicrDecider extends BasicDecider {
 
     /**
      * OicrDecider's implementation of getSwidsToLinkWorkflowRunTo() clones the input IusLimsKey object(s)
+     *
      * @param iusLimsKeySwids
+     *
      * @return the IUS accessions of the cloned IusLimsKeys, null if there was an error when building the list
+     *
      * @throws java.lang.Exception if LimsKey cannot be found
      */
     @Override
@@ -474,7 +541,7 @@ public class OicrDecider extends BasicDecider {
             //TODO: each file provenance record already has its associated IusLimsKey(s)
             //refactor this implementation to use file provenance rather than getting the LimsKey(s) again from seqware
             //refactor this implementation to clone all LimsKeys in one seqware call/transaction
-            
+
             //Get all the LimsKey(s) info from seqware
             Set<LimsKey> limsKeys = new HashSet<>();
             for (String swid : iusLimsKeySwids) {
@@ -484,7 +551,7 @@ public class OicrDecider extends BasicDecider {
                 }
                 limsKeys.add(limsKey);
             }
-            
+
             //Clone the upstream LimsKeys 
             if (isDryRunMode()) {
                 //dry run mode enabled - do nothing
@@ -524,9 +591,6 @@ public class OicrDecider extends BasicDecider {
 
         //Get default ini file
         run.addProperty(super.modifyIniFile(commaSeparatedFilePaths, commaSeparatedParentAccessions));
-
-        //Common decider ini modifications
-        run.addProperty(getCommonIniProperties());
 
         //Set the final return value to non-zero as the return value from customizeRun does not actually affect the run state.
         ReturnValue ignoredReturnValue = customizeRun(run);
@@ -885,6 +949,11 @@ public class OicrDecider extends BasicDecider {
             String sampleTagPrefix = Header.SAMPLE_TAG_PREFIX.getTitle();
             String sequencerRunTagPrefix = Header.SEQUENCER_RUN_TAG_PREFIX.getTitle();
             String laneTagPrefix = Header.LANE_TAG_PREFIX.getTitle();
+            String workflowTagPrefix = "workflow.";
+            String workflowRunTagPrefix = "workflow_run.";
+            String fileTagPrefix = "file.";
+            String iusTagPrefix = "ius.";
+            String processingTagPrefix = "processing.";
 
             List<Map<String, String>> fpList = new ArrayList<>();
             for (FileProvenance fp : provenanceClient.getFileProvenance(params2)) {
@@ -914,19 +983,19 @@ public class OicrDecider extends BasicDecider {
                 f.put("Workflow Name", StringUtils.defaultString(stringSanitizer.apply(fp.getWorkflowName())));
                 f.put("Workflow Version", StringUtils.defaultString(stringSanitizer.apply(fp.getWorkflowVersion())));
                 f.put("Workflow SWID", StringUtils.defaultString(fp.getWorkflowSWID().toString()));
-                f.put("Workflow Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getWorkflowAttributes().entrySet(), mapOfSetsToString))));
+                f.put("Workflow Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(prefixMapKeys(fp.getWorkflowAttributes(), workflowTagPrefix).entrySet(), mapOfSetsToString))));
                 f.put("Workflow Run Name", StringUtils.defaultString(stringSanitizer.apply(fp.getWorkflowRunName())));
                 f.put("Workflow Run Status", StringUtils.defaultString(stringSanitizer.apply(fp.getWorkflowRunStatus())));
                 f.put("Workflow Run SWID", StringUtils.defaultString(fp.getWorkflowRunSWID().toString()));
-                f.put("Workflow Run Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getWorkflowRunAttributes().entrySet(), mapOfSetsToString))));
+                f.put("Workflow Run Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(prefixMapKeys(fp.getWorkflowRunAttributes(), workflowRunTagPrefix).entrySet(), mapOfSetsToString))));
                 f.put("Workflow Run Input File SWAs", StringUtils.defaultString(joiner.join(fp.getWorkflowRunInputFileSWIDs())));
                 f.put("Processing Algorithm", StringUtils.defaultString(stringSanitizer.apply(fp.getProcessingAlgorithm())));
                 f.put("Processing SWID", StringUtils.defaultString(fp.getProcessingSWID().toString()));
-                f.put("Processing Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getProcessingAttributes().entrySet(), mapOfSetsToString))));
+                f.put("Processing Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(prefixMapKeys(fp.getProcessingAttributes(), processingTagPrefix).entrySet(), mapOfSetsToString))));
                 f.put("Processing Status", StringUtils.defaultString(stringSanitizer.apply(fp.getProcessingStatus())));
                 f.put("File Meta-Type", StringUtils.defaultString(stringSanitizer.apply(fp.getFileMetaType())));
                 f.put("File SWID", StringUtils.defaultString(fp.getFileSWID().toString()));
-                f.put("File Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getFileAttributes().entrySet(), mapOfSetsToString))));
+                f.put("File Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(prefixMapKeys(fp.getFileAttributes(), fileTagPrefix).entrySet(), mapOfSetsToString))));
                 f.put("File Path", StringUtils.defaultString(stringSanitizer.apply(fp.getFilePath())));
                 f.put("File Md5sum", StringUtils.defaultString(stringSanitizer.apply(fp.getFileMd5sum())));
                 f.put("File Size", StringUtils.defaultString(stringSanitizer.apply(fp.getFileSize())));
@@ -934,7 +1003,7 @@ public class OicrDecider extends BasicDecider {
                 f.put("Path Skip", StringUtils.defaultString(stringSanitizer.apply(fp.getSkip())));
                 f.put("Skip", StringUtils.defaultString(stringSanitizer.apply(fp.getSkip())));
 
-                f.put("IUS Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getIusAttributes().entrySet(), mapOfSetsToString))));
+                f.put("IUS Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(prefixMapKeys(fp.getIusAttributes(), iusTagPrefix).entrySet(), mapOfSetsToString))));
 
                 Collection<IusLimsKey> iusLimsKeys = fp.getIusLimsKeys();
                 f.put("IUS SWID", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getIusSWIDs(), stringSanitizer))));
@@ -962,8 +1031,12 @@ public class OicrDecider extends BasicDecider {
     protected Map<FileProvenanceParam, List<String>> parseOptions() {
         if (provenanceClient != null) {
             Map<FileProvenanceParam, List<String>> map = new EnumMap<>(FileProvenanceParam.class);
-            Set<HumanProvenanceFilters> supportedFilters = Sets.newHashSet(HumanProvenanceFilters.STUDY_NAME,
-                    HumanProvenanceFilters.SAMPLE_NAME, HumanProvenanceFilters.ROOT_SAMPLE_NAME, HumanProvenanceFilters.SEQUENCER_RUN_NAME);
+            Set<HumanProvenanceFilters> supportedFilters = Sets.newHashSet(
+                    HumanProvenanceFilters.STUDY_NAME,
+                    HumanProvenanceFilters.SAMPLE_NAME,
+                    HumanProvenanceFilters.ROOT_SAMPLE_NAME,
+                    HumanProvenanceFilters.SEQUENCER_RUN_NAME,
+                    HumanProvenanceFilters.LANE_NAME);
             if (options.has("all")) {
                 /**
                  * nothing special
