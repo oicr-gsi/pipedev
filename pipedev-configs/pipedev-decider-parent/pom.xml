@@ -49,8 +49,28 @@
             
             <dependencies>
                 <dependency>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>javax.ws.rs-api</artifactId>
+                    <version>2.0.1</version>
+                    <scope>compile</scope>
+                </dependency>
+                <dependency>
                     <groupId>com.github.seqware</groupId>
                     <artifactId>seqware-pipeline</artifactId>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>com.github.seqware</groupId>
+                            <artifactId>seqware-admin-webservice</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.apache.hadoop</groupId>
+                            <artifactId>hadoop-hdfs</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.apache.hadoop</groupId>
+                            <artifactId>hadoop-common</artifactId>
+                        </exclusion>
+                    </exclusions>
                 </dependency>
                 <dependency>
                     <groupId>com.github.seqware</groupId>
@@ -241,9 +261,8 @@
                                 <configuration>
                                     <rules>
                                         <requireFilesSize>
-                                            <!-- the final jar size should be between 50-100MB -->
+                                            <!-- assume something is included in the final jar that should not be if the final size >100MB -->
                                             <maxsize>104857600</maxsize>
-                                            <minsize>52428800</minsize>
                                             <files>
                                                 <file>${project.build.directory}/${final-name}.jar</file>
                                             </files>
