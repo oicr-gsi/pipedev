@@ -12,12 +12,7 @@
     
     <name>pipedev-provenance-impl</name>
     <url>http://maven.apache.org</url>
-    
-    <properties>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
-    </properties>
-    
+
     <dependencies>
         <dependency>
             <groupId>ca.on.oicr.gsi</groupId>
@@ -36,7 +31,6 @@
             <artifactId>seqware-common</artifactId>
         </dependency>
     </dependencies>
-
 
     <build>
         <plugins>
