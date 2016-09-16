@@ -43,6 +43,7 @@ import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.joda.time.DateTimeZone;
 
 /**
@@ -247,10 +248,14 @@ public class OicrDecider extends BasicDecider {
         ReturnValue ret = new ReturnValue();
 
         if (this.options.has("verbose")) {
-            Logger logger = Logger.getRootLogger().getLogger("ca.on.oicr");
+            //log4j logging configuration
+            Logger logger = Logger.getLogger("ca.on.oicr");
             logger.setLevel(Level.DEBUG);
             logger.removeAllAppenders();
             logger.addAppender(new ConsoleAppender(new PatternLayout("%p [%d{yyyy/MM/dd HH:mm:ss}] | %m%n")));
+
+            //log4j2 logging configuration
+            Configurator.setRootLevel(org.apache.logging.log4j.Level.DEBUG);
         }
 
         if (provenanceClient == null && options.has("provenance-settings")) {
