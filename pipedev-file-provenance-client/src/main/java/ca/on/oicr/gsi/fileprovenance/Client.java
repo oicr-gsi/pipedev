@@ -35,8 +35,8 @@ import ca.on.oicr.gsi.provenance.model.FileProvenanceParam;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.joda.time.DateTimeZone;
 
 /**
@@ -46,12 +46,9 @@ import org.joda.time.DateTimeZone;
 public class Client {
 
     private final DefaultProvenanceClient dpc;
-    private final Logger log;
+    private final Logger log = LogManager.getLogger(Client.class);
 
     public Client(String providerSettings) {
-        log = Logger.getLogger(Client.class);
-        log.setLevel(Level.INFO);
-
         ProviderLoader providerLoader;
         try {
             providerLoader = new ProviderLoader(providerSettings);

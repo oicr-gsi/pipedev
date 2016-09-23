@@ -95,6 +95,10 @@
             <groupId>ca.on.oicr.gsi</groupId>
             <artifactId>pipedev-common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
