@@ -1,7 +1,6 @@
 package ca.on.oicr.pde.testing.decider;
 
 import ca.on.oicr.gsi.provenance.ProvenanceClient;
-import ca.on.oicr.gsi.provenance.model.FileProvenance;
 import ca.on.oicr.pde.reports.WorkflowReport;
 import ca.on.oicr.pde.diff.ObjectDiff;
 import ca.on.oicr.pde.testing.common.RunTestBase;
@@ -25,13 +24,9 @@ import org.testng.Assert;
 import org.testng.annotations.*;
 import org.testng.annotations.Test;
 import ca.on.oicr.pde.client.SeqwareClient;
-import ca.on.oicr.pde.dao.reader.FileProvenanceClient;
 import ca.on.oicr.pde.model.ReducedFileProvenanceReportRecord;
-import ca.on.oicr.pde.model.WorkflowRunReportRecord;
 import ca.on.oicr.pde.reports.WorkflowRunReport;
-import com.google.common.collect.Lists;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -256,20 +251,11 @@ public class RunTest extends RunTestBase {
         log.printf(Level.INFO, "[%s] Completed workflow run scheduling in %s", testName, timer.stop());
     }
 
-    private static FileProvenanceClient postExecutionFpc;
-
-    @AfterGroups(groups = "execution")
-    public void loadPostExecutionSharedData() {
-        Collection<FileProvenance> fps = provenanceClient.getFileProvenance();
-        postExecutionFpc = new FileProvenanceClient(Lists.newArrayList(fps));
-    }
-
     @Test(dependsOnGroups = "execution", groups = "postExecution")
     public void calculateWorkflowRunReport() throws JsonProcessingException, IOException {
         Timer timer = Timer.start();
 
-        List<WorkflowRunReportRecord> wrrs = seqwareClient.getWorkflowRunRecords(workflow);
-        actual = WorkflowReport.generateReport(seqwareClient, postExecutionFpc, wrrs);
+        actual = WorkflowReport.generateReport(seqwareClient, provenanceClient, workflow);
 
         File actualUnmodifiedReportFile = new File(workingDirectory.getAbsolutePath() + "/tmp/" + testDefinition.outputName());
         if (actualUnmodifiedReportFile.exists()) {
