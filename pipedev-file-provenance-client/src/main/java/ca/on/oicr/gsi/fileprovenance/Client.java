@@ -31,7 +31,7 @@ import java.util.Set;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
-import ca.on.oicr.gsi.provenance.model.FileProvenanceParam;
+import ca.on.oicr.gsi.provenance.FileProvenanceFilter;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.FileUtils;
@@ -68,7 +68,7 @@ public class Client {
         }
     }
 
-    public void getFileProvenanceReport(String outputFilePath, Map<String, Set<String>> filters) throws IOException {
+    public void getFileProvenanceReport(String outputFilePath, Map<FileProvenanceFilter, Set<String>> filters) throws IOException {
         StringSanitizerBuilder ssbForFields = new StringSanitizerBuilder();
         ssbForFields.add("\t", "\u2300");
         ssbForFields.add(";", "\u2300");
@@ -199,11 +199,11 @@ public class Client {
         log.info("File provenance report formatted and written to tsv in " + sw.stop());
     }
 
-    public static Map<String, Set<String>> getDefaultFilters() {
-        Map<String, Set<String>> filters = new HashMap<>();
-        filters.put(FileProvenanceParam.processing_status.toString(), Sets.newHashSet("success"));
-        filters.put(FileProvenanceParam.workflow_run_status.toString(), Sets.newHashSet("completed"));
-        filters.put(FileProvenanceParam.skip.toString(), Sets.newHashSet("false"));
+    public static Map<FileProvenanceFilter, Set<String>> getDefaultFilters() {
+        Map<FileProvenanceFilter, Set<String>> filters = new HashMap<>();
+        filters.put(FileProvenanceFilter.processing_status, Sets.newHashSet("success"));
+        filters.put(FileProvenanceFilter.workflow_run_status, Sets.newHashSet("completed"));
+        filters.put(FileProvenanceFilter.skip, Sets.newHashSet("false"));
         return filters;
     }
 
@@ -216,7 +216,7 @@ public class Client {
                 "Get all records rather than only the records that pass the default filters: [processing status = success, workflow run status = completed, skip = false]");
 
         Map<String, OptionSpec<String>> filterOpts = new HashMap<>();
-        for (FileProvenanceParam fpp : FileProvenanceParam.values()) {
+        for (FileProvenanceFilter fpp : FileProvenanceFilter.values()) {
             String fileProvenanceParamString = fpp.toString();
             OptionSpec<String> opts = parser.accepts(fileProvenanceParamString, "Filter/select file provenance records by " + fpp.name()).withRequiredArg();
             filterOpts.put(fileProvenanceParamString, opts);
@@ -243,10 +243,10 @@ public class Client {
             throw new RuntimeException("Output file [" + outputFilePath.toString() + "] already exists");
         }
 
-        Map<String, Set<String>> filterArgs = new HashMap<>();
+        Map<FileProvenanceFilter, Set<String>> filterArgs = new HashMap<>();
         for (Entry<String, OptionSpec<String>> e : filterOpts.entrySet()) {
             if (options.has(e.getValue())) {
-                filterArgs.put(e.getKey(), Sets.newHashSet(options.valuesOf(e.getValue())));
+                filterArgs.put(FileProvenanceFilter.fromString(e.getKey()), Sets.newHashSet(options.valuesOf(e.getValue())));
             }
         }
         if (filterArgs.isEmpty() && !options.has(allOpt)) {

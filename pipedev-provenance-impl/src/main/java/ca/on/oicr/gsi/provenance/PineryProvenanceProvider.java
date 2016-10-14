@@ -1,7 +1,6 @@
 package ca.on.oicr.gsi.provenance;
 
 import ca.on.oicr.gsi.provenance.model.SampleProvenance;
-import ca.on.oicr.gsi.provenance.model.FileProvenanceParam;
 import ca.on.oicr.gsi.provenance.model.LaneProvenance;
 import ca.on.oicr.pinery.client.HttpResponseException;
 import ca.on.oicr.pinery.client.PineryClient;
@@ -45,10 +44,10 @@ public class PineryProvenanceProvider implements SampleProvenanceProvider, LaneP
     }
 
     @Override
-    public Collection<SampleProvenance> getSampleProvenance(Map<String, Set<String>> filters) {
+    public Collection<SampleProvenance> getSampleProvenance(Map<FileProvenanceFilter, Set<String>> filters) {
         Set<SampleProvenance> sps = new HashSet<>();
         for (SampleProvenance sp : getSampleProvenance()) {
-            if (filters.containsKey(FileProvenanceParam.sample.toString())) {
+            if (filters.containsKey(FileProvenanceFilter.sample)) {
                 Set<String> sampleValues = new HashSet<>();
                 if (sp.getSampleProvenanceId() != null) {
                     sampleValues.add(sp.getSampleProvenanceId());
@@ -56,22 +55,22 @@ public class PineryProvenanceProvider implements SampleProvenanceProvider, LaneP
                 if (sp.getSampleName() != null) {
                     sampleValues.add(sp.getSampleName());
                 }
-                if (Sets.intersection(sampleValues, filters.get(FileProvenanceParam.sample.toString())).isEmpty()) {
+                if (Sets.intersection(sampleValues, filters.get(FileProvenanceFilter.sample)).isEmpty()) {
                     continue;
                 }
             }
 
-            if (filters.containsKey(FileProvenanceParam.sequencer_run.toString())) {
+            if (filters.containsKey(FileProvenanceFilter.sequencer_run)) {
                 Set<String> sampleValues = new HashSet<>();
                 if (sp.getSequencerRunName() != null) {
                     sampleValues.add(sp.getSequencerRunName());
                 }
-                if (Sets.intersection(sampleValues, filters.get(FileProvenanceParam.sequencer_run.toString())).isEmpty()) {
+                if (Sets.intersection(sampleValues, filters.get(FileProvenanceFilter.sequencer_run)).isEmpty()) {
                     continue;
                 }
             }
 
-            if (filters.containsKey(FileProvenanceParam.lane.toString())) {
+            if (filters.containsKey(FileProvenanceFilter.lane)) {
                 Set<String> sampleValues = new HashSet<>();
                 if (sp.getLaneNumber() != null) {
                     sampleValues.add(sp.getLaneNumber());
@@ -79,7 +78,7 @@ public class PineryProvenanceProvider implements SampleProvenanceProvider, LaneP
 //                if (sp.getLaneName() != null) {
 //                    sampleValues.add(sp.getLaneName());
 //                }
-                if (Sets.intersection(sampleValues, filters.get(FileProvenanceParam.lane.toString())).isEmpty()) {
+                if (Sets.intersection(sampleValues, filters.get(FileProvenanceFilter.lane)).isEmpty()) {
                     continue;
                 }
             }
@@ -99,7 +98,7 @@ public class PineryProvenanceProvider implements SampleProvenanceProvider, LaneP
     }
 
     @Override
-    public Collection<LaneProvenance> getLaneProvenance(Map<String, Set<String>> filters) {
+    public Collection<LaneProvenance> getLaneProvenance(Map<FileProvenanceFilter, Set<String>> filters) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

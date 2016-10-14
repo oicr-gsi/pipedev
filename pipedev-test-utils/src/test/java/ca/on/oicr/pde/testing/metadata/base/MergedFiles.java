@@ -1,5 +1,6 @@
 package ca.on.oicr.pde.testing.metadata.base;
 
+import ca.on.oicr.gsi.provenance.FileProvenanceFilter;
 import ca.on.oicr.gsi.provenance.model.FileProvenance;
 import ca.on.oicr.gsi.provenance.model.LimsKey;
 import ca.on.oicr.gsi.provenance.model.SampleProvenance;
@@ -16,7 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import net.sourceforge.seqware.common.model.FileProvenanceParam;
 import net.sourceforge.seqware.common.model.IUS;
 import net.sourceforge.seqware.common.model.Processing;
 import net.sourceforge.seqware.common.model.WorkflowRun;
@@ -40,7 +40,7 @@ public class MergedFiles extends Base {
     public MergedFiles(TestContext ctx) {
         super(ctx);
     }
-    
+
     @Test
     public void setupFiles() {
 
@@ -50,12 +50,12 @@ public class MergedFiles extends Base {
         //create first bam (sequencer run 1, lane 1, IUS1)
 
         SampleProvenance sp;
-        Map<String, Set<String>> filters = new HashMap<>();
+        Map<FileProvenanceFilter, Set<String>> filters = new HashMap<>();
         IUS i;
         FileMetadata file;
 
         filters.clear();
-        filters.put(FileProvenanceParam.sample.toString(), Sets.newHashSet(seqwareObjects.get("IUS1").getSwAccession().toString()));
+        filters.put(FileProvenanceFilter.sample, Sets.newHashSet(seqwareObjects.get("IUS1").getSwAccession().toString()));
         sp = Iterables.getOnlyElement(provenanceClient.getSampleProvenance(filters));
         i = seqwareClient.addLims("seqware", sp.getSampleProvenanceId(), sp.getVersion(), sp.getLastModified());
         file = new FileMetadata();
@@ -70,7 +70,7 @@ public class MergedFiles extends Base {
 
         //create second bam (sequencer run 1, lane 2, IUS2)
         filters.clear();
-        filters.put(FileProvenanceParam.sample.toString(), Sets.newHashSet(seqwareObjects.get("IUS2").getSwAccession().toString()));
+        filters.put(FileProvenanceFilter.sample, Sets.newHashSet(seqwareObjects.get("IUS2").getSwAccession().toString()));
         sp = Iterables.getOnlyElement(provenanceClient.getSampleProvenance(filters));
         i = seqwareClient.addLims("seqware", sp.getSampleProvenanceId(), sp.getVersion(), sp.getLastModified());
         file = new FileMetadata();
@@ -85,7 +85,7 @@ public class MergedFiles extends Base {
 
         //create third bam (sequencer run 2, lane 1, IUS9)
         filters.clear();
-        filters.put(FileProvenanceParam.sample.toString(), Sets.newHashSet(seqwareObjects.get("IUS9").getSwAccession().toString()));
+        filters.put(FileProvenanceFilter.sample, Sets.newHashSet(seqwareObjects.get("IUS9").getSwAccession().toString()));
         sp = Iterables.getOnlyElement(provenanceClient.getSampleProvenance(filters));
         i = seqwareClient.addLims("seqware", sp.getSampleProvenanceId(), sp.getVersion(), sp.getLastModified());
         file = new FileMetadata();
@@ -113,8 +113,8 @@ public class MergedFiles extends Base {
         Set<SeqwareObject> ps = new HashSet<>();
         Set<IusLimsKey> iks = new HashSet<>();
         for (WorkflowRun wr : inputFileWorkflowRuns) {
-            Map<String, Set<String>> filters = new HashMap<>();
-            filters.put(FileProvenanceParam.workflow_run.toString(), Sets.newHashSet(wr.getSwAccession().toString()));
+            Map<FileProvenanceFilter, Set<String>> filters = new HashMap<>();
+            filters.put(FileProvenanceFilter.workflow_run, Sets.newHashSet(wr.getSwAccession().toString()));
 
             for (FileProvenance f : provenanceClient.getFileProvenance(filters)) {
                 iks.addAll(f.getIusLimsKeys());
@@ -141,7 +141,7 @@ public class MergedFiles extends Base {
         seqwareClient.createWorkflowRun(mergeBams, newIus, ps, Arrays.asList(file));
 
         Collection<FileProvenance> fps = provenanceClient.getFileProvenance();
-        
+
         Assert.assertEquals(fps.size(), 6);
 
         List<ReducedFileProvenanceReportRecord> files = getAllFiles();
@@ -155,9 +155,10 @@ public class MergedFiles extends Base {
     @Test(dependsOnMethods = "mergeFiles")
     public void skipSequencerRun() {
         seqwareLimsClient.annotate(seqwareObjects.getSequencerRun("TEST_SEQUENCER_RUN_002"), true, "sequencer run skip test");
+        seqwareLimsClient.refresh();
 
-        Map<String, Set<String>> filters = new HashMap<>();
-        filters.put(FileProvenanceParam.sequencer_run.toString(), Sets.newHashSet("TEST_SEQUENCER_RUN_002"));
+        Map<FileProvenanceFilter, Set<String>> filters = new HashMap<>();
+        filters.put(FileProvenanceFilter.sequencer_run, Sets.newHashSet("TEST_SEQUENCER_RUN_002"));
 
         List<FileProvenance> fps = new ArrayList<>(provenanceClient.getFileProvenance(filters));
 
@@ -174,9 +175,9 @@ public class MergedFiles extends Base {
 
     @Test(dependsOnMethods = "skipSequencerRun")
     public void checkFileProvenanceRecordsAreSkipped() {
-        Map<String, Set<String>> filters = new HashMap<>();
-        filters.put(FileProvenanceParam.workflow.toString(), Sets.newHashSet(mergeBams.getSwAccession().toString()));
-//        filters.put(FileProvenanceParam.skip.toString(), Sets.newHashSet("false"));
+        Map<FileProvenanceFilter, Set<String>> filters = new HashMap<>();
+        filters.put(FileProvenanceFilter.workflow, Sets.newHashSet(mergeBams.getSwAccession().toString()));
+//        filters.put(FileProvenanceFilter.skip, Sets.newHashSet("false"));
         List<FileProvenance> fps = new ArrayList<>(provenanceClient.getFileProvenance(filters));
 
         Assert.assertEquals(fps.size(), 3);
@@ -187,8 +188,8 @@ public class MergedFiles extends Base {
 
     @Test(dependsOnMethods = "skipSequencerRun")
     public void checkReducedFileProvenanceRecordsAreSkipped() {
-        Map<String, Set<String>> filters = new HashMap<>();
-        filters.put(FileProvenanceParam.workflow.toString(), Sets.newHashSet(mergeBams.getSwAccession().toString()));
+        Map<FileProvenanceFilter, Set<String>> filters = new HashMap<>();
+        filters.put(FileProvenanceFilter.workflow, Sets.newHashSet(mergeBams.getSwAccession().toString()));
         List<FileProvenance> fps = new ArrayList<>(provenanceClient.getFileProvenance(filters));
 
         List<ReducedFileProvenanceReportRecord> rfs = new FileProvenanceClient(fps).getAllFiles();

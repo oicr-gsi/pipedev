@@ -35,6 +35,12 @@ public class MetadataBackedSeqwareLimsClient implements SeqwareLimsClient {
     }
 
     @Override
+    public void refresh() {
+        metadata.refreshSampleProvenance();
+        metadata.refreshLaneProvenance();
+    }
+
+    @Override
     public Experiment createExperiment(String description, String platformId, Study study, String title) {
 
         checkNotNull(platformId);
