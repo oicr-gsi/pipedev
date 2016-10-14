@@ -1,5 +1,6 @@
 package ca.on.oicr.pde.reports;
 
+import ca.on.oicr.gsi.provenance.FileProvenanceFilter;
 import ca.on.oicr.gsi.provenance.model.FileProvenance;
 import ca.on.oicr.gsi.provenance.ProvenanceClient;
 import ca.on.oicr.pde.dao.reader.FileProvenanceClient;
@@ -8,7 +9,6 @@ import ca.on.oicr.pde.model.WorkflowRunReportRecord;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.common.collect.Lists;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,7 +26,12 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import ca.on.oicr.pde.client.SeqwareClient;
+import com.google.common.base.Functions;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableSet;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.SortedSet;
 
 public class WorkflowReport {
@@ -288,8 +293,8 @@ public class WorkflowReport {
 
     public static WorkflowReport generateReport(SeqwareClient seqwareClient, FileProvenanceClient fpc, List<WorkflowRunReportRecord> wrrs) {
 
-        WorkflowReport t = new WorkflowReport();
-        t.setWorkflowRunCount(wrrs.size());
+        WorkflowReport workflowReport = new WorkflowReport();
+        workflowReport.setWorkflowRunCount(wrrs.size());
 
         for (WorkflowRunReportRecord wrr : wrrs) {
 
@@ -304,24 +309,24 @@ public class WorkflowReport {
             //Get the workflow run's input file(s) (file accession(s))
             List<Integer> inputFileAccessions = seqwareClient.getWorkflowRunInputFiles(workflowRun);
 
-            t.addStudies(fpc.getStudy(Arrays.asList(workflowRunSwid)));
-            t.addSamples(fpc.getSamples(Arrays.asList(workflowRunSwid)));
-            t.addSequencerRuns(fpc.getSequencerRuns(Arrays.asList(workflowRunSwid)));
-            t.addLanes(fpc.getLanes(Arrays.asList(workflowRunSwid)));
-            t.addWorkflows(fpc.getWorkflows(inputFileAccessions));
-            t.addProcessingAlgorithms(fpc.getProcessingAlgorithms(inputFileAccessions));
-            t.addFileMetaTypes(fpc.getFileMetaTypes(inputFileAccessions));
+            workflowReport.addStudies(fpc.getStudy(Arrays.asList(workflowRunSwid)));
+            workflowReport.addSamples(fpc.getSamples(Arrays.asList(workflowRunSwid)));
+            workflowReport.addSequencerRuns(fpc.getSequencerRuns(Arrays.asList(workflowRunSwid)));
+            workflowReport.addLanes(fpc.getLanes(Arrays.asList(workflowRunSwid)));
+            workflowReport.addWorkflows(fpc.getWorkflows(inputFileAccessions));
+            workflowReport.addProcessingAlgorithms(fpc.getProcessingAlgorithms(inputFileAccessions));
+            workflowReport.addFileMetaTypes(fpc.getFileMetaTypes(inputFileAccessions));
 
             List<ReducedFileProvenanceReportRecord> files = fpc.getFiles(inputFileAccessions);
-            if (files.size() > t.getMaxInputFiles()) {
-                t.setMaxInputFiles(files.size());
+            if (inputFileAccessions.size() > workflowReport.getMaxInputFiles()) {
+                workflowReport.setMaxInputFiles(inputFileAccessions.size());
             }
 
-            if (files.size() < t.getMinInputFiles()) {
-                t.setMinInputFiles(files.size());
+            if (inputFileAccessions.size() < workflowReport.getMinInputFiles()) {
+                workflowReport.setMinInputFiles(inputFileAccessions.size());
             }
 
-            t.setTotalInputFiles(t.getTotalInputFiles() + files.size());
+            workflowReport.setTotalInputFiles(workflowReport.getTotalInputFiles() + inputFileAccessions.size());
 
             //get the ini that the decider scheduled
             Map<String, String> ini = seqwareClient.getWorkflowRunIni(workflowRun);
@@ -330,18 +335,39 @@ public class WorkflowReport {
             workflowRunReport.setWorkflowIni(ini);
             workflowRunReport.setFiles(files);
 
-            t.addWorkflowRun(workflowRunReport);
+            workflowReport.addWorkflowRun(workflowRunReport);
         }
 
-        return t;
+        return workflowReport;
     }
 
     public static WorkflowReport generateReport(SeqwareClient seqwareClient, ProvenanceClient provenanceClient, Workflow workflow) {
-        Collection<FileProvenance> fps = provenanceClient.getFileProvenance();
-        FileProvenanceClient fpc = new FileProvenanceClient(Lists.newArrayList(fps));
+        //get all file provenance records for the workflow
+        Map<FileProvenanceFilter, Set<String>> workflowFilter = new HashMap<>();
+        workflowFilter.put(FileProvenanceFilter.workflow, ImmutableSet.of(workflow.getSwAccession().toString()));
+        Collection<FileProvenance> workflowRunFileProvenanceRecords = provenanceClient.getFileProvenance(workflowFilter);
+
+        //additionally, get all input file file provenance records for the above workflow
+        Set<String> inputFiles = new HashSet<>();
+        for (FileProvenance fp : workflowRunFileProvenanceRecords) {
+            inputFiles.addAll(Collections2.transform(fp.getWorkflowRunInputFileSWIDs(), Functions.toStringFunction()));
+        }
+        Collection<FileProvenance> inputFileProvenanceRecords;
+        if (inputFiles.isEmpty()) {
+            inputFileProvenanceRecords = Collections.EMPTY_LIST;
+        } else {
+            Map<FileProvenanceFilter, Set<String>> inputFileFilter = new HashMap<>();
+            inputFileFilter.put(FileProvenanceFilter.file, inputFiles);
+            inputFileProvenanceRecords = provenanceClient.getFileProvenance(inputFileFilter);
+        }
+
+        //aggregate file provenance records
+        List<FileProvenance> fps = new ArrayList<>();
+        fps.addAll(workflowRunFileProvenanceRecords);
+        fps.addAll(inputFileProvenanceRecords);
+        FileProvenanceClient fpc = new FileProvenanceClient(fps);
 
         List<WorkflowRunReportRecord> wrrs = seqwareClient.getWorkflowRunRecords(workflow);
-
         return generateReport(seqwareClient, fpc, wrrs);
     }
 }

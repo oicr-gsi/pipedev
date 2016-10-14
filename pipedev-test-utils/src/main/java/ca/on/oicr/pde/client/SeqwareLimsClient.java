@@ -1,6 +1,5 @@
 package ca.on.oicr.pde.client;
 
-
 import net.sourceforge.seqware.common.model.IUS;
 import net.sourceforge.seqware.common.model.Annotatable;
 import net.sourceforge.seqware.common.model.Experiment;
@@ -9,7 +8,6 @@ import net.sourceforge.seqware.common.model.Lane;
 import net.sourceforge.seqware.common.model.Sample;
 import net.sourceforge.seqware.common.model.SequencerRun;
 import net.sourceforge.seqware.common.model.Study;
-
 
 /**
  *
@@ -33,5 +31,7 @@ public interface SeqwareLimsClient {
     public <T extends Annotatable & FirstTierModel> void annotate(T o, String key, String value);
 
     public <T extends Annotatable & FirstTierModel> void annotate(T o, boolean skip, String reason);
+
+    public void refresh();
 
 }

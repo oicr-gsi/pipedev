@@ -5,6 +5,7 @@ import ca.on.oicr.gsi.common.transformation.StringSanitizerBuilder;
 import ca.on.oicr.gsi.provenance.AnalysisProvenanceProvider;
 import ca.on.oicr.gsi.provenance.DefaultProvenanceClient;
 import ca.on.oicr.gsi.provenance.ExtendedProvenanceClient;
+import ca.on.oicr.gsi.provenance.FileProvenanceFilter;
 import ca.on.oicr.gsi.provenance.LaneProvenanceProvider;
 import ca.on.oicr.gsi.provenance.MultiThreadedDefaultProvenanceClient;
 import ca.on.oicr.gsi.provenance.PineryProvenanceProvider;
@@ -43,6 +44,7 @@ import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.joda.time.DateTimeZone;
 
 /**
@@ -247,10 +249,14 @@ public class OicrDecider extends BasicDecider {
         ReturnValue ret = new ReturnValue();
 
         if (this.options.has("verbose")) {
-            Logger logger = Logger.getRootLogger().getLogger("ca.on.oicr");
+            //log4j logging configuration
+            Logger logger = Logger.getLogger("ca.on.oicr");
             logger.setLevel(Level.DEBUG);
             logger.removeAllAppenders();
             logger.addAppender(new ConsoleAppender(new PatternLayout("%p [%d{yyyy/MM/dd HH:mm:ss}] | %m%n")));
+
+            //log4j2 logging configuration
+            Configurator.setRootLevel(org.apache.logging.log4j.Level.DEBUG);
         }
 
         if (provenanceClient == null && options.has("provenance-settings")) {
@@ -934,12 +940,21 @@ public class OicrDecider extends BasicDecider {
     protected List<Map<String, String>> getFileProvenanceReport(Map<FileProvenanceParam, List<String>> params) {
         if (provenanceClient != null) {
 
-            Map<String, Set<String>> params2 = new HashMap<>();
+            Map<FileProvenanceFilter, Set<String>> params2 = new HashMap<>();
+
+            //convert all BasicDecider file provenance params to GSI file provenance filters
             for (Entry<FileProvenanceParam, List<String>> e : params.entrySet()) {
-                params2.put(e.getKey().toString(), Sets.newHashSet(e.getValue()));
+                params2.put(FileProvenanceFilter.valueOf(e.getKey().name()), Sets.newHashSet(e.getValue()));
             }
-            params2.put(FileProvenanceParam.processing_status.toString(), Sets.newHashSet("success"));
-            params2.put(FileProvenanceParam.workflow_run_status.toString(), Sets.newHashSet("completed"));
+
+            //we're only interested in processing analysis that successfully completed
+            params2.put(FileProvenanceFilter.processing_status, Sets.newHashSet("success"));
+            params2.put(FileProvenanceFilter.workflow_run_status, Sets.newHashSet("completed"));
+
+            //only get the analysis with the metatype of interest
+            if (getMetaType() != null && !getMetaType().isEmpty()) {
+                params2.put(FileProvenanceFilter.file_meta_type, Sets.newHashSet(getMetaType()));
+            }
 
             Joiner joiner = Joiner.on(";").skipNulls();
             final String EMPTY_STRING = "";

@@ -39,12 +39,20 @@ public class ShellExecutor implements SeqwareExecutor {
         this.environmentVariables = new HashMap<>();
         environmentVariables.put("SEQWARE_SETTINGS", this.seqwareSettings.getAbsolutePath());
 
+        StringBuilder javaOptions = new StringBuilder();
+
+        String javaOptsFromMaven = System.getProperty("java_opts");
+        if (javaOptsFromMaven != null && !javaOptsFromMaven.isEmpty()) {
+            javaOptions.append(javaOptsFromMaven);
+            javaOptions.append(" ");
+        }
+
         // Setup a java tmp dir that is located within the working directory
         File javaTmpDir = new File(workingDirectory + "/" + "javaTmp");
         javaTmpDir.mkdir();
-        environmentVariables.put("_JAVA_OPTIONS", System.getenv("_JAVA_OPTIONS") == null
-                ? "-Djava.io.tmpdir=" + javaTmpDir.getAbsolutePath()
-                : System.getenv("_JAVA_OPTIONS") + " " + "-Djava.io.tmpdir=" + javaTmpDir.getAbsolutePath());
+        javaOptions.append("-Djava.io.tmpdir=").append(javaTmpDir.getAbsolutePath());
+
+        environmentVariables.put("_JAVA_OPTIONS", javaOptions.toString());
 
         // Setup an output/logging directory for command output
         loggingDirectory = new File(workingDirectory + "/" + "logs");
