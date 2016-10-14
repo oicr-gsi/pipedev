@@ -296,6 +296,9 @@
                                 <webserviceUrl>${webserviceUrl}</webserviceUrl>
                                 <schedulingSystem>${schedulingSystem}</schedulingSystem>
                                 <schedulingHost>${schedulingHost}</schedulingHost>
+
+                                <!-- args to run deciders with-->
+                                <java_opts>-Xmx4g</java_opts>
                             </systemPropertyVariables>
                         </configuration>
                         <executions>
@@ -313,6 +316,9 @@
                                 </goals>
                                 <phase>integration-test</phase>
                                 <configuration>
+                                    <!-- testng tests manages its own threads-->
+                                    <forkCount>0</forkCount>
+
                                     <skip>${skipDeciderRunITs}</skip>
                                     <suiteXmlFiles>
                                         <suiteXmlFile>${testSuite}</suiteXmlFile>
