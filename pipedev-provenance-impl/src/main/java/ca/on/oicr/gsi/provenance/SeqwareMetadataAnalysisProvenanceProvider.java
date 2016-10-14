@@ -30,8 +30,8 @@ public class SeqwareMetadataAnalysisProvenanceProvider implements AnalysisProven
     }
 
     @Override
-    public Collection<AnalysisProvenance> getAnalysisProvenance(Map<String, Set<String>> filters) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Collection<AnalysisProvenance> getAnalysisProvenance(Map<FileProvenanceFilter, Set<String>> filters) {
+        return (List<AnalysisProvenance>) (List<?>) metadata.getAnalysisProvenance(filters);
     }
 
 }

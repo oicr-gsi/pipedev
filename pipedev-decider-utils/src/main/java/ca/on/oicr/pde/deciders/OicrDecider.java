@@ -5,6 +5,7 @@ import ca.on.oicr.gsi.common.transformation.StringSanitizerBuilder;
 import ca.on.oicr.gsi.provenance.AnalysisProvenanceProvider;
 import ca.on.oicr.gsi.provenance.DefaultProvenanceClient;
 import ca.on.oicr.gsi.provenance.ExtendedProvenanceClient;
+import ca.on.oicr.gsi.provenance.FileProvenanceFilter;
 import ca.on.oicr.gsi.provenance.LaneProvenanceProvider;
 import ca.on.oicr.gsi.provenance.MultiThreadedDefaultProvenanceClient;
 import ca.on.oicr.gsi.provenance.PineryProvenanceProvider;
@@ -939,12 +940,21 @@ public class OicrDecider extends BasicDecider {
     protected List<Map<String, String>> getFileProvenanceReport(Map<FileProvenanceParam, List<String>> params) {
         if (provenanceClient != null) {
 
-            Map<String, Set<String>> params2 = new HashMap<>();
+            Map<FileProvenanceFilter, Set<String>> params2 = new HashMap<>();
+
+            //convert all BasicDecider file provenance params to GSI file provenance filters
             for (Entry<FileProvenanceParam, List<String>> e : params.entrySet()) {
-                params2.put(e.getKey().toString(), Sets.newHashSet(e.getValue()));
+                params2.put(FileProvenanceFilter.valueOf(e.getKey().name()), Sets.newHashSet(e.getValue()));
             }
-            params2.put(FileProvenanceParam.processing_status.toString(), Sets.newHashSet("success"));
-            params2.put(FileProvenanceParam.workflow_run_status.toString(), Sets.newHashSet("completed"));
+
+            //we're only interested in processing analysis that successfully completed
+            params2.put(FileProvenanceFilter.processing_status, Sets.newHashSet("success"));
+            params2.put(FileProvenanceFilter.workflow_run_status, Sets.newHashSet("completed"));
+
+            //only get the analysis with the metatype of interest
+            if (getMetaType() != null && !getMetaType().isEmpty()) {
+                params2.put(FileProvenanceFilter.file_meta_type, Sets.newHashSet(getMetaType()));
+            }
 
             Joiner joiner = Joiner.on(";").skipNulls();
             final String EMPTY_STRING = "";

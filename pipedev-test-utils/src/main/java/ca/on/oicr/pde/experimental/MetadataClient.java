@@ -2,6 +2,7 @@ package ca.on.oicr.pde.experimental;
 
 import ca.on.oicr.gsi.provenance.model.FileProvenance;
 import ca.on.oicr.gsi.provenance.ProvenanceClient;
+import ca.on.oicr.gsi.provenance.FileProvenanceFilter;
 import ca.on.oicr.pde.reports.WorkflowReport;
 import ca.on.oicr.pde.reports.WorkflowRunReport;
 import com.google.common.collect.Sets;
@@ -11,7 +12,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import net.sourceforge.seqware.common.model.FileProvenanceParam;
 import net.sourceforge.seqware.common.model.Workflow;
 import net.sourceforge.seqware.common.model.WorkflowRun;
 import ca.on.oicr.pde.client.SeqwareClient;
@@ -31,8 +31,8 @@ public class MetadataClient {
     }
 
     public WorkflowReport getWorkflowReport(Workflow workflow) {
-        Map<String, Set<String>> filters = new HashMap<>();
-        filters.put(FileProvenanceParam.workflow.toString(), Sets.newHashSet(workflow.getSwAccession().toString()));
+        Map<FileProvenanceFilter, Set<String>> filters = new HashMap<>();
+        filters.put(FileProvenanceFilter.workflow, Sets.newHashSet(workflow.getSwAccession().toString()));
 
         Collection<FileProvenance> fps = provenanceClient.getFileProvenance(filters);
         WorkflowReport t = new WorkflowReport();
@@ -45,8 +45,8 @@ public class MetadataClient {
             for (Integer i : fp.getWorkflowRunInputFileSWIDs()) {
                 inputFileAccessions.add(i.toString());
             }
-            Map<String, Set<String>> filters2 = new HashMap<>();
-            filters2.put(FileProvenanceParam.file.toString(), inputFileAccessions);
+            Map<FileProvenanceFilter, Set<String>> filters2 = new HashMap<>();
+            filters2.put(FileProvenanceFilter.file, inputFileAccessions);
             Collection<FileProvenance> inputFiles = provenanceClient.getFileProvenance(filters2);
 
             t.addStudies(fp.getStudyTitles());

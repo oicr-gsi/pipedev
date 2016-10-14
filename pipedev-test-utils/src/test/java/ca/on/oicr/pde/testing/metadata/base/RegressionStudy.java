@@ -1,5 +1,6 @@
 package ca.on.oicr.pde.testing.metadata.base;
 
+import ca.on.oicr.gsi.provenance.FileProvenanceFilter;
 import ca.on.oicr.gsi.provenance.model.SampleProvenance;
 import ca.on.oicr.pde.dao.reader.FileProvenanceClient;
 import ca.on.oicr.pde.model.ReducedFileProvenanceReportRecord;
@@ -22,7 +23,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import net.sourceforge.seqware.common.model.FileProvenanceParam;
 import net.sourceforge.seqware.common.model.IUS;
 import net.sourceforge.seqware.common.model.Workflow;
 import net.sourceforge.seqware.common.module.FileMetadata;
@@ -37,11 +37,11 @@ import ca.on.oicr.pde.client.SeqwareClient;
 public class RegressionStudy extends Base {
 
     protected int numberOfThreads = 1;
-    
+
     public RegressionStudy(TestContext ctx) {
         super(ctx);
     }
-    
+
     @Test
     public void attachFilesToTestStudy() throws MalformedURLException, InterruptedException, ExecutionException {
 
@@ -73,8 +73,8 @@ public class RegressionStudy extends Base {
         int okayCount = 0;
         int nullCount = 0;
 
-        Map<String, Set<String>> filters = new HashMap<>();
-        filters.put(FileProvenanceParam.workflow_run.toString(), Sets.newHashSet(Lists.transform(workflowRunIds, Functions.toStringFunction())));
+        Map<FileProvenanceFilter, Set<String>> filters = new HashMap<>();
+        filters.put(FileProvenanceFilter.workflow_run, Sets.newHashSet(Lists.transform(workflowRunIds, Functions.toStringFunction())));
 
         List<ReducedFileProvenanceReportRecord> files = new FileProvenanceClient(Lists.newArrayList(provenanceClient.getFileProvenance(filters))).getAllFiles();
         for (ReducedFileProvenanceReportRecord f : files) {
@@ -106,8 +106,8 @@ public class RegressionStudy extends Base {
     }
 
     private List<Callable<Integer>> generateFiles(SeqwareObject parent, String workflowName, int numberOfFiles) {
-        Map<String, Set<String>> filters = new HashMap<>();
-        filters.put(FileProvenanceParam.sample.toString(), Sets.newHashSet(parent.getSwAccession().toString()));
+        Map<FileProvenanceFilter, Set<String>> filters = new HashMap<>();
+        filters.put(FileProvenanceFilter.sample, Sets.newHashSet(parent.getSwAccession().toString()));
         SampleProvenance sp = Iterables.getOnlyElement(provenanceClient.getSampleProvenance(filters));
         IUS ius = seqwareClient.addLims("seqware", sp.getSampleProvenanceId(), sp.getVersion(), sp.getLastModified());
 
