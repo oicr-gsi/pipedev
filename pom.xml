@@ -48,7 +48,7 @@
         <pipedev-version>2.0-rc2</pipedev-version>
         <provenance-version>1.0-rc2</provenance-version>
         <seqware-version>1.1.1-gsi-rc2</seqware-version>
-        <pinery-version>2.0-rc2</pinery-version>
+        <pinery-version>2.0-rc4</pinery-version>
     </properties>
     
     <prerequisites>
