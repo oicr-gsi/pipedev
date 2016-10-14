@@ -950,6 +950,10 @@ public class OicrDecider extends BasicDecider {
             //we're only interested in processing analysis that successfully completed
             params2.put(FileProvenanceFilter.processing_status, Sets.newHashSet("success"));
             params2.put(FileProvenanceFilter.workflow_run_status, Sets.newHashSet("completed"));
+
+            //only get the analysis with the metatype of interest
+            if (getMetaType() != null && !getMetaType().isEmpty()) {
+                params2.put(FileProvenanceFilter.file_meta_type, Sets.newHashSet(getMetaType()));
             }
 
             Joiner joiner = Joiner.on(";").skipNulls();
