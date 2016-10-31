@@ -489,31 +489,28 @@ public class OicrDecider extends BasicDecider {
         run.addProperty(getCommonIniProperties());
 
         if (studyToOutputPathConfig != null) {
-            Set<String> studyTitles = new HashSet<>();
+            Set<String> outputPrefixes = new HashSet<>();
             for (FileAttributes fa : attributes) {
-                if (fa.getStudy() != null) {
-                    studyTitles.add(fa.getStudy());
-                }
-            }
-
-            if (studyTitles.size() == 1) {
-                String studyTitle = Iterables.getOnlyElement(studyTitles);
+                String studyTitle = fa.getStudy();
                 if (studyTitle == null || studyTitle.isEmpty()) {
                     Log.error("Blank study title for workflow run - expected one study title");
                     r.setExitStatus(ReturnValue.INVALIDFILE);
                     return r;
+                } else {
+                    try {
+                        outputPrefixes.add(studyToOutputPathConfig.getOutputPathForStudy(fa.getStudy()));
+                    } catch (NotFoundException nfe) {
+                        Log.error("Study title [" + studyTitle + "] was not found in study-to-output-path-csv");
+                        r.setExitStatus(ReturnValue.INVALIDFILE);
+                        return r;
+                    }
                 }
+            }
 
-                try {
-                    String outputPrefix = studyToOutputPathConfig.getOutputPathForStudy(Iterables.getOnlyElement(studyTitles));
-                    run.addProperty("output_prefix", outputPrefix);
-                } catch (NotFoundException nfe) {
-                    Log.error("Study title [" + studyTitle + "] was not found in study-to-output-path-csv");
-                    r.setExitStatus(ReturnValue.INVALIDFILE);
-                    return r;
-                }
+            if (outputPrefixes.size() == 1) {
+                run.addProperty("output_prefix", Iterables.getOnlyElement(outputPrefixes));
             } else {
-                Log.error("[" + studyTitles.size() + "] study title(s) found for workflow run - expected one study title");
+                Log.error("[" + outputPrefixes.size() + "] output prefixes found for workflow run - expected one output prefix");
                 r.setExitStatus(ReturnValue.INVALIDFILE);
                 return r;
             }
