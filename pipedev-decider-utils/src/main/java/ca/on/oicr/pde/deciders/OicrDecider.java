@@ -493,7 +493,8 @@ public class OicrDecider extends BasicDecider {
             for (FileAttributes fa : attributes) {
                 String studyTitle = fa.getStudy();
                 if (studyTitle == null || studyTitle.isEmpty()) {
-                    Log.error("Blank study title for workflow run - expected one study title");
+                    Log.warn("Blank study title for workflow run - expected one study title.\n"
+                            + "Files = [" + Joiner.on(",\n").join(attributes) + "]");
                     r.setExitStatus(ReturnValue.INVALIDFILE);
                     return r;
                 } else {
