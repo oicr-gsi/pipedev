@@ -26,7 +26,6 @@ public class JsonReportBuilder implements ReportBuilder {
         om.configure(SerializationFeature.INDENT_OUTPUT, true);
         try (BufferedWriter fw = Files.newBufferedWriter(outputFilePath, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
             om.writeValue(fw, fps);
-            fw.flush();
         }
     }
 

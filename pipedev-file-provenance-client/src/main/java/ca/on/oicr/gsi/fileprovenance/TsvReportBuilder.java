@@ -67,13 +67,14 @@ public class TsvReportBuilder implements ReportBuilder {
                         "File Meta-Type", "File SWID", "File Attributes", "File Path", "File Md5sum", "File Size", "File Description",
                         "Path Skip", "Skip",
                         "Status", "Status Reason",
-                        "LIMS Provider", "LIMS Id", "LIMS Version", "LIMS Last Modified"
+                        "LIMS IUS SWID", "LIMS Provider", "LIMS ID", "LIMS Version", "LIMS Last Modified"
                 );
 
-        try (BufferedWriter fw = Files.newBufferedWriter(outputFilePath, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW)) {
-            CSVPrinter cp = new CSVPrinter(fw, cf);
+        try (BufferedWriter fw = Files.newBufferedWriter(outputFilePath, StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW); 
+                CSVPrinter cp = new CSVPrinter(fw, cf)) {
             Joiner j = Joiner.on(delimiter).skipNulls();
             for (FileProvenance fp : fps) {
+
                 List cs = new ArrayList<>();
 
                 cs.add(fp.getLastModified().withZone(DateTimeZone.forID("America/Toronto")).toString("YYYY-MM-dd HH:mm:ss.SSS"));
@@ -146,10 +147,17 @@ public class TsvReportBuilder implements ReportBuilder {
                 cs.add(fp.getStatus().toString());
                 cs.add(fp.getStatusReason());
 
+                IusLimsKey ilk = Iterables.getOnlyElement(fp.getIusLimsKeys());
+                LimsKey lk = ilk.getLimsKey();
+                cs.add(ilk.getIusSWID().toString());
+                cs.add(lk.getProvider());
+                cs.add(lk.getId());
+                cs.add(lk.getVersion());
+                cs.add(lk.getLastModified().toString());
+
                 cp.printRecord(cs);
             }
             fw.flush();
-            cp.close();
         }
     }
 

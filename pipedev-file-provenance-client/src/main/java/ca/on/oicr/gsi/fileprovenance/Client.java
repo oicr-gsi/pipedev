@@ -22,6 +22,7 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import ca.on.oicr.gsi.provenance.FileProvenanceFilter;
+import joptsimple.BuiltinHelpFormatter;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -91,6 +92,7 @@ public class Client {
         OptionSet options = parser.parse(args);
 
         if (options.has(helpOpt)) {
+            parser.formatHelpWith(new BuiltinHelpFormatter(200, 5));
             parser.printHelpOn(System.out);
             System.exit(0);
         }
