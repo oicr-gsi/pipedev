@@ -45,7 +45,7 @@ public class TsvReportBuilder implements ReportBuilder {
         FunctionBuilder fb = new FunctionBuilder(ssbForAttributes.build());
         Function mapOfSetsToString = fb.getFunction();
 
-        String nullString = " ";
+        String nullString = "";
         Character delimiter = ';';
 
         CSVFormat cf = CSVFormat.newFormat('\t')
