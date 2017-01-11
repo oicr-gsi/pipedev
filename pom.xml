@@ -46,7 +46,7 @@
         <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
         
         <pipedev-version>2.0-rc3-SNAPSHOT</pipedev-version>
-        <provenance-version>1.0-rc5-SNAPSHOT</provenance-version>
+        <provenance-version>1.0-rc5</provenance-version>
         <seqware-version>1.1.1-gsi-rc3-SNAPSHOT</seqware-version>
         <pinery-version>2.0-rc5</pinery-version>
     </properties>
