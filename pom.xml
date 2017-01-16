@@ -47,7 +47,7 @@
         
         <pipedev-version>2.0-rc3-SNAPSHOT</pipedev-version>
         <provenance-version>1.0-rc6</provenance-version>
-        <seqware-version>1.1.1-gsi-rc2</seqware-version>
+        <seqware-version>1.1.1-gsi-rc3</seqware-version>
         <pinery-version>2.0-rc6</pinery-version>
     </properties>
     
@@ -181,11 +181,15 @@
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
                 <version>2.6.3</version>
-                <type>jar</type>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
+                <version>2.6.3</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-joda</artifactId>
                 <version>2.6.3</version>
             </dependency>
             <dependency>
