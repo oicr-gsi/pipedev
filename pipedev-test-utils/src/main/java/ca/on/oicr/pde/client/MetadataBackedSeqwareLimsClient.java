@@ -1,6 +1,7 @@
 package ca.on.oicr.pde.client;
 
 import ca.on.oicr.pde.experimental.PDEPluginRunner;
+import static com.google.common.base.Preconditions.checkNotNull;
 import io.seqware.common.model.SequencerRunStatus;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,16 +10,17 @@ import java.util.Map;
 import net.sourceforge.seqware.common.metadata.Metadata;
 import net.sourceforge.seqware.common.model.Annotatable;
 import net.sourceforge.seqware.common.model.Experiment;
+import net.sourceforge.seqware.common.model.File;
 import net.sourceforge.seqware.common.model.FirstTierModel;
 import net.sourceforge.seqware.common.model.IUS;
 import net.sourceforge.seqware.common.model.Lane;
 import net.sourceforge.seqware.common.model.Sample;
 import net.sourceforge.seqware.common.model.SequencerRun;
 import net.sourceforge.seqware.common.model.Study;
+import net.sourceforge.seqware.common.model.WorkflowRun;
 import net.sourceforge.seqware.common.module.ReturnValue;
 import net.sourceforge.seqware.pipeline.plugins.AttributeAnnotator;
 import org.apache.commons.lang3.math.NumberUtils;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  *
@@ -227,6 +229,10 @@ public class MetadataBackedSeqwareLimsClient implements SeqwareLimsClient {
             return "sequencer-run";
         } else if (o instanceof Lane) {
             return "lane";
+        } else if (o instanceof WorkflowRun) {
+            return "workflow-run";
+        } else if (o instanceof File) {
+            return "file";
         } else {
             throw new RuntimeException("Unsupported annotable class: " + o.getClass().getName());
         }
