@@ -16,18 +16,22 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import net.sourceforge.seqware.common.model.Workflow;
 import ca.on.oicr.pde.client.SeqwareClient;
+import ca.on.oicr.pde.client.SeqwareLimsClient;
 import ca.on.oicr.pde.testing.metadata.RegressionTestStudy;
 import ca.on.oicr.pde.testing.metadata.SeqwareTestEnvironment;
+import com.google.common.collect.Iterables;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import net.sourceforge.seqware.common.model.WorkflowRun;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.h2.util.IOUtils;
+import org.joda.time.DateTime;
 import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -44,6 +48,7 @@ public class ClientIT {
     protected SeqwareTestEnvironment te;
     protected ExtendedProvenanceClient provenanceClient;
     protected SeqwareClient seqwareClient;
+    protected SeqwareLimsClient seqwareLimsClient;
     protected final Map<String, String> DEFAULT_WORKFLOW_PARAMS = ImmutableMap.of("test_key", "test_value");
     protected File providerSettings;
     protected File tmpDir;
@@ -68,6 +73,7 @@ public class ClientIT {
         te = new SeqwareTestEnvironment(dbHost, dbPort, dbUser, dbPassword, seqwareWar);
         RegressionTestStudy r = new RegressionTestStudy(te.getSeqwareLimsClient());
         seqwareClient = te.getSeqwareClient();
+        seqwareLimsClient = te.getSeqwareLimsClient();
 
         SeqwareMetadataLimsMetadataProvenanceProvider seqwareProvenanceProvider = new SeqwareMetadataLimsMetadataProvenanceProvider(te.getMetadata());
         DefaultProvenanceClient dpc = new DefaultProvenanceClient();
@@ -137,6 +143,28 @@ public class ClientIT {
 
         //2 records okay, 1 skipped
         assertEquals(recs.size(), 2);
+    }
+
+    @Test
+    public void recordsWithErrorStatusTest() throws IOException {
+        Workflow upstreamWorkflow = seqwareClient.createWorkflow("UpstreamWorkflow2", "0.0", "", DEFAULT_WORKFLOW_PARAMS);
+        IUS i = seqwareClient.addLims("seqware", "does_not_exist", "does_not_exist", DateTime.now());
+        FileMetadata file = new FileMetadata();
+        file.setDescription("description");
+        file.setMd5sum("md5sum");
+        file.setFilePath("/tmp/file_" + i.getSwAccession());
+        file.setMetaType("text/plain");
+        file.setType("type?");
+        file.setSize(1L);
+        WorkflowRun wr = seqwareClient.createWorkflowRun(upstreamWorkflow, Sets.newHashSet(i), Collections.EMPTY_LIST, Lists.newArrayList(file));
+        Map<String, CSVRecord> recs;
+        recs = executeClient(Arrays.asList("--workflow-run", Integer.toString(wr.getSwAccession())));
+        assertEquals(Iterables.getOnlyElement(recs.values()).get("Status"), "ERROR");
+        assertEquals(executeClient(Collections.EMPTY_LIST).size(), 17);
+
+        //skip the above workflow run with status "ERROR"
+        seqwareLimsClient.annotate(wr, "skip", "skip workflow run");
+        assertEquals(executeClient(Collections.EMPTY_LIST).size(), 16);
     }
 
     private Map<String, CSVRecord> executeClient(List<String> inputArgs) throws IOException {
