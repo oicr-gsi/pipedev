@@ -29,16 +29,21 @@ import net.sourceforge.seqware.pipeline.deciders.BasicDecider;
 import net.sourceforge.seqware.pipeline.plugins.fileprovenance.ProvenanceUtility.HumanProvenanceFilters;
 import ca.on.oicr.gsi.provenance.ProviderLoader;
 import ca.on.oicr.gsi.provenance.SampleProvenanceProvider;
-import ca.on.oicr.gsi.provenance.model.IusLimsKey;
+import ca.on.oicr.gsi.provenance.model.FileProvenanceFromAnalysisProvenance;
 import ca.on.oicr.gsi.provenance.model.LimsKey;
 import ca.on.oicr.pde.deciders.configuration.StudyToOutputPathConfig;
 import ca.on.oicr.pinery.client.PineryClient;
 import com.google.common.base.Function;
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.nio.file.Paths;
+import joptsimple.OptionSpec;
 import net.sourceforge.seqware.common.err.NotFoundException;
 import net.sourceforge.seqware.common.hibernate.FindAllTheFiles.Header;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
@@ -142,6 +147,10 @@ public class OicrDecider extends BasicDecider {
     private final Function<String, String> stringSanitizer;
     private final Function mapOfSetsToString;
     protected StudyToOutputPathConfig studyToOutputPathConfig = null;
+    private EnumMap<FileProvenanceFilter, Set<String>> includeFilters = new EnumMap<>(FileProvenanceFilter.class);
+    private EnumMap<FileProvenanceFilter, Set<String>> excludeFilters = new EnumMap<>(FileProvenanceFilter.class);
+    private final EnumMap<FileProvenanceFilter, OptionSpec<String>> includeFilterOpts;
+    private final EnumMap<FileProvenanceFilter, OptionSpec<String>> excludeFilterOpts;
 
     /**
      * <p>
@@ -190,6 +199,17 @@ public class OicrDecider extends BasicDecider {
         ssbForAttributes.add("&", "\u2300");
         FunctionBuilder fb = new FunctionBuilder(ssbForAttributes.build());
         mapOfSetsToString = fb.getFunction();
+
+        includeFilterOpts = new EnumMap<>(FileProvenanceFilter.class);
+        excludeFilterOpts = new EnumMap<>(FileProvenanceFilter.class);
+        for (FileProvenanceFilter filter : getSupportedFilters()) {
+            includeFilterOpts.put(filter, parser.accepts("include-" + filter.toString()).withRequiredArg().withValuesSeparatedBy(",").ofType(String.class));
+            excludeFilterOpts.put(filter, parser.accepts("exclude-" + filter.toString()).withRequiredArg().withValuesSeparatedBy(",").ofType(String.class));
+        }
+    }
+
+    protected static FileProvenanceFilter[] getSupportedFilters() {
+        return FileProvenanceFilter.values();
     }
 
     public OicrDecider(ExtendedProvenanceClient provenanceClient) {
@@ -341,6 +361,27 @@ public class OicrDecider extends BasicDecider {
             }
         }
 
+        includeFilters = new EnumMap<>(FileProvenanceFilter.class);
+        for (Entry<FileProvenanceFilter, OptionSpec<String>> e : includeFilterOpts.entrySet()) {
+            if (options.has(e.getValue())) {
+                includeFilters.put(e.getKey(), ImmutableSet.copyOf(options.valuesOf(e.getValue())));
+            }
+        }
+
+        excludeFilters = new EnumMap<>(FileProvenanceFilter.class);
+        for (Entry<FileProvenanceFilter, OptionSpec<String>> e : excludeFilterOpts.entrySet()) {
+            if (options.has(e.getValue())) {
+                excludeFilters.put(e.getKey(), ImmutableSet.copyOf(options.valuesOf(e.getValue())));
+            }
+        }
+
+        //to be enabled at a later date
+//        if (!(options.has("--all") ^ !includeFilters.isEmpty() ^ !excludeFilters.isEmpty())) {
+//            Log.error("--all or a combination the following include/exclude filters should be specified ["
+//                    + Joiner.on(",").join(Lists.transform(Arrays.asList(getSupportedFilters()), Functions.toStringFunction()))
+//                    + "].");
+//            ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
+//        }
         return ret;
     }
 
@@ -489,31 +530,29 @@ public class OicrDecider extends BasicDecider {
         run.addProperty(getCommonIniProperties());
 
         if (studyToOutputPathConfig != null) {
-            Set<String> studyTitles = new HashSet<>();
+            Set<String> outputPrefixes = new HashSet<>();
             for (FileAttributes fa : attributes) {
-                if (fa.getStudy() != null) {
-                    studyTitles.add(fa.getStudy());
+                String studyTitle = fa.getStudy();
+                if (studyTitle == null || studyTitle.isEmpty()) {
+                    Log.warn("Blank study title for workflow run - expected one study title.\n"
+                            + "Files = [" + Joiner.on(",\n").join(attributes) + "]");
+                    r.setExitStatus(ReturnValue.INVALIDFILE);
+                    return r;
+                } else {
+                    try {
+                        outputPrefixes.add(studyToOutputPathConfig.getOutputPathForStudy(fa.getStudy()));
+                    } catch (NotFoundException nfe) {
+                        Log.error("Study title [" + studyTitle + "] was not found in study-to-output-path-csv");
+                        r.setExitStatus(ReturnValue.INVALIDFILE);
+                        return r;
+                    }
                 }
             }
 
-            if (studyTitles.size() == 1) {
-                String studyTitle = Iterables.getOnlyElement(studyTitles);
-                if (studyTitle == null || studyTitle.isEmpty()) {
-                    Log.error("Blank study title for workflow run - expected one study title");
-                    r.setExitStatus(ReturnValue.INVALIDFILE);
-                    return r;
-                }
-
-                try {
-                    String outputPrefix = studyToOutputPathConfig.getOutputPathForStudy(Iterables.getOnlyElement(studyTitles));
-                    run.addProperty("output_prefix", outputPrefix);
-                } catch (NotFoundException nfe) {
-                    Log.error("Study title [" + studyTitle + "] was not found in study-to-output-path-csv");
-                    r.setExitStatus(ReturnValue.INVALIDFILE);
-                    return r;
-                }
+            if (outputPrefixes.size() == 1) {
+                run.addProperty("output_prefix", Iterables.getOnlyElement(outputPrefixes));
             } else {
-                Log.error("[" + studyTitles.size() + "] study title(s) found for workflow run - expected one study title");
+                Log.error("[" + outputPrefixes.size() + "] output prefixes found for workflow run - expected one output prefix");
                 r.setExitStatus(ReturnValue.INVALIDFILE);
                 return r;
             }
@@ -940,20 +979,34 @@ public class OicrDecider extends BasicDecider {
     protected List<Map<String, String>> getFileProvenanceReport(Map<FileProvenanceParam, List<String>> params) {
         if (provenanceClient != null) {
 
-            Map<FileProvenanceFilter, Set<String>> params2 = new HashMap<>();
-
             //convert all BasicDecider file provenance params to GSI file provenance filters
+            //BasicDecider opts are only include filters, so add them only to the include list
             for (Entry<FileProvenanceParam, List<String>> e : params.entrySet()) {
-                params2.put(FileProvenanceFilter.valueOf(e.getKey().name()), Sets.newHashSet(e.getValue()));
+                FileProvenanceFilter filter = FileProvenanceFilter.valueOf(e.getKey().name());
+                List<String> values = e.getValue();
+                List<String> valuesSplit = new ArrayList<>();
+                for (String s : values) {
+                    valuesSplit.addAll(Splitter.on(",").splitToList(s));
+                }
+                if (includeFilters.containsKey(filter)) {
+                    includeFilters.get(filter).addAll(valuesSplit);
+                } else {
+                    includeFilters.put(filter, Sets.newHashSet(valuesSplit));
+                }
             }
 
             //we're only interested in processing analysis that successfully completed
-            params2.put(FileProvenanceFilter.processing_status, Sets.newHashSet("success"));
-            params2.put(FileProvenanceFilter.workflow_run_status, Sets.newHashSet("completed"));
+            includeFilters.put(FileProvenanceFilter.processing_status, Sets.newHashSet("success"));
+            includeFilters.put(FileProvenanceFilter.workflow_run_status, Sets.newHashSet("completed"));
 
             //only get the analysis with the metatype of interest
             if (getMetaType() != null && !getMetaType().isEmpty()) {
-                params2.put(FileProvenanceFilter.file_meta_type, Sets.newHashSet(getMetaType()));
+                includeFilters.put(FileProvenanceFilter.file_meta_type, Sets.newHashSet(getMetaType()));
+            }
+
+            if (options.has("verbose")) {
+                MapUtils.verbosePrint(System.out, "include filters", includeFilters);
+                MapUtils.verbosePrint(System.out, "exclude filters", excludeFilters);
             }
 
             Joiner joiner = Joiner.on(";").skipNulls();
@@ -971,7 +1024,8 @@ public class OicrDecider extends BasicDecider {
             String processingTagPrefix = "processing.";
 
             List<Map<String, String>> fpList = new ArrayList<>();
-            for (FileProvenance fp : provenanceClient.getFileProvenance(params2)) {
+            Collection<FileProvenance> fps = provenanceClient.getFileProvenance(includeFilters, excludeFilters);
+            for (FileProvenance fp : fps) {
                 Map<String, String> f = new HashMap<>();
                 f.put("Last Modified", StringUtils.defaultString(fp.getLastModified().withZone(DateTimeZone.forID("America/Toronto")).toString("YYYY-MM-dd HH:mm:ss.SSS")));
                 f.put("Study Title", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getStudyTitles(), stringSanitizer))));
@@ -1020,8 +1074,17 @@ public class OicrDecider extends BasicDecider {
 
                 f.put("IUS Attributes", StringUtils.defaultString(joiner.join(Iterables.transform(prefixMapKeys(fp.getIusAttributes(), iusTagPrefix).entrySet(), mapOfSetsToString))));
 
-                Collection<IusLimsKey> iusLimsKeys = fp.getIusLimsKeys();
-                f.put("IUS SWID", StringUtils.defaultString(joiner.join(Iterables.transform(fp.getIusSWIDs(), stringSanitizer))));
+                // return ALL associated Ius LimsKeys (as OicrDecider will only create links to LimsKeys that are returned here)
+                if (fp instanceof FileProvenanceFromAnalysisProvenance) {
+                    //This is a workaround until file provenace is not split by sample or lane provenance record and is returned as one 
+                    //object with all associated lims metadata combined.
+                    f.put("IUS SWID",
+                            StringUtils.defaultString(joiner.join(Iterables.transform(((FileProvenanceFromAnalysisProvenance) fp).getReleatedIusSWIDs(), stringSanitizer))));
+                } else {
+                    throw new UnsupportedOperationException(fp.getClass().getCanonicalName() + " implementation is not support by OicrDecider."
+                            + "If the implementation guarantees getIusSWIDs() returns all associated Ius LimsKey links, support can be added.");
+                    //f.put("IUS SWID", StringUtils.defaultString(joiner.join(Iterables.transform(((FileProvenanceFromAnalysisProvenance) fp).getIusSWIDs(), stringSanitizer))));
+                }
 
                 f.put("Status", fp.getStatus().toString());
                 f.put("Status Reason", fp.getStatusReason());

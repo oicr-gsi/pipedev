@@ -12,6 +12,7 @@ public class WorkflowRunReportRecord {
     private String librarySampleSwids;
     private String identitySampleNames;
     private String identitySampleSwids;
+    private String iusLimsKeys;
     private String inputFileMetaTypes;
     private String inputFileSwids;
     private String inputFilePaths;
@@ -109,6 +110,14 @@ public class WorkflowRunReportRecord {
 
     public void setIdentitySampleSwids(String identitySampleSwids) {
         this.identitySampleSwids = identitySampleSwids;
+    }
+
+    public String getIusLimsKeys() {
+        return iusLimsKeys;
+    }
+
+    public void setIusLimsKeys(String iusLimsKeys) {
+        this.iusLimsKeys = iusLimsKeys;
     }
 
     public String getInputFileMetaTypes() {
