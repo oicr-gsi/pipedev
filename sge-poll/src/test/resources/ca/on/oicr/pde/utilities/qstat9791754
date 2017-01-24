@@ -1,0 +1,55 @@
+==============================================================
+job_number:                 9791754
+exec_file:                  job_scripts/9791754
+submission_time:            Tue Jun 11 18:03:50 2013
+owner:                      sqwprod
+uid:                        1739
+group:                      users
+gid:                        100
+sge_o_home:                 /u/sqwprod
+sge_o_log_name:             sqwprod
+sge_o_path:                 /sbin:/usr/sbin:/bin:/usr/bin
+sge_o_workdir:              /u/sqwprod
+sge_o_host:                 sqwprod2
+account:                    sge
+stderr_path_list:           NONE:NONE:/u/sqwprod/.globus/job/sqwprod2/16290050720298114761.7638104969704690051/stderr
+hard resource_list:         h_stack=256M,h_vmem=4000M
+mail_list:                  sqwprod@sqwprod2.hpc.oicr.on.ca
+notify:                     FALSE
+job_name:                   scheduler_sge_job_script
+stdout_path_list:           NONE:NONE:/u/sqwprod/.globus/job/sqwprod2/16290050720298114761.7638104969704690051/stdout
+jobshare:                   0
+hard_queue_list:            production
+shell_list:                 NONE:/bin/bash
+env_list:
+script_file:                /u/sqwprod/.globus/job/sqwprod2/16290050720298114761.7638104969704690051/scheduler_sge_job_script
+usage    1:                 cpu=00:05:28, mem=174.92128 GBs, io=0.00000, vmem=1.825G, maxvmem=1.829G
+scheduling info:            queue instance "restricted@cn4-37.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "medchem@cn5-72.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "medchem@cn5-51.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "medchem@cn5-43.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "medchem@cn5-42.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "medchem@cn5-50.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "medchem@cn5-53.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "medchem@cn5-27.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "medchem@cn5-69.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "medchem@cn5-28.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "medchem@cn5-100.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "seqware@cn6-36.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "seqware@cn6-28.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "seqware@cn6-27.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "galaxy@cn5-72.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "galaxy@cn5-51.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "galaxy@cn5-43.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "galaxy@cn5-42.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "galaxy@cn5-50.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "galaxy@cn5-53.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "galaxy@cn5-27.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "galaxy@cn5-69.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "galaxy@cn5-28.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "galaxy@cn5-100.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "collab@cn4-37.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "research@cn4-37.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "research@cn5-72.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "research@cn6-36.hpc.oicr.on.ca" dropped because it is temporarily not available
+                            queue instance "research@cn5-51.hpc.oicr.on.ca" dropped because it is temporarily not available
