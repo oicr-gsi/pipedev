@@ -431,7 +431,7 @@
         <repository>
             <id>com.github.seqware</id>
             <name>SeqWare Maven Repository</name>
-            <url>http://seqwaremaven.oicr.on.ca/artifactory/seqware-release</url>
+            <url>https://seqwaremaven.oicr.on.ca/artifactory/seqware-release</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
@@ -442,7 +442,7 @@
         <repository>
             <id>snapshots.com.github.seqware</id>
             <name>SeqWare Maven Snapshot Repository</name>
-            <url>http://seqwaremaven.oicr.on.ca/artifactory/seqware-snapshot</url>
+            <url>https://seqwaremaven.oicr.on.ca/artifactory/seqware-snapshot</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
@@ -453,7 +453,7 @@
         <repository>
             <id>dependencies.com.github.seqware</id>
             <name>SeqWare Dependencies Maven Repository</name>
-            <url>http://seqwaremaven.oicr.on.ca/artifactory/seqware-dependencies</url>
+            <url>https://seqwaremaven.oicr.on.ca/artifactory/seqware-dependencies</url>
             <releases>
                 <enabled>true</enabled>
             </releases>     
@@ -464,7 +464,7 @@
         <repository>
             <id>snapshots.dependencies.com.github.seqware</id>
             <name>SeqWare Dependencies Maven Snapshot Repository</name>
-            <url>http://seqwaremaven.oicr.on.ca/artifactory/seqware-dependencies-snapshot</url>
+            <url>https://seqwaremaven.oicr.on.ca/artifactory/seqware-dependencies-snapshot</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
@@ -475,7 +475,7 @@
         <repository>
             <id>dependencies.gsi</id>
             <name>GSI Dependencies Maven Snapshot Repository</name>
-            <url>https://seqwaremaven.oicr.on.ca/artifactory/gsi-dependencies</url>
+            <url>https://artifacts.oicr.on.ca/artifactory/gsi-dependencies</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
@@ -486,7 +486,7 @@
         <repository>
             <id>release.gsi</id>
             <name>GSI Snapshots Maven Snapshot Repository</name>
-            <url>https://seqwaremaven.oicr.on.ca/artifactory/gsi-release</url>
+            <url>https://artifacts.oicr.on.ca/artifactory/gsi-release</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
@@ -497,7 +497,7 @@
         <repository>
             <id>snapshots.gsi</id>
             <name>GSI Snapshots Maven Snapshot Repository</name>
-            <url>https://seqwaremaven.oicr.on.ca/artifactory/gsi-snapshots</url>
+            <url>https://artifacts.oicr.on.ca/artifactory/gsi-snapshots</url>
             <releases>
                 <enabled>false</enabled>
             </releases>

@@ -13,9 +13,9 @@ This repository houses the open-source workflows, deciders and utilities that ar
 
 Our utilities are available from our Maven repository.
 
-* Releases: [gsi-dependencies](https://seqwaremaven.oicr.on.ca/artifactory/simple/gsi-dependencies)
-* Nightly snapshots: [gsi-snapshots](https://seqwaremaven.oicr.on.ca/artifactory/simple/gsi-snapshots)
-  
+* Releases: [gsi-release](https://artifacts.oicr.on.ca/artifactory/simple/gsi-release)
+* Nightly snapshots: [gsi-snapshots](https://artifacts.oicr.on.ca/artifactory/simple/gsi-snapshots)
+
 ##Build
 
 To build our utilities, use Maven.
