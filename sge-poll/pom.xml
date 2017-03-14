@@ -81,7 +81,7 @@
 	<repository>
             <id>seqware-dependencies.seqwaremaven.oicr.on.ca</id>
             <name>seqwaremaven.oicr.on.ca-seqware-dependencies</name>
-	    <url>http://seqwaremaven.oicr.on.ca/artifactory/seqware-dependencies</url>
+	    <url>https://seqwaremaven.oicr.on.ca/artifactory/seqware-dependencies</url>
         </repository>
     </repositories>
 

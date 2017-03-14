@@ -3,7 +3,6 @@ package ca.on.oicr.pde.utilities.workflows;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import net.sourceforge.seqware.common.module.ReturnValue;
 import net.sourceforge.seqware.pipeline.workflowV2.model.BashJob;
 import net.sourceforge.seqware.pipeline.workflowV2.model.Job;
 import net.sourceforge.seqware.pipeline.workflowV2.model.SqwFile;
@@ -20,9 +19,6 @@ public class OicrWorkflowTest {
     private OicrWorkflow instance;
     private HashMap<String, String> outputFiles;
 
-//    public OicrWorkflowTest(String testName) {
-//        super(testName);
-//    }
     @BeforeMethod
     public void setUp() throws Exception {
         Map<String, String> configs = new HashMap<>();
@@ -51,17 +47,13 @@ public class OicrWorkflowTest {
         //super.setUp();
     }
 
-//    @Override
-//    protected void tearDown() throws Exception {
-//        super.tearDown();
-//    }
     @Test
     public void testGetProperty() {
         System.out.println("getProperty");
         String key = "valid";
         String expResult = "valid result";
         String result = instance.getProperty(key);
-        Assert.assertEquals(instance.ret.getExitStatus(), ReturnValue.SUCCESS, "ReturnValue exit status should be ReturnValue.SUCCESS");
+        Assert.assertTrue(instance.isWorkflowIsValid(), "Workflow should be valid");
         Assert.assertEquals(result, expResult, "");
     }
 
@@ -70,7 +62,7 @@ public class OicrWorkflowTest {
         System.out.println("getPropertyNull");
         String key = "invalid";
         String result = instance.getProperty(key);
-        Assert.assertEquals(instance.ret.getExitStatus(), ReturnValue.INVALIDPARAMETERS, "ReturnValue exit status should be ReturnValue.INVALIDPARAMETERS");
+        Assert.assertFalse(instance.isWorkflowIsValid(), "Workflow should be invalid");
         Assert.assertNull(result);
     }
 
@@ -80,7 +72,7 @@ public class OicrWorkflowTest {
         String key = "opional_and_is_not_set";
         String defaultValue = "default_value";
         String result = instance.getOptionalProperty(key, defaultValue);
-        Assert.assertEquals(instance.ret.getExitStatus(), ReturnValue.SUCCESS, "ReturnValue exit status should be ReturnValue.SUCCESS");
+        Assert.assertTrue(instance.isWorkflowIsValid(), "Workflow should be valid");
         Assert.assertEquals(result, defaultValue, String.format("\"%s\" != \"%s\"", defaultValue, result));
     }
 
@@ -91,7 +83,7 @@ public class OicrWorkflowTest {
         String defaultValue = null;
         String expected = "optional_value";
         String result = instance.getOptionalProperty(key, defaultValue);
-        Assert.assertEquals(instance.ret.getExitStatus(), ReturnValue.SUCCESS, "ReturnValue exit status should be ReturnValue.SUCCESS");
+        Assert.assertTrue(instance.isWorkflowIsValid(), "Workflow should be valid");
         Assert.assertEquals(result, expected, String.format("\"%s\" != \"%s\"", expected, result));
     }
 
@@ -113,7 +105,7 @@ public class OicrWorkflowTest {
         System.out.println("getInputFilesNull");
         String[] invalidFiles = instance.getInputFiles("invalid_files");
         Assert.assertEquals(invalidFiles.length, 0, "getInputFiles should return a 0 length array");
-        Assert.assertEquals(instance.ret.getExitStatus(), ReturnValue.INVALIDPARAMETERS, "ReturnValue exit status should be ReturnValue.INVALIDPARAMETERS");
+        Assert.assertFalse(instance.isWorkflowIsValid(), "Workflow should be invalid");
     }
 
     @Test
@@ -141,7 +133,7 @@ public class OicrWorkflowTest {
         System.out.println("provisionInputFiles");
         SqwFile[] invalidFiles = instance.provisionInputFiles("invalid_files");
         Assert.assertEquals(invalidFiles.length, 0, "getInputFiles should return a 0 length array");
-        Assert.assertEquals(instance.ret.getExitStatus(), ReturnValue.INVALIDPARAMETERS, "ReturnValue exit status should be ReturnValue.INVALIDPARAMETERS");
+        Assert.assertFalse(instance.isWorkflowIsValid(), "Workflow should be invalid");
     }
 
     @Test

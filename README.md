@@ -13,9 +13,9 @@ This repository houses the open-source workflows, deciders and utilities that ar
 
 Our utilities are available from our Maven repository.
 
-* Releases: [gsi-dependencies](https://seqwaremaven.oicr.on.ca/artifactory/simple/gsi-dependencies)
-* Nightly snapshots: [gsi-snapshots](https://seqwaremaven.oicr.on.ca/artifactory/simple/gsi-snapshots)
-  
+* Releases: [gsi-release](https://artifacts.oicr.on.ca/artifactory/simple/gsi-release)
+* Nightly snapshots: [gsi-snapshots](https://artifacts.oicr.on.ca/artifactory/simple/gsi-snapshots)
+
 ##Build
 
 To build our utilities, use Maven.
@@ -45,7 +45,7 @@ Add pipedev-workflow-utils as a maven dependency:
 <dependency>
     <groupId>ca.on.oicr.gsi</groupId>
     <artifactId>pipedev-workflow-utils</artifactId>
-    <version>2.0</version>
+    <version>2.1</version>
 </dependency>
 ```
 
@@ -64,7 +64,7 @@ Add pipedev-decider-utils as a maven dependency:
 <dependency>
     <groupId>ca.on.oicr.gsi</groupId>
     <artifactId>pipedev-decider-utils</artifactId>
-    <version>2.0</version>
+    <version>2.1</version>
 </dependency>
 ```
 
@@ -84,7 +84,7 @@ Add pipedev-test-utils as a maven dependency:
 <dependency>
     <groupId>ca.on.oicr.gsi</groupId>
     <artifactId>pipedev-test-utils</artifactId>
-    <version>2.0</version>
+    <version>2.1</version>
     <scope>test</scope>
 </dependency>
 ```
@@ -102,7 +102,7 @@ PDE's [workflow parent pom](pipedev-configs/pipedev-workflow-parent/pom.xml) can
 <parent>
     <groupId>ca.on.oicr.gsi</groupId>
     <artifactId>pipedev-workflow-parent</artifactId>
-    <version>2.0</version>
+    <version>2.1</version>
     <relativePath/>
 </parent>
 ```
@@ -113,7 +113,7 @@ PDE's [decider parent pom](configs/decider-parent/pom.xml) can be used as a temp
 <parent>
     <groupId>ca.on.oicr.gsi</groupId>
     <artifactId>pipedev-decider-parent</artifactId>
-    <version>2.0</version>
+    <version>2.1</version>
     <relativePath/>
 </parent>
 ```
