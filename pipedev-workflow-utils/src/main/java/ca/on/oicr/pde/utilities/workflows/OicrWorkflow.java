@@ -1,7 +1,6 @@
 package ca.on.oicr.pde.utilities.workflows;
 
 import java.util.*;
-import net.sourceforge.seqware.common.module.ReturnValue;
 import net.sourceforge.seqware.common.util.Log;
 import net.sourceforge.seqware.pipeline.workflowV2.AbstractWorkflowDataModel;
 import net.sourceforge.seqware.pipeline.workflowV2.model.Job;
@@ -15,14 +14,7 @@ import net.sourceforge.seqware.pipeline.workflowV2.model.SqwFile;
 public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
     
     private final Random random = new Random(System.nanoTime());
-
-    /**
-     * A workflow model ReturnValue that can be used to track the errors and state during workflow model construction. See the <b>Module
-     * Status Values</b> section of <a
-     * href="http://seqware.github.io/docs/16-module-conventions/">http://seqware.github.io/docs/16-module-conventions/</a> for more
-     * information).
-     */
-    protected ReturnValue ret = new ReturnValue();
+    private boolean workflowIsValid = true;
 
     /**
      * A map of job names to job objects.
@@ -53,7 +45,7 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
             files.addAll(Arrays.asList(input.split(",")));
         } catch (Exception e) {
             e.printStackTrace();
-            ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
+            setWorkflowInvalid();
         }
         return files.toArray(new String[0]);
     }
@@ -82,8 +74,8 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
     }
     
     /**
-     * Retrieves the value of a property from the INI file. Implemented in OicrWorkflow to catch any Exceptions thrown, set the ReturnValue
-     * to ReturnValue.INVALIDPARAMETERS, and print the stacktrace.
+     * Retrieves the value of a property from the INI file. Implemented in OicrWorkflow to catch any Exceptions thrown, set the workflow to 
+     * invalid, and print the stacktrace.
      *
      * @param key the name of the INI property
      * @return The value of the property named by "key"
@@ -97,14 +89,14 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
         } catch (Exception e) {
             Log.error("Error retrieving property: " + key);
             e.printStackTrace();
-            ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
+            setWorkflowInvalid();
         }
         return property;
     }
 
     /**
      * Retrieves the value of a property from the INI file or returns the user specified default value. Implemented in OicrWorkflow to catch
-     * any Exceptions thrown, set the ReturnValue to ReturnValue.INVALIDPARAMETERS, and print the stacktrace.
+     * any Exceptions thrown, set the workflow to invalid, and print the stacktrace.
      *
      * @param key the name of the INI property to retrieve
      * @param defaultValue the property value that will be returned if the property key/value is not set in the INI
@@ -120,7 +112,7 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
                 property = null;
                 Log.error("Error retrieving property that should exist: " + key);
                 e.printStackTrace();
-                ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
+                setWorkflowInvalid();
             }
         }
         return property;
@@ -260,7 +252,22 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
 
         return file;
     }
-    
+
+    /**
+     * Set the workflow status to invalid
+     */
+    public void setWorkflowInvalid() {
+        workflowIsValid = false;
+    }
+
+    /**
+     * Check if the workflow status is valid
+     * @return true if valid, false if invalid
+     */
+    public boolean isWorkflowIsValid() {
+        return workflowIsValid;
+    }
+
     /**
      * Verifies that the workflow data model object was built correctly.
      * {@inheritDoc}
@@ -269,8 +276,9 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
      */
     @Override
     public void wrapup() {
-        if (ret.getExitStatus() != ReturnValue.SUCCESS) {
-            throw new RuntimeException("The were errors building the workflow data model object. Final return value is [" + ret.getExitStatus() + "].");
+        if (!workflowIsValid) {
+            throw new RuntimeException("The were errors building the workflow data model object.");
         }
     }
+
 }
