@@ -261,6 +261,14 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
     }
 
     /**
+     * Check if the workflow status is valid
+     * @return true if valid, false if invalid
+     */
+    public boolean isWorkflowIsValid() {
+        return workflowIsValid;
+    }
+
+    /**
      * Verifies that the workflow data model object was built correctly.
      * {@inheritDoc}
      *
