@@ -29,7 +29,7 @@ mvn clean install \
 
 The current options for the client can be viewed by providing the "--help" argument:
 ```
-java -jar pipedev-file-provenance-client-2.1-jar-with-dependencies.jar --help
+java -jar pipedev-file-provenance-client-jar-with-dependencies.jar --help
 
 Option (* = required)  Description                           
 ---------------------  -----------                           
@@ -104,10 +104,10 @@ An example provenance provider settings file:
 
 Getting the file provenance records that pass the default filters (processing status = success, workflow run status = completed, skip = false]:
 ```
-java -jar pipedev-file-provenance-client-2.1-jar-with-dependencies.jar --settings /path/to/settings.json --out /tmp/fpr.tsv
+java -jar pipedev-file-provenance-client-jar-with-dependencies.jar --settings /path/to/settings.json --out /tmp/fpr.tsv
 ```
 
 Or getting all file provenance records (no filters):
 ```
-java -jar pipedev-file-provenance-client-2.1-jar-with-dependencies.jar --settings /path/to/settings.json --out /tmp/fpr_all.tsv --all
+java -jar pipedev-file-provenance-client-jar-with-dependencies.jar --settings /path/to/settings.json --out /tmp/fpr_all.tsv --all
 ```
