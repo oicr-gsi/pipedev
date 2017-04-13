@@ -35,9 +35,10 @@ import ca.on.oicr.pde.deciders.configuration.StudyToOutputPathConfig;
 import ca.on.oicr.pinery.client.PineryClient;
 import com.google.common.base.Function;
 import com.google.common.base.Splitter;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
+import com.google.common.collect.SetMultimap;
 import java.io.IOException;
 import java.nio.file.Paths;
 import joptsimple.OptionSpec;
@@ -151,6 +152,7 @@ public class OicrDecider extends BasicDecider {
     private EnumMap<FileProvenanceFilter, Set<String>> excludeFilters = new EnumMap<>(FileProvenanceFilter.class);
     private final EnumMap<FileProvenanceFilter, OptionSpec<String>> includeFilterOpts;
     private final EnumMap<FileProvenanceFilter, OptionSpec<String>> excludeFilterOpts;
+    protected WorkflowRun currentWorkflowRun;
 
     /**
      * <p>
@@ -525,6 +527,7 @@ public class OicrDecider extends BasicDecider {
 
         //create a new workflow run (with a blank set of ini properties) for each final check
         run = new WorkflowRun(null, attributes);
+        currentWorkflowRun = run;
 
         //Common decider ini modifications
         run.addProperty(getCommonIniProperties());
@@ -582,12 +585,16 @@ public class OicrDecider extends BasicDecider {
      */
     @Override
     protected Set<String> getSwidsToLinkWorkflowRunTo(Set<String> iusLimsKeySwids) throws Exception {
+        Map<String, String> inputIusToOutputIus = new HashMap<>();
+        Set<String> outputIusLimsKeys;
+
         if (getMetadataWriteback()) {
             //TODO: each file provenance record already has its associated IusLimsKey(s)
             //refactor this implementation to use file provenance rather than getting the LimsKey(s) again from seqware
             //refactor this implementation to clone all LimsKeys in one seqware call/transaction
 
             //Get all the LimsKey(s) info from seqware
+            SetMultimap<LimsKey, String> limsKeyToIusMap = HashMultimap.create();
             Set<LimsKey> limsKeys = new HashSet<>();
             for (String swid : iusLimsKeySwids) {
                 LimsKey limsKey = metadata.getLimsKeyFrom(Integer.parseInt(swid));
@@ -595,12 +602,18 @@ public class OicrDecider extends BasicDecider {
                     throw new Exception("No LimsKey found for SWID = [" + swid + "]");
                 }
                 limsKeys.add(limsKey);
+                limsKeyToIusMap.put(limsKey, swid);
             }
 
-            //Clone the upstream LimsKeys 
+            //Clone the upstream LimsKeys and update the input IUS to new/output IUS map
             if (isDryRunMode()) {
+                //populate inputIusToOutputIusForCurrentWorkflowRun blank output IUS
+                for (String inputIUS : iusLimsKeySwids) {
+                    inputIusToOutputIus.put(inputIUS, null);
+                }
+
                 //dry run mode enabled - do nothing
-                return Collections.EMPTY_SET;
+                outputIusLimsKeys = Collections.EMPTY_SET;
             } else {
                 Set<String> newIusSwids = new HashSet<>();
                 for (LimsKey limsKey : limsKeys) {
@@ -612,13 +625,39 @@ public class OicrDecider extends BasicDecider {
                             limsKey.getLastModified());
                     Integer newIusSwid = metadata.addIUS(newLimsKeySwid, false);
                     newIusSwids.add(newIusSwid.toString());
+
+                    //map all input iuses to the new ius
+                    for (String inputIus : limsKeyToIusMap.get(limsKey)) {
+                        if (inputIusToOutputIus.put(inputIus, newIusSwid.toString()) != null) {
+                            throw new Exception("Input IUS SWID [" + inputIus + "] maps to multiple output iuses");
+                        }
+                    }
                 }
-                return newIusSwids;
+
+                outputIusLimsKeys = newIusSwids;
             }
         } else {
+            //populate inputIusToOutputIusForCurrentWorkflowRun blank output IUS
+            for (String inputIUS : iusLimsKeySwids) {
+                inputIusToOutputIus.put(inputIUS, null);
+            }
+
             //metadata writeback disabled - do nothing
-            return Collections.EMPTY_SET;
+            outputIusLimsKeys = Collections.EMPTY_SET;
         }
+
+        //set the input IUS-LimsKey to output IUS-LimsKey map for the current workflow run
+        currentWorkflowRun.setInputIusToOutputIus(inputIusToOutputIus);
+
+        //set the ouput IUS list to link the current workflow run
+        //note: this set is currently not used - rather BasicDecider uses the set returned by this method
+        List<Integer> outputIusAsInt = new ArrayList<>();
+        for (String ius : outputIusLimsKeys) {
+            outputIusAsInt.add(Integer.parseInt(ius));
+        }
+        currentWorkflowRun.setIusSwidsToLinkWorkflowRunTo(outputIusAsInt);
+
+        return outputIusLimsKeys;
     }
 
     @Deprecated

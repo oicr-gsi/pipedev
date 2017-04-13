@@ -1,6 +1,7 @@
 package ca.on.oicr.pde.deciders;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ public class WorkflowRun {
     private Map<String, String> iniFile;
     private FileAttributes[] files;
     private List<Integer> iusSwidsToLinkWorkflowRunTo = new ArrayList<>();
+    private Map<String,String> inputIusToOutputIus = new HashMap<>();
 
     /**
      * Create a local WorkflowRun object to locally store ini file properties and workflow run input files.
@@ -198,6 +200,24 @@ public class WorkflowRun {
      */
     public void setIusSwidsToLinkWorkflowRunTo(List<Integer> iusSwidsToLinkWorkflowRunTo) {
         this.iusSwidsToLinkWorkflowRunTo = iusSwidsToLinkWorkflowRunTo;
+    }
+
+    /**
+     * Get the mapping of input IUS swids to output IUS swids that the workflow run should be linked to
+     *
+     * @return map of input IUS swids to output IUS swids
+     */
+    public Map<String, String> getInputIusToOutputIus() {
+        return Collections.unmodifiableMap(inputIusToOutputIus);
+    }
+
+    /**
+     * Set the mapping of input IUS swids to output IUS swids that the workflow run should be linked to
+     *
+     * @param inputIusToOutputIus
+     */
+    public void setInputIusToOutputIus(Map<String, String> inputIusToOutputIus) {
+        this.inputIusToOutputIus.putAll(inputIusToOutputIus);
     }
 
 }
