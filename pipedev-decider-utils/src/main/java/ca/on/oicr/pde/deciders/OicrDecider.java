@@ -423,7 +423,7 @@ public class OicrDecider extends BasicDecider {
         //check if record's provenance status is okay
         FileProvenance.Status provenanceStatus = FileProvenance.Status.valueOf(returnValue.getAttribute("Status"));
         if (!FileProvenance.Status.OKAY.equals(provenanceStatus)) {
-            Log.debug("Ignoring file because the file provenance record status is [" + provenanceStatus.toString() + "] " + fm.getFilePath());
+            Log.warn("Ignoring file because the file provenance record status is [" + provenanceStatus.toString() + "] " + fm.getFilePath());
             return false;
         }
 
