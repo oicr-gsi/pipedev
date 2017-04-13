@@ -11,7 +11,6 @@
 
     <modules>
         <module>pipedev-common</module>
-        <!--module>pipedev-tools</module-->
         <module>pipedev-configs</module>
         <module>pipedev-provenance-impl</module>
         <module>pipedev-test-utils</module>
