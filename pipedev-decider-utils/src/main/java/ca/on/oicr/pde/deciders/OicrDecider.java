@@ -9,47 +9,44 @@ import ca.on.oicr.gsi.provenance.FileProvenanceFilter;
 import ca.on.oicr.gsi.provenance.LaneProvenanceProvider;
 import ca.on.oicr.gsi.provenance.MultiThreadedDefaultProvenanceClient;
 import ca.on.oicr.gsi.provenance.PineryProvenanceProvider;
-import ca.on.oicr.gsi.provenance.SeqwareMetadataAnalysisProvenanceProvider;
-import ca.on.oicr.gsi.provenance.model.FileProvenance;
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Sets;
-import java.io.File;
-import java.util.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Map.Entry;
-import java.util.regex.Pattern;
-import net.sourceforge.seqware.common.hibernate.FindAllTheFiles;
-import net.sourceforge.seqware.common.model.FileProvenanceParam;
-import net.sourceforge.seqware.common.module.FileMetadata;
-import net.sourceforge.seqware.common.module.ReturnValue;
-import net.sourceforge.seqware.common.util.Log;
-import net.sourceforge.seqware.pipeline.deciders.BasicDecider;
-import net.sourceforge.seqware.pipeline.plugins.fileprovenance.ProvenanceUtility.HumanProvenanceFilters;
 import ca.on.oicr.gsi.provenance.ProviderLoader;
 import ca.on.oicr.gsi.provenance.SampleProvenanceProvider;
+import ca.on.oicr.gsi.provenance.SeqwareMetadataAnalysisProvenanceProvider;
+import ca.on.oicr.gsi.provenance.model.FileProvenance;
 import ca.on.oicr.gsi.provenance.model.FileProvenanceFromAnalysisProvenance;
 import ca.on.oicr.gsi.provenance.model.LimsKey;
 import ca.on.oicr.pde.deciders.configuration.StudyToOutputPathConfig;
 import ca.on.oicr.pinery.client.PineryClient;
 import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.SetMultimap;
+import com.google.common.collect.Sets;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.regex.Pattern;
 import joptsimple.OptionSpec;
 import net.sourceforge.seqware.common.err.NotFoundException;
+import net.sourceforge.seqware.common.hibernate.FindAllTheFiles;
 import net.sourceforge.seqware.common.hibernate.FindAllTheFiles.Header;
+import net.sourceforge.seqware.common.model.FileProvenanceParam;
+import net.sourceforge.seqware.common.module.FileMetadata;
+import net.sourceforge.seqware.common.module.ReturnValue;
+import net.sourceforge.seqware.pipeline.deciders.BasicDecider;
+import net.sourceforge.seqware.pipeline.plugins.fileprovenance.ProvenanceUtility.HumanProvenanceFilters;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.joda.time.DateTimeZone;
 
@@ -131,6 +128,7 @@ import org.joda.time.DateTimeZone;
  */
 public class OicrDecider extends BasicDecider {
 
+    private final Logger log = LogManager.getLogger(OicrDecider.class);
     private Group groupBy = null;
     protected Map<String, FileAttributes> files;
     private int numberOfFilesPerGroup = Integer.MIN_VALUE;
@@ -253,7 +251,7 @@ public class OicrDecider extends BasicDecider {
     protected String getArgument(String arg) {
         Object o = options.valueOf(arg);
         if (o == null || o.toString().isEmpty()) {
-            Log.debug("Command line argument is not available: " + arg);
+            log.debug("Command line argument is not available: " + arg);
             return "";
         } else {
             return o.toString();
@@ -272,10 +270,10 @@ public class OicrDecider extends BasicDecider {
 
         if (this.options.has("verbose")) {
             //log4j logging configuration
-            Logger logger = Logger.getLogger("ca.on.oicr");
-            logger.setLevel(Level.DEBUG);
+            org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger("ca.on.oicr");
+            logger.setLevel(org.apache.log4j.Level.DEBUG);
             logger.removeAllAppenders();
-            logger.addAppender(new ConsoleAppender(new PatternLayout("%p [%d{yyyy/MM/dd HH:mm:ss}] | %m%n")));
+            logger.addAppender(new org.apache.log4j.ConsoleAppender(new org.apache.log4j.PatternLayout("%p [%d{yyyy/MM/dd HH:mm:ss}] | %m%n")));
 
             //log4j2 logging configuration
             Configurator.setRootLevel(org.apache.logging.log4j.Level.DEBUG);
@@ -315,7 +313,7 @@ public class OicrDecider extends BasicDecider {
         //Sanity checking for required parameters
         for (String option : requiredParams) {
             if (!options.has(option)) {
-                Log.warn("Required argument missing: --" + option);
+                log.warn("Required argument missing: --" + option);
                 ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
                 System.out.println(get_syntax());
             }
@@ -326,7 +324,7 @@ public class OicrDecider extends BasicDecider {
             try {
                 afterDate = format.parse(dateString);
             } catch (ParseException e) {
-                Log.error("After Date should be in the format: " + format.toPattern(), e);
+                log.error("After Date should be in the format: " + format.toPattern(), e);
                 ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
             }
         }
@@ -335,7 +333,7 @@ public class OicrDecider extends BasicDecider {
             try {
                 beforeDate = format.parse(dateString);
             } catch (ParseException e) {
-                Log.error("Before Date should be in the format: " + format.toPattern(), e);
+                log.error("Before Date should be in the format: " + format.toPattern(), e);
                 ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
             }
         }
@@ -351,14 +349,14 @@ public class OicrDecider extends BasicDecider {
 
         if (options.has("study-to-output-path-csv")) {
             if (options.has("output-path")) {
-                Log.error("Use \"study-to-output-path-csv\" or \"output-path\" - not both");
+                log.error("Use \"study-to-output-path-csv\" or \"output-path\" - not both");
                 ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
             }
 
             try {
                 studyToOutputPathConfig = new StudyToOutputPathConfig(options.valueOf("study-to-output-path-csv").toString());
             } catch (IOException ex) {
-                Log.error("\"study-to-output-path-csv\" is not accessible");
+                log.error("\"study-to-output-path-csv\" is not accessible");
                 ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
             }
         }
@@ -379,7 +377,7 @@ public class OicrDecider extends BasicDecider {
 
         //to be enabled at a later date
 //        if (!(options.has("--all") ^ !includeFilters.isEmpty() ^ !excludeFilters.isEmpty())) {
-//            Log.error("--all or a combination the following include/exclude filters should be specified ["
+//            log.error("--all or a combination the following include/exclude filters should be specified ["
 //                    + Joiner.on(",").join(Lists.transform(Arrays.asList(getSupportedFilters()), Functions.toStringFunction()))
 //                    + "].");
 //            ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
@@ -397,11 +395,11 @@ public class OicrDecider extends BasicDecider {
         if (!toReturn) {
             return toReturn;
         }
-        Log.debug("CHECK FILE DETAILS:" + fm);
+        log.debug("CHECK FILE DETAILS:" + fm);
 
         if (this.options.has("check-file-exists")) {
             if (!new File(fm.getFilePath()).exists()) {
-                Log.warn("File not found:" + fm.getFilePath());
+                log.warn("File not found:" + fm.getFilePath());
                 return false;
             }
         }
@@ -416,14 +414,14 @@ public class OicrDecider extends BasicDecider {
         //check if record should be skipped
         boolean skip = Boolean.parseBoolean(returnValue.getAttribute("Skip"));
         if (skip) {
-            Log.debug("Ignoring file because the file provenance record is skip status is set to true " + fm.getFilePath());
+            log.debug("Ignoring file because the file provenance record is skip status is set to true " + fm.getFilePath());
             return false;
         }
 
         //check if record's provenance status is okay
         FileProvenance.Status provenanceStatus = FileProvenance.Status.valueOf(returnValue.getAttribute("Status"));
         if (!FileProvenance.Status.OKAY.equals(provenanceStatus)) {
-            Log.warn("Ignoring file because the file provenance record status is [" + provenanceStatus.toString() + "] " + fm.getFilePath());
+            log.warn("Ignoring file because the file provenance record status is [" + provenanceStatus.toString() + "] " + fm.getFilePath());
             return false;
         }
 
@@ -431,7 +429,7 @@ public class OicrDecider extends BasicDecider {
             for (String attribute : attributes) {
                 if (attribute.contains("Status")) {
                     if (attributes.getOtherAttribute(attribute).equals("failed")) {
-                        Log.debug("Ignoring file because the workflow run status is failed " + fm.getFilePath());
+                        log.debug("Ignoring file because the workflow run status is failed " + fm.getFilePath());
                         return false;
                     }
                 }
@@ -439,11 +437,11 @@ public class OicrDecider extends BasicDecider {
         }
         String dateString = attributes.getOtherAttribute(FindAllTheFiles.Header.PROCESSING_DATE);
         if (options.has("after-date") && !isAfterDate(dateString, afterDate)) {
-            Log.debug("File was processed before the after-date " + afterDate.toString() + " : " + attributes.getPath());
+            log.debug("File was processed before the after-date " + afterDate.toString() + " : " + attributes.getPath());
             return false;
         }
         if (options.has("before-date") && !isBeforeDate(dateString, beforeDate)) {
-            Log.debug("File was processed after the before-date " + beforeDate.toString() + " : " + attributes.getPath());
+            log.debug("File was processed after the before-date " + beforeDate.toString() + " : " + attributes.getPath());
             return false;
         }
         if (!checkFileDetails(attributes)) {
@@ -469,7 +467,7 @@ public class OicrDecider extends BasicDecider {
                 return true;
             }
         } catch (ParseException e) {
-            Log.error("File date is not in the format: " + format.toPattern(), e);
+            log.error("File date is not in the format: " + format.toPattern(), e);
         }
         return false;
     }
@@ -490,7 +488,7 @@ public class OicrDecider extends BasicDecider {
                 return true;
             }
         } catch (ParseException e) {
-            Log.error("File date is not in the format: " + format.toPattern(), e);
+            log.error("File date is not in the format: " + format.toPattern(), e);
         }
         return false;
     }
@@ -537,7 +535,7 @@ public class OicrDecider extends BasicDecider {
             for (FileAttributes fa : attributes) {
                 String studyTitle = fa.getStudy();
                 if (studyTitle == null || studyTitle.isEmpty()) {
-                    Log.warn("Blank study title for workflow run - expected one study title.\n"
+                    log.warn("Blank study title for workflow run - expected one study title.\n"
                             + "Files = [" + Joiner.on(",\n").join(attributes) + "]");
                     r.setExitStatus(ReturnValue.INVALIDFILE);
                     return r;
@@ -545,7 +543,7 @@ public class OicrDecider extends BasicDecider {
                     try {
                         outputPrefixes.add(studyToOutputPathConfig.getOutputPathForStudy(fa.getStudy()));
                     } catch (NotFoundException nfe) {
-                        Log.error("Study title [" + studyTitle + "] was not found in study-to-output-path-csv");
+                        log.error("Study title [" + studyTitle + "] was not found in study-to-output-path-csv");
                         r.setExitStatus(ReturnValue.INVALIDFILE);
                         return r;
                     }
@@ -555,17 +553,17 @@ public class OicrDecider extends BasicDecider {
             if (outputPrefixes.size() == 1) {
                 run.addProperty("output_prefix", Iterables.getOnlyElement(outputPrefixes));
             } else {
-                Log.error("[" + outputPrefixes.size() + "] output prefixes found for workflow run - expected one output prefix");
+                log.error("[" + outputPrefixes.size() + "] output prefixes found for workflow run - expected one output prefix");
                 r.setExitStatus(ReturnValue.INVALIDFILE);
                 return r;
             }
         }
 
         //Check for expected number of input files
-        Log.debug("Number of files: " + run.getFiles().length);
+        log.debug("Number of files: " + run.getFiles().length);
         if (numberOfFilesPerGroup != Integer.MIN_VALUE) {
             if (run.getFiles().length != numberOfFilesPerGroup) {
-                Log.debug("Invalid number of files: " + run.getFiles().length + ":" + run.getFiles()[0]);
+                log.debug("Invalid number of files: " + run.getFiles().length + ":" + run.getFiles()[0]);
                 r.setExitStatus(ReturnValue.INVALIDFILE);
                 return r;
             }
@@ -679,7 +677,7 @@ public class OicrDecider extends BasicDecider {
         //Set the final return value to non-zero as the return value from customizeRun does not actually affect the run state.
         ReturnValue ignoredReturnValue = customizeRun(run);
         if (ignoredReturnValue.getExitStatus() != ReturnValue.SUCCESS) {
-            Log.error("This decider is using customizeRun to abort workflow runs - this functionality is not supported.  Please submit a bug.");
+            log.error("This decider is using customizeRun to abort workflow runs - this functionality is not supported.  Please submit a bug.");
             setFinalStatusToFailed();
         }
 
@@ -689,11 +687,22 @@ public class OicrDecider extends BasicDecider {
     protected Map<String, String> getCommonIniProperties() {
         Map<String, String> commonIniProperties = new HashMap<>();
 
-        commonIniProperties.put("output_prefix",
-                getArgument("output-path").isEmpty() ? "./" : (getArgument("output-path").endsWith("/") ? getArgument("output-path") : getArgument("output-path").concat("/")));
+        String outputPath = "./";
+        if (options.has("output-path")) {
+            outputPath = getArgument("output-path");
+            if (outputPath.endsWith("/")) {
+                //do nothing
+            } else {
+                outputPath += "/";
+            }
+        }
+        commonIniProperties.put("output_prefix", outputPath);
 
-        commonIniProperties.put("output_dir",
-                getArgument("output-folder").isEmpty() ? "seqware-results" : getArgument("output-folder"));
+        String outputDir = "seqware-results";
+        if (options.has("output-folder")) {
+            outputDir = getArgument("output-folder");
+        }
+        commonIniProperties.put("output_dir", outputDir);
 
         return commonIniProperties;
     }
@@ -921,13 +930,13 @@ public class OicrDecider extends BasicDecider {
             int index = idMate(file.getPath()) - 1;
             if (index == (OicrDecider.MATE_UNDEF - 1)) {
                 if (files.length > 1) {
-                    Log.warn("Unidentifiable read number! " + file.toString());
+                    log.warn("Unidentifiable read number! " + file.toString());
                 }
                 inputs = files;
                 break;
             } else if (index >= inputs.length) {
-                Log.warn("The read number is larger than the amount of reads given for this study. e.g. this is a read 2 but there is only one file.");
-                Log.warn(index + "is the read number for file " + file);
+                log.warn("The read number is larger than the amount of reads given for this study. e.g. this is a read 2 but there is only one file.");
+                log.warn(index + "is the read number for file " + file);
                 inputs = files;
                 break;
             } else {
