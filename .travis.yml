@@ -1,0 +1,30 @@
+language: java
+dist: trusty
+sudo: required
+jdk:
+- oraclejdk8
+git:
+    depth: 3
+env: > 
+      MAVEN_SETTINGS="${TRAVIS_BUILD_DIR}/gsi-config"
+      MAVEN_OPTS="-Xms1g -Xmx2g" 
+addons:
+    sonarcloud:
+        organization: "oicr-gsi"
+        token:
+            secure: "Wf7XVIubVDKZj592OSrylS/4kNf8qHHLWJkcru7aQtMaLxYt7tgoVdQcSCFg/E0cILtyU6oJ50zaDFK1JZqK0tf1GiVxB6eKtVx2sv9GE9/XFmTEc1QpLvJjVlFVDZj8eGNvJMpExr0Jc/8AHs0i1ZEVwzhuN/qZ9QWbKGc1Cnc="
+        github_token:
+            secure: "W+bf9WfTa5OHBDxvkb2HAcVCCLjmihJt2e2NBwJLCyfMOLS0X67Xb/vzNO2/Iiu20YdIIqfUkaibafE8ASbAInOWWnUaCo3Q7TGhy39ZSV8CtZbZEKmP1cHQS/KqTdmq0atyC0cIk22Lxfrsh20QIsQ8dMI+JeAbERIDlgYNCF8="
+
+before_install:
+- git clone https://github.com/oicr-gsi/gsi-config.git "${MAVEN_SETTINGS}"
+- cp "${MAVEN_SETTINGS}/settings.xml" "${HOME}/.m2/settings.xml"
+
+script:
+- mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar
+
+cache:
+    directories:
+    - "$HOME/.m2"
+    - "$HOME/.sonar/cache"
+
