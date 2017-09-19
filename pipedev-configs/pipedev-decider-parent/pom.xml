@@ -320,6 +320,7 @@
                                     <forkCount>0</forkCount>
 
                                     <skip>${skipDeciderRunITs}</skip>
+                                    <failIfNoTests>true</failIfNoTests>
                                     <suiteXmlFiles>
                                         <suiteXmlFile>${testSuite}</suiteXmlFile>
                                     </suiteXmlFiles>

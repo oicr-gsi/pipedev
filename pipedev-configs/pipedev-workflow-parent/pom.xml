@@ -404,6 +404,7 @@
                                 <phase>integration-test</phase>
                                 <configuration>
                                     <skip>${skipWorkflowRunITs}</skip>
+                                    <failIfNoTests>true</failIfNoTests>
                                     <suiteXmlFiles>
                                         <suiteXmlFile>${testSuite}</suiteXmlFile>
                                     </suiteXmlFiles>
