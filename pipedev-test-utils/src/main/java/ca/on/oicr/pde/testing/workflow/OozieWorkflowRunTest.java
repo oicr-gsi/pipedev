@@ -80,11 +80,15 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
     }
 
     @Override
-    public void executeWorkflow() throws IOException {
-
-        //TODO: integrate this process into SeqwareExecutor
+    public void launchWorkflow() throws IOException {
         seqwareExecutor.workflowRunLaunch(workflowRun);
 
+        Assert.assertTrue(Arrays.asList("running", "pending").contains(seqwareExecutor.workflowRunStatus(workflowRun)));
+
+    }
+
+    @Override
+    public void monitorWorkflow() throws IOException {
         String workflowRunStatus = "pending";
         while (Arrays.asList("running", "pending").contains(workflowRunStatus)) {
 
@@ -95,13 +99,11 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
             }
 
             seqwareExecutor.workflowRunUpdateStatus(workflowRun);
-            workflowRunStatus = seqwareExecutor.workflowRunReport(workflowRun);
-
+            workflowRunStatus = seqwareExecutor.workflowRunStatus(workflowRun);
         }
 
-        //TODO: what if the test/workflow run should fail?
-        //TODO: print std out/err if workflow failed.
         Assert.assertEquals(workflowRunStatus, "completed");
+    }
 
     }
 }

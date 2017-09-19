@@ -10,12 +10,11 @@ import java.util.Map;
 import org.testng.Assert;
 import org.testng.annotations.*;
 import org.apache.commons.io.FileUtils;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
 @Listeners({ca.on.oicr.pde.testing.testng.TestCaseReporter.class})
-public class WorkflowRunTest extends RunTestBase {
+public abstract class WorkflowRunTest extends RunTestBase {
 
     private final static Logger log = LogManager.getLogger(WorkflowRunTest.class);
 
@@ -102,16 +101,10 @@ public class WorkflowRunTest extends RunTestBase {
     }
 
     @Test(dependsOnGroups = "preExecution", groups = "execution")
-    public void executeWorkflow() throws IOException {
+    public abstract void launchWorkflow() throws IOException;
 
-        if (!parameters.isEmpty()) {
-            throw new RuntimeException("\"parameters\" are not supported by workflowRunLaunch().  Please report a bug.");
-        }
-
-        //blocks until completed
-        seqwareExecutor.workflowRunLaunch(workflowBundlePath, workflowInis, workflowName, workflowVersion);
-
-    }
+    @Test(dependsOnMethods = "launchWorkflow", groups = "execution")
+    public abstract void monitorWorkflow() throws IOException;
 
     @Test(dependsOnGroups = "execution", groups = "postExecution")
     public void checkWorkflowOutputExists() {
@@ -134,7 +127,7 @@ public class WorkflowRunTest extends RunTestBase {
 
     }
 
-    @Test(dependsOnGroups = "execution", dependsOnMethods = "calculateOutputMetrics")
+    @Test(dependsOnGroups = "execution", dependsOnMethods = "calculateOutputMetrics", groups = "postExecution")
     public void compareOutputToExpected() throws IOException {
 
         Assert.assertTrue(expectedOutput != null && expectedOutput.exists() && expectedOutput.canRead() && expectedOutput.isFile(),
