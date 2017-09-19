@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import net.sourceforge.seqware.common.metadata.Metadata;
 import net.sourceforge.seqware.common.metadata.MetadataFactory;
 import net.sourceforge.seqware.common.model.Workflow;
@@ -16,6 +18,7 @@ import net.sourceforge.seqware.common.util.maptools.MapTools;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.testng.Assert;
+import org.testng.Reporter;
 import org.testng.annotations.Test;
 
 public class OozieWorkflowRunTest extends WorkflowRunTest {
@@ -85,6 +88,8 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
 
         Assert.assertTrue(Arrays.asList("running", "pending").contains(seqwareExecutor.workflowRunStatus(workflowRun)));
 
+        Reporter.getCurrentTestResult().setAttribute("working directory", getWorkflowRunReportString("^Workflow Run Working Dir\\s*\\|\\s*(.*)$"));
+        Reporter.getCurrentTestResult().setAttribute("oozie id", getWorkflowRunReportString("^Workflow Run Engine ID\\s*\\|\\s*(.*)$"));
     }
 
     @Override
@@ -105,5 +110,18 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
         Assert.assertEquals(workflowRunStatus, "completed");
     }
 
+    private String getWorkflowRunReportString(String pattern) throws IOException {
+        String report = seqwareExecutor.workflowRunReport(workflowRun);
+
+        Pattern p = Pattern.compile(pattern);
+        Matcher m = p.matcher(report);
+
+        String result = "";
+        if (m.find()) {
+            result = m.group(1).trim();
+        }
+
+        return result;
     }
+
 }
