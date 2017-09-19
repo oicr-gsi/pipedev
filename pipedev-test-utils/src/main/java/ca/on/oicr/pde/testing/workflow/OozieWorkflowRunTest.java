@@ -17,9 +17,9 @@ import net.sourceforge.seqware.common.model.WorkflowRun;
 import net.sourceforge.seqware.common.util.maptools.MapTools;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.testng.Assert;
 import org.testng.Reporter;
 import org.testng.annotations.Test;
+import static org.assertj.core.api.Assertions.*;
 
 public class OozieWorkflowRunTest extends WorkflowRunTest {
 
@@ -65,29 +65,21 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
 
     @Test(groups = "preExecution")
     public void installWorkflow() throws IOException {
-
         workflow = seqwareExecutor.installWorkflow(workflowBundlePath);
-
-        Assert.assertNotNull(workflow);
-
+        assertThat(workflow).as("workflow").isNotNull();
     }
 
     @Test(groups = "preExecution", dependsOnMethods = "installWorkflow")
     public void scheduleWorkflow() throws IOException {
-
         workflowRun = seqwareExecutor.workflowRunSchedule(workflow, workflowInis, parameters);
-
-        Assert.assertNotNull(workflowRun);
-
+        assertThat(workflowRun).as("workflow run").isNotNull();
         Reporter.getCurrentTestResult().setAttribute("workflow run swid", workflowRun.getSwAccession());
     }
 
     @Override
     public void launchWorkflow() throws IOException {
         seqwareExecutor.workflowRunLaunch(workflowRun);
-
-        Assert.assertTrue(Arrays.asList("running", "pending").contains(seqwareExecutor.workflowRunStatus(workflowRun)));
-
+        assertThat(seqwareExecutor.workflowRunStatus(workflowRun)).as("workflow run status").isIn(Arrays.asList("running", "pending"));
         Reporter.getCurrentTestResult().setAttribute("working directory", getWorkflowRunReportString("^Workflow Run Working Dir\\s*\\|\\s*(.*)$"));
         Reporter.getCurrentTestResult().setAttribute("oozie id", getWorkflowRunReportString("^Workflow Run Engine ID\\s*\\|\\s*(.*)$"));
     }
@@ -107,7 +99,7 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
             workflowRunStatus = seqwareExecutor.workflowRunStatus(workflowRun);
         }
 
-        Assert.assertEquals(workflowRunStatus, "completed");
+        assertThat(workflowRunStatus).as("workflow run status").isEqualTo("completed");
     }
 
     private String getWorkflowRunReportString(String pattern) throws IOException {
