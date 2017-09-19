@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -134,6 +133,13 @@ public class TestCaseReporter implements IReporter {
                         System.out.println(formatAndIndent(3, "group = %s, method = [%s], execution time = [%.2fs], status = [%s]",
                                 Arrays.toString(tr.getMethod().getGroups()), tr.getMethod().getMethodName(),
                                 (tr.getEndMillis() - tr.getStartMillis()) / 1000D, TestNGStatuses.valueOf(tr.getStatus())));
+
+                        //Print test result attributes if there are any
+                        if (!tr.getAttributeNames().isEmpty()) {
+                            for (String attr : tr.getAttributeNames()) {
+                                System.out.println(formatAndIndent(4, "%s", attr + " = " + tr.getAttribute(attr)));
+                            }
+                        }
 
                         //If there was an error for the test case, print the output
                         if (!tr.isSuccess() && tr.getStatus() != TestNGStatuses.SKIP.statusCode) {

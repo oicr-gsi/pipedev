@@ -76,6 +76,7 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
 
         Assert.assertNotNull(workflowRun);
 
+        Reporter.getCurrentTestResult().setAttribute("workflow run swid", workflowRun.getSwAccession());
     }
 
     @Override
