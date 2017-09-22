@@ -24,9 +24,10 @@ import org.testng.ITestResult;
 import org.testng.xml.XmlSuite;
 
 /**
+ * <pre>
  * A TestNG Reporter that groups test results by test case name (ie, ITest getName()).
  *
- * Test results are grouped in this order: test suite --> test context --> test case
+ * Test results are grouped in this order: {@code test suite --> test context --> test case}
  * Within the test case results, the tests are order by their start time.
  *
  * Add this to your TestNG test suite either by add the annotation: @Listeners({ca.on.oicr.pde.testing.testng.TestCaseReporter.class})
@@ -42,6 +43,7 @@ import org.testng.xml.XmlSuite;
  * ____Test case = [Fake test case 1]
  * ______group = [], method = [sleepTest], execution time = [1.00s], status = [SUCCESS]
  * ______group = [], method = [sleepTest], execution time = [1.00s], status = [SUCCESS]
+ * </pre>
  */
 public class TestCaseReporter implements IReporter {
 

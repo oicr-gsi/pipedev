@@ -28,7 +28,7 @@ public class JSONHelper {
      * @param schemaJSON the json file which contains the schema
      * @param dataJSON the json file which you wish to validate
      * @return Whether or not the JSON is valid or not
-     * @throws java.io.IOException
+     * @throws java.io.IOException if there is a json parsing error
      */
     public boolean isJSONValid(File schemaJSON, File dataJSON) throws IOException {
         

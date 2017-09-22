@@ -63,10 +63,10 @@ public class Rsconfig {
      * </pre>
      *
      * @param rsconfigPath Path to the rsconfig.xml file
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws IOException
-     * @throws InvalidFileFormatException
+     * @throws ParserConfigurationException if error parsing file
+     * @throws SAXException if error parsing file
+     * @throws IOException if file is missing
+     * @throws InvalidFileFormatException if error parsing file
      */
     public Rsconfig(File rsconfigPath) throws ParserConfigurationException, SAXException, IOException, InvalidFileFormatException {
         references = loadRsconfig(rsconfigPath);
