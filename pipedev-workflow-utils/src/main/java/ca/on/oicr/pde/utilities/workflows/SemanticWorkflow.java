@@ -70,7 +70,7 @@ public abstract class SemanticWorkflow extends OicrWorkflow {
      *
      * @param file seqware file to attach terms to
      * @param ontID the ontology id
-     * @param commaSepTerms comma separated list of ontology terms (must be a registered term)
+     * @param commaSepLabels comma separated list of ontology terms (must be a registered term)
      */
     protected void attachCVlabels(SqwFile file, String ontID, String commaSepLabels) {
         if (null == file || null == ontID || ontID.isEmpty() || null == commaSepLabels || commaSepLabels.isEmpty()) {
