@@ -26,14 +26,14 @@ public abstract class SemanticWorkflow extends OicrWorkflow {
     /**
      * Method for Accessing OntologyManager
      *
-     * @return
+     * @return the ontology manager
      */
     protected GSIOntologyManager getOntologyManager() {
         return this.om;
     }
 
     /**
-     * @param configFilePath
+     * @param configFilePath path to ontology configuration
      */
     protected void configureOntologyManager(String configFilePath) {
         this.om = new GSIOntologyManager(configFilePath);
@@ -43,9 +43,9 @@ public abstract class SemanticWorkflow extends OicrWorkflow {
      * While we accept a list of Human-readable terms (ontology labels) we
      * convert them to alphanumeric term ids and then attach to files
      *
-     * @param file
-     * @param ontID
-     * @param commaSepTerms
+     * @param file seqware file to attach terms to
+     * @param ontID the ontology id
+     * @param commaSepTerms comma separated list of ontology terms (must be a registered term)
      */
     protected void attachCVterms(SqwFile file, String ontID, String commaSepTerms) {
 

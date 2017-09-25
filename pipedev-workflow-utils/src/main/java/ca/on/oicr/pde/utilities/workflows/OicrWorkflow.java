@@ -141,9 +141,9 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
     }
 
     /**
-     * Returns a map of Job titles -> Jobs. Jobs can be added to this map through this.newJob(title);
+     * Returns a map of {@code Job titles -> Jobs}. Jobs can be added to this map through this.newJob(title);
      *
-     * @return Returns a map of Job titles -> Jobs.
+     * @return Returns a map of {@code Job titles -> Jobs}
      */
     protected Map<String, Job> getJobs() {
         return jobs;
@@ -165,7 +165,7 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
      *
      * @param endJob the job that produces the output files.
      * @param directory the directory where the file is located.
-     * @throws java.lang.Exception
+     * @throws java.lang.Exception if output file string is malformed
      */
     protected void defineOutputFiles(Job endJob, String directory) throws Exception {
         if (directory == null) {
@@ -201,7 +201,7 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
      * @see OicrWorkflow#defineOutputFiles(net.sourceforge.seqware.pipeline.workflowV2.model.Job, java.lang.String) 
      * 
      * @param endJob the job that produces the output files.
-     * @throws Exception
+     * @throws Exception if output file string is malformed
      */
     protected void defineOutputFiles(Job endJob) throws Exception {
         defineOutputFiles(endJob, "");
@@ -229,9 +229,9 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
      * either in the directory defined by output_prefix and output_dir in the INI file for manualOutput, or at
      * output_prefix/output_dir/WorkflowName_WorkflowVersion/[randomNumber].
      *
-     * @param workingPath
-     * @param metatype
-     * @param manualOutput
+     * @param workingPath the working or source file path
+     * @param metatype the source file type
+     * @param manualOutput whether to enable manual output or not
      * @return a SqwFile with the source path of the file in the working directory and the provisioned path of the file in the permanent
      * location
      */
@@ -272,7 +272,7 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
      * Verifies that the workflow data model object was built correctly.
      * {@inheritDoc}
      *
-     * @throws RuntimeException When the workflow data model object's {@link OicrWorkflow#ret} is not "SUCCESS".
+     * @throws RuntimeException When the workflow data model object is not valid
      */
     @Override
     public void wrapup() {

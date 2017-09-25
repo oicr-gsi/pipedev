@@ -236,26 +236,6 @@ public class GATK2 {
         return job;
     }
 
-    /**
-     * DBsnp is provided to annotate variants during calling: http://www.broadinstitute.org/gatk/guide/article?id=1247
-     *
-     * @param java the path to java
-     * @param gatk the location of the GenomeAnalysisTK.jar
-     * @param memoryMb the amount of memory to give the job in MB
-     * @param tmpDir the path of the temp dir where the processing will occur
-     * @param refFasta the human genome reference
-     * @param chromosome the chromosome to realign
-     * @param ploidy
-     * @param genotypeLikelihoodModel
-     * @param standEmitConf
-     * @param standCallConf
-     * @param gatkKey
-     * @param dbSnp
-     * @param inputFile the path of the input BAM file
-     * @param outputFile the path of the output file
-     * @param otherParams any other parameters to send to UnifiedGenotyper
-     * @return the Job with the command and the max memory set
-     */
     public Job unifiedGenotyper(String java, String gatk, int memoryMb, String tmpDir,
             String refFasta, String chromosome, int ploidy, String genotypeLikelihoodModel,
             int standEmitConf, int standCallConf, String gatkKey, String dbSnp,
@@ -328,10 +308,6 @@ public class GATK2 {
         return job;
     }
 
-    /**
-     * Recommendations from
-     * http://www.broadinstitute.org/gatk/guide/article?id=1259
-     */
     public Job snpVariantRecalibrator(String java, String gatk, int memoryMb, String tmpDir,
             String refFasta, String chromosome, double tranche, String gatkKey,
             String hapMapPath, String omniPath, String thousandGPath, String dbSnpPath,
@@ -349,10 +325,6 @@ public class GATK2 {
                 annotations, inputFile, outputFile, tranchesFile, otherParams);
     }
 
-    /**
-     * Recommendations from
-     * http://www.broadinstitute.org/gatk/guide/article?id=1259
-     */
     public Job indelVariantRecalibrator(String java, String gatk, int memoryMb, String tmpDir,
             String refFasta, String chromosome, double tranche, String gatkKey,
             String millsDevinePath, String thousandGIndelPath, String dbSnpPath,

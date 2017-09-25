@@ -21,12 +21,14 @@ public interface SeqwareExecutor {
 
     public void workflowRunUpdateStatus(WorkflowRun workflowRun) throws IOException;
 
+    public String workflowRunStatus(WorkflowRun workflowRun) throws IOException;
+
     public String workflowRunReport(WorkflowRun workflowRun) throws IOException;
 
     public void cancelWorkflowRun(WorkflowRun workflowRun) throws IOException;
 
     public void cancelWorkflowRuns(Workflow workflow) throws IOException;
-    
+
     public void deciderRunSchedule(String decider, Workflow workflow, String... deciderArgs) throws IOException;
 
 }

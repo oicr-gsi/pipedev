@@ -47,7 +47,7 @@ public class FileProvenanceClient {
     /**
      * Setup common
      *
-     * @param fileProvenanceReportRecords
+     * @param fileProvenanceReportRecords list of records to use for client operations
      */
     public FileProvenanceClient(List<FileProvenance> fileProvenanceReportRecords) {
         this.fileProvenanceReportRecords = fileProvenanceReportRecords;
@@ -65,7 +65,7 @@ public class FileProvenanceClient {
 
     /**
      * Get a list ReducedFileProvenanceReportRecord (file records) from a collection of accessions.
-     *
+     * <p>
      * Two notable operations occur in this method:
      * <ol>
      * <li>All input accessions that uniquely (determined by file accession) reference a file will be converted directly into a
@@ -77,16 +77,20 @@ public class FileProvenanceClient {
      * For example:
      * <pre>
      * Case 1:
+     * {@code
      * Accession 1 --> File1 --> ReducedFile1
      * Accession 2 --> File2 --> ReducedFile2
+     * }
      *
      * Case 2:
+     * {@code
      * Accession 3 --> File3 \
      * Accession 4 --> File3 --> ReducedFile3
      * Accession 5 --> File3 /
+     * }
      * </pre>
      *
-     * @param swids
+     * @param swids list of SWIDs to get related records for
      *
      * @return A list of ReducedFileProvenanceReportRecord
      */
