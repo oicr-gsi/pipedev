@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import org.testng.Assert;
 import org.testng.ITest;
+import org.testng.Reporter;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Listeners;
@@ -58,8 +59,10 @@ public class FakeImpl {
         public void sleepTest(int arg1, String arg2) throws InterruptedException {
             //Simulate computation time
             Thread.sleep(1000L);
-            
+
             Assert.assertEquals(Integer.toString(arg1), arg2);
+
+            Reporter.getCurrentTestResult().setAttribute("test_id", testId + "_" + arg1);
         }
 
         @Override

@@ -1,6 +1,5 @@
 package ca.on.oicr.pde.dao.executor;
 
-import ca.on.oicr.pde.model.SeqwareAccession;
 import ca.on.oicr.pde.parsers.SeqwareOutputParser;
 import ca.on.oicr.pde.utilities.Helpers;
 import com.google.common.base.Joiner;
@@ -186,8 +185,12 @@ public class ShellExecutor implements SeqwareExecutor {
     }
 
     @Override
-    public String workflowRunReport(WorkflowRun workflowRunSwid) throws IOException {
+    public String workflowRunStatus(WorkflowRun workflowRunSwid) throws IOException {
+        return SeqwareOutputParser.getWorkflowRunStatusFromOutput(workflowRunReport(workflowRunSwid));
+    }
 
+    @Override
+    public String workflowRunReport(WorkflowRun workflowRunSwid) throws IOException {
         StringBuilder cmd = new StringBuilder();
         cmd.append("java -cp ").append(getClassPathAsString());
         cmd.append(" io.seqware.cli.Main workflow-run report");
@@ -195,8 +198,7 @@ public class ShellExecutor implements SeqwareExecutor {
 
         File stdOutAndErrFile = new File(loggingDirectory + "/" + "workflowRunReport.out");
 
-        return SeqwareOutputParser.getWorkflowRunStatusFromOutput(
-                Helpers.executeCommand(id, cmd.toString(), workingDirectory, stdOutAndErrFile, environmentVariables));
+        return Helpers.executeCommand(id, cmd.toString(), workingDirectory, stdOutAndErrFile, environmentVariables);
     }
 
     @Override

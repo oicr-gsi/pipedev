@@ -45,14 +45,14 @@ public abstract class SemanticWorkflow extends OicrWorkflow {
     /**
      * Method for Accessing OntologyManager
      *
-     * @return
+     * @return the ontology manager
      */
     protected GSIOntologyManager getOntologyManager() {
         return this.ontologies;
     }
 
     /**
-     * @param configFilePath
+     * @param configFilePath path to ontology configuration
      */
     protected void configureOntologyManager(String configFilePath) {
         this.ontologies = new GSIOntologyManager(configFilePath);
@@ -68,9 +68,9 @@ public abstract class SemanticWorkflow extends OicrWorkflow {
      * Convert a comma-separated list of labels to terms from loaded ontologies 
      * and then attach to files.
      *
-     * @param file
-     * @param ontID
-     * @param commaSepLabels
+     * @param file seqware file to attach terms to
+     * @param ontID the ontology id
+     * @param commaSepTerms comma separated list of ontology terms (must be a registered term)
      */
     protected void attachCVlabels(SqwFile file, String ontID, String commaSepLabels) {
         if (null == file || null == ontID || ontID.isEmpty() || null == commaSepLabels || commaSepLabels.isEmpty()) {
