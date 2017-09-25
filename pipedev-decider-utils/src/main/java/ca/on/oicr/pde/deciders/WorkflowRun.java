@@ -214,7 +214,7 @@ public class WorkflowRun {
     /**
      * Set the mapping of input IUS swids to output IUS swids that the workflow run should be linked to
      *
-     * @param inputIusToOutputIus
+     * @param inputIusToOutputIus linking map for input to output IUS swid
      */
     public void setInputIusToOutputIus(Map<String, String> inputIusToOutputIus) {
         this.inputIusToOutputIus.putAll(inputIusToOutputIus);

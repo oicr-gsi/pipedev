@@ -12,7 +12,7 @@ import net.sourceforge.seqware.pipeline.workflowV2.model.SqwFile;
  */
 public abstract class SemanticWorkflow extends OicrWorkflow {
 
-    private GSIOntologyManager om = new GSIOntologyManager(null);
+    private GSIOntologyManager ontologies;
     public static final String CVTERM_TAG = "cvterms";
     private static final String CVTERM_SEPARATOR = ":";
 
@@ -24,55 +24,77 @@ public abstract class SemanticWorkflow extends OicrWorkflow {
     protected abstract Map<String, Set<String>> getTerms();
 
     /**
+     * Instantiates GSIOntologyManager with the default config, which is a path
+     * only accessible inside OICR.
+     */
+    public SemanticWorkflow() {
+        this(null);
+    }
+
+    /**
+     * Instantiate the GSI ontology manager with a custom ontology configuration
+     * file.
+     * 
+     * @param configFile the full path to a ontology configuration file
+     */
+    public SemanticWorkflow(String configFile) {
+        ontologies = new GSIOntologyManager(configFile);
+    }
+    
+    
+    /**
      * Method for Accessing OntologyManager
      *
-     * @return
+     * @return the ontology manager
      */
     protected GSIOntologyManager getOntologyManager() {
-        return this.om;
+        return this.ontologies;
     }
 
     /**
-     * @param configFilePath
+     * @param configFilePath path to ontology configuration
      */
     protected void configureOntologyManager(String configFilePath) {
-        this.om = new GSIOntologyManager(configFilePath);
+        this.ontologies = new GSIOntologyManager(configFilePath);
+    }
+
+    @Deprecated
+    protected void attachCVterms(SqwFile file, String ontID, String commaSepTerms) {
+        System.err.println("Use of attachCVTerms is deprecated. Please use attachCVlabels");
+        attachCVlabels(file, ontID, commaSepTerms);
     }
 
     /**
-     * While we accept a list of Human-readable terms (ontology labels) we
-     * convert them to alphanumeric term ids and then attach to files
+     * Convert a comma-separated list of labels to terms from loaded ontologies 
+     * and then attach to files.
      *
-     * @param file
-     * @param ontID
-     * @param commaSepTerms
+     * @param file seqware file to attach terms to
+     * @param ontID the ontology id
+     * @param commaSepLabels comma separated list of ontology terms (must be a registered term)
      */
-    protected void attachCVterms(SqwFile file, String ontID, String commaSepTerms) {
-
-        if (null == file || null == ontID || ontID.isEmpty() || null == commaSepTerms || commaSepTerms.isEmpty()) {
-            System.err.println("Nothing to do, attchCVterms won't work");
+    protected void attachCVlabels(SqwFile file, String ontID, String commaSepLabels) {
+        if (null == file || null == ontID || ontID.isEmpty() || null == commaSepLabels || commaSepLabels.isEmpty()) {
+            System.err.println("Incorrect parameters provided to SemanticWorkflow: attachCVterms won't work. file="+file+" ontID="+ontID+" labels="+commaSepLabels);
             return;
         }
         // Set holds only unique items, so we just add everything to the Set
-        HashSet<String> VettedTerms = new HashSet<String>();
+        HashSet<String> VettedTerms = new HashSet<>();
         Map<String, Set<String>> registeredTerms = this.getTerms();
 
         // If we have terms already, extract them and add to the Set (with validation)
-        String commaSepExisiting = file.getAnnotations().get(CVTERM_TAG);
-        if (null != commaSepExisiting) {
-            if (!commaSepExisiting.isEmpty()) {
-                String[] oldTermArray = commaSepExisiting.split(",");
+        String commaSepExisting = file.getAnnotations().get(CVTERM_TAG);
+        if (null != commaSepExisting) {
+            if (!commaSepExisting.isEmpty()) {
+                String[] oldTermArray = commaSepExisting.split(",");
 
                 for (String t : oldTermArray) {
                     String[] checks = t.split(CVTERM_SEPARATOR);
-                    if (checks.length == 2 && this.om.isOntologySupported(checks[0])) { // we split by separator and we have 2-element array
-                        if (this.om.hasTerm(checks[1], checks[0])) {
-
-                            if (!registeredTerms.containsKey(ontID) || !registeredTerms.get(ontID).contains(this.om.termToLabel(checks[1], ontID))) {
-                                System.err.println("Term " + t + " is not available via getTerms(), make sure it's description (label) is registered");
+                    if (checks.length == 2 && this.ontologies.isOntologySupported(checks[0])) { // we split by separator and we have 2-element array
+                        if (this.ontologies.hasTerm(checks[1], checks[0])) {
+                            if (!registeredTerms.containsKey(ontID) || !registeredTerms.get(ontID).contains(this.ontologies.termToLabel(checks[1], ontID))) {
+                                System.err.println("Term " + t + " is not available via getTerms(), make sure its description (label) is registered");
                                 continue;
                             }
-
                             VettedTerms.add(t);
                         }
                     }
@@ -81,20 +103,24 @@ public abstract class SemanticWorkflow extends OicrWorkflow {
         }
 
         //Check submitted terms (labels)
-        String[] newTermArray = commaSepTerms.split(",");
-        for (String t : newTermArray) {
-            if (!registeredTerms.containsKey(ontID) || !registeredTerms.get(ontID).contains(t)) {
-                System.err.println("Term " + t + " is not available via getTerms(), make sure it is registered");
+        String[] newLabelArray = commaSepLabels.split(",");
+        for (String l : newLabelArray) {
+            // check that the ontology is available
+            if (!registeredTerms.containsKey(ontID)) {
+                System.err.println("Ontology " + ontID + " is not available via getTerms(), make sure it is registered");
                 continue;
             }
-            if (this.om.hasLabel(t, ontID)) {
-                String term = this.om.labelToTerm(t, ontID);
+            // check that the label was registered
+            else if (!registeredTerms.get(ontID).contains(l)){
+                System.err.println("Label " + l + " is not available via getTerms(), make sure it is registered");
+                continue;
+            }
+            
+            //convert to term and add to vettedTerms
+            if (this.ontologies.hasLabel(l, ontID)) {
+                String term = this.ontologies.labelToTerm(l, ontID);
                 if (null != term) {
-                    StringBuilder vettedFormatted = new StringBuilder();
-                    vettedFormatted.append(ontID)
-                            .append(CVTERM_SEPARATOR)
-                            .append(term);
-                    VettedTerms.add(vettedFormatted.toString());
+                    VettedTerms.add(ontID + CVTERM_SEPARATOR + term);
                 }
             }
         }
