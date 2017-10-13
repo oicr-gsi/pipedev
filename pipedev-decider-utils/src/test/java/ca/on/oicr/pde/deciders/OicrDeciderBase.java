@@ -1,6 +1,7 @@
 package ca.on.oicr.pde.deciders;
 
 import ca.on.oicr.gsi.provenance.ExtendedProvenanceClient;
+import ca.on.oicr.gsi.provenance.FileProvenanceFilter;
 import ca.on.oicr.gsi.provenance.model.FileProvenance;
 import ca.on.oicr.gsi.provenance.model.FileProvenance.Status;
 import ca.on.oicr.gsi.provenance.model.SampleProvenance;
@@ -37,8 +38,10 @@ import net.sourceforge.seqware.common.model.Workflow;
 import org.joda.time.DateTime;
 import static org.mockito.Mockito.when;
 import ca.on.oicr.pde.client.SeqwareClient;
+import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Properties;
@@ -132,7 +135,7 @@ public class OicrDeciderBase {
     @Test
     public void deciderOperationModes() throws HttpResponseException, IOException {
 
-        SampleProvenance sp = Iterables.getOnlyElement(provenanceClient.getSampleProvenance());
+        SampleProvenance sp = Iterables.getFirst(provenanceClient.getSampleProvenance(), null);
 
         //create a file in seqware
         Workflow upstreamWorkflow = seqwareClient.createWorkflow("UpstreamWorkflow", "0.0", "", ImmutableMap.of("test_param", "test_value"));
@@ -147,8 +150,11 @@ public class OicrDeciderBase {
         file.setType("type?");
         file.setSize(1L);
         seqwareClient.createWorkflowRun(upstreamWorkflow, Sets.newHashSet(ius), Collections.EMPTY_LIST, Arrays.asList(file));
-        assertEquals(provenanceClient.getSampleProvenance().size(), 1);
-        assertEquals(provenanceClient.getFileProvenance().size(), 1);
+
+        EnumMap<FileProvenanceFilter, Set<String>> filters = new EnumMap<>(FileProvenanceFilter.class);
+        filters.put(FileProvenanceFilter.workflow, ImmutableSet.of(upstreamWorkflow.getSwAccession().toString()));
+
+        assertEquals(provenanceClient.getFileProvenance(filters).size(), 1);
 
         //setup downstream workflow and decider
         Workflow downstreamWorkflow = seqwareClient.createWorkflow("DownstreamWorkflow", "0.0", "", ImmutableMap.of("test_param", "test_value"));
@@ -156,32 +162,34 @@ public class OicrDeciderBase {
         decider.setWorkflowAccession(downstreamWorkflow.getSwAccession().toString());
         decider.setMetaType(Arrays.asList("text/plain"));
 
+        filters.put(FileProvenanceFilter.workflow, ImmutableSet.of(upstreamWorkflow.getSwAccession().toString(), downstreamWorkflow.getSwAccession().toString()));
+
         //test decider operation modes
-        run(decider, Arrays.asList("--sample-name", "TEST_SAMPLE", "--dry-run"));
+        run(decider, Arrays.asList("--parent-wf-accession", upstreamWorkflow.getSwAccession().toString(), "--sample-name", "TEST_SAMPLE", "--dry-run"));
         assertEquals(decider.getWorkflowRuns().size(), 1);
-        assertEquals(provenanceClient.getFileProvenance().size(), 1);
+        assertEquals(provenanceClient.getFileProvenance(filters).size(), 1);
 
-        run(decider, Arrays.asList("--sample-name", "TEST_SAMPLE", "--no-metadata"));
+        run(decider, Arrays.asList("--parent-wf-accession", upstreamWorkflow.getSwAccession().toString(), "--sample-name", "TEST_SAMPLE", "--no-metadata"));
         assertEquals(decider.getWorkflowRuns().size(), 1);
-        assertEquals(provenanceClient.getFileProvenance().size(), 1);
+        assertEquals(provenanceClient.getFileProvenance(filters).size(), 1);
 
-        run(decider, Arrays.asList("--sample-name", "TEST_SAMPLE"));
+        run(decider, Arrays.asList("--parent-wf-accession", upstreamWorkflow.getSwAccession().toString(), "--sample-name", "TEST_SAMPLE"));
         assertEquals(decider.getWorkflowRuns().size(), 1);
-        assertEquals(provenanceClient.getFileProvenance().size(), 2);
+        assertEquals(provenanceClient.getFileProvenance(filters).size(), 2);
 
-        run(decider, Arrays.asList("--sample-name", "TEST_SAMPLE", "--ignore-previous-runs"));
+        run(decider, Arrays.asList("--parent-wf-accession", upstreamWorkflow.getSwAccession().toString(), "--sample-name", "TEST_SAMPLE", "--ignore-previous-runs"));
         assertEquals(decider.getWorkflowRuns().size(), 1);
-        assertEquals(provenanceClient.getFileProvenance().size(), 3);
+        assertEquals(provenanceClient.getFileProvenance(filters).size(), 3);
 
-        run(decider, Arrays.asList("--all", "--ignore-previous-runs"));
+        run(decider, Arrays.asList("--parent-wf-accession", upstreamWorkflow.getSwAccession().toString(), "--all", "--ignore-previous-runs"));
         assertEquals(decider.getWorkflowRuns().size(), 1);
-        assertEquals(provenanceClient.getFileProvenance().size(), 4);
+        assertEquals(provenanceClient.getFileProvenance(filters).size(), 4);
 
-        run(decider, Arrays.asList("--all", "--ignore-previous-runs", "--launch-max", "0"));
+        run(decider, Arrays.asList("--parent-wf-accession", upstreamWorkflow.getSwAccession().toString(), "--all", "--ignore-previous-runs", "--launch-max", "0"));
         assertEquals(decider.getWorkflowRuns().size(), 0);
-        assertEquals(provenanceClient.getFileProvenance().size(), 4);
+        assertEquals(provenanceClient.getFileProvenance(filters).size(), 4);
 
-        run(decider, Arrays.asList("--all", "--ignore-previous-runs",
+        run(decider, Arrays.asList("--parent-wf-accession", upstreamWorkflow.getSwAccession().toString(), "--all", "--ignore-previous-runs",
                 "--study-to-output-path-csv", TestUtils.getResourceFilePath("studyToOutputPathConfig/test-study-to-output-path.csv").getAbsolutePath(),
                 "--launch-max", "999999")); //TODO: BasicDecider should reset launch-max during init()
         assertEquals(decider.getWorkflowRuns().size(), 1);
@@ -189,13 +197,13 @@ public class OicrDeciderBase {
         p.load(FileUtils.openInputStream(Paths.get(Iterables.getOnlyElement(decider.getWorkflowRuns())).toFile()));
         Map<String, String> iniProperties = new HashMap(p);
         assertEquals(iniProperties.get("output_prefix"), "/tmp/output/path/123/");
-        assertEquals(provenanceClient.getFileProvenance().size(), 5);
+        assertEquals(provenanceClient.getFileProvenance(filters).size(), 5);
     }
 
     @Test
     public void deciderForMergingWorkflow() {
 
-        SampleProvenance sp = Iterables.getOnlyElement(provenanceClient.getSampleProvenance());
+        SampleProvenance sp = Iterables.getFirst(provenanceClient.getSampleProvenance(), null);
 
         //setup files in seqware
         Workflow workflow1 = seqwareClient.createWorkflow("TestWorkflow1", "0.0", "", ImmutableMap.of("test_param", "test_value"));
@@ -222,8 +230,10 @@ public class OicrDeciderBase {
         file.setSize(1L);
         seqwareClient.createWorkflowRun(workflow1, Sets.newHashSet(ius), Collections.EMPTY_LIST, Arrays.asList(file));
 
-        assertEquals(provenanceClient.getSampleProvenance().size(), 1);
-        assertEquals(provenanceClient.getFileProvenance().size(), 2);
+        EnumMap<FileProvenanceFilter, Set<String>> filters = new EnumMap<>(FileProvenanceFilter.class);
+        filters.put(FileProvenanceFilter.workflow, ImmutableSet.of(workflow1.getSwAccession().toString()));
+
+        assertEquals(provenanceClient.getFileProvenance(filters).size(), 2);
 
         //setup downstream workflow and decider
         Workflow downstreamWorkflow = seqwareClient.createWorkflow("DownstreamWorkflow", "0.0", "", ImmutableMap.of("test_param", "test_value"));
@@ -232,17 +242,19 @@ public class OicrDeciderBase {
         decider.setMetaType(Arrays.asList("text/plain"));
         decider.setGroupBy(Group.ROOT_SAMPLE_NAME, true);
 
-        run(decider, Arrays.asList("--all", "--dry-run"));
-        assertEquals(decider.getWorkflowRuns().size(), 1);
-        assertEquals(provenanceClient.getFileProvenance().size(), 2);
+        filters.put(FileProvenanceFilter.workflow, ImmutableSet.of(workflow1.getSwAccession().toString(), downstreamWorkflow.getSwAccession().toString()));
 
-        run(decider, Arrays.asList("--all", "--no-metadata"));
+        run(decider, Arrays.asList("--parent-wf-accessions", workflow1.getSwAccession().toString(), "--all", "--dry-run"));
         assertEquals(decider.getWorkflowRuns().size(), 1);
-        assertEquals(provenanceClient.getFileProvenance().size(), 2);
+        assertEquals(provenanceClient.getFileProvenance(filters).size(), 2);
 
-        run(decider, Arrays.asList("--all"));
+        run(decider, Arrays.asList("--parent-wf-accessions", workflow1.getSwAccession().toString(), "--all", "--no-metadata"));
         assertEquals(decider.getWorkflowRuns().size(), 1);
-        assertEquals(provenanceClient.getFileProvenance().size(), 4);
+        assertEquals(provenanceClient.getFileProvenance(filters).size(), 2);
+
+        run(decider, Arrays.asList("--parent-wf-accessions", workflow1.getSwAccession().toString(), "--all"));
+        assertEquals(decider.getWorkflowRuns().size(), 1);
+        assertEquals(provenanceClient.getFileProvenance(filters).size(), 4);
     }
 
     @Test
@@ -266,17 +278,20 @@ public class OicrDeciderBase {
         file.setSize(1L);
         seqwareClient.createWorkflowRun(workflow1, Sets.newHashSet(ius), Collections.EMPTY_LIST, Arrays.asList(file));
 
-        assertEquals(provenanceClient.getFileProvenance().size(), 1);
-        assertEquals(Iterables.getOnlyElement(provenanceClient.getFileProvenance()).getStatus(), Status.OKAY);
+        EnumMap<FileProvenanceFilter, Set<String>> filters = new EnumMap<>(FileProvenanceFilter.class);
+        filters.put(FileProvenanceFilter.workflow, ImmutableSet.of(workflow1.getSwAccession().toString()));
+
+        assertEquals(provenanceClient.getFileProvenance(filters).size(), 1);
+        assertEquals(Iterables.getOnlyElement(provenanceClient.getFileProvenance(filters)).getStatus(), Status.OKAY);
 
         //modify sample provenance - version and last modified have changed
         sample.setName("TEST_SAMPLE_modified");
-        assertEquals(Iterables.getOnlyElement(provenanceClient.getFileProvenance()).getStatus(), Status.STALE);
+        assertEquals(Iterables.getOnlyElement(provenanceClient.getFileProvenance(filters)).getStatus(), Status.STALE);
 
         //modify sample id - sample provenance id changed, so unable to join analysis provenance and sample provenance
         runSample.setId("1-modified");
         sample.setId("1-modified");
-        assertEquals(Iterables.getOnlyElement(provenanceClient.getFileProvenance()).getStatus(), Status.ERROR);
+        assertEquals(Iterables.getOnlyElement(provenanceClient.getFileProvenance(filters)).getStatus(), Status.ERROR);
     }
 
     @Test
