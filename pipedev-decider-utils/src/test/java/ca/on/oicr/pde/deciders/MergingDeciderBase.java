@@ -26,7 +26,7 @@ import org.testng.annotations.Test;
  *
  * @author mlaszloffy
  */
-public class MergingDeciderBase extends OicrDeciderBase {
+public class MergingDeciderBase extends DeciderBase {
 
     @BeforeMethod(dependsOnGroups = "setup", dependsOnMethods = "setupData")
     public void setupIus() {
@@ -155,11 +155,6 @@ public class MergingDeciderBase extends OicrDeciderBase {
         run(decider, Arrays.asList("--all", "--group-by", "IUS_SWA", "--verbose"));
         assertEquals(decider.getWorkflowRuns().size(), 2);
         assertEquals(provenanceClient.getFileProvenance().size(), 4);
-    }
-
-    @Override
-    @Test(enabled = false)
-    public void demultiplexingWorkflow() {
     }
 
     private class MergingDeciderImpl extends MergingDecider {
