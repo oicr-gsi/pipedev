@@ -510,6 +510,32 @@ public class OicrDecider extends BasicDecider {
     }
 
     /**
+     * Get a list of FileAttributes objects from a commaSeparateFilePaths string.
+     * <p>
+     * The returned list is in the same order as the commaSeparatedFilePaths string.
+     *
+     * @param commaSeparatedFilePaths
+     *
+     * @return
+     */
+    public List<FileAttributes> getFileAttributes(String commaSeparatedFilePaths) {
+        List<FileAttributes> fileAttributes = new ArrayList<>();
+        Set<FileAttributes> tmp = new HashSet<>();
+        for (String filePath : commaSeparatedFilePaths.split(",")) {
+            FileAttributes f = files.get(filePath);
+            if (f == null) {
+                throw new RuntimeException("An unknown file path [" + filePath + "] was encountered.");
+            }
+            if (!tmp.add(f)) {
+                throw new RuntimeException("Duplicate file path [" + filePath + "] detected.");
+            } else {
+                fileAttributes.add(f);
+            }
+        }
+        return fileAttributes;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
