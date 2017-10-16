@@ -108,43 +108,6 @@ public class MergingDeciderBaseIT extends MergingDeciderBase {
         provenanceClient = dpc;
     }
 
-    @Test
-    public void testDeciderPineryUrlOption() {
-
-        //check preconditions
-        assertEquals(provenanceClient.getSampleProvenance().size(), 1);
-        assertEquals(provenanceClient.getFileProvenance().size(), 0);
-
-        SampleProvenance sp = Iterables.getOnlyElement(provenanceClient.getSampleProvenance());
-
-        //create a file in seqware
-        Workflow upstreamWorkflow = seqwareClient.createWorkflow("UpstreamWorkflow", "0.0", "", ImmutableMap.of("test_param", "test_value"));
-        IUS ius;
-        FileMetadata file;
-        ius = seqwareClient.addLims("pinery", sp.getSampleProvenanceId(), sp.getVersion(), sp.getLastModified());
-        file = new FileMetadata();
-        file.setDescription("description");
-        file.setMd5sum("md5sum");
-        file.setFilePath("/tmp/file.bam");
-        file.setMetaType("text/plain");
-        file.setType("type?");
-        file.setSize(1L);
-        seqwareClient.createWorkflowRun(upstreamWorkflow, Sets.newHashSet(ius), Collections.EMPTY_LIST, Arrays.asList(file));
-        assertEquals(provenanceClient.getSampleProvenance().size(), 1);
-        assertEquals(provenanceClient.getFileProvenance().size(), 1);
-
-        //setup downstream workflow and decider
-        Workflow downstreamWorkflow = seqwareClient.createWorkflow("DownstreamWorkflow", "0.0", "", ImmutableMap.of("test_param", "test_value"));
-        OicrDecider decider = new OicrDecider();
-        decider.setWorkflowAccession(downstreamWorkflow.getSwAccession().toString());
-        decider.setMetaType(Arrays.asList("text/plain"));
-
-        //test pinery-url decider option
-        run(decider, Arrays.asList("--all", "--ignore-previous-runs", "--pinery-url", "http://localhost:9999"));
-        assertEquals(decider.getWorkflowRuns().size(), 1);
-        assertEquals(provenanceClient.getFileProvenance().size(), 2);
-    }
-
     @AfterMethod(alwaysRun = true)
     public void destroyProvenance() {
 
