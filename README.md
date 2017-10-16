@@ -1,4 +1,4 @@
-#pipedev
+# pipedev
 
 This is the public workflow repository for the Pipeline Development and Evaluation (PDE) Working Group at [Ontario Institute for Cancer Research](http://www.oicr.on.ca) (OICR).
 
@@ -9,14 +9,14 @@ The PDE has two primary mandates:
 
 This repository houses the open-source workflows, deciders and utilities that are written and maintained by our group.
 
-##Binaries
+## Binaries
 
 Our utilities are available from our Maven repository.
 
 * Releases: [gsi-release](https://artifacts.oicr.on.ca/artifactory/simple/gsi-release)
 * Nightly snapshots: [gsi-snapshots](https://artifacts.oicr.on.ca/artifactory/simple/gsi-snapshots)
 
-##Build
+## Build
 
 To build our utilities, use Maven.
 
@@ -32,9 +32,9 @@ mvn clean install -DskipITs=false \
 -DdbUser=<postgres user name>
 ```
 
-##Usage
+## Usage
 
-###pipedev-workflow-utils
+### pipedev-workflow-utils
 Simplifies building of SeqWare workflows by providing:
 
 - helper methods to create jobs, provision input or output files, and safely get ini properties
@@ -53,7 +53,7 @@ Modify your workflow class to extend ```OicrWorkflow``` (instead of ```AbstractW
 
 Review [OicrWorkflow javadoc]() for documentation.
 
-###pipedev-decider-utils
+### pipedev-decider-utils
 Simplifies building of SeqWare java deciders by providing:
 
 - helper methods to simplify command line execution and get file attributes
@@ -72,7 +72,7 @@ Modify your workflow class to extend ```OicrDecider``` (instead of ```BasicDecid
 
 Review [OicrDecider javadoc]() for documentation.
 
-###pipedev-test-utils
+### pipedev-test-utils
 Provides unit and integration testing utilities such as:
 
 - a common procedure to test run workflow and decider projects
@@ -92,7 +92,7 @@ Add pipedev-test-utils as a maven dependency:
 Review the [pipedev wiki](https://github.com/oicr-gsi/pipedev/wiki) for documentation.
 
 
-###Common maven configuration (parent pom)
+### Common maven configuration (parent pom)
 
 Workflow projects or decider projects share a very similar maven configuration. To reduce configuration duplication and maintenance, common configuration can be moved to a parent pom.
 
