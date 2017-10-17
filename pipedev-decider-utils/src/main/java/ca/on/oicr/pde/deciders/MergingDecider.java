@@ -22,6 +22,12 @@ import net.sourceforge.seqware.common.module.ReturnValue;
 import org.apache.logging.log4j.Logger;
 
 /**
+ * Base decider logic for grouping files together and scheduling merging workflow runs.
+ * <p>
+ * The decider uses the default grouping key of:
+ * DONOR + TISSUE_ORIGIN + LIBRARY_TEMPLATE_TYPE + WORKFLOW_NAME + TISSUE_TYPE + TISSUE_PREP + TISSUE_REGION + GROUP_ID + TARGETED_RESEQUENCING
+ * <p>
+ * Grouping behaviour can be modified by setting "group-by" parameter.
  *
  * @author mlaszloffy
  */
@@ -41,11 +47,13 @@ public abstract class MergingDecider extends OicrDecider {
         this(logger);
         this.provenanceClient = provenanceClient;
     }
-    
+
     /**
+     * Before grouping, check if the file should be included or excluded.
      *
-     * @param fileAttributes
-     * @return
+     * @param fileAttributes the file attributes for the current ungrouped file
+     *
+     * @return true if the file should be included (and grouped), false if the file should be excluded
      */
     protected abstract boolean checkFilePassesFilterBeforeGrouping(FileAttributes fileAttributes);
 
@@ -163,9 +171,13 @@ public abstract class MergingDecider extends OicrDecider {
     }
 
     /**
+     * After grouping files, check if files within the group are valid.
+     * <p>
+     * If any file within a group is not valid, the whole group is invalid.
      *
-     * @param fileAttributes
-     * @return
+     * @param fileAttributes the file attributes for the current grouped file
+     *
+     * @return true if the file is valid, false if the file and the group is invalid
      */
     protected abstract boolean checkFilePassesFilterAfterGrouping(FileAttributes fileAttributes);
 
@@ -180,9 +192,13 @@ public abstract class MergingDecider extends OicrDecider {
     }
 
     /**
+     * Validate and modify workflow run parameters/ini.
+     * <p>
+     * The ReturnValue is used to signal if the workflow run is valid or not.
      *
-     * @param run
-     * @return
+     * @param run the workflow run object that will be used to create a workflow run
+     *
+     * @return a ReturnValue indicating SUCCESS if the workflow run is valid or anything other than SUCCESS if invalid
      */
     protected abstract ReturnValue customizeWorkflowRun(WorkflowRun run);
 
