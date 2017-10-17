@@ -7,12 +7,14 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import net.sourceforge.seqware.common.hibernate.FindAllTheFiles;
 import net.sourceforge.seqware.common.module.FileMetadata;
@@ -27,7 +29,8 @@ public abstract class MergingDecider extends OicrDecider {
 
     public final Logger log;
     public final GroupableFileFactory groupableFileFactory;
-    public final Map<String, GroupableFileFactory.GroupableFile> fileSwaToFile = new HashMap<>();
+    public final Map<String, GroupableFile> fileSwaToFile = new HashMap<>();
+    public final Map<String, String> fileSwaToGroupName = new HashMap<>();
 
     public MergingDecider(Logger logger) {
         this.log = logger;
@@ -114,6 +117,20 @@ public abstract class MergingDecider extends OicrDecider {
             groupedFiles = Multimaps.asMap(hm);
         }
 
+        //create a map of file swid to group name
+        for (Entry<String, List<ReturnValue>> e : groupedFiles.entrySet()) {
+            String groupName = e.getKey();
+            for (ReturnValue rv : e.getValue()) {
+                String fileSwa = rv.getAttribute(FindAllTheFiles.Header.FILE_SWA.getTitle());
+                String previousGroupName = fileSwaToGroupName.put(fileSwa, groupName);
+                if (previousGroupName != null && !previousGroupName.equals(groupName)) {
+                    throw new UnsupportedOperationException(
+                            MessageFormat.format("File with SWID = [{0}] belongs to multiple groups = [previous = {1}, new = {2}].",
+                                    fileSwa, previousGroupName, groupName));
+                }
+            }
+        }
+
         if (options.has("verbose")) {
             for (Map.Entry<String, List<ReturnValue>> e : groupedFiles.entrySet()) {
                 StringBuilder sb = new StringBuilder();
@@ -186,15 +203,15 @@ public abstract class MergingDecider extends OicrDecider {
         //modifies currentWorkflowRun + calls BasicDecider modifyIniFile
         super.modifyIniFile(commaSeparatedFilePaths, commaSeparatedParentAccessions);
 
-        //allow implementing decider opportunity to customize the workflow run
         if (options.has("verbose")) {
             Set<String> t = new HashSet<>();
             for (FileAttributes fa : currentWorkflowRun.getFiles()) {
-                GroupableFileFactory.GroupableFile file = fileSwaToFile.get(fa.getOtherAttribute(FindAllTheFiles.Header.FILE_SWA.getTitle()));
-                t.add(file.getGroupByAttribute());
+                t.add(fileSwaToGroupName.get(fa.getOtherAttribute(FindAllTheFiles.Header.FILE_SWA.getTitle())));
             }
-            log.debug("Workflow run for group = [" + Iterables.getOnlyElement(t));
+            log.debug("Workflow run for group = " + Iterables.getOnlyElement(t));
         }
+
+        //call to subclass to customize the workflow run
         r = customizeWorkflowRun(currentWorkflowRun);
 
         return r;
