@@ -11,6 +11,7 @@ import ca.on.oicr.pde.client.MetadataBackedSeqwareLimsClient;
 import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
 import net.sourceforge.seqware.common.model.Workflow;
+import net.sourceforge.seqware.common.util.ExitException;
 import ca.on.oicr.pde.client.SeqwareClient;
 
 public class RegressionStudyBase {
@@ -32,7 +33,11 @@ public class RegressionStudyBase {
 
         List<String> params = new ArrayList<>();
         params.add("--all");
+        try {
         run(decider, params);
+        } catch (ExitException e) {
+        	assertEquals(e.getExitCode(), 0);
+        }
         assertEquals(decider.getWorkflowRuns().size(), 16);
 
         run(decider, params);

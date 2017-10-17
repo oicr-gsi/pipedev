@@ -1,43 +1,47 @@
 package ca.on.oicr.gsi.fileprovenance;
 
-import ca.on.oicr.gsi.provenance.DefaultProvenanceClient;
-import ca.on.oicr.gsi.provenance.SeqwareMetadataAnalysisProvenanceProvider;
-import ca.on.oicr.gsi.provenance.SeqwareMetadataLimsMetadataProvenanceProvider;
-import ca.on.oicr.gsi.provenance.model.SampleProvenance;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import java.util.Collections;
-import net.sourceforge.seqware.common.model.IUS;
-import net.sourceforge.seqware.common.module.FileMetadata;
-import ca.on.oicr.gsi.provenance.ExtendedProvenanceClient;
-import ca.on.oicr.gsi.provenance.ProviderLoader;
-import ca.on.oicr.gsi.provenance.ProviderLoader.Provider;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import net.sourceforge.seqware.common.model.Workflow;
-import ca.on.oicr.pde.client.SeqwareClient;
-import ca.on.oicr.pde.client.SeqwareLimsClient;
-import ca.on.oicr.pde.testing.metadata.RegressionTestStudy;
-import ca.on.oicr.pde.testing.metadata.SeqwareTestEnvironment;
-import com.google.common.collect.Iterables;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import net.sourceforge.seqware.common.model.WorkflowRun;
+import java.util.Map;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.h2.util.IOUtils;
-import org.joda.time.DateTime;
-import org.testng.annotations.Test;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
+import ca.on.oicr.gsi.provenance.DefaultProvenanceClient;
+import ca.on.oicr.gsi.provenance.ExtendedProvenanceClient;
+import ca.on.oicr.gsi.provenance.ProviderLoader;
+import ca.on.oicr.gsi.provenance.ProviderLoader.Provider;
+import ca.on.oicr.gsi.provenance.SeqwareMetadataAnalysisProvenanceProvider;
+import ca.on.oicr.gsi.provenance.SeqwareMetadataLimsMetadataProvenanceProvider;
+import ca.on.oicr.gsi.provenance.model.SampleProvenance;
+import ca.on.oicr.pde.client.SeqwareClient;
+import ca.on.oicr.pde.client.SeqwareLimsClient;
+import ca.on.oicr.pde.testing.metadata.RegressionTestStudy;
+import ca.on.oicr.pde.testing.metadata.SeqwareTestEnvironment;
+import net.sourceforge.seqware.common.model.IUS;
+import net.sourceforge.seqware.common.model.Workflow;
+import net.sourceforge.seqware.common.model.WorkflowRun;
+import net.sourceforge.seqware.common.module.FileMetadata;
 
 /**
  *
@@ -112,13 +116,13 @@ public class ClientIT {
             file.setMetaType("text/plain");
             file.setType("type?");
             file.setSize(1L);
-            seqwareClient.createWorkflowRun(upstreamWorkflow, Sets.newHashSet(i), Collections.EMPTY_LIST, Lists.newArrayList(file));
+            seqwareClient.createWorkflowRun(upstreamWorkflow, Sets.newHashSet(i), Collections.emptyList(), Lists.newArrayList(file));
         }
     }
 
     @Test
     public void defaultFiltersTest() throws IOException {
-        Map<String, CSVRecord> recs = executeClient(Collections.EMPTY_LIST);
+        Map<String, CSVRecord> recs = executeClient(Collections.emptyList());
 
         //16 records okay, 6 skipped
         assertEquals(recs.size(), 16);
@@ -148,7 +152,7 @@ public class ClientIT {
     @Test
     public void recordsWithErrorStatusTest() throws IOException {
         Workflow upstreamWorkflow = seqwareClient.createWorkflow("UpstreamWorkflow2", "0.0", "", DEFAULT_WORKFLOW_PARAMS);
-        IUS i = seqwareClient.addLims("seqware", "does_not_exist", "does_not_exist", DateTime.now());
+        IUS i = seqwareClient.addLims("seqware", "does_not_exist", "does_not_exist", ZonedDateTime.now());
         FileMetadata file = new FileMetadata();
         file.setDescription("description");
         file.setMd5sum("md5sum");
@@ -156,15 +160,15 @@ public class ClientIT {
         file.setMetaType("text/plain");
         file.setType("type?");
         file.setSize(1L);
-        WorkflowRun wr = seqwareClient.createWorkflowRun(upstreamWorkflow, Sets.newHashSet(i), Collections.EMPTY_LIST, Lists.newArrayList(file));
+        WorkflowRun wr = seqwareClient.createWorkflowRun(upstreamWorkflow, Sets.newHashSet(i), Collections.emptyList(), Lists.newArrayList(file));
         Map<String, CSVRecord> recs;
         recs = executeClient(Arrays.asList("--workflow-run", Integer.toString(wr.getSwAccession())));
         assertEquals(Iterables.getOnlyElement(recs.values()).get("Status"), "ERROR");
-        assertEquals(executeClient(Collections.EMPTY_LIST).size(), 17);
+        assertEquals(executeClient(Collections.emptyList()).size(), 17);
 
         //skip the above workflow run with status "ERROR"
         seqwareLimsClient.annotate(wr, "skip", "skip workflow run");
-        assertEquals(executeClient(Collections.EMPTY_LIST).size(), 16);
+        assertEquals(executeClient(Collections.emptyList()).size(), 16);
     }
 
     private Map<String, CSVRecord> executeClient(List<String> inputArgs) throws IOException {

@@ -132,7 +132,7 @@ public class OicrDeciderBaseIT extends OicrDeciderBase {
         file.setMetaType("text/plain");
         file.setType("type?");
         file.setSize(1L);
-        seqwareClient.createWorkflowRun(upstreamWorkflow, Sets.newHashSet(ius), Collections.EMPTY_LIST, Arrays.asList(file));
+        seqwareClient.createWorkflowRun(upstreamWorkflow, Sets.newHashSet(ius), Collections.emptyList(), Arrays.asList(file));
         assertEquals(provenanceClient.getSampleProvenance().size(), 1);
         assertEquals(provenanceClient.getFileProvenance().size(), 1);
 

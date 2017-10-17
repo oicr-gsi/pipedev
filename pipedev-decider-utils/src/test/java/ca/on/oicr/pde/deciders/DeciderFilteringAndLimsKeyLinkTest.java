@@ -1,5 +1,28 @@
 package ca.on.oicr.pde.deciders;
 
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.mockito.Mockito;
+import org.powermock.reflect.Whitebox;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Table;
+
 import ca.on.oicr.gsi.provenance.AnalysisProvenanceProvider;
 import ca.on.oicr.gsi.provenance.DefaultProvenanceClient;
 import ca.on.oicr.gsi.provenance.ExtendedProvenanceClient;
@@ -16,31 +39,12 @@ import ca.on.oicr.pinery.api.RunSample;
 import ca.on.oicr.pinery.api.Sample;
 import ca.on.oicr.pinery.api.SampleProject;
 import ca.on.oicr.pinery.client.PineryClient;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Table;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import net.sourceforge.seqware.common.metadata.Metadata;
 import net.sourceforge.seqware.common.metadata.MetadataInMemory;
 import net.sourceforge.seqware.common.model.IUS;
 import net.sourceforge.seqware.common.model.Workflow;
 import net.sourceforge.seqware.common.model.WorkflowRun;
 import net.sourceforge.seqware.common.module.FileMetadata;
-import org.joda.time.DateTime;
-import org.mockito.Mockito;
-import static org.mockito.Mockito.when;
-import org.powermock.reflect.Whitebox;
-import static org.testng.Assert.assertEquals;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 /**
  *
@@ -102,7 +106,7 @@ public class DeciderFilteringAndLimsKeyLinkTest {
 
     @BeforeMethod
     public void setupLimsData() {
-        DateTime limsLastModified = DateTime.now();
+        ZonedDateTime limsLastModified = ZonedDateTime.now();
 
         sp1 = Mockito.mock(SampleProvenance.class);
         when(sp1.getProvenanceId()).thenReturn("1");
@@ -142,7 +146,10 @@ public class DeciderFilteringAndLimsKeyLinkTest {
         file1.setSize(1L);
         Set<IUS> limsKeys1 = Sets.newHashSet(
                 seqwareClient.addLims(limsProvider, sp1.getSampleProvenanceId(), sp1.getVersion(), sp1.getLastModified()));
-        WorkflowRun wr1 = seqwareClient.createWorkflowRun(inputFileProducer, limsKeys1, Collections.EMPTY_LIST, Arrays.asList(file1));
+        assertEquals(limsKeys1.size(), 1);
+        assertEquals(limsKeys1.iterator().next().getLimsKey().getVersion(), sp1.getVersion());
+        assertEquals(limsKeys1.iterator().next().getLimsKey().getLastModified().toInstant(), sp1.getLastModified().toInstant());
+        WorkflowRun wr1 = seqwareClient.createWorkflowRun(inputFileProducer, limsKeys1, Collections.emptyList(), Arrays.asList(file1));
         inputFileWorkflowRuns.add(wr1);
 
         //create workflow run that has one BAM as output and is linked to IUS1 and IUS2
@@ -156,7 +163,7 @@ public class DeciderFilteringAndLimsKeyLinkTest {
         Set<IUS> limsKeys2 = Sets.newHashSet(
                 seqwareClient.addLims(limsProvider, sp1.getSampleProvenanceId(), sp1.getVersion(), sp1.getLastModified()),
                 seqwareClient.addLims(limsProvider, sp2.getSampleProvenanceId(), sp2.getVersion(), sp2.getLastModified()));
-        WorkflowRun wr2 = seqwareClient.createWorkflowRun(inputFileProducer, limsKeys2, Collections.EMPTY_LIST, Arrays.asList(file2));
+        WorkflowRun wr2 = seqwareClient.createWorkflowRun(inputFileProducer, limsKeys2, Collections.emptyList(), Arrays.asList(file2));
         inputFileWorkflowRuns.add(wr2);
 
         //create workflow run that has one BAM as output and is linked to IUS3
@@ -169,7 +176,7 @@ public class DeciderFilteringAndLimsKeyLinkTest {
         file3.setSize(1L);
         Set<IUS> limsKeys3 = Sets.newHashSet(
                 seqwareClient.addLims(limsProvider, sp3.getSampleProvenanceId(), sp3.getVersion(), sp3.getLastModified()));
-        WorkflowRun wr3 = seqwareClient.createWorkflowRun(inputFileProducer, limsKeys3, Collections.EMPTY_LIST, Arrays.asList(file3));
+        WorkflowRun wr3 = seqwareClient.createWorkflowRun(inputFileProducer, limsKeys3, Collections.emptyList(), Arrays.asList(file3));
         inputFileWorkflowRuns.add(wr3);
     }
 

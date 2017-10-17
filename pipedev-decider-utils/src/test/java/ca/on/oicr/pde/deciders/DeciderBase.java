@@ -1,5 +1,20 @@
 package ca.on.oicr.pde.deciders;
 
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.testng.annotations.BeforeMethod;
+
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
 import ca.on.oicr.gsi.provenance.ExtendedProvenanceClient;
 import ca.on.oicr.pde.client.SeqwareClient;
 import ca.on.oicr.pinery.api.Attribute;
@@ -15,17 +30,7 @@ import ca.on.oicr.pinery.lims.DefaultRunPosition;
 import ca.on.oicr.pinery.lims.DefaultRunSample;
 import ca.on.oicr.pinery.lims.DefaultSample;
 import ca.on.oicr.pinery.lims.DefaultSampleProject;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import net.sourceforge.seqware.common.metadata.Metadata;
-import org.joda.time.DateTime;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import org.testng.annotations.BeforeMethod;
 
 /**
  *
@@ -65,7 +70,7 @@ public class DeciderBase {
         sample.setProject("TEST_PROJECT");
         sample.setAttributes(Sets.newHashSet(a));
         sample.setId("1");
-        sample.setModified(DateTime.parse("2015-01-01T00:00:00.000Z").toDate());
+        sample.setModified(Date.from(ZonedDateTime.parse("2015-01-01T00:00:00.000Z").toInstant()));
         samples.add(sample);
 
         a = new DefaultAttribute();
@@ -96,10 +101,16 @@ public class DeciderBase {
     }
 
     protected void run(OicrDecider decider, List<String> params) {
+    	if (provenanceClient == null) {
+    		throw new IllegalStateException("No provenance client");
+    	}
+    	decider.setProvenanceClient(provenanceClient);
         decider.setMetadata(metadata);
         decider.setConfig(config);
         decider.setParams(params);
-        decider.parse_parameters();
+        if (decider.parse_parameters().getReturnValue() != 0) {
+        	throw new IllegalStateException();
+        }
         decider.init();
         decider.do_test();
         decider.do_run();

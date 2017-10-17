@@ -1,25 +1,27 @@
 package ca.on.oicr.pde.deciders;
 
+import java.util.Collections;
+import java.util.HashMap;
+
+import org.powermock.reflect.Whitebox;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Table;
+
 import ca.on.oicr.gsi.provenance.DefaultProvenanceClient;
-import ca.on.oicr.gsi.provenance.PineryProvenanceProvider;
 import ca.on.oicr.gsi.provenance.SeqwareMetadataAnalysisProvenanceProvider;
 import ca.on.oicr.gsi.provenance.SeqwareMetadataLimsMetadataProvenanceProvider;
 import ca.on.oicr.gsi.provenance.model.SampleProvenance;
 import ca.on.oicr.pde.client.MetadataBackedSeqwareClient;
 import ca.on.oicr.pde.client.MetadataBackedSeqwareLimsClient;
 import ca.on.oicr.pde.testing.metadata.RegressionTestStudy;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Table;
-import java.util.Collections;
-import java.util.HashMap;
 import net.sourceforge.seqware.common.metadata.MetadataInMemory;
 import net.sourceforge.seqware.common.model.IUS;
 import net.sourceforge.seqware.common.model.Workflow;
 import net.sourceforge.seqware.common.module.FileMetadata;
-import org.powermock.reflect.Whitebox;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 
 /**
  *
@@ -57,7 +59,7 @@ public class RegressionStudyBaseTest extends RegressionStudyBase {
             file.setMetaType("text/plain");
             file.setType("type?");
             file.setSize(1L);
-            seqwareClient.createWorkflowRun(upstreamWorkflow, Sets.newHashSet(i), Collections.EMPTY_LIST, Lists.newArrayList(file));
+            seqwareClient.createWorkflowRun(upstreamWorkflow, Sets.newHashSet(i), Collections.emptyList(), Lists.newArrayList(file));
         }
     }
 

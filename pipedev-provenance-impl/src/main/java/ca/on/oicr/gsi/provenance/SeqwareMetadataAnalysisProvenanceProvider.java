@@ -1,10 +1,11 @@
 package ca.on.oicr.gsi.provenance;
 
-import ca.on.oicr.gsi.provenance.model.AnalysisProvenance;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import ca.on.oicr.gsi.provenance.model.AnalysisProvenance;
 import net.sourceforge.seqware.common.metadata.Metadata;
 import net.sourceforge.seqware.common.metadata.MetadataFactory;
 
@@ -14,24 +15,25 @@ import net.sourceforge.seqware.common.metadata.MetadataFactory;
  */
 public class SeqwareMetadataAnalysisProvenanceProvider implements AnalysisProvenanceProvider {
 
-    private final Metadata metadata;
+	private final Metadata metadata;
 
-    public SeqwareMetadataAnalysisProvenanceProvider(Map<String, String> settings) {
-        this.metadata = MetadataFactory.get(settings);
-    }
+	public SeqwareMetadataAnalysisProvenanceProvider(Map<String, String> settings) {
+		this.metadata = MetadataFactory.get(settings);
+	}
 
-    public SeqwareMetadataAnalysisProvenanceProvider(Metadata metadata) {
-        this.metadata = metadata;
-    }
+	public SeqwareMetadataAnalysisProvenanceProvider(Metadata metadata) {
+		this.metadata = metadata;
+	}
 
-    @Override
-    public Collection<AnalysisProvenance> getAnalysisProvenance() {
-        return (List<AnalysisProvenance>) (List<?>) metadata.getAnalysisProvenance();
-    }
+	@Override
+	public Collection<AnalysisProvenance> getAnalysisProvenance() {
+		return metadata.getAnalysisProvenance().stream().map(x->x).collect(Collectors.toList());
+	}
 
-    @Override
-    public Collection<AnalysisProvenance> getAnalysisProvenance(Map<FileProvenanceFilter, Set<String>> filters) {
-        return (List<AnalysisProvenance>) (List<?>) metadata.getAnalysisProvenance(filters);
-    }
+	@Override
+	public Collection<AnalysisProvenance> getAnalysisProvenance(Map<FileProvenanceFilter, Set<String>> filters) {
+		return metadata.getAnalysisProvenance(filters).stream().map(x->x)
+				.collect(Collectors.toList());
+	}
 
 }

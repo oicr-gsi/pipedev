@@ -1,15 +1,19 @@
 package ca.on.oicr.pde.testing.metadata;
 
-import ca.on.oicr.pde.utilities.Helpers;
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
 import org.apache.commons.lang3.RandomStringUtils;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
+
+import ca.on.oicr.pde.utilities.Helpers;
 
 /**
  *
@@ -37,7 +41,7 @@ public class SeqwareTestDatabase {
         this.port = port;
         this.user = user;
         this.password = password;
-        this.databaseName = "testing" + "_" + DateTime.now().toString(DateTimeFormat.forPattern("MMdd_HHmmss")) + "_" + RandomStringUtils.randomAlphanumeric(6).toLowerCase();
+        this.databaseName = "testing" + "_" + DateTimeFormatter.ofPattern("MMdd_HHmmss").format(ZonedDateTime.now()) + "_" + RandomStringUtils.randomAlphanumeric(6).toLowerCase();
 
         //load the postgres driver
         Class.forName("org.postgresql.Driver");

@@ -68,7 +68,7 @@ public class MergingDeciderBase extends DeciderBase {
         file.setMetaType("text/plain");
         file.setType("type?");
         file.setSize(1L);
-        seqwareClient.createWorkflowRun(workflow1, Sets.newHashSet(ius), Collections.EMPTY_LIST, Arrays.asList(file));
+        seqwareClient.createWorkflowRun(workflow1, Sets.newHashSet(ius), Collections.<Workflow>emptyList(), Arrays.asList(file));
 
         sp = sps.get(1);
         ius = seqwareClient.addLims("pinery", sp.getSampleProvenanceId(), sp.getVersion(), sp.getLastModified());
@@ -79,7 +79,7 @@ public class MergingDeciderBase extends DeciderBase {
         file.setMetaType("text/plain");
         file.setType("type?");
         file.setSize(1L);
-        seqwareClient.createWorkflowRun(workflow1, Sets.newHashSet(ius), Collections.EMPTY_LIST, Arrays.asList(file));
+        seqwareClient.createWorkflowRun(workflow1, Sets.newHashSet(ius), Collections.<Workflow>emptyList(), Arrays.asList(file));
     }
 
     @Test

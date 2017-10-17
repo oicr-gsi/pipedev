@@ -21,20 +21,20 @@ import net.sourceforge.seqware.pipeline.plugin.PluginInterface;
  */
 public class PDEPluginRunner {
 
-    private final Map config;
+    private final Map<String, String> config;
     private final Metadata metadata;
 
     public PDEPluginRunner() {
         this(ConfigTools.getSettings());
     }
 
-    public PDEPluginRunner(Map config) {
+    public PDEPluginRunner(Map<String, String> config) {
         super();
         this.config = config;
         this.metadata = MetadataFactory.get(config);
     }
     
-        public PDEPluginRunner(Map config, Metadata metadata) {
+        public PDEPluginRunner(Map<String, String> config, Metadata metadata) {
         super();
         this.config = config;
         this.metadata = metadata;

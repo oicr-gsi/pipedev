@@ -140,7 +140,7 @@ public class FileProvenanceClient {
      * @return A set of study names
      */
     public Set<String> getStudy(List<Integer> swids) {
-        Set studies = new HashSet<>();
+        Set<String> studies = new HashSet<>();
         for (Integer swid : swids) {
             for (FileProvenance fpr : accessionToFileProvenanceReportRecords.get(swid)) {
                 if (fpr.getStudyTitles() != null) {
@@ -159,7 +159,7 @@ public class FileProvenanceClient {
      * @return A set of sequencer run names
      */
     public Set<String> getSequencerRuns(List<Integer> swids) {
-        Set sequencerRuns = new HashSet<>();
+        Set<String> sequencerRuns = new HashSet<>();
         for (Integer swid : swids) {
             for (FileProvenance fpr : accessionToFileProvenanceReportRecords.get(swid)) {
                 if (fpr.getSequencerRunNames() != null) {
@@ -178,7 +178,7 @@ public class FileProvenanceClient {
      * @return A set of lanes names
      */
     public Set<String> getLanes(List<Integer> swids) {
-        Set lanes = new HashSet<>();
+        Set<String> lanes = new HashSet<>();
         for (Integer swid : swids) {
             for (FileProvenance fpr : accessionToFileProvenanceReportRecords.get(swid)) {
                 if (fpr.getLaneNames() != null) {
@@ -197,7 +197,7 @@ public class FileProvenanceClient {
      * @return A set of sample names
      */
     public Set<String> getSamples(List<Integer> swids) {
-        Set samples = new HashSet<>();
+        Set<String> samples = new HashSet<>();
         for (Integer swid : swids) {
             for (FileProvenance fpr : accessionToFileProvenanceReportRecords.get(swid)) {
                 if (fpr.getSampleNames() != null) {
@@ -216,7 +216,7 @@ public class FileProvenanceClient {
      * @return A set of processing algorithm names
      */
     public Set<String> getProcessingAlgorithms(List<Integer> swids) {
-        Set processingAlgorithms = new HashSet<>();
+        Set<String> processingAlgorithms = new HashSet<>();
         for (Integer swid : swids) {
             for (FileProvenance fpr : accessionToFileProvenanceReportRecords.get(swid)) {
                 if (fpr.getProcessingAlgorithm() != null) {
@@ -235,7 +235,7 @@ public class FileProvenanceClient {
      * @return A list of file metatype names
      */
     public Set<String> getFileMetaTypes(List<Integer> swids) {
-        Set fileTypes = new HashSet<>();
+        Set<String> fileTypes = new HashSet<>();
         for (Integer swid : swids) {
             for (FileProvenance fpr : accessionToFileProvenanceReportRecords.get(swid)) {
                 if (fpr.getFileMetaType() != null) {
@@ -254,7 +254,7 @@ public class FileProvenanceClient {
      * @return A set of workflow names
      */
     public Set<String> getWorkflows(List<Integer> swids) {
-        Set workflows = new HashSet<>();
+        Set<String> workflows = new HashSet<>();
         for (Integer swid : swids) {
             for (FileProvenance fpr : accessionToFileProvenanceReportRecords.get(swid)) {
                 if (fpr.getWorkflowName() != null) {

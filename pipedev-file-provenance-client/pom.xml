@@ -4,7 +4,7 @@
     <parent>
         <groupId>ca.on.oicr.gsi</groupId>
         <artifactId>pipedev</artifactId>
-        <version>2.3</version>
+        <version>2.4-SNAPSHOT</version>
     </parent>
     
     <artifactId>pipedev-file-provenance-client</artifactId>
@@ -13,8 +13,8 @@
     <name>pipedev-file-provenance-client</name>
     
     <properties>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <seqwareWar>${com.github.seqware:seqware-webservice:war}</seqwareWar>
         <skipITs>true</skipITs>
     </properties>
@@ -76,10 +76,6 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-joda</artifactId>
         </dependency>
     </dependencies>
     
