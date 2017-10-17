@@ -12,7 +12,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import java.io.File;
-import java.net.ServerSocket;
 import java.util.Arrays;
 import java.util.Collections;
 import javax.naming.NamingException;
@@ -62,7 +61,7 @@ public class OicrDeciderBaseIT extends OicrDeciderBase {
         appContext.setInitParameter("spring.profiles.active", "mock");
 
         //setup the jetty server
-        server = new Server();
+        server = new Server(0);
         server.setHandler(appContext);
         server.start();
         pineryUrl = "http://localhost:" + ((ServerConnector) server.getConnectors()[0]).getLocalPort();

@@ -52,7 +52,7 @@ public class MergingDeciderBaseIT extends MergingDeciderBase {
         appContext.setInitParameter("spring.profiles.active", "mock");
 
         //setup the jetty server
-        server = new Server();
+        server = new Server(0);
         server.setHandler(appContext);
         server.start();
         pineryUrl = "http://localhost:" + ((ServerConnector) server.getConnectors()[0]).getLocalPort();
