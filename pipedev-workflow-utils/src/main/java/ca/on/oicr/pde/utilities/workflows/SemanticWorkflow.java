@@ -4,6 +4,7 @@ import ca.on.oicr.pde.tools.common.GSIOntologyManager;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import net.sourceforge.seqware.common.util.Log;
 import net.sourceforge.seqware.pipeline.workflowV2.model.SqwFile;
 
 /**
@@ -60,7 +61,7 @@ public abstract class SemanticWorkflow extends OicrWorkflow {
 
     @Deprecated
     protected void attachCVterms(SqwFile file, String ontID, String commaSepTerms) {
-        System.err.println("Use of attachCVTerms is deprecated. Please use attachCVlabels");
+        Log.warn("Use of attachCVTerms is deprecated. Please use attachCVlabels");
         attachCVlabels(file, ontID, commaSepTerms);
     }
 
@@ -74,7 +75,7 @@ public abstract class SemanticWorkflow extends OicrWorkflow {
      */
     protected void attachCVlabels(SqwFile file, String ontID, String commaSepLabels) {
         if (null == file || null == ontID || ontID.isEmpty() || null == commaSepLabels || commaSepLabels.isEmpty()) {
-            System.err.println("Incorrect parameters provided to SemanticWorkflow: attachCVterms won't work. file="+file+" ontID="+ontID+" labels="+commaSepLabels);
+            Log.warn("Incorrect parameters provided to SemanticWorkflow: attachCVterms won't work. file="+file+" ontID="+ontID+" labels="+commaSepLabels);
             return;
         }
         // Set holds only unique items, so we just add everything to the Set
@@ -92,7 +93,7 @@ public abstract class SemanticWorkflow extends OicrWorkflow {
                     if (checks.length == 2 && this.ontologies.isOntologySupported(checks[0])) { // we split by separator and we have 2-element array
                         if (this.ontologies.hasTerm(checks[1], checks[0])) {
                             if (!registeredTerms.containsKey(ontID) || !registeredTerms.get(ontID).contains(this.ontologies.termToLabel(checks[1], ontID))) {
-                                System.err.println("Term " + t + " is not available via getTerms(), make sure its description (label) is registered");
+                                Log.warn("Term " + t + " is not available via getTerms(), make sure its description (label) is registered");
                                 continue;
                             }
                             VettedTerms.add(t);
@@ -107,12 +108,12 @@ public abstract class SemanticWorkflow extends OicrWorkflow {
         for (String l : newLabelArray) {
             // check that the ontology is available
             if (!registeredTerms.containsKey(ontID)) {
-                System.err.println("Ontology " + ontID + " is not available via getTerms(), make sure it is registered");
+                Log.warn("Ontology " + ontID + " is not available via getTerms(), make sure it is registered");
                 continue;
             }
             // check that the label was registered
             else if (!registeredTerms.get(ontID).contains(l)){
-                System.err.println("Label " + l + " is not available via getTerms(), make sure it is registered");
+                Log.warn("Label " + l + " is not available via getTerms(), make sure it is registered");
                 continue;
             }
             
