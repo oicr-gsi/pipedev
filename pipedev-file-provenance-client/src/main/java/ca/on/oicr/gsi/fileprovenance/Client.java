@@ -21,6 +21,7 @@ import java.util.Set;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
+import net.sourceforge.seqware.common.util.ExitException;
 import ca.on.oicr.gsi.provenance.FileProvenanceFilter;
 import joptsimple.BuiltinHelpFormatter;
 import org.apache.commons.io.FileUtils;
@@ -74,10 +75,10 @@ public class Client {
 
     public static void main(String[] args) throws IOException {
         OptionParser parser = new OptionParser();
-        OptionSpec helpOpt = parser.accepts("help").forHelp();
+        OptionSpec<Void> helpOpt = parser.accepts("help").forHelp();
         OptionSpec<String> providerSettingFileOpt = parser.accepts("settings", "Provider settings json file (default: ~/.provenance/settings.json)").withRequiredArg();
         OptionSpec<String> outOpt = parser.accepts("out", "Path to write the output file to").withRequiredArg().required();
-        OptionSpec allOpt = parser.accepts("all",
+        OptionSpec<Void> allOpt = parser.accepts("all",
                 "Get all records rather than only the records that pass the default filters: [processing status = success, workflow run status = completed, skip = false]");
         OptionSpec<Boolean> outputJsonOpt = parser.accepts("json", "Output report as json (default: tsv)").withOptionalArg().ofType(Boolean.class).defaultsTo(false);
 
@@ -94,7 +95,7 @@ public class Client {
         if (options.has(helpOpt)) {
             parser.formatHelpWith(new BuiltinHelpFormatter(200, 5));
             parser.printHelpOn(System.out);
-            System.exit(0);
+            throw new ExitException(0);
         }
 
         Path providerSettingFile = Paths.get(System.getProperty("user.home"), ".provenance", "settings.json");

@@ -1,17 +1,18 @@
 package ca.on.oicr.pde.client;
 
-import ca.on.oicr.pde.model.WorkflowRunReportRecord;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import ca.on.oicr.pde.model.WorkflowRunReportRecord;
 import net.sourceforge.seqware.common.model.FirstTierModel;
 import net.sourceforge.seqware.common.model.IUS;
 import net.sourceforge.seqware.common.model.Processing;
 import net.sourceforge.seqware.common.model.Workflow;
 import net.sourceforge.seqware.common.model.WorkflowRun;
 import net.sourceforge.seqware.common.module.FileMetadata;
-import org.joda.time.DateTime;
 
 /**
  *
@@ -35,6 +36,6 @@ public interface SeqwareClient {
 
     public List<WorkflowRunReportRecord> getWorkflowRunRecords(Workflow workflow);
     
-    public IUS addLims(String provider, String id, String version, DateTime lastModified);
+    public IUS addLims(String provider, String id, String version, ZonedDateTime lastModified);
 
 }

@@ -1,25 +1,31 @@
 package ca.on.oicr.gsi.fileprovenance;
 
-import ca.on.oicr.gsi.common.transformation.FunctionBuilder;
-import ca.on.oicr.gsi.common.transformation.StringSanitizerBuilder;
-import ca.on.oicr.gsi.provenance.model.FileProvenance;
-import ca.on.oicr.gsi.provenance.model.IusLimsKey;
-import ca.on.oicr.gsi.provenance.model.LimsKey;
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Iterables;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.joda.time.DateTimeZone;
+
+import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
+
+import ca.on.oicr.gsi.common.transformation.MapStringifier;
+import ca.on.oicr.gsi.common.transformation.StringSanitizerBuilder;
+import ca.on.oicr.gsi.provenance.model.FileProvenance;
+import ca.on.oicr.gsi.provenance.model.IusLimsKey;
+import ca.on.oicr.gsi.provenance.model.LimsKey;
 
 /**
  *
@@ -35,18 +41,19 @@ public class TsvReportBuilder implements ReportBuilder {
         ssbForFields.add("=", "\u2300");
         ssbForFields.add("&", "\u2300");
         ssbForFields.add(" ", "_");
-        Function<String, String> stringSanitizer = ssbForFields.build();
+        Function<String, String> stringSanitizer = ssbForFields.build()::apply;
 
         StringSanitizerBuilder ssbForAttributes = new StringSanitizerBuilder();
         ssbForAttributes.add("\t", " ");
         ssbForAttributes.add(";", "\u2300");
         ssbForAttributes.add("=", "\u2300");
         ssbForAttributes.add("&", "\u2300");
-        FunctionBuilder fb = new FunctionBuilder(ssbForAttributes.build());
-        Function mapOfSetsToString = fb.getFunction();
+        Function<String, String> ssForAttributes = ssbForAttributes.build()::apply;
 
         String nullString = "";
-        Character delimiter = ';';
+        String delimiter = ";";
+        
+        Function<Collection<String>, String> join = c -> c.stream().filter(Objects::nonNull).map(ssForAttributes).collect(Collectors.joining(delimiter)); 
 
         CSVFormat cf = CSVFormat.newFormat('\t')
                 .withNullString(nullString)
@@ -75,67 +82,67 @@ public class TsvReportBuilder implements ReportBuilder {
             Joiner j = Joiner.on(delimiter).skipNulls();
             for (FileProvenance fp : fps) {
 
-                List cs = new ArrayList<>();
+                List<String> cs = new ArrayList<>();
 
-                cs.add(fp.getLastModified().withZone(DateTimeZone.forID("America/Toronto")).toString("YYYY-MM-dd HH:mm:ss.SSS"));
+                cs.add(fp.getLastModified().withZoneSameInstant(ZoneId.of("America/Toronto")).format(DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm:ss.SSS")));
 
-                cs.add(j.join(Iterables.transform(fp.getStudyTitles(), stringSanitizer)));
+                cs.add(join.apply(fp.getStudyTitles()));
                 cs.add(nullString); //study swids not available
-                cs.add(j.join(Iterables.transform(fp.getStudyAttributes().entrySet(), mapOfSetsToString)));
+                cs.add(MapStringifier.transform(ssForAttributes, ssForAttributes, fp.getStudyAttributes()));
 
                 cs.add(nullString);
                 cs.add(nullString); //experiment swids not available
                 cs.add(nullString);
 
-                cs.add(j.join(Iterables.transform(fp.getRootSampleNames(), stringSanitizer)));
+                cs.add(join.apply(fp.getRootSampleNames()));
                 cs.add(nullString); //root sample swids not available
 
-                cs.add(j.join(Iterables.transform(fp.getParentSampleNames(), stringSanitizer)));
+                cs.add(join.apply(fp.getParentSampleNames()));
                 cs.add(nullString); //parent sample swids not available
                 cs.add(j.join(fp.getParentSampleOrganismIDs()));
-                cs.add(j.join(Iterables.transform(fp.getParentSampleAttributes().entrySet(), mapOfSetsToString)));
+                cs.add(MapStringifier.transform(ssForAttributes, ssForAttributes,fp.getParentSampleAttributes()));
 
-                cs.add(j.join(Iterables.transform(fp.getSampleNames(), stringSanitizer)));
+                cs.add(join.apply(fp.getSampleNames()));
                 cs.add(nullString); //sample swids not available
-                cs.add(j.join(Iterables.transform(fp.getSampleOrganismIDs(), stringSanitizer)));
-                cs.add(j.join(Iterables.transform(fp.getSampleOrganismCodes(), stringSanitizer)));
-                cs.add(j.join(Iterables.transform(fp.getSampleAttributes().entrySet(), mapOfSetsToString)));
+                cs.add(join.apply(fp.getSampleOrganismIDs()));
+                cs.add(join.apply(fp.getSampleOrganismCodes()));
+                cs.add(MapStringifier.transform(ssForAttributes, ssForAttributes,fp.getSampleAttributes()));
 
-                cs.add(j.join(Iterables.transform(fp.getSequencerRunNames(), stringSanitizer)));
+                cs.add(join.apply(fp.getSequencerRunNames()));
                 cs.add(nullString); //sequencer run swids not available
-                cs.add(j.join(Iterables.transform(fp.getSequencerRunAttributes().entrySet(), mapOfSetsToString)));
-                cs.add(j.join(Iterables.transform(fp.getSequencerRunPlatformIDs(), stringSanitizer)));
-                cs.add(j.join(Iterables.transform(fp.getSequencerRunPlatformNames(), stringSanitizer)));
+                cs.add(MapStringifier.transform(ssForAttributes, ssForAttributes,fp.getSequencerRunAttributes()));
+                cs.add(join.apply(fp.getSequencerRunPlatformIDs()));
+                cs.add(join.apply(fp.getSequencerRunPlatformNames()));
 
-                cs.add(j.join(Iterables.transform(fp.getLaneNames(), stringSanitizer)));
-                cs.add(j.join(Iterables.transform(fp.getLaneNumbers(), stringSanitizer)));
+                cs.add(join.apply(fp.getLaneNames()));
+                cs.add(join.apply(fp.getLaneNumbers()));
                 cs.add(nullString); //lane swids not available
-                cs.add(j.join(Iterables.transform(fp.getLaneAttributes().entrySet(), mapOfSetsToString)));
+                cs.add(MapStringifier.transform(ssForAttributes, ssForAttributes,fp.getLaneAttributes()));
 
-                cs.add(j.join(Iterables.transform(fp.getIusTags(), stringSanitizer)));
-                cs.add(j.join(Iterables.transform(fp.getIusSWIDs(), stringSanitizer)));
-                cs.add(j.join(Iterables.transform(fp.getIusAttributes().entrySet(), mapOfSetsToString)));
+                cs.add(join.apply(fp.getIusTags()));
+                cs.add(join.apply(fp.getIusSWIDs()));
+                cs.add(MapStringifier.transform(ssForAttributes, ssForAttributes,fp.getIusAttributes()));
 
                 cs.add(stringSanitizer.apply(fp.getWorkflowName()));
                 cs.add(stringSanitizer.apply(fp.getWorkflowVersion()));
-                cs.add(fp.getWorkflowSWID());
-                cs.add(j.join(Iterables.transform(fp.getWorkflowAttributes().entrySet(), mapOfSetsToString)));
+                cs.add(fp.getWorkflowSWID().toString());
+                cs.add(MapStringifier.transform(ssForAttributes, ssForAttributes,fp.getWorkflowAttributes()));
 
                 cs.add(stringSanitizer.apply(fp.getWorkflowRunName()));
                 cs.add(stringSanitizer.apply(fp.getWorkflowRunStatus()));
-                cs.add(fp.getWorkflowRunSWID());
-                cs.add(j.join(Iterables.transform(fp.getWorkflowRunAttributes().entrySet(), mapOfSetsToString)));
+                cs.add(fp.getWorkflowRunSWID().toString());
+                cs.add(MapStringifier.transform(ssForAttributes, ssForAttributes,fp.getWorkflowRunAttributes()));
 
                 cs.add(j.join(fp.getWorkflowRunInputFileSWIDs()));
 
                 cs.add(stringSanitizer.apply(fp.getProcessingAlgorithm()));
-                cs.add(fp.getProcessingSWID());
-                cs.add(j.join(Iterables.transform(fp.getProcessingAttributes().entrySet(), mapOfSetsToString)));
+                cs.add(fp.getProcessingSWID().toString());
+                cs.add(MapStringifier.transform(ssForAttributes, ssForAttributes,fp.getProcessingAttributes()));
                 cs.add(stringSanitizer.apply(fp.getProcessingStatus()));
 
                 cs.add(stringSanitizer.apply(fp.getFileMetaType()));
-                cs.add(fp.getFileSWID());
-                cs.add(j.join(Iterables.transform(fp.getFileAttributes().entrySet(), mapOfSetsToString)));
+                cs.add(fp.getFileSWID().toString());
+                cs.add(MapStringifier.transform(ssForAttributes, ssForAttributes,fp.getFileAttributes()));
                 cs.add(stringSanitizer.apply(fp.getFilePath()));
                 cs.add(stringSanitizer.apply(fp.getFileMd5sum()));
                 cs.add(stringSanitizer.apply(fp.getFileSize()));

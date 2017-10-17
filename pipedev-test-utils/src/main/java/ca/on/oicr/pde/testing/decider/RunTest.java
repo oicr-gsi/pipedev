@@ -64,9 +64,9 @@ public class RunTest extends RunTestBase {
     private static final Comparator<WorkflowRunReport> WORKFLOW_RUN_REPORT_COMPARATOR = new Comparator<WorkflowRunReport>() {
         @Override
         public int compare(WorkflowRunReport o1, WorkflowRunReport o2) {
-            SortedSet<String> sampleNames1 = new TreeSet();
-            SortedSet<String> laneNames1 = new TreeSet();
-            SortedSet<Integer> fileIds1 = new TreeSet();
+            SortedSet<String> sampleNames1 = new TreeSet<String>();
+            SortedSet<String> laneNames1 = new TreeSet<String>();
+            SortedSet<Integer> fileIds1 = new TreeSet<Integer>();
             for (ReducedFileProvenanceReportRecord r : o1.getFiles()) {
 
                 for (String sampleName : r.getSampleName()) {
@@ -81,9 +81,9 @@ public class RunTest extends RunTestBase {
             }
             String o1key = Joiner.on("").join(sampleNames1) + Joiner.on("").join(laneNames1) + Joiner.on("").join(fileIds1);
 
-            SortedSet<String> sampleNames2 = new TreeSet();
-            SortedSet<String> laneNames2 = new TreeSet();
-            SortedSet<Integer> fileIds2 = new TreeSet();
+            SortedSet<String> sampleNames2 = new TreeSet<String>();
+            SortedSet<String> laneNames2 = new TreeSet<String>();
+            SortedSet<Integer> fileIds2 = new TreeSet<Integer>();
             for (ReducedFileProvenanceReportRecord r : o2.getFiles()) {
 
                 for (String sampleName : r.getSampleName()) {

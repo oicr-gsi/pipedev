@@ -24,7 +24,7 @@ public class PDEPluginRunnerTest {
         Metadata expectedMetadata = MetadataFactory.getNoOp();
         PDEPluginRunner pr = new PDEPluginRunner(Collections.EMPTY_MAP, expectedMetadata);
         HelloWorld hw = new HelloWorld();
-        ReturnValue rv = pr.runPlugin(hw, Collections.EMPTY_LIST);
+        ReturnValue rv = pr.runPlugin(hw, Collections.<String>emptyList());
         Assert.assertEquals(rv.getExitStatus(), ReturnValue.SUCCESS);
 
         //probe plugin object as necessary
