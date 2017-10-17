@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import net.sourceforge.seqware.common.metadata.Metadata;
 import net.sourceforge.seqware.common.metadata.MetadataFactory;
 import net.sourceforge.seqware.common.model.Workflow;
@@ -15,8 +17,9 @@ import net.sourceforge.seqware.common.model.WorkflowRun;
 import net.sourceforge.seqware.common.util.maptools.MapTools;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.testng.Assert;
+import org.testng.Reporter;
 import org.testng.annotations.Test;
+import static org.assertj.core.api.Assertions.*;
 
 public class OozieWorkflowRunTest extends WorkflowRunTest {
 
@@ -62,28 +65,27 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
 
     @Test(groups = "preExecution")
     public void installWorkflow() throws IOException {
-
         workflow = seqwareExecutor.installWorkflow(workflowBundlePath);
-
-        Assert.assertNotNull(workflow);
-
+        assertThat(workflow).as("workflow").isNotNull();
     }
 
     @Test(groups = "preExecution", dependsOnMethods = "installWorkflow")
     public void scheduleWorkflow() throws IOException {
-
         workflowRun = seqwareExecutor.workflowRunSchedule(workflow, workflowInis, parameters);
-
-        Assert.assertNotNull(workflowRun);
-
+        assertThat(workflowRun).as("workflow run").isNotNull();
+        Reporter.getCurrentTestResult().setAttribute("workflow run swid", workflowRun.getSwAccession());
     }
 
     @Override
-    public void executeWorkflow() throws IOException {
-
-        //TODO: integrate this process into SeqwareExecutor
+    public void launchWorkflow() throws IOException {
         seqwareExecutor.workflowRunLaunch(workflowRun);
+        assertThat(seqwareExecutor.workflowRunStatus(workflowRun)).as("workflow run status").isIn(Arrays.asList("running", "pending"));
+        Reporter.getCurrentTestResult().setAttribute("working directory", getWorkflowRunReportString("^Workflow Run Working Dir\\s*\\|\\s*(.*)$"));
+        Reporter.getCurrentTestResult().setAttribute("oozie id", getWorkflowRunReportString("^Workflow Run Engine ID\\s*\\|\\s*(.*)$"));
+    }
 
+    @Override
+    public void monitorWorkflow() throws IOException {
         String workflowRunStatus = "pending";
         while (Arrays.asList("running", "pending").contains(workflowRunStatus)) {
 
@@ -94,13 +96,24 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
             }
 
             seqwareExecutor.workflowRunUpdateStatus(workflowRun);
-            workflowRunStatus = seqwareExecutor.workflowRunReport(workflowRun);
-
+            workflowRunStatus = seqwareExecutor.workflowRunStatus(workflowRun);
         }
 
-        //TODO: what if the test/workflow run should fail?
-        //TODO: print std out/err if workflow failed.
-        Assert.assertEquals(workflowRunStatus, "completed");
-
+        assertThat(workflowRunStatus).as("workflow run status").isEqualTo("completed");
     }
+
+    private String getWorkflowRunReportString(String pattern) throws IOException {
+        String report = seqwareExecutor.workflowRunReport(workflowRun);
+
+        Pattern p = Pattern.compile(pattern);
+        Matcher m = p.matcher(report);
+
+        String result = "";
+        if (m.find()) {
+            result = m.group(1).trim();
+        }
+
+        return result;
+    }
+
 }

@@ -53,7 +53,7 @@ public class PicardTools {
      * @param output the full path of the output BAM file location
      * @param sortOrder the order to sort the BAM file, e.g. coordinate
      * @param assumeSorted whether the input files are sorted or not
-     * @param useThreading
+     * @param useThreading enable or disable threading
      * @param otherParams any other params to MergeSamFiles
      * @param tmpDir the temporary directory where the processing will take place
      * @param input the path(s) of the SAM/BAM files to process

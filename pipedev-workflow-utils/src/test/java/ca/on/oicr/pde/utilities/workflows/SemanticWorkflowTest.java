@@ -5,7 +5,6 @@
  */
 package ca.on.oicr.pde.utilities.workflows;
 
-import ca.on.oicr.pde.tools.common.GSIOntologyManager;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,30 +20,36 @@ import org.testng.Assert;
  */
 public class SemanticWorkflowTest {
 
-    private SemanticWorkflow instance;
-    private static final String EDAM = "EDAM";
+    private final SemanticWorkflow instance;
     private static final String PIZZA = "PIZZA";
     private static final String FAKE = "SHMITZA";
-    private static final Map<String, Set<String>> testTerms;
+    private static final Map<String, Set<String>> TERMS;
+    private static final Map<String, Set<String>> LABELS;
+    private static final String CONFIG;
 
+    
     static {
-        testTerms = new HashMap<String, Set<String>>();
-        testTerms.put(EDAM, new HashSet<String>(Arrays.asList("SAM", "BAM", "Nucleic acid sequence alignment")));
+        CONFIG=ClassLoader.getSystemClassLoader().getResource("ontologies.conf").getFile();
+        TERMS = new HashMap<>();
+        TERMS.put(PIZZA, new HashSet<>(Arrays.asList("AnchoviesTopping", "FourCheesesTopping")));
+        LABELS = new HashMap<>();
+        LABELS.put(PIZZA,new HashSet<>(Arrays.asList("CoberturaDeAnchovies", "CoberturaQuatroQueijos")));
     }
 
     public SemanticWorkflowTest() {
-        this.instance = new SemanticWorkflow() {
-
+        this.instance = new SemanticWorkflow(CONFIG) {
             @Override
             protected Map<String, Set<String>> getTerms() {
-                Map<String, Set<String>> myTerms = new HashMap<String, Set<String>>();
-                myTerms.putAll(testTerms);
+                Map<String, Set<String>> myTerms = new HashMap<>();
+                myTerms.putAll(TERMS);
+                myTerms.putAll(LABELS);
+
                 return myTerms;
             }
 
             @Override
             public void buildWorkflow() {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                throw new UnsupportedOperationException("Not supported yet.");
             }
         };
 
@@ -52,22 +57,29 @@ public class SemanticWorkflowTest {
         configs.put("test_files", "/u/me/in1.txt,/u/me/in2.txt");
 
         instance.setConfigs(configs);
-        instance.configureOntologyManager(GSIOntologyManager.DEFAULT_CONFIG);
+        instance.configureOntologyManager(CONFIG);
     }
 
     @Test
-    public void testAttachCVtermsRegistered() {
+    public void testAttachCVlabelsRegistered() {
         SqwFile[] twoFiles = instance.provisionInputFiles("test_files");
         for (SqwFile f : twoFiles) {
-            instance.attachCVterms(f, EDAM, "BAM");
-            instance.attachCVterms(f, EDAM, "Nucleic acid sequence alignment");
+            for (String label: LABELS.get(PIZZA)) {
+                System.out.println("Adding "+ label);
+                instance.attachCVlabels(f, PIZZA, label);
+            }
+            Assert.assertEquals(f.getAnnotations().size(), 1, "File does not have the right number of CV term annotations:");
+            for (String annot : f.getAnnotations().keySet()){
+                System.out.println(f.toString() + " has tag "+annot + " > " + f.getAnnotations().get(annot));
+            }
         }
 
         for (SqwFile fa : twoFiles) {
             String attachedTerm = fa.getAnnotations().get(SemanticWorkflow.CVTERM_TAG);
-            Assert.assertTrue(attachedTerm.contains(EDAM));
-            Assert.assertTrue(attachedTerm.contains("format_2572"));
-            Assert.assertTrue(attachedTerm.contains("topic_0740"));
+            System.out.println("THING "+ attachedTerm);
+            for (String term: TERMS.get(PIZZA)) {
+                Assert.assertTrue(attachedTerm.contains(term), "Terms on file "+fa+" don't contain "+term);
+            }
         }
     }
 
@@ -75,7 +87,7 @@ public class SemanticWorkflowTest {
     public void testAttachCVtermsUnRegistered() {
         SqwFile[] twoFiles = instance.provisionInputFiles("test_files");
         for (SqwFile f : twoFiles) {
-            instance.attachCVterms(f, PIZZA, "PizzaTemperada");
+            instance.attachCVlabels(f, PIZZA, "SubmarineSandwich");
         }
 
         String attachedTerm = twoFiles[0].getAnnotations().get(SemanticWorkflow.CVTERM_TAG);
@@ -86,7 +98,7 @@ public class SemanticWorkflowTest {
     public void testAttachCVtermsInvalid() {
         SqwFile[] twoFiles = instance.provisionInputFiles("test_files");
         for (SqwFile f : twoFiles) {
-            instance.attachCVterms(f, FAKE, "Invalid Description");
+            instance.attachCVlabels(f, FAKE, "Invalid Description");
         }
 
         String attachedTerm = twoFiles[0].getAnnotations().get(SemanticWorkflow.CVTERM_TAG);

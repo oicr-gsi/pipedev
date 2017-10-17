@@ -156,7 +156,7 @@ public class OicrDecider extends BasicDecider {
      * <p>
      * Sets up the decider arguments and global variables. Any arguments intended to be used on the command line should be added using
      * either The constructor runs before the arguments are parsed from the command line.SeqWare uses the JOpt package to parse command line
-     * parameters. OicrDecider builds on top of that. There are several mechanisms you can use to pull arguments from the command line.<p>
+     * parameters. OicrDecider builds on top of that. There are several mechanisms you can use to pull arguments from the command line.</p>
      *
      * <ul><li>Flags: You add can flags to the decider by using {@link #parser parser}{@code .accepts(String argument, String description)}
      * and retrieve them in later methods using {@link #options options}{@code .has(argument)}.
@@ -510,6 +510,32 @@ public class OicrDecider extends BasicDecider {
     }
 
     /**
+     * Get a list of FileAttributes objects from a commaSeparateFilePaths string.
+     * <p>
+     * The returned list is in the same order as the commaSeparatedFilePaths string.
+     *
+     * @param commaSeparatedFilePaths
+     *
+     * @return
+     */
+    public List<FileAttributes> getFileAttributes(String commaSeparatedFilePaths) {
+        List<FileAttributes> fileAttributes = new ArrayList<>();
+        Set<FileAttributes> tmp = new HashSet<>();
+        for (String filePath : commaSeparatedFilePaths.split(",")) {
+            FileAttributes f = files.get(filePath);
+            if (f == null) {
+                throw new RuntimeException("An unknown file path [" + filePath + "] was encountered.");
+            }
+            if (!tmp.add(f)) {
+                throw new RuntimeException("Duplicate file path [" + filePath + "] detected.");
+            } else {
+                fileAttributes.add(f);
+            }
+        }
+        return fileAttributes;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -575,7 +601,7 @@ public class OicrDecider extends BasicDecider {
     /**
      * OicrDecider's implementation of getSwidsToLinkWorkflowRunTo() clones the input IusLimsKey object(s)
      *
-     * @param iusLimsKeySwids
+     * @param iusLimsKeySwids list of IUS-LimsKey that will be cloned
      *
      * @return the IUS accessions of the cloned IusLimsKeys, null if there was an error when building the list
      *
@@ -769,7 +795,7 @@ public class OicrDecider extends BasicDecider {
      *
      * @see Group
      * @see FindAllTheFiles.Header
-     * @see OicrDecider#setGroupBy()
+     * @see OicrDecider#setGroupBy(Group, boolean)
      * @see BasicDecider#getGroupingStrategy()
      */
     public Group getGroupBy() {
@@ -789,7 +815,7 @@ public class OicrDecider extends BasicDecider {
      * Set the number of expected files per workflow run group. This is used by {@link #doFinalCheck(java.lang.String, java.lang.String)} to
      * determine if the workflow run input file set is valid.
      *
-     * @param expectedNumberOfFiles
+     * @param expectedNumberOfFiles the number of files expected for each workflow run group
      */
     public void setNumberOfFilesPerGroup(int expectedNumberOfFiles) {
         this.numberOfFilesPerGroup = expectedNumberOfFiles;

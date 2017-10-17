@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import net.sourceforge.seqware.common.model.Workflow;
+import net.sourceforge.seqware.common.model.WorkflowRun;
 import net.sourceforge.seqware.common.module.ReturnValue;
 import net.sourceforge.seqware.pipeline.runner.PluginRunner;
 
@@ -92,7 +93,7 @@ public class PluginExecutor implements SeqwareExecutor {
     }
 
     @Override
-    public String workflowRunReport(net.sourceforge.seqware.common.model.WorkflowRun workflowRun) throws IOException {
+    public String workflowRunStatus(net.sourceforge.seqware.common.model.WorkflowRun workflowRun) throws IOException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -128,6 +129,11 @@ public class PluginExecutor implements SeqwareExecutor {
         result = result.replaceAll(" ", "\\\\ ");
 
         return result;
+    }
+
+    @Override
+    public String workflowRunReport(WorkflowRun workflowRun) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }

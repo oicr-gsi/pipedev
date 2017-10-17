@@ -3,21 +3,13 @@ package ca.on.oicr.pde.deciders;
 import ca.on.oicr.gsi.provenance.DefaultProvenanceClient;
 import ca.on.oicr.gsi.provenance.PineryProvenanceProvider;
 import ca.on.oicr.gsi.provenance.SeqwareMetadataAnalysisProvenanceProvider;
-import ca.on.oicr.gsi.provenance.model.SampleProvenance;
 import ca.on.oicr.pde.client.MetadataBackedSeqwareClient;
 import ca.on.oicr.pde.testing.metadata.SeqwareTestEnvironment;
 import ca.on.oicr.pinery.client.HttpResponseException;
 import ca.on.oicr.pinery.client.PineryClient;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 import java.io.File;
 import java.util.Arrays;
-import java.util.Collections;
 import javax.naming.NamingException;
-import net.sourceforge.seqware.common.model.IUS;
-import net.sourceforge.seqware.common.model.Workflow;
-import net.sourceforge.seqware.common.module.FileMetadata;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -30,19 +22,18 @@ import org.springframework.web.servlet.DispatcherServlet;
 import static org.testng.Assert.*;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 /**
  *
  * @author mlaszloffy
  */
-public class OicrDeciderBaseIT extends OicrDeciderBase {
+public class MergingDeciderBaseIT extends MergingDeciderBase {
 
     private SeqwareTestEnvironment seqwareTestEnvironment;
     private Server server;
     private String pineryUrl;
 
-    public OicrDeciderBaseIT() {
+    public MergingDeciderBaseIT() {
         Logger.getRootLogger().setLevel(Level.WARN);
     }
 
@@ -109,43 +100,6 @@ public class OicrDeciderBaseIT extends OicrDeciderBase {
         dpc.registerSampleProvenanceProvider("pinery", pineryProvenanceProvider);
         dpc.registerLaneProvenanceProvider("pinery", pineryProvenanceProvider);
         provenanceClient = dpc;
-    }
-
-    @Test
-    public void testDeciderPineryUrlOption() {
-
-        //check preconditions
-        assertEquals(provenanceClient.getSampleProvenance().size(), 1);
-        assertEquals(provenanceClient.getFileProvenance().size(), 0);
-
-        SampleProvenance sp = Iterables.getOnlyElement(provenanceClient.getSampleProvenance());
-
-        //create a file in seqware
-        Workflow upstreamWorkflow = seqwareClient.createWorkflow("UpstreamWorkflow", "0.0", "", ImmutableMap.of("test_param", "test_value"));
-        IUS ius;
-        FileMetadata file;
-        ius = seqwareClient.addLims("pinery", sp.getSampleProvenanceId(), sp.getVersion(), sp.getLastModified());
-        file = new FileMetadata();
-        file.setDescription("description");
-        file.setMd5sum("md5sum");
-        file.setFilePath("/tmp/file.bam");
-        file.setMetaType("text/plain");
-        file.setType("type?");
-        file.setSize(1L);
-        seqwareClient.createWorkflowRun(upstreamWorkflow, Sets.newHashSet(ius), Collections.EMPTY_LIST, Arrays.asList(file));
-        assertEquals(provenanceClient.getSampleProvenance().size(), 1);
-        assertEquals(provenanceClient.getFileProvenance().size(), 1);
-
-        //setup downstream workflow and decider
-        Workflow downstreamWorkflow = seqwareClient.createWorkflow("DownstreamWorkflow", "0.0", "", ImmutableMap.of("test_param", "test_value"));
-        OicrDecider decider = new OicrDecider();
-        decider.setWorkflowAccession(downstreamWorkflow.getSwAccession().toString());
-        decider.setMetaType(Arrays.asList("text/plain"));
-
-        //test pinery-url decider option
-        run(decider, Arrays.asList("--all", "--ignore-previous-runs", "--pinery-url", pineryUrl));
-        assertEquals(decider.getWorkflowRuns().size(), 1);
-        assertEquals(provenanceClient.getFileProvenance().size(), 2);
     }
 
     @AfterMethod(alwaysRun = true)

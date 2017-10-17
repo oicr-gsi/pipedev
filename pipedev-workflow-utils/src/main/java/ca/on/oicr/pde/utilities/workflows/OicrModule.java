@@ -61,8 +61,6 @@ public class OicrModule extends Module {
      * presence of your argument using  {@link #options options}{@code .has(argument)}
      * and retrieve it using {@link #options options}{@code .valueOf(argument))}
      *
-     * {@inheritDoc}
-     *
      * @param arg an argument previously defined by 'defineArgument'.
      * @return the value provided on the command line, or empty string if none
      * provided.
