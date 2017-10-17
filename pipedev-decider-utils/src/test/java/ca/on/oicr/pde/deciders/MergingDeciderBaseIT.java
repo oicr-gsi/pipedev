@@ -3,25 +3,18 @@ package ca.on.oicr.pde.deciders;
 import ca.on.oicr.gsi.provenance.DefaultProvenanceClient;
 import ca.on.oicr.gsi.provenance.PineryProvenanceProvider;
 import ca.on.oicr.gsi.provenance.SeqwareMetadataAnalysisProvenanceProvider;
-import ca.on.oicr.gsi.provenance.model.SampleProvenance;
 import ca.on.oicr.pde.client.MetadataBackedSeqwareClient;
 import ca.on.oicr.pde.testing.metadata.SeqwareTestEnvironment;
 import ca.on.oicr.pinery.client.HttpResponseException;
 import ca.on.oicr.pinery.client.PineryClient;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 import java.io.File;
 import java.util.Arrays;
-import java.util.Collections;
 import javax.naming.NamingException;
-import net.sourceforge.seqware.common.model.IUS;
-import net.sourceforge.seqware.common.model.Workflow;
-import net.sourceforge.seqware.common.module.FileMetadata;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
 import org.springframework.web.context.WebApplicationContext;
@@ -29,7 +22,6 @@ import org.springframework.web.servlet.DispatcherServlet;
 import static org.testng.Assert.*;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 /**
  *
@@ -39,6 +31,7 @@ public class MergingDeciderBaseIT extends MergingDeciderBase {
 
     private SeqwareTestEnvironment seqwareTestEnvironment;
     private Server server;
+    private String pineryUrl;
 
     public MergingDeciderBaseIT() {
         Logger.getRootLogger().setLevel(Level.WARN);
@@ -59,9 +52,10 @@ public class MergingDeciderBaseIT extends MergingDeciderBase {
         appContext.setInitParameter("spring.profiles.active", "mock");
 
         //setup the jetty server
-        server = new Server(9999);
+        server = new Server();
         server.setHandler(appContext);
         server.start();
+        pineryUrl = "http://localhost:" + ((ServerConnector) server.getConnectors()[0]).getLocalPort();
 
         //get the spring servlet and context
         DispatcherServlet dispatcherServlet = (DispatcherServlet) appContext.getServletHandler().getServlet("spring").getServletInstance();
@@ -74,7 +68,7 @@ public class MergingDeciderBaseIT extends MergingDeciderBase {
         limsMock = webApplicationContext.getBean(ca.on.oicr.pinery.api.Lims.class);
         assertNotNull(limsMock, "Pinery Lims mock is null");
 
-        pineryClient = new PineryClient("http://localhost:9999");
+        pineryClient = new PineryClient(pineryUrl);
     }
 
     @BeforeMethod(groups = "setup")
