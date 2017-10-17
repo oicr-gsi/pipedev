@@ -7,12 +7,14 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import net.sourceforge.seqware.common.hibernate.FindAllTheFiles;
 import net.sourceforge.seqware.common.module.FileMetadata;
@@ -20,6 +22,12 @@ import net.sourceforge.seqware.common.module.ReturnValue;
 import org.apache.logging.log4j.Logger;
 
 /**
+ * Base decider logic for grouping files together and scheduling merging workflow runs.
+ * <p>
+ * The decider uses the default grouping key of:
+ * DONOR + TISSUE_ORIGIN + LIBRARY_TEMPLATE_TYPE + WORKFLOW_NAME + TISSUE_TYPE + TISSUE_PREP + TISSUE_REGION + GROUP_ID + TARGETED_RESEQUENCING
+ * <p>
+ * Grouping behaviour can be modified by setting "group-by" parameter.
  *
  * @author mlaszloffy
  */
@@ -27,7 +35,8 @@ public abstract class MergingDecider extends OicrDecider {
 
     public final Logger log;
     public final GroupableFileFactory groupableFileFactory;
-    public final Map<String, GroupableFileFactory.GroupableFile> fileSwaToFile = new HashMap<>();
+    public final Map<String, GroupableFile> fileSwaToFile = new HashMap<>();
+    public final Map<String, String> fileSwaToGroupName = new HashMap<>();
 
     public MergingDecider(Logger logger) {
         this.log = logger;
@@ -38,11 +47,13 @@ public abstract class MergingDecider extends OicrDecider {
         this(logger);
         this.provenanceClient = provenanceClient;
     }
-    
+
     /**
+     * Before grouping, check if the file should be included or excluded.
      *
-     * @param fileAttributes
-     * @return
+     * @param fileAttributes the file attributes for the current ungrouped file
+     *
+     * @return true if the file should be included (and grouped), false if the file should be excluded
      */
     protected abstract boolean checkFilePassesFilterBeforeGrouping(FileAttributes fileAttributes);
 
@@ -114,6 +125,20 @@ public abstract class MergingDecider extends OicrDecider {
             groupedFiles = Multimaps.asMap(hm);
         }
 
+        //create a map of file swid to group name
+        for (Entry<String, List<ReturnValue>> e : groupedFiles.entrySet()) {
+            String groupName = e.getKey();
+            for (ReturnValue rv : e.getValue()) {
+                String fileSwa = rv.getAttribute(FindAllTheFiles.Header.FILE_SWA.getTitle());
+                String previousGroupName = fileSwaToGroupName.put(fileSwa, groupName);
+                if (previousGroupName != null && !previousGroupName.equals(groupName)) {
+                    throw new UnsupportedOperationException(
+                            MessageFormat.format("File with SWID = [{0}] belongs to multiple groups = [previous = {1}, new = {2}].",
+                                    fileSwa, previousGroupName, groupName));
+                }
+            }
+        }
+
         if (options.has("verbose")) {
             for (Map.Entry<String, List<ReturnValue>> e : groupedFiles.entrySet()) {
                 StringBuilder sb = new StringBuilder();
@@ -146,9 +171,13 @@ public abstract class MergingDecider extends OicrDecider {
     }
 
     /**
+     * After grouping files, check if files within the group are valid.
+     * <p>
+     * If any file within a group is not valid, the whole group is invalid.
      *
-     * @param fileAttributes
-     * @return
+     * @param fileAttributes the file attributes for the current grouped file
+     *
+     * @return true if the file is valid, false if the file and the group is invalid
      */
     protected abstract boolean checkFilePassesFilterAfterGrouping(FileAttributes fileAttributes);
 
@@ -163,9 +192,13 @@ public abstract class MergingDecider extends OicrDecider {
     }
 
     /**
+     * Validate and modify workflow run parameters/ini.
+     * <p>
+     * The ReturnValue is used to signal if the workflow run is valid or not.
      *
-     * @param run
-     * @return
+     * @param run the workflow run object that will be used to create a workflow run
+     *
+     * @return a ReturnValue indicating SUCCESS if the workflow run is valid or anything other than SUCCESS if invalid
      */
     protected abstract ReturnValue customizeWorkflowRun(WorkflowRun run);
 
@@ -186,15 +219,15 @@ public abstract class MergingDecider extends OicrDecider {
         //modifies currentWorkflowRun + calls BasicDecider modifyIniFile
         super.modifyIniFile(commaSeparatedFilePaths, commaSeparatedParentAccessions);
 
-        //allow implementing decider opportunity to customize the workflow run
         if (options.has("verbose")) {
             Set<String> t = new HashSet<>();
             for (FileAttributes fa : currentWorkflowRun.getFiles()) {
-                GroupableFileFactory.GroupableFile file = fileSwaToFile.get(fa.getOtherAttribute(FindAllTheFiles.Header.FILE_SWA.getTitle()));
-                t.add(file.getGroupByAttribute());
+                t.add(fileSwaToGroupName.get(fa.getOtherAttribute(FindAllTheFiles.Header.FILE_SWA.getTitle())));
             }
-            log.debug("Workflow run for group = [" + Iterables.getOnlyElement(t));
+            log.debug("Workflow run for group = " + Iterables.getOnlyElement(t));
         }
+
+        //call to subclass to customize the workflow run
         r = customizeWorkflowRun(currentWorkflowRun);
 
         return r;
