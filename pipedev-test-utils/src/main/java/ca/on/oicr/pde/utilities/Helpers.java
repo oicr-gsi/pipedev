@@ -1,5 +1,6 @@
 package ca.on.oicr.pde.utilities;
 
+import ca.on.oicr.pde.testing.RunTestSettings;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import org.testng.Assert;
 import static com.google.common.base.Preconditions.*;
 import com.jcabi.manifests.Manifests;
 import java.io.Serializable;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.regex.Matcher;
@@ -125,20 +127,15 @@ public class Helpers {
 
     }
 
-    public static File generateSeqwareSettings(File workingDirectory, String webserviceUrl, String schedulingSystem,
-            String schedulingHost) throws IOException {
+    public static File generateSeqwareSettings(File workingDirectory, String webserviceUrl, String webserviceUser, String webservicePassword, String schedulingSystem, String schedulingHost) throws IOException {
 
-        //TODO: implement this in java
-        StringBuilder command = new StringBuilder();
-        command.append(getScriptFromResource("generateSeqwareSettings.sh"));
-        command.append(" ").append(workingDirectory);
-        command.append(" ").append(webserviceUrl);
-        command.append(" ").append(schedulingSystem);
-        command.append(" ").append(schedulingHost);
-        command.append(" ").append(UUID.randomUUID());
+        if (!"oozie".equals(schedulingSystem)) {
+            throw new UnsupportedOperationException("Only oozie scheduler is supported");
+        }
 
-        return new File(executeCommand("generateSeqwareSettings()", command.toString(), workingDirectory));
-
+        RunTestSettings t = new RunTestSettings(workingDirectory.toPath(), new URL(webserviceUrl), webserviceUser, webservicePassword, schedulingHost, System.getProperty("user.name"), UUID.randomUUID().toString());
+        t.createOnDisk();
+        return t.getSettingsFilePath().toFile();
     }
 
     public static String buildPathFromDirectory(String initialPath, File dir) throws IOException {
