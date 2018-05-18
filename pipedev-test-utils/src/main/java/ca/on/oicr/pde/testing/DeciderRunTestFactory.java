@@ -54,6 +54,8 @@ public class DeciderRunTestFactory {
     private final File workingDirectory;
     private final String schedulingSystem;
     private final String webserviceUrl;
+    private final String webserviceUser;
+    private final String webservicePassword;
     private final String schedulingHost;
 
     private final File deciderJar;
@@ -78,6 +80,8 @@ public class DeciderRunTestFactory {
         schedulingSystem = getRequiredSystemPropertyAsString("schedulingSystem");
         schedulingHost = getRequiredSystemPropertyAsString("schedulingHost");
         webserviceUrl = getRequiredSystemPropertyAsString("webserviceUrl");
+        webserviceUser = getRequiredSystemPropertyAsString("webserviceUser");
+        webservicePassword = getRequiredSystemPropertyAsString("webservicePassword");
         deciderJar = getRequiredSystemPropertyAsFile("deciderJar");
 
         dbFile = System.getProperty("dbFile");
@@ -164,7 +168,7 @@ public class DeciderRunTestFactory {
             String testId = (count++) + "_" + UUID.randomUUID().toString().substring(0, 7);
 
             File testWorkingDir = generateTestWorkingDirectory(workingDirectory, prefix, testName, testId);
-            File seqwareSettings = generateSeqwareSettings(testWorkingDir, webserviceUrl, schedulingSystem, schedulingHost);
+            File seqwareSettings = generateSeqwareSettings(testWorkingDir, webserviceUrl, webserviceUser, webservicePassword, schedulingSystem, schedulingHost);
 
             Map<String, String> config = new HashMap<>();
             MapTools.ini2Map(seqwareSettings.getAbsolutePath(), config, true);

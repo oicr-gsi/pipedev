@@ -6,7 +6,7 @@
     <parent>
         <groupId>ca.on.oicr.gsi</groupId>
         <artifactId>pipedev</artifactId>
-        <version>2.3</version>
+        <version>2.4</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     
@@ -30,6 +30,9 @@
             </activation>
             
             <properties>
+                <maven.compiler.source>1.8</maven.compiler.source>
+                <maven.compiler.target>1.8</maven.compiler.target>
+
                 <display-name>decider_${project.artifactId}</display-name>
 
                 <skipITs>true</skipITs>
@@ -119,10 +122,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
-                        <configuration>
-                            <source>1.7</source>
-                            <target>1.7</target>
-                        </configuration>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -220,6 +219,14 @@
                                             <message>webserviceUrl property is missing</message>
                                         </requireProperty>
                                         <requireProperty>
+                                            <property>webserviceUser</property>
+                                            <message>webserviceUser property is missing</message>
+                                        </requireProperty>
+                                        <requireProperty>
+                                            <property>webservicePassword</property>
+                                            <message>webservicePassword property is missing</message>
+                                        </requireProperty>
+                                        <requireProperty>
                                             <property>schedulingSystem</property>
                                             <message>schedulingSystem property is missing</message>
                                         </requireProperty>
@@ -294,6 +301,8 @@
                                 <seqwareDistribution>${seqwareDistribution}</seqwareDistribution>
                                 <workingDirectory>${workingDirectory}</workingDirectory>
                                 <webserviceUrl>${webserviceUrl}</webserviceUrl>
+                                <webserviceUser>${webserviceUser}</webserviceUser>
+                                <webservicePassword>${webservicePassword}</webservicePassword>
                                 <schedulingSystem>${schedulingSystem}</schedulingSystem>
                                 <schedulingHost>${schedulingHost}</schedulingHost>
 

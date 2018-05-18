@@ -35,6 +35,8 @@ public class WorkflowRunTestFactory {
     private final String workflowVersion;
     private final File workingDirectory;
     private final String seqwareWebserviceUrl;
+    private final String seqwareWebserviceUser;
+    private final String seqwareWebservicePassword;
     private final String schedulingSystem;
     private final String schedulingHost;
 
@@ -49,6 +51,8 @@ public class WorkflowRunTestFactory {
         workflowVersion = getRequiredSystemPropertyAsString("workflowVersion");
         workingDirectory = getRequiredSystemPropertyAsFile("workingDirectory");
         seqwareWebserviceUrl = getRequiredSystemPropertyAsString("webserviceUrl");
+        seqwareWebserviceUser = getRequiredSystemPropertyAsString("webserviceUser");
+        seqwareWebservicePassword = getRequiredSystemPropertyAsString("webservicePassword");
         schedulingSystem = getRequiredSystemPropertyAsString("schedulingSystem");
         schedulingHost = getRequiredSystemPropertyAsString("schedulingHost");
 
@@ -68,7 +72,7 @@ public class WorkflowRunTestFactory {
                 String prefix = new SimpleDateFormat("yyMMdd_HHmm").format(new Date());
                 String testId = UUID.randomUUID().toString().substring(0, 7);
                 File testWorkingDir = generateTestWorkingDirectory(workingDirectory, prefix, testName, testId);
-                File seqwareSettings = generateSeqwareSettings(testWorkingDir, seqwareWebserviceUrl, schedulingSystem, schedulingHost);
+                File seqwareSettings = generateSeqwareSettings(testWorkingDir, seqwareWebserviceUrl, seqwareWebserviceUser, seqwareWebservicePassword, schedulingSystem, schedulingHost);
 
                 Path scriptDirectory = Files.createDirectory(Paths.get(testWorkingDir.getAbsolutePath()).resolve("scripts"));
                 File calculateMetricsScript = getScriptFromResource(t.getMetricsCalculateScript(), scriptDirectory);
@@ -85,10 +89,10 @@ public class WorkflowRunTestFactory {
                 }
 
                 String actualOutputFileName = "";
-                if(StringUtils.isNotBlank(t.getId())){
-                    actualOutputFileName = StringUtils.trim(t.getId()) +".metrics";
-                } else if(t.getIniFile() != null && StringUtils.isNotBlank(t.getIniFile().getName())) {
-                     actualOutputFileName = t.getIniFile().getName() + ".metrics";
+                if (StringUtils.isNotBlank(t.getId())) {
+                    actualOutputFileName = StringUtils.trim(t.getId()) + ".metrics";
+                } else if (t.getIniFile() != null && StringUtils.isNotBlank(t.getIniFile().getName())) {
+                    actualOutputFileName = t.getIniFile().getName() + ".metrics";
                 } else {
                     throw new RuntimeException();
                 }
