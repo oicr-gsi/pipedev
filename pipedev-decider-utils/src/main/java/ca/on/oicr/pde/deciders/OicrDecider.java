@@ -365,7 +365,8 @@ public class OicrDecider extends BasicDecider {
 					new org.apache.log4j.PatternLayout("%p [%d{yyyy/MM/dd HH:mm:ss}] | %m%n")));
 
 			// log4j2 logging configuration
-			Configurator.setRootLevel(org.apache.logging.log4j.Level.DEBUG);
+			Configurator.setRootLevel(org.apache.logging.log4j.Level.INFO);
+			Configurator.setLevel("ca.on.oicr", org.apache.logging.log4j.Level.DEBUG);
 		}
 
 		if (provenanceClient == null && options.has("provenance-settings")) {
