@@ -1,6 +1,7 @@
 package ca.on.oicr.pde.testing.workflow;
 
 import ca.on.oicr.pde.dao.executor.ShellExecutor;
+import ca.on.oicr.pde.parsers.SeqwareOutputParser;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -8,8 +9,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import net.sourceforge.seqware.common.metadata.Metadata;
 import net.sourceforge.seqware.common.metadata.MetadataFactory;
 import net.sourceforge.seqware.common.model.Workflow;
@@ -80,8 +79,10 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
     public void launchWorkflow() throws IOException {
         seqwareExecutor.workflowRunLaunch(workflowRun);
         assertThat(seqwareExecutor.workflowRunStatus(workflowRun)).as("workflow run status").isIn(Arrays.asList("running", "pending"));
-        Reporter.getCurrentTestResult().setAttribute("working directory", getWorkflowRunReportString("^Workflow Run Working Dir\\s*\\|\\s*(.*)$"));
-        Reporter.getCurrentTestResult().setAttribute("oozie id", getWorkflowRunReportString("^Workflow Run Engine ID\\s*\\|\\s*(.*)$"));
+        Reporter.getCurrentTestResult().setAttribute("working directory",
+                SeqwareOutputParser.getFirstMatch(seqwareExecutor.workflowRunReport(workflowRun), "^Workflow Run Working Dir\\h*\\|\\h*(.*)$"));
+        Reporter.getCurrentTestResult().setAttribute("oozie id",
+                SeqwareOutputParser.getFirstMatch(seqwareExecutor.workflowRunReport(workflowRun), "^Workflow Run Engine ID\\h*\\|\\h*(.*)$"));
     }
 
     @Override
@@ -100,20 +101,6 @@ public class OozieWorkflowRunTest extends WorkflowRunTest {
         }
 
         assertThat(workflowRunStatus).as("workflow run status").isEqualTo("completed");
-    }
-
-    private String getWorkflowRunReportString(String pattern) throws IOException {
-        String report = seqwareExecutor.workflowRunReport(workflowRun);
-
-        Pattern p = Pattern.compile(pattern);
-        Matcher m = p.matcher(report);
-
-        String result = "";
-        if (m.find()) {
-            result = m.group(1).trim();
-        }
-
-        return result;
     }
 
 }
