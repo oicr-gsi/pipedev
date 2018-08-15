@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.stream.Collectors;
+import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -55,7 +56,7 @@ public class ReadGroupsOptionParser {
      * @throws IllegalArgumentException if the ReadGroupGenerator in the args can not be found
      * @throws OptionException if args is missing required ReadGroupGenerator configuration
      */
-    public ReadGroupsGenerator getReadGroupGenerator(String... args) {
+    public ReadGroupsGenerator getReadGroupGenerator(String... args) throws IllegalArgumentException, OptionException {
 
         //load all available ReadGroupsGeneratorBuilder
         ServiceLoader<ReadGroupsGeneratorBuilder> loader = ServiceLoader.load(ReadGroupsGeneratorBuilder.class);
