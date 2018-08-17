@@ -47,6 +47,9 @@ public class WorkflowReport {
     private Integer maxInputFiles;
     private Integer minInputFiles;
     private Integer totalInputFiles;
+    private Integer maxOutputFileProvenanceRecords;
+    private Integer minOutputFileProvenanceRecords;
+    private Integer totalOutputFileProvenanceRecords;
     private List<WorkflowRunReport> workflowRuns;
 
     public WorkflowReport() {
@@ -60,6 +63,9 @@ public class WorkflowReport {
         maxInputFiles = Integer.MIN_VALUE;
         minInputFiles = Integer.MAX_VALUE;
         totalInputFiles = Integer.valueOf("0");
+        maxOutputFileProvenanceRecords = Integer.MIN_VALUE;
+        minOutputFileProvenanceRecords = Integer.MAX_VALUE;
+        totalOutputFileProvenanceRecords = Integer.valueOf("0");
 
         workflowRuns = new ArrayList<>();
     }
@@ -130,6 +136,30 @@ public class WorkflowReport {
 
     public void setTotalInputFiles(Integer totalInputFiles) {
         this.totalInputFiles = totalInputFiles;
+    }
+
+    public Integer getMaxOutputFileProvenanceRecords() {
+        return maxOutputFileProvenanceRecords;
+    }
+
+    public void setMaxOutputFileProvenanceRecords(Integer maxOutputFileProvenanceRecords) {
+        this.maxOutputFileProvenanceRecords = maxOutputFileProvenanceRecords;
+    }
+
+    public Integer getMinOutputFileProvenanceRecords() {
+        return minOutputFileProvenanceRecords;
+    }
+
+    public void setMinOutputFileProvenanceRecords(Integer minOutputFileProvenanceRecords) {
+        this.minOutputFileProvenanceRecords = minOutputFileProvenanceRecords;
+    }
+
+    public Integer getTotalOutputFileProvenanceRecords() {
+        return totalOutputFileProvenanceRecords;
+    }
+
+    public void setTotalOutputFileProvenanceRecords(Integer totalOutputFileProvenanceRecords) {
+        this.totalOutputFileProvenanceRecords = totalOutputFileProvenanceRecords;
     }
 
     public void setWorkflowRunCount(Integer workflowRunCount) {
@@ -238,6 +268,15 @@ public class WorkflowReport {
         if (expected.totalInputFiles.intValue() != actual.totalInputFiles.intValue()) {
             sb.append(String.format("Total input file count changed from %s to %s%n", expected.totalInputFiles, actual.totalInputFiles));
         }
+        if (expected.maxOutputFileProvenanceRecords.intValue() != actual.maxOutputFileProvenanceRecords.intValue()) {
+            sb.append(String.format("Max output file provenance record count changed from %s to %s%n", expected.maxOutputFileProvenanceRecords, actual.maxOutputFileProvenanceRecords));
+        }
+        if (expected.minOutputFileProvenanceRecords.intValue() != actual.minOutputFileProvenanceRecords.intValue()) {
+            sb.append(String.format("Min output file provenance record count changed from %s to %s%n", expected.minOutputFileProvenanceRecords, actual.minOutputFileProvenanceRecords));
+        }
+        if (expected.totalOutputFileProvenanceRecords.intValue() != actual.totalOutputFileProvenanceRecords.intValue()) {
+            sb.append(String.format("Total output file provenance record count changed from %s to %s%n", expected.totalOutputFileProvenanceRecords, actual.totalOutputFileProvenanceRecords));
+        }
 
         //Remove last new line character
         if (sb.length() != 0) {
@@ -334,6 +373,16 @@ public class WorkflowReport {
             WorkflowRunReport workflowRunReport = new WorkflowRunReport();
             workflowRunReport.setWorkflowIni(ini);
             workflowRunReport.setFiles(files);
+            workflowRunReport.setOutputFileProvenanceRecords(fpc.getFileRecords(workflowRunSwid).size());
+
+            //update WorkflowReport fileProvenanceCount
+            if (workflowRunReport.getOutputFileProvenanceRecords() > workflowReport.getMaxOutputFileProvenanceRecords()) {
+                workflowReport.setMaxOutputFileProvenanceRecords(workflowRunReport.getOutputFileProvenanceRecords());
+            }
+            if (workflowRunReport.getOutputFileProvenanceRecords() < workflowReport.getMinOutputFileProvenanceRecords()) {
+                workflowReport.setMinOutputFileProvenanceRecords(workflowRunReport.getOutputFileProvenanceRecords());
+            }
+            workflowReport.setTotalOutputFileProvenanceRecords(workflowReport.getTotalOutputFileProvenanceRecords() + workflowRunReport.getOutputFileProvenanceRecords());
 
             workflowReport.addWorkflowRun(workflowRunReport);
         }
