@@ -19,6 +19,7 @@ public class WorkflowRunReport implements Comparable<WorkflowRunReport> {
 
     Map<String, String> workflowIni = new TreeMap<>();
     List<ReducedFileProvenanceReportRecord> files = new ArrayList<>();
+    Integer outputFileProvenanceRecords = 0;
 
     public Map<String, String> getWorkflowIni() {
         return workflowIni;
@@ -36,6 +37,14 @@ public class WorkflowRunReport implements Comparable<WorkflowRunReport> {
     public void setFiles(List<ReducedFileProvenanceReportRecord> files) {
         this.files.addAll(files);
         Collections.sort(this.files);
+    }
+
+    public Integer getOutputFileProvenanceRecords() {
+        return outputFileProvenanceRecords;
+    }
+
+    public void setOutputFileProvenanceRecords(Integer outputFileProvenanceRecords) {
+        this.outputFileProvenanceRecords = outputFileProvenanceRecords;
     }
 
     @Override

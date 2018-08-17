@@ -58,6 +58,7 @@ import ca.on.oicr.gsi.provenance.model.FileProvenance;
 import ca.on.oicr.gsi.provenance.model.FileProvenanceFromAnalysisProvenance;
 import ca.on.oicr.pde.deciders.configuration.StudyToOutputPathConfig;
 import ca.on.oicr.pinery.client.PineryClient;
+import java.time.ZonedDateTime;
 import joptsimple.OptionSpec;
 import net.sourceforge.seqware.common.err.NotFoundException;
 import net.sourceforge.seqware.common.hibernate.FindAllTheFiles;
@@ -68,6 +69,7 @@ import net.sourceforge.seqware.common.module.FileMetadata;
 import net.sourceforge.seqware.common.module.ReturnValue;
 import net.sourceforge.seqware.pipeline.deciders.BasicDecider;
 import net.sourceforge.seqware.pipeline.plugins.fileprovenance.ProvenanceUtility.HumanProvenanceFilters;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 
 /**
  * <p>
@@ -703,15 +705,17 @@ public class OicrDecider extends BasicDecider {
 			// call/transaction
 
 			// Get all the LimsKey(s) info from seqware
-			SetMultimap<LimsKey, String> limsKeyToIusMap = HashMultimap.create();
-			Set<LimsKey> limsKeys = new HashSet<>();
+			SetMultimap<ComparableLimsKey, String> limsKeyToIusMap = HashMultimap.create();
+			Set<ComparableLimsKey> limsKeys = new HashSet<>();
 			for (String swid : iusLimsKeySwids) {
 				LimsKey limsKey = metadata.getLimsKeyFrom(Integer.parseInt(swid));
 				if (limsKey == null) {
 					throw new Exception("No LimsKey found for SWID = [" + swid + "]");
 				}
-				limsKeys.add(limsKey);
-				limsKeyToIusMap.put(limsKey, swid);
+                                //create a new LimsKey object that only uses provider+id+version+lastModified for equality
+                                ComparableLimsKey comparableLimsKey = new ComparableLimsKey(limsKey);
+				limsKeys.add(comparableLimsKey);
+				limsKeyToIusMap.put(comparableLimsKey, swid);
 			}
 
 			// Clone the upstream LimsKeys and update the input IUS to new/output IUS map
@@ -725,7 +729,7 @@ public class OicrDecider extends BasicDecider {
 				outputIusLimsKeys = Collections.emptySet();
 			} else {
 				Set<String> newIusSwids = new HashSet<>();
-				for (LimsKey limsKey : limsKeys) {
+				for (ComparableLimsKey limsKey : limsKeys) {
 					// Create a LimsKey -> create IUS -> link LimsKey to IUS
 					Integer newLimsKeySwid = metadata.addLimsKey(limsKey.getProvider(), limsKey.getId(),
 							limsKey.getVersion(), limsKey.getLastModified());
@@ -1383,5 +1387,77 @@ public class OicrDecider extends BasicDecider {
 		}
 
 	}
+
+    private class ComparableLimsKey implements ca.on.oicr.gsi.provenance.model.LimsKey {
+
+        private final String provider;
+        private final String id;
+        private final String version;
+        private final ZonedDateTime lastModified;
+
+        public ComparableLimsKey(LimsKey limsKey) {
+            this.provider = limsKey.getProvider();
+            this.id = limsKey.getId();
+            this.version = limsKey.getVersion();
+            this.lastModified = limsKey.getLastModified();
+        }
+
+        @Override
+        public String getProvider() {
+            return provider;
+        }
+
+        @Override
+        public String getId() {
+            return id;
+        }
+
+        @Override
+        public String getVersion() {
+            return version;
+        }
+
+        @Override
+        public ZonedDateTime getLastModified() {
+            return lastModified;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 7;
+            hash = 67 * hash + Objects.hashCode(this.provider);
+            hash = 67 * hash + Objects.hashCode(this.id);
+            hash = 67 * hash + Objects.hashCode(this.version);
+            hash = 67 * hash + Objects.hashCode(this.lastModified);
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final ComparableLimsKey other = (ComparableLimsKey) obj;
+            if (!Objects.equals(this.provider, other.provider)) {
+                return false;
+            }
+            if (!Objects.equals(this.id, other.id)) {
+                return false;
+            }
+            if (!Objects.equals(this.version, other.version)) {
+                return false;
+            }
+            if (!Objects.equals(this.lastModified, other.lastModified)) {
+                return false;
+            }
+            return true;
+        }
+    }
 
 }
