@@ -135,7 +135,7 @@ public class OicrDeciderBase extends DeciderBase {
 	}
 
 	@Test
-	public void deciderForMergingWorkflow() {
+	public void deciderForCollectingWorkflow() {
 
 		SampleProvenance sp = Iterables.getFirst(provenanceClient.getSampleProvenance(), null);
 
@@ -193,7 +193,9 @@ public class OicrDeciderBase extends DeciderBase {
 
 		run(decider, Arrays.asList("--parent-wf-accessions", workflow1.getSwAccession().toString(), "--all"));
 		assertEquals(decider.getWorkflowRuns().size(), 1);
-		assertEquals(provenanceClient.getFileProvenance(filters).size(), 4);
+
+                // same sample for both bams, only one IUS-LimsKey is created so only one file provenance record is created
+		assertEquals(provenanceClient.getFileProvenance(filters).size(), 3);
 	}
 
 	@Test
