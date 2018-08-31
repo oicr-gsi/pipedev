@@ -69,7 +69,6 @@ import net.sourceforge.seqware.common.module.FileMetadata;
 import net.sourceforge.seqware.common.module.ReturnValue;
 import net.sourceforge.seqware.pipeline.deciders.BasicDecider;
 import net.sourceforge.seqware.pipeline.plugins.fileprovenance.ProvenanceUtility.HumanProvenanceFilters;
-import org.apache.commons.lang3.builder.EqualsBuilder;
 
 /**
  * <p>
@@ -190,8 +189,8 @@ public class OicrDecider extends BasicDecider {
 	protected Map<String, FileAttributes> files;
 	private int numberOfFilesPerGroup = Integer.MIN_VALUE;
 	private List<String> requiredParams = new ArrayList<>();
-	private static final String[][] readMateFlags = { { "_R1_", "1_sequence.txt", ".1.fastq" },
-			{ "_R2_", "2_sequence.txt", ".2.fastq" } };
+        private static final String[][] READ_MATE_FLAGS = {{"_R1_", "1_sequence.txt", ".1.fastq", "_R1.fastq"},
+            {"_R2_", "2_sequence.txt", ".2.fastq", "_R2.fastq"}};
 	public static final int MATE_UNDEF = 0;
 	public static final int MATE_1 = 1;
 	public static final int MATE_2 = 2;
@@ -1055,17 +1054,32 @@ public class OicrDecider extends BasicDecider {
 	 * @return 1 if mate 1, 2 if mate 2, 0 if not able to find mate value
 	 */
 	public static int idMate(String filePath) {
-		int[] indexes = { 0, 1 };
-		int[] mates = { OicrDecider.MATE_1, OicrDecider.MATE_2 };
-		for (int i : indexes) {
-			for (int j = 0; j < readMateFlags[i].length; j++) {
-				if (filePath.contains(readMateFlags[i][j])) {
-					return mates[i];
-				}
-			}
-		}
-		return OicrDecider.MATE_UNDEF;
-	}
+            return idMate(filePath, READ_MATE_FLAGS);
+        }
+
+        /**
+         * A utility function that searches for patterns in a file path in order to
+         * identify mate in paired-end sequencing data (or report that mate info is
+         * unavailable if no pattern detected).
+         *
+         * @param filePath
+         *                 file path to identify if mate 1 or 2
+         * @param readMateFlags double array of read 1 patterns in the first array and read 2 patterns in the second array
+         *
+         * @return 1 if mate 1, 2 if mate 2, 0 if not able to find mate value
+         */
+        public static int idMate(String filePath, String[][] readMateFlags) {
+            int[] indexes = {0, 1};
+            int[] mates = {OicrDecider.MATE_1, OicrDecider.MATE_2};
+            for (int i : indexes) {
+                for (int j = 0; j < readMateFlags[i].length; j++) {
+                    if (filePath.contains(readMateFlags[i][j])) {
+                        return mates[i];
+                    }
+                }
+            }
+            return OicrDecider.MATE_UNDEF;
+        }
 
 	/**
 	 * Uses idMate to put read1 and read2 files into order and return the set. Tests
