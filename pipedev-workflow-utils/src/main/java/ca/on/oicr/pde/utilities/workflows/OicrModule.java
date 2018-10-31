@@ -8,10 +8,11 @@ import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import net.sourceforge.seqware.common.module.ReturnValue;
-import net.sourceforge.seqware.common.util.Log;
 import net.sourceforge.seqware.pipeline.module.Module;
 import net.sourceforge.seqware.pipeline.module.ModuleInterface;
 import org.openide.util.lookup.ServiceProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A wrapper around SeqWare's module system to hide some of the ugly parts of
@@ -24,11 +25,12 @@ import org.openide.util.lookup.ServiceProvider;
  */
 @ServiceProvider(service = ModuleInterface.class)
 public class OicrModule extends Module {
+    private final Logger logger = LoggerFactory.getLogger(OicrModule.class);
 
     private ReturnValue ret;
     private OptionSet options = null;
     protected OptionParser parser;
-    private List<String> requiredParams = new ArrayList<>();
+    private final List<String> requiredParams = new ArrayList<>();
 
     public OicrModule() {
         super();
@@ -68,7 +70,7 @@ public class OicrModule extends Module {
     protected String getArgument(String arg) {
         Object o = options.valueOf(arg);
         if (o == null || o.toString().isEmpty()) {
-            Log.debug("Command line argument is not available: " + arg);
+            logger.debug("Command line argument is not available: " + arg);
             return "";
         } else {
             return o.toString();
@@ -81,7 +83,7 @@ public class OicrModule extends Module {
      * @return OptionParser this is used to get command line options
      */
     @Override
-    protected OptionParser getOptionParser() {
+    public OptionParser getOptionParser() {
         return (parser);
     }
 
@@ -97,7 +99,7 @@ public class OicrModule extends Module {
             parser.printHelpOn(output);
             return (output.toString());
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.warn("OicrModule.get_syntax IOException",e);
             return (e.getMessage());
         }
     }
@@ -124,8 +126,7 @@ public class OicrModule extends Module {
             ret.setStdout(ret.getStdout() + "Output: " + (String) options.valueOf("output-file") + "\n");
 
         } catch (OptionException e) {
-            e.printStackTrace();
-            Log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             ret.setStderr(e.getMessage());
             ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
         }
@@ -141,7 +142,7 @@ public class OicrModule extends Module {
         //Sanity checking for required parameters
         for (String option : requiredParams) {
             if (!options.has(option)) {
-                Log.warn("Required argument missing: --" + option);
+                logger.warn("Required argument missing: --" + option);
                 ret.setStderr("Required argument missing: --" + option);
                 ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
             }

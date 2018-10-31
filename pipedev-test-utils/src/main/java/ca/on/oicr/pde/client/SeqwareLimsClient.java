@@ -28,9 +28,9 @@ public interface SeqwareLimsClient {
 
     public Study createStudy(String id, String centerName, String centerProjectName, String description, String studyType, String title);
 
-    public <T extends Annotatable & FirstTierModel> void annotate(T o, String key, String value);
+    public <T extends Annotatable<?> & FirstTierModel> void annotate(T o, String key, String value);
 
-    public <T extends Annotatable & FirstTierModel> void annotate(T o, boolean skip, String reason);
+    public <T extends Annotatable<?> & FirstTierModel> void annotate(T o, boolean skip, String reason);
 
     public void refresh();
 

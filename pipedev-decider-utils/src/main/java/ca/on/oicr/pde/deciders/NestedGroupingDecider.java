@@ -8,8 +8,8 @@ import java.util.*;
 import net.sourceforge.seqware.common.module.FileMetadata;
 import net.sourceforge.seqware.common.hibernate.FindAllTheFiles.Header;
 import net.sourceforge.seqware.common.module.ReturnValue;
-import net.sourceforge.seqware.common.util.Log;
-import net.sourceforge.seqware.pipeline.deciders.BasicDecider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -17,7 +17,8 @@ import net.sourceforge.seqware.pipeline.deciders.BasicDecider;
  */
 
 public class NestedGroupingDecider extends BasicDecider {
-  
+    private final Logger logger = LoggerFactory.getLogger(NestedGroupingDecider.class);
+
     private String path   = "./";
     private String folder = "seqware-results";
     private String templateType;
@@ -35,7 +36,7 @@ public class NestedGroupingDecider extends BasicDecider {
 
     @Override
     public ReturnValue init() {
-        Log.debug("INIT");
+        logger.debug("INIT");
 
 	this.setMetaType(Arrays.asList("application/bam"));
 	//allows anything defined on the command line to override the 'defaults' here.
@@ -52,13 +53,13 @@ public class NestedGroupingDecider extends BasicDecider {
         }
 
         if (this.options.has("verbose")) {
-            Log.setVerbose(true);
+            logger.warn("Not changing verbosity--please set in log4j.properties file");
         }
 
 	// The below if block handles MIME types for the files, current implementation allows only one MIME type
 	if (this.options.has("meta-types")) {
 	    String metaTypes = options.valueOf("meta-types").toString();
-	    Log.debug("meta-types parameter passed setting metaType to " +  metaTypes);
+	    logger.debug("meta-types parameter passed setting metaType to " +  metaTypes);
 	    this.setMetaType(Arrays.asList(metaTypes));
 	}
 
@@ -86,7 +87,7 @@ public class NestedGroupingDecider extends BasicDecider {
 
     @Override
     protected boolean checkFileDetails(ReturnValue returnValue, FileMetadata fm) {
-        Log.debug("CHECK FILE DETAILS:" + fm);
+        logger.debug("CHECK FILE DETAILS:" + fm);
 
         if (this.options.has("template-type")) {
 	    if (!returnValue.getAttribute(Header.SAMPLE_TAG_PREFIX.getTitle() + "geo_library_source_template_type").equals(this.options.valueOf("template-type"))) {
@@ -127,7 +128,7 @@ public class NestedGroupingDecider extends BasicDecider {
 
     @Override
     protected Map<String, String> modifyIniFile(String commaSeparatedFilePaths, String commaSeparatedParentAccessions) {
-        Log.debug("INI FILE:" + commaSeparatedFilePaths);
+        logger.debug("INI FILE:" + commaSeparatedFilePaths);
 
 	Map<String, String> iniFileMap = new TreeMap<>();
         iniFileMap.put("input_files", commaSeparatedFilePaths);
