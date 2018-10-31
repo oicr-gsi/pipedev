@@ -29,7 +29,8 @@ Build with integration tests (Postgres DB 9.1+ required, user should be able to 
 mvn clean install -DskipITs=false \
 -DdbHost=<postgres db host> \
 -DdbPort=<postgres db port> \
--DdbUser=<postgres user name>
+-DdbUser=<postgres user name> \
+-DdbPassword=<postgres password>
 ```
 
 ## Usage

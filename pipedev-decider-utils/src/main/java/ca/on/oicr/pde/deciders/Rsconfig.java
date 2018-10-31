@@ -7,7 +7,8 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import net.sourceforge.seqware.common.util.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -36,6 +37,7 @@ import org.xml.sax.SAXException;
  * @author mlaszloffy
  */
 public class Rsconfig {
+    private final Logger logger = LoggerFactory.getLogger(Rsconfig.class);
 
     private Map<String, Reference> references;
 
@@ -121,13 +123,13 @@ public class Rsconfig {
                 String templateType = eElement.getElementsByTagName("template_type").item(0).getTextContent();
 
                 Reference r = new Reference(templateType, resequencingTypeId);
-                Log.debug("Reference=[" + r.toString() + "]");
+                logger.debug("Reference=[" + r.toString() + "]");
                 NodeList l = eElement.getElementsByTagName("*");
                 for (int j = 0; j < l.getLength(); j++) {
                     Element e = (Element) l.item(j);
                     String key = e.getNodeName();
                     String value = e.getTextContent();
-                    Log.debug("Key=[" + key + "] Value=[" + value + "]");
+                    logger.debug("Key=[" + key + "] Value=[" + value + "]");
                     if (r.put(key, value) != null) {
                         throw new InvalidFileFormatException("Error: duplicate config key found found in reference with template type = [" + templateType
                                 + "], resequencing type = [" + resequencingTypeId + "], config key = [" + key + "].");

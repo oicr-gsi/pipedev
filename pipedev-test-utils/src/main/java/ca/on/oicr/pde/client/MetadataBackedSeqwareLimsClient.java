@@ -31,7 +31,7 @@ public class MetadataBackedSeqwareLimsClient implements SeqwareLimsClient {
     private final Metadata metadata;
     private final PDEPluginRunner runner;
 
-    public MetadataBackedSeqwareLimsClient(Metadata metadata, Map config) {
+    public MetadataBackedSeqwareLimsClient(Metadata metadata, Map<String, String> config) {
         this.metadata = metadata;
         this.runner = new PDEPluginRunner(config);
     }
@@ -149,13 +149,13 @@ public class MetadataBackedSeqwareLimsClient implements SeqwareLimsClient {
     }
 
     @Override
-    public <T extends Annotatable & FirstTierModel> void annotate(T o, String key, String value) {
+    public <T extends Annotatable<?> & FirstTierModel> void annotate(T o, String key, String value) {
 
         checkNotNull(o);
         checkNotNull(key);
         checkNotNull(value);
 
-        List<String> params = new ArrayList(Arrays.asList(
+        List<String> params = new ArrayList<>(Arrays.asList(
                 "--" + getAnnotatableClassShortName(o) + "-accession", o.getSwAccession().toString(),
                 "--key", key,
                 "--val", value
@@ -166,12 +166,12 @@ public class MetadataBackedSeqwareLimsClient implements SeqwareLimsClient {
     }
 
     @Override
-    public <T extends Annotatable & FirstTierModel> void annotate(T o, boolean skip, String value) {
+    public <T extends Annotatable<?> & FirstTierModel> void annotate(T o, boolean skip, String value) {
 
         checkNotNull(o);
         checkNotNull(skip);
 
-        List<String> params = new ArrayList(Arrays.asList(
+        List<String> params = new ArrayList<>(Arrays.asList(
                 "--" + getAnnotatableClassShortName(o) + "-accession", o.getSwAccession().toString(),
                 "--skip", Boolean.toString(skip)
         ));
@@ -214,9 +214,9 @@ public class MetadataBackedSeqwareLimsClient implements SeqwareLimsClient {
         return input;
     }
 
-    private <T extends Annotatable> String getAnnotatableClassShortName(T o) {
+    private <T extends Annotatable<?>> String getAnnotatableClassShortName(T o) {
         if (o == null) {
-            throw new NullPointerException();
+            throw new NullPointerException("Cannot annotate null");
         } else if (o instanceof Study) {
             return "study";
         } else if (o instanceof Experiment) {

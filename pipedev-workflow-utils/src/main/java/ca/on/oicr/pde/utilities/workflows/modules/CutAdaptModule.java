@@ -4,9 +4,10 @@ import ca.on.oicr.pde.utilities.workflows.OicrModule;
 import java.io.File;
 import java.io.IOException;
 import net.sourceforge.seqware.common.module.ReturnValue;
-import net.sourceforge.seqware.common.util.Log;
 import net.sourceforge.seqware.common.util.filetools.FileTools;
 import net.sourceforge.seqware.common.util.runtools.RunTools;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>Uses cutadapt to trim reads from paired end fastq files. When quality is
@@ -66,6 +67,7 @@ import net.sourceforge.seqware.common.util.runtools.RunTools;
  *
  */
 public class CutAdaptModule extends OicrModule {
+    private final Logger logger = LoggerFactory.getLogger(CutAdaptModule.class);
 
     private String read1Adapters = "";
     private String read2Adapters = "";
@@ -128,7 +130,7 @@ public class CutAdaptModule extends OicrModule {
         try {
             tempDir = FileTools.createTempDirectory(new File(System.getProperty("user.dir")));
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("CutAdaptModule.do_run IOException",e);
             ret.setStderr(e.getMessage());
             ret.setExitStatus(ReturnValue.DIRECTORYNOTWRITABLE);
         }
@@ -153,18 +155,18 @@ public class CutAdaptModule extends OicrModule {
         java.util.ArrayList<String> theCommand = new java.util.ArrayList<>();
         theCommand.add("bash");
         theCommand.add("-lc");
-        StringBuffer cmdBuff = new StringBuffer();
-        cmdBuff.append(command+ " ");
+        StringBuilder cmdBuff = new StringBuilder();
+        cmdBuff.append(command).append(" ");
         theCommand.add(cmdBuff.toString());
-        Log.stdout("Command run: \nbash -lc " + cmdBuff.toString());
+        logger.debug("Command run: \nbash -lc " + cmdBuff.toString());
         ret = RunTools.runCommand(theCommand.toArray(new String[0]));
-        Log.stdout("Command exit code: " + ret.getExitStatus());
+        logger.debug("Command exit code: " + ret.getExitStatus());
 
 
         } finally {
             cleanUp();
         }
-        Log.stdout("Exit status: " + ret.getExitStatus());
+        logger.debug("Exit status: " + ret.getExitStatus());
 
 
 

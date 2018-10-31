@@ -23,9 +23,9 @@ public class Workflow implements PdeObject {
         name = b.name;
         version = b.version;
         if (b.attributes == null) {
-            attributes = Collections.EMPTY_MAP;
+            attributes = Collections.emptyMap();
         } else {
-            attributes = new HashMap(b.attributes);
+            attributes = new HashMap<>(b.attributes);
         }
     }
 
