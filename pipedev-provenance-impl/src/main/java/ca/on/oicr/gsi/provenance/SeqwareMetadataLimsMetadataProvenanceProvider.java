@@ -93,4 +93,9 @@ public class SeqwareMetadataLimsMetadataProvenanceProvider implements SampleProv
 		return getLaneProvenance();
 	}
 
+	@Override
+	public void close() throws Exception {
+		metadata.clean_up();
+	}
+
 }

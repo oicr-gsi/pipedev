@@ -129,7 +129,7 @@ public class DeciderFilteringAndLimsKeyLinkTest {
         when(sp3.getLastModified()).thenReturn(limsLastModified);
         when(sp3.getSequencerRunName()).thenReturn("RUN3");
 
-        when(spp.getSampleProvenance()).thenReturn(Arrays.asList(sp1, sp2, sp3));
+        when(spp.getSampleProvenance()).thenAnswer(i -> Arrays.asList(sp1, sp2, sp3));
     }
 
     @BeforeMethod(dependsOnMethods = {"setupLimsData"})
