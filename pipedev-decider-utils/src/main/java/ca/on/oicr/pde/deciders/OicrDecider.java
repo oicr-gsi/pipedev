@@ -1253,7 +1253,7 @@ public class OicrDecider extends BasicDecider {
 			String processingTagPrefix = "processing.";
 
 			List<Map<String, String>> fpList = new ArrayList<>();
-			Collection<FileProvenance> fps = provenanceClient.getFileProvenance(includeFilters, excludeFilters);
+			Collection<? extends FileProvenance> fps = provenanceClient.getFileProvenance(includeFilters, excludeFilters);
 			for (FileProvenance fp : fps) {
 				Map<String, String> f = new HashMap<>();
 				f.put("Last Modified", StringUtils.defaultString(fp.getLastModified() == null ? null : fp.getLastModified()

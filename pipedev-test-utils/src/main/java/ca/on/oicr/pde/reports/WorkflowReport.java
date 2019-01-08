@@ -394,16 +394,16 @@ public class WorkflowReport {
         //get all file provenance records for the workflow
         Map<FileProvenanceFilter, Set<String>> workflowFilter = new HashMap<>();
         workflowFilter.put(FileProvenanceFilter.workflow, ImmutableSet.of(workflow.getSwAccession().toString()));
-        Collection<FileProvenance> workflowRunFileProvenanceRecords = provenanceClient.getFileProvenance(workflowFilter);
+        Collection<? extends FileProvenance> workflowRunFileProvenanceRecords = provenanceClient.getFileProvenance(workflowFilter);
 
         //additionally, get all input file file provenance records for the above workflow
         Set<String> inputFiles = new HashSet<>();
         for (FileProvenance fp : workflowRunFileProvenanceRecords) {
             inputFiles.addAll(Collections2.transform(fp.getWorkflowRunInputFileSWIDs(), Functions.toStringFunction()));
         }
-        Collection<FileProvenance> inputFileProvenanceRecords;
+        Collection<? extends FileProvenance> inputFileProvenanceRecords;
         if (inputFiles.isEmpty()) {
-            inputFileProvenanceRecords = Collections.EMPTY_LIST;
+            inputFileProvenanceRecords = Collections.emptyList();
         } else {
             Map<FileProvenanceFilter, Set<String>> inputFileFilter = new HashMap<>();
             inputFileFilter.put(FileProvenanceFilter.file, inputFiles);

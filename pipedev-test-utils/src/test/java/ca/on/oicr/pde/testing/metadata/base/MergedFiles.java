@@ -140,7 +140,7 @@ public class MergedFiles extends Base {
         file.setSize(1L);
         seqwareClient.createWorkflowRun(mergeBams, newIus, ps, Arrays.asList(file));
 
-        Collection<FileProvenance> fps = provenanceClient.getFileProvenance();
+        Collection<? extends FileProvenance> fps = provenanceClient.getFileProvenance();
 
         Assert.assertEquals(fps.size(), 6);
 

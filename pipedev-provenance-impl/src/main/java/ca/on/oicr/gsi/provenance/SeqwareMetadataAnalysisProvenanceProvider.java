@@ -36,4 +36,9 @@ public class SeqwareMetadataAnalysisProvenanceProvider implements AnalysisProven
 				.collect(Collectors.toList());
 	}
 
+	@Override
+	public void close() throws Exception {
+		metadata.clean_up();
+	}
+
 }
