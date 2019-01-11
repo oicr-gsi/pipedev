@@ -17,27 +17,35 @@ import java.util.Set;
  */
 public class PineryProvenanceProvider implements SampleProvenanceProvider, LaneProvenanceProvider {
 
-    private final PineryClient pineryClient;
+    private static final String DEFAULT_VERSION = "v1";
+	private final PineryClient pineryClient;
+    private final String version;
 
     public PineryProvenanceProvider(Map<String, String> settings) {
         if (!settings.containsKey("url")) {
             throw new RuntimeException("PineryProvenanceProvider \"url\" setting is missing");
         }
         this.pineryClient = new PineryClient(settings.get("url"), true);
+        version = settings.getOrDefault("version", DEFAULT_VERSION);
     }
 
     public PineryProvenanceProvider(String url) {
-        this.pineryClient = new PineryClient(url, true);
+        this(new PineryClient(url, true));
     }
-
+    
     public PineryProvenanceProvider(PineryClient pineryClient) {
+        this(pineryClient, DEFAULT_VERSION);
+    }
+    
+    public PineryProvenanceProvider(PineryClient pineryClient, String version) {
         this.pineryClient = pineryClient;
+        this.version = version;
     }
 
     @Override
     public Collection<SampleProvenance> getSampleProvenance() {
         try {
-            return (List<SampleProvenance>) (List<?>) pineryClient.getSampleProvenance().all();
+            return (List<SampleProvenance>) (List<?>) pineryClient.getSampleProvenance().version(version);
         } catch (HttpResponseException hre) {
             throw new RuntimeException(hre);
         }
@@ -91,7 +99,7 @@ public class PineryProvenanceProvider implements SampleProvenanceProvider, LaneP
     @Override
     public Collection<LaneProvenance> getLaneProvenance() {
         try {
-            return (List<LaneProvenance>) (List<?>) pineryClient.getLaneProvenance().all();
+            return (List<LaneProvenance>) (List<?>) pineryClient.getLaneProvenance().version(version);
         } catch (HttpResponseException hre) {
             throw new RuntimeException(hre);
         }

@@ -18,6 +18,8 @@ import ca.on.oicr.ws.dto.SampleProvenanceDto;
 import com.google.common.collect.Table;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import net.sourceforge.seqware.common.metadata.MetadataInMemory;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
@@ -48,10 +50,10 @@ public class MergingDeciderBaseTest extends MergingDeciderBase {
         SampleProvenanceClient sampleProvenanceClientMock = mock(SampleProvenanceClient.class);
         doReturn(sampleProvenanceClientMock).when(pineryClientMock).getSampleProvenance();
         try {
-            when(sampleProvenanceClientMock.all()).thenAnswer(new Answer<List<SampleProvenanceDto>>() {
+            when(sampleProvenanceClientMock.version("v1")).thenAnswer(new Answer<List<SampleProvenanceDto>>() {
                 @Override
                 public List<SampleProvenanceDto> answer(InvocationOnMock invocation) throws Throwable {
-                    return Dtos.sampleProvenanceCollectionAsDto(sampleProvenanceService.getSampleProvenance());
+                    return sampleProvenanceService.getSampleProvenance().stream().map(Dtos::asDto).collect(Collectors.toList());
                 }
             });
         } catch (HttpResponseException ex) {
@@ -62,10 +64,10 @@ public class MergingDeciderBaseTest extends MergingDeciderBase {
         LaneProvenanceClient laneProvenanceClientMock = mock(LaneProvenanceClient.class);
         doReturn(laneProvenanceClientMock).when(pineryClientMock).getLaneProvenance();
         try {
-            when(laneProvenanceClientMock.all()).thenAnswer(new Answer<List<LaneProvenanceDto>>() {
+            when(laneProvenanceClientMock.version("v1")).thenAnswer(new Answer<List<LaneProvenanceDto>>() {
                 @Override
                 public List<LaneProvenanceDto> answer(InvocationOnMock invocation) throws Throwable {
-                    return Dtos.laneProvenanceCollectionAsDto(laneProvenanceService.getLaneProvenance());
+                    return laneProvenanceService.getLaneProvenance().stream().map(Dtos::asDto).collect(Collectors.toList());
                 }
             });
         } catch (HttpResponseException ex) {
