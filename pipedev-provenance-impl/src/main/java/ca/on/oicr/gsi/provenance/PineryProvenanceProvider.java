@@ -26,7 +26,7 @@ public class PineryProvenanceProvider implements SampleProvenanceProvider, LaneP
             throw new RuntimeException("PineryProvenanceProvider \"url\" setting is missing");
         }
         this.pineryClient = new PineryClient(settings.get("url"), true);
-        version = settings.getOrDefault("version", DEFAULT_VERSION);
+        version = settings.get("version");
     }
 
     public PineryProvenanceProvider(String url) {
