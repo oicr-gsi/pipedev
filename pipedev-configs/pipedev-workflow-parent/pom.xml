@@ -6,7 +6,7 @@
     <parent>
         <groupId>ca.on.oicr.gsi</groupId>
         <artifactId>pipedev</artifactId>
-        <version>2.4.7</version>
+        <version>2.4.8</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     
@@ -484,27 +484,6 @@
                         <artifactId>maven-deploy-plugin</artifactId>
                         <configuration>
                             <skip>true</skip>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>com.pyx4j</groupId>
-                        <artifactId>maven-junction-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>link</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>unlink</id>
-                                <phase>clean</phase>
-                                <goals>
-                                    <goal>unlink</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
                         </configuration>
                     </plugin>
                     <plugin>

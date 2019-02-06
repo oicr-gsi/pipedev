@@ -34,7 +34,7 @@ public class MetadataClient {
         Map<FileProvenanceFilter, Set<String>> filters = new HashMap<>();
         filters.put(FileProvenanceFilter.workflow, Sets.newHashSet(workflow.getSwAccession().toString()));
 
-        Collection<FileProvenance> fps = provenanceClient.getFileProvenance(filters);
+        Collection<? extends FileProvenance> fps = provenanceClient.getFileProvenance(filters);
         WorkflowReport t = new WorkflowReport();
         t.setWorkflowRunCount(fps.size()); //wrrs.size());
 
@@ -47,7 +47,7 @@ public class MetadataClient {
             }
             Map<FileProvenanceFilter, Set<String>> filters2 = new HashMap<>();
             filters2.put(FileProvenanceFilter.file, inputFileAccessions);
-            Collection<FileProvenance> inputFiles = provenanceClient.getFileProvenance(filters2);
+            Collection<? extends FileProvenance> inputFiles = provenanceClient.getFileProvenance(filters2);
 
             t.addStudies(fp.getStudyTitles());
             t.addSamples(fp.getSampleNames());

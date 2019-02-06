@@ -7,7 +7,6 @@ import ca.on.oicr.pinery.client.PineryClient;
 import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -43,16 +42,16 @@ public class PineryProvenanceProvider implements SampleProvenanceProvider, LaneP
     }
 
     @Override
-    public Collection<SampleProvenance> getSampleProvenance() {
+    public Collection<? extends SampleProvenance> getSampleProvenance() {
         try {
-            return (List<SampleProvenance>) (List<?>) pineryClient.getSampleProvenance().version(version);
+            return pineryClient.getSampleProvenance().version(version);
         } catch (HttpResponseException hre) {
             throw new RuntimeException(hre);
         }
     }
 
     @Override
-    public Collection<SampleProvenance> getSampleProvenance(Map<FileProvenanceFilter, Set<String>> filters) {
+    public Collection<? extends SampleProvenance> getSampleProvenance(Map<FileProvenanceFilter, Set<String>> filters) {
         Set<SampleProvenance> sps = new HashSet<>();
         for (SampleProvenance sp : getSampleProvenance()) {
             if (filters.containsKey(FileProvenanceFilter.sample)) {
@@ -97,9 +96,9 @@ public class PineryProvenanceProvider implements SampleProvenanceProvider, LaneP
     }
 
     @Override
-    public Collection<LaneProvenance> getLaneProvenance() {
+    public Collection<? extends LaneProvenance> getLaneProvenance() {
         try {
-            return (List<LaneProvenance>) (List<?>) pineryClient.getLaneProvenance().version(version);
+            return pineryClient.getLaneProvenance().version(version);
         } catch (HttpResponseException hre) {
             throw new RuntimeException(hre);
         }
@@ -109,5 +108,10 @@ public class PineryProvenanceProvider implements SampleProvenanceProvider, LaneP
     public Collection<LaneProvenance> getLaneProvenance(Map<FileProvenanceFilter, Set<String>> filters) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+	@Override
+	public void close() throws Exception {
+        pineryClient.close();
+	}
 
 }
