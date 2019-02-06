@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import lombok.Data;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
@@ -96,7 +95,6 @@ public class ProviderLoader {
         }
     }
 
-    @Data
     public static class Provider {
 
         public String getType() {
