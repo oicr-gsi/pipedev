@@ -40,7 +40,10 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
+import joptsimple.OptionSpec;
 import org.apache.commons.lang3.StringUtils;
 import org.openide.util.lookup.ServiceProvider;
 import org.slf4j.Logger;
@@ -101,12 +104,15 @@ public class BasicDecider extends Plugin implements DeciderInterface {
     private int launchMax = Integer.MAX_VALUE, launched = 0;
     private int rerunMax = 5;
     private String host = null;
+    protected Set<String> workflowRunAttributeTagFilters = new HashSet<>(Arrays.asList("skip","deleted"));
 
     protected final NonOptionArgumentSpec<String> nonOptionSpec;
     protected final OptionSpecBuilder ignorePreviousRunsSpec;
     protected final OptionSpecBuilder forceRunAllSpec;
+    protected final OptionSpec<String> workflowRunAttributeTagFiltersOpt;
 
     private boolean isValidWorkflowRun;
+
 
     public BasicDecider() {
         super();
@@ -148,6 +154,11 @@ public class BasicDecider extends Plugin implements DeciderInterface {
                 .withRequiredArg();
         // SEQWARE-1622 - check whether files exist
         parser.acceptsAll(Arrays.asList("check-file-exists", "cf"), "Optional: only launch on the file if the file exists");
+        workflowRunAttributeTagFiltersOpt = parser.accepts("workflow-run-annotation-tag-filters",
+                "When checking if a workflow run has been processed before, filter out workflow runs annotated with these tags.")
+                .withRequiredArg()
+                .ofType(String.class)
+                .defaultsTo(workflowRunAttributeTagFilters.stream().toArray(String[]::new));
         this.nonOptionSpec = parser.nonOptions(WorkflowScheduler.OVERRIDE_INI_DESC);
     }
 
@@ -324,6 +335,10 @@ public class BasicDecider extends Plugin implements DeciderInterface {
         if (workflowAccession == null || "".equals(workflowAccession)) {
             LOGGER.error("The wf-accession must be defined.");
             ret.setExitStatus(ReturnValue.INVALIDPARAMETERS);
+        }
+
+        if (options.has(workflowRunAttributeTagFiltersOpt)) {
+            workflowRunAttributeTagFilters = new HashSet<>(options.valuesOf(workflowRunAttributeTagFiltersOpt));
         }
 
         return ret;
@@ -1052,6 +1067,9 @@ public class BasicDecider extends Plugin implements DeciderInterface {
         return doRerun;
     }
 
+    private final Predicate<WorkflowRun> workflowRunAttributeFilter = wr -> wr.getAnnotations().stream()
+            .noneMatch(attr -> workflowRunAttributeTagFilters.contains(attr.getTag()));
+
     private List<WorkflowRun> produceAccessionListWithFileList(List<Integer> fileSWIDs) {
         // grab only the workflows in which we are interested
         List<Integer> relevantWorkflows = new ArrayList<>();
@@ -1062,7 +1080,11 @@ public class BasicDecider extends Plugin implements DeciderInterface {
         // find relevant workflow runs for this group of files
         List<WorkflowRun> wrFiles1 = this.metadata.getWorkflowRunsAssociatedWithInputFiles(fileSWIDs, relevantWorkflows);
         LOGGER.debug("Found " + wrFiles1.size() + " workflow runs via direct search");
-        return wrFiles1;
+
+        //filter workflowRuns that do not pass workflow run attribute tag filters
+        List<WorkflowRun> filteredWorkflowRuns = wrFiles1.stream().filter(workflowRunAttributeFilter).collect(Collectors.toList());
+        LOGGER.debug("After workflow run attribute filtering " + filteredWorkflowRuns.size() + " relevant workflow runs");
+        return filteredWorkflowRuns;
     }
 
     /**
