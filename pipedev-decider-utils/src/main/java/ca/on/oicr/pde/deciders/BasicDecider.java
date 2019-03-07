@@ -1081,7 +1081,7 @@ public class BasicDecider extends Plugin implements DeciderInterface {
         List<WorkflowRun> wrFiles1 = this.metadata.getWorkflowRunsAssociatedWithInputFiles(fileSWIDs, relevantWorkflows);
         LOGGER.debug("Found " + wrFiles1.size() + " workflow runs via direct search");
 
-        //filter workflowRuns that do not pass workflow run attribute tag filters
+        //select workflowRuns that do not have workflow run attribute tags
         List<WorkflowRun> filteredWorkflowRuns = wrFiles1.stream().filter(workflowRunAttributeFilter).collect(Collectors.toList());
         LOGGER.debug("After workflow run attribute filtering " + filteredWorkflowRuns.size() + " relevant workflow runs");
         return filteredWorkflowRuns;
