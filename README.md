@@ -46,7 +46,7 @@ Add pipedev-workflow-utils as a maven dependency:
 <dependency>
     <groupId>ca.on.oicr.gsi</groupId>
     <artifactId>pipedev-workflow-utils</artifactId>
-    <version>2.3</version>
+    <version>2.5</version>
 </dependency>
 ```
 
@@ -65,7 +65,7 @@ Add pipedev-decider-utils as a maven dependency:
 <dependency>
     <groupId>ca.on.oicr.gsi</groupId>
     <artifactId>pipedev-decider-utils</artifactId>
-    <version>2.3</version>
+    <version>2.5</version>
 </dependency>
 ```
 
@@ -85,7 +85,7 @@ Add pipedev-test-utils as a maven dependency:
 <dependency>
     <groupId>ca.on.oicr.gsi</groupId>
     <artifactId>pipedev-test-utils</artifactId>
-    <version>2.3</version>
+    <version>2.5</version>
     <scope>test</scope>
 </dependency>
 ```
@@ -103,7 +103,7 @@ PDE's [workflow parent pom](pipedev-configs/pipedev-workflow-parent/pom.xml) can
 <parent>
     <groupId>ca.on.oicr.gsi</groupId>
     <artifactId>pipedev-workflow-parent</artifactId>
-    <version>2.3</version>
+    <version>2.5</version>
     <relativePath/>
 </parent>
 ```
@@ -114,7 +114,7 @@ PDE's [decider parent pom](configs/decider-parent/pom.xml) can be used as a temp
 <parent>
     <groupId>ca.on.oicr.gsi</groupId>
     <artifactId>pipedev-decider-parent</artifactId>
-    <version>2.3</version>
+    <version>2.5</version>
     <relativePath/>
 </parent>
 ```
