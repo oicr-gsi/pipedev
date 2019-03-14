@@ -5,7 +5,8 @@ import java.util.Map;
 import net.sourceforge.seqware.common.hibernate.FindAllTheFiles.Header;
 import net.sourceforge.seqware.common.module.FileMetadata;
 import net.sourceforge.seqware.common.module.ReturnValue;
-import net.sourceforge.seqware.common.util.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.*;
 import org.testng.Assert;
 /**
@@ -13,6 +14,7 @@ import org.testng.Assert;
  * @author mtaschuk
  */
 public class AttributesTest {
+    private final Logger logger = LoggerFactory.getLogger(AttributesTest.class);
 
     public AttributesTest() {
     }
@@ -35,7 +37,7 @@ public class AttributesTest {
 
     @Test
     public void testAttributes() {
-        Log.stdout("testAttributes");
+        logger.debug("testAttributes");
 
         FileMetadata fm = new FileMetadata();
         fm.setFilePath("/my/file/is/here");
@@ -74,7 +76,7 @@ public class AttributesTest {
     
         @Test
     public void testNullAttributes() {
-        Log.stdout("testAttributes");
+        logger.debug("testAttributes");
 
         FileMetadata fm = new FileMetadata();
         fm.setFilePath("/my/file/is/here");
@@ -113,7 +115,7 @@ public class AttributesTest {
     
     @Test
     public void testExtractAttribute (){
-        System.out.println("testExtractAttribute");
+        logger.debug("testExtractAttribute");
         String test1 = "parent_sample.geo_group_id.492930";
         String test2 = "parent_sample.geo_group_id_description.492930";
         FileAttributes fa = new FileAttributes();

@@ -29,11 +29,11 @@ public class RegressionTestStudy {
     public class SeqwareObjects {
 
         private final Table<String, Class<?>, Object> data = HashBasedTable.create();
-        private final HashMap<String, SeqwareObject> data2 = new HashMap<>();
+        private final HashMap<String, SeqwareObject<?>> data2 = new HashMap<>();
 
-        public <T extends FirstTierModel & Annotatable> void add(String key, T t) {
+        public <T extends FirstTierModel & Annotatable<?>> void add(String key, T t) {
             data.put(key, t.getClass(), t);
-            data2.put(key, new SeqwareObject(t));
+            data2.put(key, new SeqwareObject<>(t));
         }
 
         public Sample getSample(String key) {
@@ -60,7 +60,7 @@ public class RegressionTestStudy {
             return (IUS) data.get(key, IUS.class);
         }
 
-        public SeqwareObject get(String key) {
+        public SeqwareObject<?> get(String key) {
             return data2.get(key);
         }
 

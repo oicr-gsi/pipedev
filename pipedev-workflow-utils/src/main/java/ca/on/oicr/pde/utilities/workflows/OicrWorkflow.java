@@ -1,10 +1,11 @@
 package ca.on.oicr.pde.utilities.workflows;
 
 import java.util.*;
-import net.sourceforge.seqware.common.util.Log;
 import net.sourceforge.seqware.pipeline.workflowV2.AbstractWorkflowDataModel;
 import net.sourceforge.seqware.pipeline.workflowV2.model.Job;
 import net.sourceforge.seqware.pipeline.workflowV2.model.SqwFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An extension to SeqWare's workflow class that adds additional OICR-specific functionality.
@@ -12,7 +13,8 @@ import net.sourceforge.seqware.pipeline.workflowV2.model.SqwFile;
  * @author mtaschuk
  */
 public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
-    
+    private final Logger logger = LoggerFactory.getLogger(OicrWorkflow.class);
+
     private final Random random = new Random(System.nanoTime());
     private boolean workflowIsValid = true;
 
@@ -44,7 +46,7 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
             String input = super.getProperty(identifier);
             files.addAll(Arrays.asList(input.split(",")));
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.warn("OicrWorkflow.getInputFiles exception",e);
             setWorkflowInvalid();
         }
         return files.toArray(new String[0]);
@@ -87,8 +89,7 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
             property = super.getProperty(key);
 
         } catch (Exception e) {
-            Log.error("Error retrieving property: " + key);
-            e.printStackTrace();
+            logger.error("Error retrieving property: " + key,e);
             setWorkflowInvalid();
         }
         return property;
@@ -110,8 +111,7 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
 
             } catch (Exception e) {
                 property = null;
-                Log.error("Error retrieving property that should exist: " + key);
-                e.printStackTrace();
+                logger.error("Error retrieving property that should exist: " + key,e);
                 setWorkflowInvalid();
             }
         }
@@ -177,7 +177,7 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
         String outputFiles = getProperty("output_files");
         Boolean doIt = false;
         if (getProperty("manual_output") != null) {
-            doIt = Boolean.parseBoolean(getProperty("manual_output").toString());
+            doIt = Boolean.parseBoolean(getProperty("manual_output"));
         }
         if (outputFiles != null && !outputFiles.trim().isEmpty()) {
             int i = 0;
@@ -219,7 +219,7 @@ public abstract class OicrWorkflow extends AbstractWorkflowDataModel {
     protected SqwFile createOutputFile(String name, String workingPath) {
         Boolean doIt = false;
         if (getProperty("manual_output") != null) {
-            doIt = Boolean.parseBoolean(getProperty("manual_output").toString());
+            doIt = Boolean.parseBoolean(getProperty("manual_output"));
         }
         return createOutputFile(workingPath, "txt/plain", doIt);
     }

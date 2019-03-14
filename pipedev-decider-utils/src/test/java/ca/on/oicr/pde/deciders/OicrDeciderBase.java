@@ -15,13 +15,10 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.*;
+import net.sourceforge.seqware.common.model.*;
 import org.apache.commons.io.FileUtils;
 import org.testng.annotations.Test;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 
 import ca.on.oicr.gsi.provenance.FileProvenanceFilter;
 import ca.on.oicr.gsi.provenance.model.FileProvenance;
@@ -31,10 +28,6 @@ import ca.on.oicr.pde.TestUtils;
 import ca.on.oicr.pinery.api.RunPosition;
 import ca.on.oicr.pinery.client.HttpResponseException;
 import ca.on.oicr.pinery.lims.DefaultRunPosition;
-import net.sourceforge.seqware.common.model.File;
-import net.sourceforge.seqware.common.model.IUS;
-import net.sourceforge.seqware.common.model.Processing;
-import net.sourceforge.seqware.common.model.Workflow;
 import net.sourceforge.seqware.common.module.FileMetadata;
 
 public class OicrDeciderBase extends DeciderBase {
@@ -282,5 +275,75 @@ public class OicrDeciderBase extends DeciderBase {
 			assertEquals(fp.getWorkflowName(), workflowName);
 		}
 	}
+
+    @Test
+    public void workflowRunAttributeFilterTest_GP_1978() {
+        // setup files in seqware
+        Workflow workflow1 = seqwareClient.createWorkflow("TestWorkflow1", "0.0", "",
+                ImmutableMap.of("test_param", "test_value"));
+
+        SampleProvenance sp = Iterables.getFirst(provenanceClient.getSampleProvenance(), null);
+        IUS ius = seqwareClient.addLims("pinery", sp.getSampleProvenanceId(), sp.getVersion(), sp.getLastModified());
+        FileMetadata file = new FileMetadata();
+        file.setDescription("description");
+        file.setMd5sum("md5sum");
+        file.setFilePath("/tmp/file1.bam");
+        file.setMetaType("text/plain");
+        file.setType("type?");
+        file.setSize(1L);
+        seqwareClient.createWorkflowRun(workflow1, Sets.newHashSet(ius), Collections.emptyList(), Arrays.asList(file));
+
+        EnumMap<FileProvenanceFilter, Set<String>> filters = new EnumMap<>(FileProvenanceFilter.class);
+        filters.put(FileProvenanceFilter.skip, ImmutableSet.of("false"));
+        filters.put(FileProvenanceFilter.workflow, ImmutableSet.of(workflow1.getSwAccession().toString()));
+        assertEquals(provenanceClient.getFileProvenance(filters).size(), 1);
+
+        // setup DownstreamWorkflow workflow and decider
+        Workflow downstreamWorkflow = seqwareClient.createWorkflow("DownstreamWorkflow", "0.0", "",
+                ImmutableMap.of("test_param", "test_value"));
+        OicrDecider decider = new OicrDecider(provenanceClient);
+        decider.setWorkflowAccession(downstreamWorkflow.getSwAccession().toString());
+        decider.setMetaType(Arrays.asList("text/plain"));
+        decider.setGroupBy(Group.ROOT_SAMPLE_NAME, true);
+
+        // schedule a DownstreamWorkflow run
+        filters.put(FileProvenanceFilter.workflow,
+                ImmutableSet.of(downstreamWorkflow.getSwAccession().toString()));
+        run(decider, Arrays.asList("--parent-wf-accessions", workflow1.getSwAccession().toString(), "--all"));
+        assertEquals(decider.getWorkflowRuns().size(), 1);
+        assertEquals(provenanceClient.getFileProvenance(filters).size(), 1);
+
+        // check that scheduling is blocked
+        run(decider, Arrays.asList("--parent-wf-accessions", workflow1.getSwAccession().toString(), "--all"));
+        assertEquals(decider.getWorkflowRuns().size(), 0);
+
+        // annotate the above DownstreamWorkflow run as skipped
+        Integer workflowRunSwid = provenanceClient.getFileProvenance(Maps.immutableEnumMap(ImmutableMap.of(
+                FileProvenanceFilter.workflow, ImmutableSet.of(downstreamWorkflow.getSwAccession().toString()),
+                FileProvenanceFilter.skip, ImmutableSet.of("false"))))
+                .stream().collect(MoreCollectors.onlyElement()).getWorkflowRunSWID();
+        WorkflowRunAttribute wra = new WorkflowRunAttribute();
+        wra.setTag("skip");
+        wra.setValue("test");
+        metadata.annotateWorkflowRun(workflowRunSwid, wra, null);
+
+        // override default workflow-run-attribute filters, check decider is blocked still
+        run(decider, Arrays.asList("--parent-wf-accessions", workflow1.getSwAccession().toString(), "--all",
+                "--workflow-run-annotation-tag-filters", ""));
+        assertEquals(decider.getWorkflowRuns().size(), 0);
+
+        //run the decider again, previous skipped workflow run is filtered so a new workflow run should be launched
+        run(decider, Arrays.asList("--parent-wf-accessions", workflow1.getSwAccession().toString(), "--all",
+                "--workflow-run-annotation-tag-filters", "skip"));
+        assertEquals(decider.getWorkflowRuns().size(), 1);
+        assertEquals(provenanceClient.getFileProvenance(filters).size(), 1);
+
+        // another check to ensure the a new DownstreamWorkflow run was scheduled
+        Integer newWorkflowRunSwid = provenanceClient.getFileProvenance(Maps.immutableEnumMap(ImmutableMap.of(
+                FileProvenanceFilter.workflow, ImmutableSet.of(downstreamWorkflow.getSwAccession().toString()),
+                FileProvenanceFilter.skip, ImmutableSet.of("false"))))
+                .stream().collect(MoreCollectors.onlyElement()).getWorkflowRunSWID();
+        assertNotEquals(workflowRunSwid, newWorkflowRunSwid);
+    }
 
 }
