@@ -460,7 +460,7 @@ public class BasicDecider extends Plugin implements DeciderInterface {
                             for (String line : studyReporterOutput) {
                                 LOGGER.debug(line);
                             }
-                            LOGGER.debug("NOT RUNNING (but would have ran). dryRunMode=" + isDryRunMode + " or !rerun=" + !rerun);
+                            LOGGER.info("NOT RUNNING (but would have ran). dryRunMode=" + isDryRunMode + " or !rerun=" + !rerun);
                             reportLaunch();
                             
                             //keep track of workflow runs to be scheduled
@@ -844,7 +844,7 @@ public class BasicDecider extends Plugin implements DeciderInterface {
     @Override
     public ReturnValue do_summary() {
         String command = do_summary_command();
-        LOGGER.debug(command);
+        LOGGER.info(command);
         return new ReturnValue();
     }
 
