@@ -110,6 +110,7 @@ public class BasicDecider extends Plugin implements DeciderInterface {
     protected final OptionSpecBuilder ignorePreviousRunsSpec;
     protected final OptionSpecBuilder forceRunAllSpec;
     protected final OptionSpec<String> workflowRunAttributeTagFiltersOpt;
+    protected final OptionSpec<Boolean> dryRunOpt;
 
     private boolean isValidWorkflowRun;
 
@@ -138,7 +139,9 @@ public class BasicDecider extends Plugin implements DeciderInterface {
                 .withRequiredArg();
         this.forceRunAllSpec = parser.acceptsAll(Arrays.asList("force-run-all"),
                 "Forces the decider to run all matches regardless of whether they've been run before or not");
-        parser.acceptsAll(Arrays.asList("dry-run", "test"), "Dry-run/test mode. Prints the INI files to standard out and does not submit the workflow.");
+        dryRunOpt = parser.acceptsAll(Arrays.asList("dry-run", "test"),
+                "Dry-run/test mode. Prints the INI files to standard out and does not submit the workflow.")
+                .withOptionalArg().ofType(Boolean.class).defaultsTo(false);
         parser.acceptsAll(Arrays.asList("no-meta-db", "no-metadata"), "Optional: a flag that prevents metadata writeback (which is done "
                 + "by default) by the Decider and that is subsequently "
                 + "passed to the called workflow which can use it to determine if "
@@ -278,7 +281,7 @@ public class BasicDecider extends Plugin implements DeciderInterface {
         }
         ignorePreviousRuns = options.has(this.ignorePreviousRunsSpec) || options.has(this.forceRunAllSpec);
 
-        if (options.has("dry-run") || options.has("test") || options.has("no-metadata") || options.has("no-meta-db")) {
+        if (getBooleanFlagOrArgValue(dryRunOpt) || options.has("no-metadata") || options.has("no-meta-db")) {
             // dry run mode turns off all of the submission functions and just prints to debug
             isDryRunMode = true;
             metadataWriteback = false;
@@ -1296,5 +1299,20 @@ public class BasicDecider extends Plugin implements DeciderInterface {
             return latestSWID;
         }
 
+    }
+
+    private boolean getBooleanFlagOrArgValue(OptionSpec<Boolean> param) {
+        if (options.has(param)) {
+            if (options.hasArgument(param)) {
+                //return explicit boolean provided as arg
+                return options.valueOf(param);
+            } else {
+                //only parameter provided - treat as flag
+                return true;
+            }
+        } else {
+            //return default
+            return options.valueOf(param);
+        }
     }
 }
