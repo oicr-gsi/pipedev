@@ -454,13 +454,7 @@ public class BasicDecider extends Plugin implements DeciderInterface {
                                 continue;
                             }
 
-                            List<String> inputFileReport = new ArrayList<>();
-                            inputFileReport.add("Input file records:");
-                            for (String line : studyReporterOutput) {
-                                inputFileReport.add(line);
-                            }
-                            LOGGER.info(inputFileReport.stream().collect(Collectors.joining("\n\n")));
-
+                            LOGGER.info(studyReporterOutput.stream().collect(Collectors.joining("\n\n", "Input file records:\n", "")));
                             LOGGER.debug("NOT RUNNING (but would have ran). dryRunMode=" + isDryRunMode + " or !rerun=" + !rerun);
                             reportLaunch();
 
