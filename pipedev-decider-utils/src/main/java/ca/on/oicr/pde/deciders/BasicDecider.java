@@ -16,6 +16,13 @@
  */
 package ca.on.oicr.pde.deciders;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import io.seqware.common.model.ProcessingStatus;
+import io.seqware.common.model.WorkflowRunStatus;
+import io.seqware.pipeline.plugins.WorkflowScheduler;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -42,22 +49,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import joptsimple.OptionSpec;
-import org.apache.commons.lang3.StringUtils;
-import org.openide.util.lookup.ServiceProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
-import io.seqware.common.model.ProcessingStatus;
-import io.seqware.common.model.WorkflowRunStatus;
-import io.seqware.pipeline.plugins.WorkflowScheduler;
 import joptsimple.NonOptionArgumentSpec;
+import joptsimple.OptionSpec;
 import joptsimple.OptionSpecBuilder;
 import net.sourceforge.seqware.common.hibernate.FindAllTheFiles;
 import net.sourceforge.seqware.common.hibernate.FindAllTheFiles.Header;
@@ -75,6 +68,10 @@ import net.sourceforge.seqware.pipeline.plugin.PluginInterface;
 import net.sourceforge.seqware.pipeline.plugins.fileprovenance.ProvenanceUtility;
 import net.sourceforge.seqware.pipeline.runner.PluginRunner;
 import net.sourceforge.seqware.pipeline.tools.SetOperations;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
@@ -82,7 +79,7 @@ import net.sourceforge.seqware.pipeline.tools.SetOperations;
  */
 @ServiceProvider(service = PluginInterface.class)
 public class BasicDecider extends Plugin implements DeciderInterface {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BasicDecider.class);
+    private static final Logger LOGGER = LogManager.getLogger(BasicDecider.class);
 
     private List<Header> header = Lists.newArrayList(Header.FILE_SWA);
     private Set<String> parentWorkflowAccessions = new TreeSet<>();
@@ -379,9 +376,9 @@ public class BasicDecider extends Plugin implements DeciderInterface {
             Collections.sort(entryList, new ReturnValueProcessingTimeComparator());
 
             for (Entry<String, List<ReturnValue>> entry : entryList) {
-                LOGGER.info("Considering key:" + entry.getKey());
+                LOGGER.debug("Considering key:" + entry.getKey());
                 for (ReturnValue r : entry.getValue()) {
-                    LOGGER.info("Group contains: " + r.getAttribute(FindAllTheFiles.FILE_SWA));
+                    LOGGER.debug("Group contains: " + r.getAttribute(FindAllTheFiles.FILE_SWA));
                 }
 
                 parentAccessionsToRun = new HashSet<>();
@@ -392,7 +389,7 @@ public class BasicDecider extends Plugin implements DeciderInterface {
 
                 // for each grouping (e.g. sample), iterate through the files
                 List<ReturnValue> files = entry.getValue();
-                LOGGER.info("key:" + entry.getKey() + " consists of " + files.size() + " files");
+                LOGGER.debug("key:" + entry.getKey() + " consists of " + files.size() + " files");
 
                 for (ReturnValue file : files) {
                     String wfAcc = file.getAttribute(Header.WORKFLOW_SWA.getTitle());
@@ -457,15 +454,19 @@ public class BasicDecider extends Plugin implements DeciderInterface {
                                 continue;
                             }
 
+                            List<String> inputFileReport = new ArrayList<>();
+                            inputFileReport.add("Input file records:");
                             for (String line : studyReporterOutput) {
-                                LOGGER.debug(line);
+                                inputFileReport.add(line);
                             }
-                            LOGGER.info("NOT RUNNING (but would have ran). dryRunMode=" + isDryRunMode + " or !rerun=" + !rerun);
+                            LOGGER.info(inputFileReport.stream().collect(Collectors.joining("\n\n")));
+
+                            LOGGER.debug("NOT RUNNING (but would have ran). dryRunMode=" + isDryRunMode + " or !rerun=" + !rerun);
                             reportLaunch();
-                            
+
                             //keep track of workflow runs to be scheduled
                             workflowRuns.addAll(iniFiles);
-                            
+
                             // SEQWARE-1642 - output to debug only whether a decider would launch
                             ret = do_summary();
                             launched++;
