@@ -16,6 +16,13 @@
  */
 package ca.on.oicr.pde.deciders;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import io.seqware.common.model.ProcessingStatus;
+import io.seqware.common.model.WorkflowRunStatus;
+import io.seqware.pipeline.plugins.WorkflowScheduler;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -42,22 +49,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import joptsimple.OptionSpec;
-import org.apache.commons.lang3.StringUtils;
-import org.openide.util.lookup.ServiceProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
-import io.seqware.common.model.ProcessingStatus;
-import io.seqware.common.model.WorkflowRunStatus;
-import io.seqware.pipeline.plugins.WorkflowScheduler;
 import joptsimple.NonOptionArgumentSpec;
+import joptsimple.OptionSpec;
 import joptsimple.OptionSpecBuilder;
 import net.sourceforge.seqware.common.hibernate.FindAllTheFiles;
 import net.sourceforge.seqware.common.hibernate.FindAllTheFiles.Header;
@@ -75,6 +68,10 @@ import net.sourceforge.seqware.pipeline.plugin.PluginInterface;
 import net.sourceforge.seqware.pipeline.plugins.fileprovenance.ProvenanceUtility;
 import net.sourceforge.seqware.pipeline.runner.PluginRunner;
 import net.sourceforge.seqware.pipeline.tools.SetOperations;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
@@ -82,7 +79,7 @@ import net.sourceforge.seqware.pipeline.tools.SetOperations;
  */
 @ServiceProvider(service = PluginInterface.class)
 public class BasicDecider extends Plugin implements DeciderInterface {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BasicDecider.class);
+    private static final Logger LOGGER = LogManager.getLogger(BasicDecider.class);
 
     private List<Header> header = Lists.newArrayList(Header.FILE_SWA);
     private Set<String> parentWorkflowAccessions = new TreeSet<>();
@@ -110,6 +107,7 @@ public class BasicDecider extends Plugin implements DeciderInterface {
     protected final OptionSpecBuilder ignorePreviousRunsSpec;
     protected final OptionSpecBuilder forceRunAllSpec;
     protected final OptionSpec<String> workflowRunAttributeTagFiltersOpt;
+    protected final OptionSpec<Boolean> dryRunOpt;
 
     private boolean isValidWorkflowRun;
 
@@ -138,7 +136,9 @@ public class BasicDecider extends Plugin implements DeciderInterface {
                 .withRequiredArg();
         this.forceRunAllSpec = parser.acceptsAll(Arrays.asList("force-run-all"),
                 "Forces the decider to run all matches regardless of whether they've been run before or not");
-        parser.acceptsAll(Arrays.asList("dry-run", "test"), "Dry-run/test mode. Prints the INI files to standard out and does not submit the workflow.");
+        dryRunOpt = parser.acceptsAll(Arrays.asList("dry-run", "test"),
+                "Dry-run/test mode. Prints the INI files to standard out and does not submit the workflow.")
+                .withOptionalArg().ofType(Boolean.class).defaultsTo(false);
         parser.acceptsAll(Arrays.asList("no-meta-db", "no-metadata"), "Optional: a flag that prevents metadata writeback (which is done "
                 + "by default) by the Decider and that is subsequently "
                 + "passed to the called workflow which can use it to determine if "
@@ -278,7 +278,7 @@ public class BasicDecider extends Plugin implements DeciderInterface {
         }
         ignorePreviousRuns = options.has(this.ignorePreviousRunsSpec) || options.has(this.forceRunAllSpec);
 
-        if (options.has("dry-run") || options.has("test") || options.has("no-metadata") || options.has("no-meta-db")) {
+        if (getBooleanFlagOrArgValue(dryRunOpt) || options.has("no-metadata") || options.has("no-meta-db")) {
             // dry run mode turns off all of the submission functions and just prints to debug
             isDryRunMode = true;
             metadataWriteback = false;
@@ -376,9 +376,9 @@ public class BasicDecider extends Plugin implements DeciderInterface {
             Collections.sort(entryList, new ReturnValueProcessingTimeComparator());
 
             for (Entry<String, List<ReturnValue>> entry : entryList) {
-                LOGGER.info("Considering key:" + entry.getKey());
+                LOGGER.debug("Considering key:" + entry.getKey());
                 for (ReturnValue r : entry.getValue()) {
-                    LOGGER.info("Group contains: " + r.getAttribute(FindAllTheFiles.FILE_SWA));
+                    LOGGER.debug("Group contains: " + r.getAttribute(FindAllTheFiles.FILE_SWA));
                 }
 
                 parentAccessionsToRun = new HashSet<>();
@@ -389,7 +389,7 @@ public class BasicDecider extends Plugin implements DeciderInterface {
 
                 // for each grouping (e.g. sample), iterate through the files
                 List<ReturnValue> files = entry.getValue();
-                LOGGER.info("key:" + entry.getKey() + " consists of " + files.size() + " files");
+                LOGGER.debug("key:" + entry.getKey() + " consists of " + files.size() + " files");
 
                 for (ReturnValue file : files) {
                     String wfAcc = file.getAttribute(Header.WORKFLOW_SWA.getTitle());
@@ -454,15 +454,13 @@ public class BasicDecider extends Plugin implements DeciderInterface {
                                 continue;
                             }
 
-                            for (String line : studyReporterOutput) {
-                                LOGGER.debug(line);
-                            }
+                            LOGGER.info(studyReporterOutput.stream().collect(Collectors.joining("\n\n", "Input file records:\n", "")));
                             LOGGER.debug("NOT RUNNING (but would have ran). dryRunMode=" + isDryRunMode + " or !rerun=" + !rerun);
                             reportLaunch();
-                            
+
                             //keep track of workflow runs to be scheduled
                             workflowRuns.addAll(iniFiles);
-                            
+
                             // SEQWARE-1642 - output to debug only whether a decider would launch
                             ret = do_summary();
                             launched++;
@@ -841,7 +839,7 @@ public class BasicDecider extends Plugin implements DeciderInterface {
     @Override
     public ReturnValue do_summary() {
         String command = do_summary_command();
-        LOGGER.debug(command);
+        LOGGER.info(command);
         return new ReturnValue();
     }
 
@@ -1296,5 +1294,20 @@ public class BasicDecider extends Plugin implements DeciderInterface {
             return latestSWID;
         }
 
+    }
+
+    private boolean getBooleanFlagOrArgValue(OptionSpec<Boolean> param) {
+        if (options.has(param)) {
+            if (options.hasArgument(param)) {
+                //return explicit boolean provided as arg
+                return options.valueOf(param);
+            } else {
+                //only parameter provided - treat as flag
+                return true;
+            }
+        } else {
+            //return default
+            return options.valueOf(param);
+        }
     }
 }
