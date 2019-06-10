@@ -2,7 +2,7 @@
     <workflow name="${project.artifactId}" project.version="${project.version}" seqware_version="${seqware-version}"
             basedir="${workflow_bundle_dir}/Workflow_Bundle_${project.artifactId}/${project.version}">
         <description>${workflow-description}</description>
-        <workflow_class path="${workflow_bundle_dir}/Workflow_Bundle_${project.artifactId}/${project.version}/classes/ca/on/oicr/pde/workflows/${project.artifactId}Workflow.java"/>
+        <workflow_class path="${workflow_bundle_dir}/Workflow_Bundle_${project.artifactId}/${project.version}/classes/ca/on/oicr/pde/workflows/HelloWorldWorkflow.java"/>
         <config path="${workflow_bundle_dir}/Workflow_Bundle_${project.artifactId}/${project.version}/config/defaults.ini"/>
         <requirements compute="single" memory="20M" network="local"  workflow_engine="Oozie" workflow_type="java"/>
     </workflow>

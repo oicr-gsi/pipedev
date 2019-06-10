@@ -1,4 +1,3 @@
-#set( $symbol_dollar = '$' )
 package ${package};
 
 import ca.on.oicr.pde.utilities.workflows.OicrWorkflow;
@@ -20,7 +19,7 @@ import net.sourceforge.seqware.pipeline.workflowV2.model.SqwFile;
  * <a href="http://seqware.github.io/javadoc/stable/apidocs/net/sourceforge/seqware/pipeline/workflowV2/AbstractWorkflowDataModel.html#setupDirectory%28%29">AbstractWorkflowDataModel</a> 
  * for more information.
  */
-public class ${workflow-name-camel-case}Workflow extends OicrWorkflow {
+public class ${classNamePrefix}Workflow extends OicrWorkflow {
 
     private boolean manualOutput=false;
     private String catPath, echoPath;

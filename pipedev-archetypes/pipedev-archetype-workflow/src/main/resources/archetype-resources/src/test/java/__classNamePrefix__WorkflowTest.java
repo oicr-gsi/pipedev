@@ -1,4 +1,3 @@
-#set( $symbol_dollar = '$' )
 package ${package};
 
 import java.io.File;
@@ -10,17 +9,17 @@ import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-public class ${workflow-name-camel-case}WorkflowTest {
+public class ${classNamePrefix}WorkflowTest {
 
-    public ${workflow-name-camel-case}WorkflowTest() {
+    public ${classNamePrefix}WorkflowTest() {
 
     }
 
-    private ${workflow-name-camel-case}Workflow getWorkflow() throws IOException {
+    private ${classNamePrefix}Workflow getWorkflow() throws IOException {
         File defaultIniFile = new File(System.getProperty("bundleDirectory") + "/config/defaults.ini");
         String defaultIniFileContents = FileUtils.readFileToString(defaultIniFile);
         
-        ${workflow-name-camel-case}Workflow wf = new ${workflow-name-camel-case}Workflow();
+        ${classNamePrefix}Workflow wf = new ${classNamePrefix}Workflow();
         wf.setConfigs(MapTools.iniString2Map(defaultIniFileContents));
         
         return wf;
@@ -32,7 +31,7 @@ public class ${workflow-name-camel-case}WorkflowTest {
         Map<String, String> config = new HashMap<String, String>();
         config.put("greeting", "new greeting");
 
-        ${workflow-name-camel-case}Workflow wf = getWorkflow();
+        ${classNamePrefix}Workflow wf = getWorkflow();
         wf.getConfigs().putAll(config);
         wf.setupDirectory();
 

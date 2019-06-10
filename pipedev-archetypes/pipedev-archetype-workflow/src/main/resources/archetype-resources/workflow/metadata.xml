@@ -1,10 +1,9 @@
-#set( $symbol_dollar = '$' )
-<bundle project.version="${symbol_dollar}{project.version}">
-    <workflow name="${symbol_dollar}{project.artifactId}" project.version="${symbol_dollar}{project.version}" seqware_version="${symbol_dollar}{seqware-version}"
-            basedir="${symbol_dollar}{workflow_bundle_dir}/Workflow_Bundle_${symbol_dollar}{project.artifactId}/${symbol_dollar}{project.version}">
+<bundle project.version="${project.version}">
+    <workflow name="${project.artifactId}" project.version="${project.version}" seqware_version="${seqware-version}"
+            basedir="${workflow_bundle_dir}/Workflow_Bundle_${project.artifactId}/${project.version}">
         <description>${workflow-description}</description>
-        <workflow_class path="${symbol_dollar}{workflow_bundle_dir}/Workflow_Bundle_${symbol_dollar}{project.artifactId}/${symbol_dollar}{project.version}/classes/${packageInPathFormat}/${symbol_dollar}{project.artifactId}Workflow.java"/>
-        <config path="${symbol_dollar}{workflow_bundle_dir}/Workflow_Bundle_${symbol_dollar}{project.artifactId}/${symbol_dollar}{project.version}/config/defaults.ini"/>
+        <workflow_class path="${workflow_bundle_dir}/Workflow_Bundle_${project.artifactId}/${project.version}/classes/${packageInPathFormat}/${classNamePrefix}Workflow.java"/>
+        <config path="${workflow_bundle_dir}/Workflow_Bundle_${project.artifactId}/${project.version}/config/defaults.ini"/>
         <requirements compute="single" memory="20M" network="local"  workflow_engine="Oozie" workflow_type="java"/>
     </workflow>
 </bundle>

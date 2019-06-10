@@ -12,24 +12,14 @@
         <requiredProperty key="package">
             <defaultValue>${groupId}</defaultValue>
         </requiredProperty>
-        <requiredProperty key="workflow-name-lower-case"/>
-        <requiredProperty key="artifactId">
-            <defaultValue>workflow-${workflow-name-lower-case}</defaultValue>
-        </requiredProperty>
-        <requiredProperty key="workflow-name-camel-case"/>
-        <requiredProperty key="realArtifactId">
-            <defaultValue>${workflow-name-camel-case}</defaultValue>
+        <requiredProperty key="artifactId"/>
+        <requiredProperty key="classNamePrefix">
+            <defaultValue>${artifactId.replaceAll("^a|-a", "A").replaceAll("^b|-b", "B").replaceAll("^c|-c", "C").replaceAll("^d|-d", "D").replaceAll("^e|-e", "E").replaceAll("^f|-f", "F").replaceAll("^g|-g", "G").replaceAll("^h|-h", "H").replaceAll("^i|-i", "I").replaceAll("^j|-j", "J").replaceAll("^k|-k", "K").replaceAll("^l|-l", "L").replaceAll("^m|-m", "M").replaceAll("^n|-n", "N").replaceAll("^o|-o", "O").replaceAll("^p|-p", "P").replaceAll("^q|-q", "Q").replaceAll("^r|-r", "R").replaceAll("^s|-s", "S").replaceAll("^t|-t", "T").replaceAll("^u|-u", "U").replaceAll("^v|-v", "V").replaceAll("^w|-w", "W").replaceAll("^x|-x", "X").replaceAll("^y|-y", "Y").replaceAll("^z|-z", "Z")}</defaultValue>
         </requiredProperty>
     </requiredProperties>
     <fileSets>
         <fileSet filtered="false" encoding="UTF-8">
             <directory>workflow/bin</directory>
-            <includes>
-                <include>**/*</include>
-            </includes>
-        </fileSet>
-        <fileSet filtered="false" encoding="UTF-8">
-            <directory>links</directory>
             <includes>
                 <include>**/*</include>
             </includes>
@@ -62,6 +52,12 @@
         </fileSet>
         <fileSet filtered="true" packaged="true" encoding="UTF-8">
             <directory>src/main/java</directory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+        </fileSet>
+        <fileSet filtered="true" packaged="false" encoding="UTF-8">
+            <directory>src/main/filters</directory>
             <includes>
                 <include>**/*</include>
             </includes>
