@@ -60,4 +60,16 @@ public class SeqwareOutputParser {
 
     }
 
+    public static String getFirstMatch(String input, String pattern) throws IOException {
+        Pattern p = Pattern.compile(pattern, Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+        Matcher m = p.matcher(input);
+
+        String result = "";
+        if (m.find()) {
+            result = m.group(1).trim();
+        }
+
+        return result;
+    }
+
 }
