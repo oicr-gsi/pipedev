@@ -21,6 +21,8 @@
         <fileSet filtered="false" encoding="UTF-8">
             <directory>workflow/bin</directory>
             <includes>
+                <!--required for git + empty directories-->
+                <include>.directory</include>
                 <include>**/*</include>
             </includes>
         </fileSet>
