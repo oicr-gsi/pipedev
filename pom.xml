@@ -17,6 +17,7 @@
         <module>pipedev-workflow-utils</module>
         <module>pipedev-decider-utils</module>
         <module>pipedev-file-provenance-client</module>
+        <module>pipedev-archetypes</module>
     </modules>
 
     <properties>
