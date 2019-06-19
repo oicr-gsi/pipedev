@@ -18,6 +18,7 @@ public class WorkflowRun {
     private FileAttributes[] files;
     private List<Integer> iusSwidsToLinkWorkflowRunTo = new ArrayList<>();
     private Map<String,String> inputIusToOutputIus = new HashMap<>();
+    private String name;
 
     /**
      * Create a local WorkflowRun object to locally store ini file properties and workflow run input files.
@@ -218,6 +219,24 @@ public class WorkflowRun {
      */
     public void setInputIusToOutputIus(Map<String, String> inputIusToOutputIus) {
         this.inputIusToOutputIus.putAll(inputIusToOutputIus);
+    }
+
+    /**
+     * Get the name to describe this workflow run
+     *
+     * @return workflow run name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Set the name to describe this workflow run
+     *
+     * @param name name to describe the workflow run
+     */
+    public void setName(String name) {
+        this.name = name;
     }
 
 }
