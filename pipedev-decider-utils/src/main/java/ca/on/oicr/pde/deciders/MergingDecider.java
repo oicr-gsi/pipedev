@@ -195,12 +195,30 @@ public abstract class MergingDecider extends OicrDecider {
      * Validate and modify workflow run parameters/ini.
      * <p>
      * The ReturnValue is used to signal if the workflow run is valid or not.
+     * <p>
+     * NOTE:
+     * <p>
+     * This method is called BEFORE getSwidsToLinkWorkflowRunTo(). If modification of ini properties that rely or modify swids to link
+     * workflow run needs to be done, implement the customizeWorkflowRunAfterCreatingSwidsToLinkWorkflowRunTo().
      *
      * @param run the workflow run object that will be used to create a workflow run
      *
      * @return a ReturnValue indicating SUCCESS if the workflow run is valid or anything other than SUCCESS if invalid
      */
     protected abstract ReturnValue customizeWorkflowRun(WorkflowRun run);
+
+    /**
+     * Customize the workflow run parameter/ini after creating swids to link the workflow run to.
+     * <p>
+     * If an ini property depends on swids to link the workflow run to, this method needs to be implemented.
+     *
+     * @param run the workflow run object with swids to link the workflow run to
+     *
+     * @return a ReturnValue indicating SUCCESS if the workflow run customization was valid or anything other than SUCCESS if not
+     */
+    protected ReturnValue customizeWorkflowRunAfterCreatingSwidsToLinkWorkflowRunTo(WorkflowRun run) {
+        return new ReturnValue();
+    }
 
     @Override
     public final ReturnValue customizeRun(WorkflowRun run) {
@@ -219,12 +237,15 @@ public abstract class MergingDecider extends OicrDecider {
         //modifies currentWorkflowRun + calls BasicDecider modifyIniFile
         super.modifyIniFile(commaSeparatedFilePaths, commaSeparatedParentAccessions);
 
+        //use the group name as the workflow run's descriptive name
+        Set<String> t = new HashSet<>();
+        for (FileAttributes fa : currentWorkflowRun.getFiles()) {
+            t.add(fileSwaToGroupName.get(fa.getOtherAttribute(FindAllTheFiles.Header.FILE_SWA.getTitle())));
+        }
+        currentWorkflowRun.setName(Iterables.getOnlyElement(t));
+
         if (options.has("verbose")) {
-            Set<String> t = new HashSet<>();
-            for (FileAttributes fa : currentWorkflowRun.getFiles()) {
-                t.add(fileSwaToGroupName.get(fa.getOtherAttribute(FindAllTheFiles.Header.FILE_SWA.getTitle())));
-            }
-            log.debug("Workflow run for group = " + Iterables.getOnlyElement(t));
+            log.debug("Workflow run for group = " + currentWorkflowRun.getName());
         }
 
         //call to subclass to customize the workflow run
@@ -235,6 +256,15 @@ public abstract class MergingDecider extends OicrDecider {
 
     @Override
     protected final Map<String, String> modifyIniFile(String commaSeparatedFilePaths, String commaSeparatedParentAccessions) {
+
+        //call to subclass to customize the workflow run
+        ReturnValue r = customizeWorkflowRunAfterCreatingSwidsToLinkWorkflowRunTo(currentWorkflowRun);
+
+        if (r.getExitStatus() != ReturnValue.SUCCESS) {
+            log.error("Failed to generate a valid workflow run for = " + currentWorkflowRun.getName());
+            abortSchedulingOfCurrentWorkflowRun();
+        }
+
         return currentWorkflowRun.getIniFile();
     }
 
