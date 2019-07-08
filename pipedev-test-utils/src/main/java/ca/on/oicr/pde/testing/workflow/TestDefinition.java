@@ -3,13 +3,19 @@ package ca.on.oicr.pde.testing.workflow;
 import static ca.on.oicr.pde.utilities.Helpers.isFileAccessible;
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class TestDefinition {
@@ -208,8 +214,22 @@ public class TestDefinition {
         }
 
         @JsonProperty("parameters")
-        public void setParameters(Map<String, String> parameters) {
-            this.parameters.putAll(parameters);
+        public void setParameters(ObjectNode parameters) {
+            Map<String, String> testParameters = new HashMap<>();
+            Iterator<Entry<String, JsonNode>> iter = parameters.fields();
+            while (iter.hasNext()) {
+                Entry<String, JsonNode> e = iter.next();
+                String key = e.getKey();
+                JsonNode value = e.getValue();
+                if (value.isValueNode()) {
+                    testParameters.put(key, value.asText());
+                } else if (value.isObject()) {
+                    testParameters.put(key, StringEscapeUtils.escapeJson(value.toString()));
+                } else {
+                    throw new UnsupportedOperationException("The parameter " + key + " value type of " + value.getNodeType() + " is unsupported.");
+                }
+            }
+            this.parameters.putAll(testParameters);
         }
 
         public Map<String, String> getEnvironmentVariables() {

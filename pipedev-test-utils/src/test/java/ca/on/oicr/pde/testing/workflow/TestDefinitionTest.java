@@ -3,10 +3,13 @@ package ca.on.oicr.pde.testing.workflow;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 import static org.testng.Assert.*;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+import org.testng.reporters.Files;
 
 public class TestDefinitionTest {
 
@@ -14,56 +17,14 @@ public class TestDefinitionTest {
 
     @BeforeTest
     public void setup() throws IOException {
-
-        String jsonDoc = "{\n"
-                + "    \"defaults\": {\n"
-                + "        \"description\": \"Workflow test\",\n"
-                + "        \"metrics_calculate\": \"calculate.sh\",\n"
-                + "        \"metrics_compare\": \"compare.sh\",\n"
-                + "        \"input_config_dir\": \"\",\n"
-                + "        \"output_metrics_dir\":\"/some/dir\",\n"
-                + "        \"parameters\": {}\n"
-                + "    },\n"
-                + "    \"tests\": [\n"
-                + "        {\n"
-                + "            \"input_config\": \"workflow_test_01.ini\"\n"
-                + "        },\n"
-                + "        {\n"
-                + "            \"input_config\": \"workflow_test_02.ini\"\n"
-                + "        },\n"
-                + "        {\n"
-                + "            \"input_config\": \"workflow_test_03.ini\"\n"
-                + "        },\n"
-                + "        {\n"
-                + "            \"input_config\": \"workflow_test_04.ini\"\n"
-                + "        },\n"
-                + "        {\n"
-                + "            \"input_config\": \"workflow_test_05.ini\"\n"
-                + "        },\n"
-                + "        {\n"
-                + "            \"input_config\": \"workflow_test_06.ini\"\n"
-                + "        },\n"
-                + "        {\n"
-                + "            \"input_config\": \"workflow_test_07.ini\"\n"
-                + "        },\n"
-                + "        {\n"
-                + "            \"input_config\": \"workflow_test_08.ini\"\n"
-                + "        },\n"
-                + "        {\n"
-                + "            \"id\": \"Test1\",\n"
-                + "            \"parameters\":{\"a\":\"1\", \"b\":\"2\"}"
-                + "        }\n"
-                + "    ]\n"
-                + "}";
-
+        String jsonDoc = Files.readFile(new File(this.getClass().getResource("/definition/workflow_test_definition.json").getFile()));
         td = TestDefinition.buildFromJson(jsonDoc);
-
     }
 
     @Test
     public void countTestInstances() throws IOException {
         assertNotNull(td);
-        assertEquals(9, td.getTests().size());
+        assertEquals(10, td.getTests().size());
     }
 
     @Test
@@ -71,6 +32,17 @@ public class TestDefinitionTest {
         ObjectMapper m = new ObjectMapper();
         m.enable(SerializationFeature.INDENT_OUTPUT);
         System.out.println(m.writeValueAsString(td));
+    }
+
+    @Test
+    public void jsonIniParameterTest() throws IOException {
+        assertNotNull(td);
+        Optional<TestDefinition.Test> t = td.getTests().stream().filter(test -> "Test2".equals(test.getId())).findFirst();
+        if (t.isPresent()) {
+            assertEquals(t.get().getParameters().get("json_string_ini_param"), "{\\\"a\\\":\\\"1\\\",\\\"b\\\":\\\"2\\\"}");
+        } else {
+            fail("Unable to find Test2");
+        }
     }
 
 }
