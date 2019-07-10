@@ -1,0 +1,53 @@
+{
+    "defaults": {
+        "description": "Workflow test",
+        "metrics_calculate": "calculate.sh",
+        "metrics_compare": "compare.sh",
+        "input_config_dir": "",
+        "output_metrics_dir": "/some/dir",
+        "parameters": {}
+    },
+    "tests": [
+        {
+            "input_config": "workflow_test_01.ini"
+        },
+        {
+            "input_config": "workflow_test_02.ini"
+        },
+        {
+            "input_config": "workflow_test_03.ini"
+        },
+        {
+            "input_config": "workflow_test_04.ini"
+        },
+        {
+            "input_config": "workflow_test_05.ini"
+        },
+        {
+            "input_config": "workflow_test_06.ini"
+        },
+        {
+            "input_config": "workflow_test_07.ini"
+        },
+        {
+            "input_config": "workflow_test_08.ini"
+        },
+        {
+            "id": "Test1",
+            "parameters": {
+                "a": "1",
+                "b": "2"
+            }
+        },
+        {
+            "id": "Test2",
+            "parameters": {
+                "json_string_ini_param": {
+                    "a": "1",
+                    "b": "2"
+                },
+                "string_ini_param": "string value"
+            }
+        }
+    ]
+}
