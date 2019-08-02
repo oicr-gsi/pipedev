@@ -12,6 +12,7 @@
     <modules>
         <module>pipedev-workflow-parent</module>
         <module>pipedev-decider-parent</module>
+        <module>pipedev-niassa-cromwell-workflow-parent</module>
     </modules>
  
     <properties>
