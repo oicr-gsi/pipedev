@@ -4,6 +4,7 @@ set -o pipefail
 
 JAVA=""
 SEQWARE_JAR=""
+JQ=""
 WORKFLOW_RUN_SWID=""
 PROCESSING_SWID=""
 CROMWELL_HOST=""
@@ -15,6 +16,7 @@ while (( "$#" )); do
     case "${1}" in
 		--java-path) JAVA="${2}"; shift 2 ;;
 		--seqware-jar-path) SEQWARE_JAR="${2}"; shift 2 ;;
+		--jq-path) JQ="${2}"; shift 2 ;;
 		--workflow-run-swid) WORKFLOW_RUN_SWID="${2}"; shift 2 ;;
 		--processing-swid) PROCESSING_SWID="${2}"; shift 2 ;;
 		--cromwell-host) CROMWELL_HOST="${2}"; shift 2 ;;
@@ -27,6 +29,7 @@ done
 
 [[ -z "${JAVA}" ]] && echo "--java-path is not set" >&2 && exit 1
 [[ -z "${SEQWARE_JAR}" ]] && echo "--seqware-jar-path is not set" >&2 && exit 1
+[[ -z "${JQ}" ]] && echo "--jq-path is not set" >&2 && exit 1
 [[ -z "${WORKFLOW_RUN_SWID}" ]] && echo "--workflow-run-swid is not set" >&2 && exit 1
 [[ -z "${PROCESSING_SWID}" ]] && echo "--processing-swid is not set" >&2 && exit 1
 [[ -z "${CROMWELL_HOST}" ]] && echo "--cromwell-host is not set" >&2 && exit 1
@@ -40,19 +43,19 @@ if [[ -z "${CROMWELL_WORKFLOW_ID}" ]]; then
 fi
 
 STATUS_TEXT=$(curl -s -X GET "${CROMWELL_HOST}/api/workflows/v1/${CROMWELL_WORKFLOW_ID}/status")
-if [[ $(jq --raw-output --exit-status '.status' <<< "${STATUS_TEXT}") != "Succeeded" ]]; then
+if [[ $("${JQ}" --raw-output --exit-status '.status' <<< "${STATUS_TEXT}") != "Succeeded" ]]; then
   echo "Status response from cromwell:" >&2
   echo "${STATUS_TEXT}" >&2
 fi
 
 OUTPUTS_TEXT=$(curl -s -X GET "${CROMWELL_HOST}/api/workflows/v1/${CROMWELL_WORKFLOW_ID}/outputs")
-if ! jq --raw-output --exit-status '.outputs' <<< "${OUTPUTS_TEXT}" >/dev/null ; then
+if ! "${JQ}" --raw-output --exit-status '.outputs' <<< "${OUTPUTS_TEXT}" >/dev/null ; then
   echo "Outputs response from cromwell:" >&2
   echo "${OUTPUTS_TEXT}" >&2
   exit 1
 else
   # store outputs in an array: output file key, output file path
-  OUTPUTS=( $(jq --raw-output --exit-status '.outputs | to_entries[] | "\(.key),\(.value)"' <<< "${OUTPUTS_TEXT}") )
+  OUTPUTS=( $("${JQ}" --raw-output --exit-status '.outputs | to_entries[] | "\(.key),\(.value)"' <<< "${OUTPUTS_TEXT}") )
   echo "Detected ${#OUTPUTS[@]} output files"
 fi
 

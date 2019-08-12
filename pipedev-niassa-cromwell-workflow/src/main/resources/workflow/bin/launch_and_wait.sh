@@ -3,6 +3,7 @@ set -eu
 set -o pipefail
 
 JAVA=""
+JQ=""
 CROMWELL_JAR=""
 CROMWELL_HOST=""
 WORKFLOW=""
@@ -15,6 +16,7 @@ while (( "$#" )); do
     [[ -z "${2+not_set}" ]] && echo "Missing value for ${1}" && exit 1
     case "${1}" in
 		--java-path) JAVA="${2}"; shift 2 ;;
+		--jq-path) JQ="${2}"; shift 2 ;;
 		--cromwell-jar-path) CROMWELL_JAR="${2}"; shift 2 ;;
 		--cromwell-host) CROMWELL_HOST="${2}"; shift 2 ;;
 		--workflow) WORKFLOW="${2}"; shift 2 ;;
@@ -28,6 +30,7 @@ while (( "$#" )); do
 done
 
 [[ -z "${JAVA}" ]] && echo "--java-path is not set" >&2 && exit 1
+[[ -z "${JQ}" ]] && echo "--jq-path is not set" >&2 && exit 1
 [[ -z "${CROMWELL_JAR}" ]] && echo "--cromwell-jar-path is not set" >&2 && exit 1
 [[ -z "${CROMWELL_HOST}" ]] && echo "--cromwell-host is not set" >&2 && exit 1
 [[ -z "${WORKFLOW}" ]] && echo "--workflow is not set" >&2 && exit 1
@@ -60,7 +63,7 @@ STATUS="Pending"
 while [[ "${STATUS}" == "Pending" || "${STATUS}" == "Submitted" || "${STATUS}" == "Running" ]]; do
   echo "Workflow id = ${WORKFLOW_ID} status = ${STATUS}"
   sleep 30
-  STATUS=$(curl -s -X GET "${CROMWELL_HOST}/api/workflows/v1/${WORKFLOW_ID}/status" | jq --raw-output --exit-status '.status')
+  STATUS=$(curl -s -X GET "${CROMWELL_HOST}/api/workflows/v1/${WORKFLOW_ID}/status" | "${JQ}" --raw-output --exit-status '.status')
 done
 
 echo "Workflow id = ${WORKFLOW_ID} status = ${STATUS}"

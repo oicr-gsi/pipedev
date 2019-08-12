@@ -2,6 +2,7 @@
 set -eu
 set -o pipefail
 
+JQ=""
 CROMWELL_HOST=""
 CROMWELL_WORKFLOW_ID_PATH=""
 OUTPUT_DIR=""
@@ -10,6 +11,7 @@ OUTPUT_FILE_DEFINITION=""
 while (( "$#" )); do
     [[ -z "${2+not_set}" ]] && echo "Missing value for ${1}" && exit 1
     case "${1}" in
+		--jq-path) JQ="${2}"; shift 2 ;;
 		--cromwell-host) CROMWELL_HOST="${2}"; shift 2 ;;
 		--cromwell-workflow-id-path) CROMWELL_WORKFLOW_ID_PATH="${2}"; shift 2 ;;
 		--output-dir) OUTPUT_DIR="${2}"; shift 2 ;;
@@ -19,6 +21,7 @@ while (( "$#" )); do
     esac
 done
 
+[[ -z "${JQ}" ]] && echo "--jq-path is not set" >&2 && exit 1
 [[ -z "${CROMWELL_HOST}" ]] && echo "--cromwell-host is not set" >&2 && exit 1
 [[ -z "${CROMWELL_WORKFLOW_ID_PATH}" ]] && echo "--cromwell-workflow-id-path is not set" >&2 && exit 1
 [[ -z "${OUTPUT_DIR}" ]] && echo "--output-dir is not set" >&2 && exit 1
@@ -31,17 +34,17 @@ if [[ -z "${WORKFLOW_ID}" ]]; then
 fi
 
 STATUS_TEXT=$(curl -s -X GET "${CROMWELL_HOST}/api/workflows/v1/${WORKFLOW_ID}/status")
-if [[ $(jq --raw-output --exit-status '.status' <<< "${STATUS_TEXT}") != "Succeeded" ]]; then
+if [[ $("${JQ}" --raw-output --exit-status '.status' <<< "${STATUS_TEXT}") != "Succeeded" ]]; then
   echo "Status response from cromwell:" >&2
   echo "${STATUS_TEXT}" >&2
 fi
 
 OUTPUTS_TEXT=$(curl -s -X GET "${CROMWELL_HOST}/api/workflows/v1/${WORKFLOW_ID}/outputs")
-if ! jq --raw-output --exit-status '.outputs' <<< "${OUTPUTS_TEXT}" >/dev/null ; then
+if ! "${JQ}" --raw-output --exit-status '.outputs' <<< "${OUTPUTS_TEXT}" >/dev/null ; then
   echo "Output response from cromwell:" >&2
   echo "${OUTPUTS_TEXT}" >&2
 else
-  OUTPUT=$(jq --raw-output --exit-status '.outputs' <<< "${OUTPUTS_TEXT}")
+  OUTPUT=$("${JQ}" --raw-output --exit-status '.outputs' <<< "${OUTPUTS_TEXT}")
 fi
 
 echo "${OUTPUT}"

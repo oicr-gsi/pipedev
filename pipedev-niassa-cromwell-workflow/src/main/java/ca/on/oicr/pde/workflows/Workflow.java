@@ -19,6 +19,7 @@ public class Workflow extends OicrWorkflow {
 
     private String javaPath;
     private String seqwareDistributionJarPath;
+    private String jqPath;
     private String launchAndWaitScript;
     private String copyOutputScript;
     private String provisionOutScript;
@@ -37,6 +38,7 @@ public class Workflow extends OicrWorkflow {
     private void init() {
         javaPath = getRequiredProperty("java_path");
         seqwareDistributionJarPath = getRequiredProperty("seqware_distribution_jar_path");
+        jqPath = getRequiredProperty("jq_path");
         launchAndWaitScript = getRequiredProperty("launch_and_wait_script");
         copyOutputScript = getRequiredProperty("copy_output_script");
         provisionOutScript = getRequiredProperty("provision_out_script");
@@ -116,6 +118,8 @@ public class Workflow extends OicrWorkflow {
         runWdlWorkflowCommand.addArgument(launchAndWaitScript);
         runWdlWorkflowCommand.addArgument("--java-path");
         runWdlWorkflowCommand.addArgument(javaPath);
+        runWdlWorkflowCommand.addArgument("--jq-path");
+        runWdlWorkflowCommand.addArgument(jqPath);
         runWdlWorkflowCommand.addArgument("--cromwell-jar-path");
         runWdlWorkflowCommand.addArgument(cromwellJarPath);
         runWdlWorkflowCommand.addArgument("--cromwell-host");
@@ -148,6 +152,8 @@ public class Workflow extends OicrWorkflow {
 
             Command symlinkOutputCommand = symlinkOutput.getCommand();
             symlinkOutputCommand.addArgument(copyOutputScript);
+            symlinkOutputCommand.addArgument("--jq-path");
+            symlinkOutputCommand.addArgument(jqPath);
             symlinkOutputCommand.addArgument("--cromwell-host");
             symlinkOutputCommand.addArgument(cromwellHost);
             symlinkOutputCommand.addArgument("--cromwell-workflow-id-path");
@@ -184,6 +190,8 @@ public class Workflow extends OicrWorkflow {
             provisionOutCommand.addArgument(javaPath);
             provisionOutCommand.addArgument("--seqware-jar-path");
             provisionOutCommand.addArgument(seqwareDistributionJarPath);
+            provisionOutCommand.addArgument("--jq-path");
+            provisionOutCommand.addArgument(jqPath);
             provisionOutCommand.addArgument("--workflow-run-swid");
             provisionOutCommand.addArgument("${WORKFLOW_RUN_ACCESSION}"); //exported at runtime
             provisionOutCommand.addArgument("--processing-swid");
