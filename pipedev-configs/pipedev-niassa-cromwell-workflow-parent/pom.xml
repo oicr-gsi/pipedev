@@ -32,9 +32,6 @@
             </activation>
 
             <properties>
-
-                <seqware-version>2.0.5</seqware-version>
-
                 <maven.compiler.source>1.8</maven.compiler.source>
                 <maven.compiler.target>1.8</maven.compiler.target>
 
@@ -43,7 +40,6 @@
                 <display-name>workflow_${workflow-name}</display-name>
 
                 <skipITs>true</skipITs>
-                <skipBundleTest>true</skipBundleTest>
                 <skipWorkflowRunITs>false</skipWorkflowRunITs>
 
                 <!--legacy-property-->
@@ -577,22 +573,6 @@
                                 <configuration>
                                     <executable>chmod</executable>
                                     <commandlineArgs>-R 755 ${bundleDirectory}/bin</commandlineArgs>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>test_bundle</id>
-                                <phase>integration-test</phase>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-                                <configuration>
-                                    <skip>${skipBundleTest}</skip>
-                                    <executable>${bundleDirectory}/bin/jre${jre-version}/bin/java</executable>
-                                    <commandlineArgs>-jar
-                                        ${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-name}/${project.version}/lib/seqware-distribution-${seqware-version}-full.jar
-                                        --plugin net.sourceforge.seqware.pipeline.plugins.BundleManager -- -t -b
-                                        ${project.build.directory}/Workflow_Bundle_${project.artifactId}_${project.version}_SeqWare_${seqware-version}/
-                                    </commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
