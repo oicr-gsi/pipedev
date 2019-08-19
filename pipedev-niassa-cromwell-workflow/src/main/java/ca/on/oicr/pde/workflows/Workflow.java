@@ -228,7 +228,7 @@ public class Workflow extends OicrWorkflow {
 
     private List<String> writeStringToFile(String fileContents, String filePath) {
         return Arrays.asList(
-                "cat << END_OF_FILE_CONTENTS" + ">",
+                "cat << 'END_OF_FILE_CONTENTS' >",
                 filePath + "\n" + fileContents + "\nEND_OF_FILE_CONTENTS\n");
     }
 
