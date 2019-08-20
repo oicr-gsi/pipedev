@@ -1,0 +1,9 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="TestSuite" parallel="instances" thread-count="${run-test-threads}">
+    <test name="WorkflowRunTests">
+        <classes>
+            <parameter name="testDefinition" value="${test-definition-file}"/>
+            <class name="ca.on.oicr.pde.testing.WorkflowRunTestFactory"/>
+        </classes>
+    </test>
+</suite>

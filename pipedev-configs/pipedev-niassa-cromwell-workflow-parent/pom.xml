@@ -2,33 +2,35 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
         <groupId>ca.on.oicr.gsi</groupId>
         <artifactId>pipedev</artifactId>
         <version>2.5.4</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
-    
-    <artifactId>pipedev-workflow-parent</artifactId>
+
+    <groupId>ca.on.oicr.gsi</groupId>
+    <artifactId>pipedev-niassa-cromwell-parent</artifactId>
     <packaging>pom</packaging>
-    <url>http://maven.apache.org</url>
+
 
     <profiles>
         <profile>
             <id>install-parent-pom</id>
             <activation>
                 <file>
-                    <missing>src</missing>
+                    <exists>.install_parent_pom</exists>
                 </file>
             </activation>
         </profile>
+
         <profile>
             <id>build-workflow</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
-      
+
             <properties>
                 <maven.compiler.source>1.8</maven.compiler.source>
                 <maven.compiler.target>1.8</maven.compiler.target>
@@ -36,24 +38,37 @@
                 <jre-version>1.8.0_45</jre-version>
 
                 <display-name>workflow_${workflow-name}</display-name>
-        
+
                 <skipITs>true</skipITs>
-                <skipBundleTest>true</skipBundleTest>
                 <skipWorkflowRunITs>false</skipWorkflowRunITs>
 
                 <!--legacy-property-->
                 <workflow-directory-name>${workflow-name}</workflow-directory-name>
-        
+
                 <!-- default testng test suite -->
-                <testSuite>src/test/resources/development.xml</testSuite>
-        
+                <testSuite>${project.build.directory}/test-classes/test-suite.xml</testSuite>
+
                 <!-- properties used by tests -->
                 <schedulingSystem>oozie</schedulingSystem>
-                <seqwareDistribution>${bundleDirectory}/lib/seqware-distribution-${seqware-version}-full.jar</seqwareDistribution>
+                <seqwareDistribution>${bundleDirectory}/lib/seqware-distribution-${seqware-version}-full.jar
+                </seqwareDistribution>
                 <workingDirectory>${user.home}/_testing/</workingDirectory>
-                <bundleDirectory>${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-name}/${project.version}</bundleDirectory>
+                <bundleDirectory>
+                    ${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-name}/${project.version}
+                </bundleDirectory>
+                <run-test-threads>10</run-test-threads>
+
+                <workflow-name>${project.artifactId}</workflow-name>
+                <workflow-description>Niassa workflow to run WDL workflows in Cromwell</workflow-description>
+                <cromwell-host></cromwell-host>
+
+
+                <test-definition-file>${project.build.directory}/test-classes/${test-definition}</test-definition-file>
+                <wdl-url>
+                    file://${workflow_bundle_dir}/Workflow_Bundle_${workflow-name}/${project.version}/lib/${wdl-workflow}
+                </wdl-url>
             </properties>
-    
+
             <dependencies>
                 <dependency>
                     <groupId>com.github.seqware</groupId>
@@ -69,7 +84,7 @@
                     <groupId>ca.on.oicr.gsi</groupId>
                     <artifactId>pipedev-workflow-utils</artifactId>
                 </dependency>
-        
+
                 <!-- test dependencies -->
                 <dependency>
                     <groupId>ca.on.oicr.gsi</groupId>
@@ -81,60 +96,26 @@
                     <artifactId>testng</artifactId>
                     <scope>test</scope>
                 </dependency>
+
+                <dependency>
+                    <groupId>ca.on.oicr.gsi</groupId>
+                    <artifactId>pipedev-niassa-cromwell-workflow</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>ca.on.oicr.gsi</groupId>
+                    <artifactId>pipedev-niassa-cromwell-workflow</artifactId>
+                    <classifier>tests</classifier>
+                    <type>test-jar</type>
+                    <scope>test</scope>
+                </dependency>
+
             </dependencies>
-    
+
             <build>
-
-                <filters>
-                    <filter>src/main/filters/workflow.properties</filter>
-                </filters>
-        
-                <resources>
-                    <resource>
-                        <directory>workflow</directory>
-                        <excludes>
-                            <!-- handled by maven-resources-plugin "copy-resources" step -->
-                            <exclude>**/*</exclude>
-                        </excludes>
-                    </resource>
-                    <resource>
-                        <directory>links</directory>
-                        <excludes>
-                            <!-- handled by maven-junction-plugin "link" goal -->
-                            <exclude>**/*</exclude>
-                        </excludes>
-                    </resource>
-                </resources>
-        
-                <testResources>
-                    <testResource>
-                        <directory>src/test/resources</directory>
-                        <filtering>true</filtering>
-                    </testResource>
-                </testResources>
-
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>properties-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>properties-maven-plugin-execution</id>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>read-project-properties</goal>
-                                </goals>
-                                <configuration>
-                                    <files>
-                                        <file>src/main/filters/workflow.properties</file>
-                                    </files>
-                                </configuration>
-                            </execution>
-                        </executions>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -153,7 +134,7 @@
                                     <outputDirectory>${bundleDirectory}</outputDirectory>
                                     <resources>
                                         <resource>
-                                            <directory>workflow</directory>
+                                            <directory>${project.build.directory}/workflow</directory>
                                             <excludes>
                                                 <exclude>config/*</exclude>
                                                 <exclude>metadata.xml</exclude>
@@ -172,7 +153,7 @@
                                     <outputDirectory>${bundleDirectory}</outputDirectory>
                                     <resources>
                                         <resource>
-                                            <directory>workflow</directory>
+                                            <directory>${project.build.directory}/workflow</directory>
                                             <includes>
                                                 <include>config/*</include>
                                                 <include>metadata.xml</include>
@@ -200,11 +181,89 @@
                                     </resources>
                                 </configuration>
                             </execution>
+                            <execution>
+                                <id>copy-wdl-workflow</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${bundleDirectory}/lib/</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>${project.basedir}</directory>
+                                            <includes>
+                                                <include>${wdl-workflow}</include>
+                                            </includes>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>copy-tests-json</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/test-classes/</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>${project.basedir}</directory>
+                                            <includes>
+                                                <include>${test-definition}</include>
+                                            </includes>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>copy-and-filter-test-resources</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/test-classes/</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>${project.build.directory}/test-resources/</directory>
+                                            <includes>
+                                                <include>test-suite.xml</include>
+                                            </includes>
+                                            <filtering>true</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>copy-and-no-filter-test-resources</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/test-classes/</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>${project.build.directory}/test-resources/</directory>
+                                            <includes>
+                                                <include>**</include>
+                                            </includes>
+                                            <excludes>
+                                                <exclude>test-suite.xml</exclude>
+                                            </excludes>
+                                            <filtering>false</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
                         </executions>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-dependency-plugin</artifactId>
+                        <version>3.1.1</version>
                         <executions>
                             <execution>
                                 <id>copy-seqware-distribution</id>
@@ -241,13 +300,6 @@
                                             <overWrite>true</overWrite>
                                             <outputDirectory>${bundleDirectory}/bin</outputDirectory>
                                         </artifactItem>
-                                        <artifactItem>
-                                            <groupId>net.sourceforge.seqware</groupId>
-                                            <artifactId>seqware-bin-linux-x86-64-perl-5.14.1</artifactId>
-                                            <version>1.0.0</version>
-                                            <overWrite>true</overWrite>
-                                            <outputDirectory>${bundleDirectory}/bin</outputDirectory>
-                                        </artifactItem>
                                     </artifactItems>
                                 </configuration>
                             </execution>
@@ -258,13 +310,73 @@
                                     <goal>unpack-dependencies</goal>
                                 </goals>
                                 <configuration>
+
                                     <outputDirectory>${bundleDirectory}/classes</outputDirectory>
                                     <overWriteReleases>false</overWriteReleases>
                                     <overWriteSnapshots>true</overWriteSnapshots>
                                     <includeScope>compile</includeScope>
-                                    <!--only include runtime and compile scope jar dependencies--> 
+                                    <!--only include runtime and compile scope jar dependencies-->
                                     <includeScope>runtime</includeScope>
                                     <includeTypes>jar</includeTypes>
+                                    <excludeArtifactIds>pipedev-niassa-cromwell-workflow</excludeArtifactIds>
+                                </configuration>
+                            </execution>
+
+
+                            <execution>
+                                <id>unpack-niassa-cromwell-workflow-classes</id>
+                                <phase>process-sources</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>ca.on.oicr.gsi</groupId>
+                                            <artifactId>pipedev-niassa-cromwell-workflow</artifactId>
+                                            <type>jar</type>
+                                            <outputDirectory>${bundleDirectory}/classes</outputDirectory>
+                                            <includes>**/*</includes>
+                                            <excludes>workflow/</excludes>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>unpack-niassa-cromwell-workflow-resources</id>
+                                <phase>process-sources</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>ca.on.oicr.gsi</groupId>
+                                            <artifactId>pipedev-niassa-cromwell-workflow</artifactId>
+                                            <type>jar</type>
+                                            <includes>workflow/</includes>
+                                            <outputDirectory>${project.build.directory}</outputDirectory>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>unpack-niassa-cromwell-workflow-test-resources</id>
+                                <phase>process-sources</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>ca.on.oicr.gsi</groupId>
+                                            <artifactId>pipedev-niassa-cromwell-workflow</artifactId>
+                                            <classifier>tests</classifier>
+                                            <type>test-jar</type>
+                                            <includes>calculate.sh,compare.sh,test-suite.xml</includes>
+                                            <outputDirectory>${project.build.directory}/test-resources/</outputDirectory>
+                                        </artifactItem>
+                                    </artifactItems>
                                 </configuration>
                             </execution>
                             <execution>
@@ -280,20 +392,6 @@
                                     <includeTypes>zip,tar.gz,gz</includeTypes>
                                 </configuration>
                             </execution>
-                            <!--<execution>
-                                <id>copy-provided-jar-dependencies</id>
-                                <phase>process-sources</phase>
-                                <goals>
-                                    <goal>copy-dependencies</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>${bundleDirectory}/lib</outputDirectory>
-                                    <overWriteReleases>false</overWriteReleases>
-                                    <overWriteSnapshots>true</overWriteSnapshots>
-                                    <includeScope>provided</includeScope>
-                                    <includeTypes>jar</includeTypes>
-                                </configuration>
-                            </execution>-->
                         </executions>
                     </plugin>
                     <plugin>
@@ -303,13 +401,32 @@
                             <systemPropertyVariables>
                                 <bundleDirectory>${bundleDirectory}</bundleDirectory>
                                 <bundledBinPath>${bundleDirectory}/bin/</bundledBinPath>
+                                <testDefinitionFile>${test-definition-file}</testDefinitionFile>
                             </systemPropertyVariables>
+                            <dependenciesToScan>
+                                <dependency>ca.on.oicr.gsi:pipedev-niassa-cromwell-workflow</dependency>
+                            </dependenciesToScan>
                         </configuration>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-enforcer-plugin</artifactId>
                         <executions>
+                            <execution>
+                                <id>enforce-required-niassa-cromwell-properties</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireProperty>
+                                            <property>wdl-workflow</property>
+                                            <message>Url to the WDL file has not been provided.</message>
+                                        </requireProperty>
+                                    </rules>
+                                    <fail>true</fail>
+                                </configuration>
+                            </execution>
                             <execution>
                                 <id>enforce-required-run-test-properties</id>
                                 <goals>
@@ -366,7 +483,9 @@
                                         </requireProperty>
                                         <requireFilesDontExist>
                                             <files>
-                                                <file>${releaseDirectory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}.zip</file>
+                                                <file>
+                                                    ${releaseDirectory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}.zip
+                                                </file>
                                             </files>
                                         </requireFilesDontExist>
                                     </rules>
@@ -379,14 +498,16 @@
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <configuration>
                             <skip>${skipITs}</skip>
-                            <systemPropertyVariables>                    
+                            <systemPropertyVariables>
                                 <bundledJava>${bundleDirectory}/bin/jre${jre-version}/bin/java</bundledJava>
                                 <bundleDirectory>${bundleDirectory}</bundleDirectory>
                                 <bundledBinPath>${bundleDirectory}/bin/</bundledBinPath>
-                                <bundledWorkflow>${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/</bundledWorkflow>
+                                <bundledWorkflow>
+                                    ${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/
+                                </bundledWorkflow>
                                 <workflowName>${workflow-name}</workflowName>
                                 <workflowVersion>${project.version}</workflowVersion>
-                        
+
                                 <!-- required to create seqware settings -->
                                 <seqwareDistribution>${seqwareDistribution}</seqwareDistribution>
                                 <workingDirectory>${workingDirectory}</workingDirectory>
@@ -455,18 +576,6 @@
                                 </configuration>
                             </execution>
                             <execution>
-                                <id>test_bundle</id>
-                                <phase>integration-test</phase>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-                                <configuration>
-                                    <skip>${skipBundleTest}</skip>
-                                    <executable>${bundleDirectory}/bin/jre${jre-version}/bin/java</executable>
-                                    <commandlineArgs>-jar ${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-name}/${project.version}/lib/seqware-distribution-${seqware-version}-full.jar --plugin net.sourceforge.seqware.pipeline.plugins.BundleManager -- -t -b ${project.build.directory}/Workflow_Bundle_${project.artifactId}_${project.version}_SeqWare_${seqware-version}/ </commandlineArgs>
-                                </configuration>
-                            </execution>
-                            <execution>
                                 <id>zip-bundle</id>
                                 <phase>deploy</phase>
                                 <goals>
@@ -474,7 +583,12 @@
                                 </goals>
                                 <configuration>
                                     <executable>${bundleDirectory}/bin/jre${jre-version}/bin/java</executable>
-                                    <commandlineArgs>-jar ${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-name}/${project.version}/lib/seqware-distribution-${seqware-version}-full.jar --plugin net.sourceforge.seqware.pipeline.plugins.BundleManager -- --bundle ${releaseDirectory} --path-to-package ${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/</commandlineArgs>
+                                    <commandlineArgs>-jar
+                                        ${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-name}/${project.version}/lib/seqware-distribution-${seqware-version}-full.jar
+                                        --plugin net.sourceforge.seqware.pipeline.plugins.BundleManager -- --bundle
+                                        ${releaseDirectory} --path-to-package
+                                        ${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/
+                                    </commandlineArgs>
                                 </configuration>
                             </execution>
                         </executions>
@@ -489,17 +603,23 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-jar-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>default-jar</id>
+                                <phase/>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-install-plugin</artifactId>
                         <configuration>
-                            <archive>
-                                <manifestEntries>
-                                    <Workflow-Bundle-Path>${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}</Workflow-Bundle-Path>
-                                </manifestEntries>
-                            </archive>
+                            <skip>true</skip>
                         </configuration>
                     </plugin>
                 </plugins>
             </build>
         </profile>
     </profiles>
-    <name>pipedev-workflow-parent</name>
+
 </project>

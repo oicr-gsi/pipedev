@@ -1,4 +1,4 @@
-
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -9,24 +9,36 @@
         <version>2.5.4</version>
     </parent>
 
-    <artifactId>pipedev-workflow-utils</artifactId>
+    <artifactId>pipedev-niassa-cromwell-workflow</artifactId>
     <packaging>jar</packaging>
 
-    <name>pipedev-workflow-utils</name>
-    <url>http://maven.apache.org</url>
-
     <properties>
-        <skipITs>true</skipITs>
+        <workflow-name>${project.artifactId}</workflow-name>
+        <workflow-description>Niassa workflow to run WDL workflows in Cromwell</workflow-description>
+        <cromwell-host></cromwell-host>
+
+        <bundleDirectory>${project.build.directory}/classes/ca/on/oicr/pde/workflows/</bundleDirectory>
+
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>com.github.seqware</groupId>
             <artifactId>seqware-pipeline</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>com.github.seqware</groupId>
+            <artifactId>seqware-common</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>ca.on.oicr.gsi</groupId>
+            <artifactId>pipedev-workflow-utils</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ca.on.oicr.gsi</groupId>
+            <artifactId>pipedev-test-utils</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -34,48 +46,35 @@
             <artifactId>testng</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>ca.on.oicr.pde.tools</groupId>
-            <artifactId>common</artifactId>
-            <version>1.2.1</version>
-        </dependency>
     </dependencies>
-    
+
     <build>
+        <filters>
+            <filter>src/main/filters/workflow.properties</filter>
+        </filters>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
+                <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <encoding>UTF-8</encoding>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.2</version>
                 <executions>
                     <execution>
-                        <id>attach-sources</id>
                         <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
+                            <goal>test-jar</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
-    
-</project>
 
+</project>

@@ -61,8 +61,14 @@ public class WorkflowRunTestFactory {
     @Parameters({"testDefinition"})
     @Factory
     public Object[] createTests(String testDefinition) throws IOException {
-
-        TestDefinition td = TestDefinition.buildFromJson(FileUtils.readFileToString(FileUtils.toFile(getClass().getResource(testDefinition))));
+        TestDefinition td = null;
+        if (getClass().getResource(testDefinition) != null) {
+            td = TestDefinition.buildFromJson(FileUtils.readFileToString(FileUtils.toFile(getClass().getResource(testDefinition))));
+        } else if (Paths.get(testDefinition).toFile().exists()) {
+            td = TestDefinition.buildFromJson(FileUtils.readFileToString(Paths.get(testDefinition).toFile()));
+        } else {
+            throw new RuntimeException("Unable to load tests from test definition = [" + testDefinition + "]");
+        }
 
         tests = new ArrayList();
         int count = 0;
