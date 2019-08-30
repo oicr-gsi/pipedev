@@ -62,6 +62,11 @@ fi
 for i in ${!OUTPUTS[@]}; do
   IFS=, read -ra REC <<< "${OUTPUTS[$i]}"
 
+  if [[ ${REC[1]} == "null" ]]; then
+    echo "Detected optional (null) output - not provisioning ${REC[0]}"
+    continue
+  fi
+
   # figure out the file metatype
   case "$(basename ${REC[1]})" in
     *.bam)
