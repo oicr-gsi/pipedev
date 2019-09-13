@@ -118,8 +118,14 @@ public class Workflow extends OicrWorkflow {
         runWdlWorkflowCommand.addArgument(launchAndWaitScript);
         runWdlWorkflowCommand.addArgument("--java-path");
         runWdlWorkflowCommand.addArgument(javaPath);
+        runWdlWorkflowCommand.addArgument("--seqware-jar-path");
+        runWdlWorkflowCommand.addArgument(seqwareDistributionJarPath);
         runWdlWorkflowCommand.addArgument("--jq-path");
         runWdlWorkflowCommand.addArgument(jqPath);
+        runWdlWorkflowCommand.addArgument("--workflow-run-swid");
+        runWdlWorkflowCommand.addArgument("${WORKFLOW_RUN_ACCESSION}"); //exported at runtime
+        runWdlWorkflowCommand.addArgument("--processing-swid");
+        runWdlWorkflowCommand.addArgument("${PROCESSING_ACCESSION}"); //exported at runtime
         runWdlWorkflowCommand.addArgument("--cromwell-jar-path");
         runWdlWorkflowCommand.addArgument(cromwellJarPath);
         runWdlWorkflowCommand.addArgument("--cromwell-host");
