@@ -67,6 +67,11 @@
                 <wdl-url>
                     file://${workflow_bundle_dir}/Workflow_Bundle_${workflow-name}/${project.version}/lib/${wdl-workflow}
                 </wdl-url>
+                <!-- test configuration -->
+                <test-basedir>${project.basedir}</test-basedir>
+                <test-definition>tests.json</test-definition>
+                <calculate-metrics-script>calculate.sh</calculate-metrics-script>
+                <compare-metrics-script>compare.sh</compare-metrics-script>
             </properties>
 
             <dependencies>
@@ -200,7 +205,7 @@
                                 </configuration>
                             </execution>
                             <execution>
-                                <id>copy-tests-json</id>
+                                <id>copy-test-resources-with-filtering</id>
                                 <phase>process-resources</phase>
                                 <goals>
                                     <goal>copy-resources</goal>
@@ -209,9 +214,30 @@
                                     <outputDirectory>${project.build.directory}/test-classes/</outputDirectory>
                                     <resources>
                                         <resource>
-                                            <directory>${project.basedir}</directory>
+                                            <filtering>true</filtering>
+                                            <directory>${test-basedir}</directory>
                                             <includes>
                                                 <include>${test-definition}</include>
+                                            </includes>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>copy-test-resources-without-filtering</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/test-classes/</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <filtering>false</filtering>
+                                            <directory>${test-basedir}</directory>
+                                            <includes>
+                                                <include>${calculate-metrics-script}</include>
+                                                <include>${compare-metrics-script}</include>
                                             </includes>
                                         </resource>
                                     </resources>
