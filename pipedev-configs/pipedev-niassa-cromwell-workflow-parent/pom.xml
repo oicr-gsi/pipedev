@@ -53,20 +53,15 @@
                 <seqwareDistribution>${bundleDirectory}/lib/seqware-distribution-${seqware-version}-full.jar
                 </seqwareDistribution>
                 <workingDirectory>${user.home}/_testing/</workingDirectory>
-                <bundleDirectory>
-                    ${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-name}/${project.version}
-                </bundleDirectory>
+                <bundleDirectory>${project.build.directory}/Workflow_Bundle_${workflow-name}_${project.version}_SeqWare_${seqware-version}/Workflow_Bundle_${workflow-name}/${project.version}</bundleDirectory>
                 <run-test-threads>10</run-test-threads>
+                <test-definition-file>${project.build.directory}/test-classes/${test-definition}</test-definition-file>
+                <cromwell-host></cromwell-host>
 
                 <workflow-name>${project.artifactId}</workflow-name>
                 <workflow-description>Niassa workflow to run WDL workflows in Cromwell</workflow-description>
-                <cromwell-host></cromwell-host>
+                <wdl-url>file://${workflow_bundle_dir}/Workflow_Bundle_${workflow-name}/${project.version}/lib/${wdl-workflow}</wdl-url>
 
-
-                <test-definition-file>${project.build.directory}/test-classes/${test-definition}</test-definition-file>
-                <wdl-url>
-                    file://${workflow_bundle_dir}/Workflow_Bundle_${workflow-name}/${project.version}/lib/${wdl-workflow}
-                </wdl-url>
                 <!-- test configuration -->
                 <test-basedir>${project.basedir}</test-basedir>
                 <test-definition>tests.json</test-definition>
