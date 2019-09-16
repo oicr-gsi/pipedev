@@ -39,7 +39,8 @@ public class TestDefinitionTest {
         assertNotNull(td);
         Optional<TestDefinition.Test> t = td.getTests().stream().filter(test -> "Test2".equals(test.getId())).findFirst();
         if (t.isPresent()) {
-            assertEquals(t.get().getParameters().get("json_string_ini_param"), "{\\\"a\\\":\\\"1\\\",\\\"b\\\":\\\"2\\\"}");
+            assertEquals(t.get().getParameters().get("json_string_ini_param"), "{\"a\":\"1\",\"b\":\"2\"}");
+            assertEquals(t.get().getParameters().get("default_json"), "{\"a\":\"\\\"escaped_string\\\"\",\"b\":2}");
         } else {
             fail("Unable to find Test2");
         }

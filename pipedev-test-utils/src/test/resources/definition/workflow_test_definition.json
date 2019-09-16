@@ -5,7 +5,12 @@
         "metrics_compare": "compare.sh",
         "input_config_dir": "",
         "output_metrics_dir": "/some/dir",
-        "parameters": {}
+        "parameters": {
+            "default_json": {
+                "a": "\"escaped_string\"",
+                "b": 2
+            }
+        }
     },
     "tests": [
         {

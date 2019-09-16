@@ -92,8 +92,22 @@ public class TestDefinition {
         }
 
         @JsonProperty("parameters")
-        public void setParameters(Map<String, String> parameters) {
-            this.parameters = parameters;
+        public void setParameters(ObjectNode parameters) {
+            Map<String, String> testParameters = new HashMap<>();
+            Iterator<Entry<String, JsonNode>> iter = parameters.fields();
+            while (iter.hasNext()) {
+                Entry<String, JsonNode> e = iter.next();
+                String key = e.getKey();
+                JsonNode value = e.getValue();
+                if (value.isValueNode()) {
+                    testParameters.put(key, value.asText());
+                } else if (value.isObject()) {
+                    testParameters.put(key, value.toString());
+                } else {
+                    throw new UnsupportedOperationException("The parameter " + key + " value type of " + value.getNodeType() + " is unsupported.");
+                }
+            }
+            this.parameters.putAll(testParameters);
         }
 
         @JsonProperty("environment_variables")
@@ -224,7 +238,7 @@ public class TestDefinition {
                 if (value.isValueNode()) {
                     testParameters.put(key, value.asText());
                 } else if (value.isObject()) {
-                    testParameters.put(key, StringEscapeUtils.escapeJson(value.toString()));
+                    testParameters.put(key, value.toString());
                 } else {
                     throw new UnsupportedOperationException("The parameter " + key + " value type of " + value.getNodeType() + " is unsupported.");
                 }
