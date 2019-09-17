@@ -25,6 +25,7 @@ public class Workflow extends OicrWorkflow {
     private String provisionOutScript;
     private String cromwellJarPath;
     private String cromwellHost;
+    private String pollingInterval;
     private String wdlWorkflow;
     private String wdlInputs;
     private String wdlOptions;
@@ -45,6 +46,7 @@ public class Workflow extends OicrWorkflow {
 
         cromwellJarPath = getRequiredProperty("cromwell_jar_path");
         cromwellHost = getRequiredProperty("cromwell_host");
+        pollingInterval = getRequiredProperty("polling_interval");
         wdlWorkflow = getRequiredProperty("wdl_workflow");
         wdlInputs = getRequiredProperty("wdl_inputs");
         wdlOptions = getOptionalProperty("wdl_options", null);
@@ -135,6 +137,8 @@ public class Workflow extends OicrWorkflow {
         runWdlWorkflowCommand.addArgument(cromwellJarPath);
         runWdlWorkflowCommand.addArgument("--cromwell-host");
         runWdlWorkflowCommand.addArgument(cromwellHost);
+        runWdlWorkflowCommand.addArgument("--polling-interval");
+        runWdlWorkflowCommand.addArgument(pollingInterval);
         runWdlWorkflowCommand.addArgument("--workflow");
         runWdlWorkflowCommand.addArgument(wdlWorkflowFile);
         runWdlWorkflowCommand.addArgument("--inputs");
