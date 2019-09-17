@@ -32,7 +32,7 @@ public class Workflow extends OicrWorkflow {
     private String wdlDepsZip;
     private String outputFilesDefinition;
     private boolean manualOutput = false;
-
+    private String jobMemory;
     private String outputDir = "output/";
     private String tmpDir = "tmp/";
 
@@ -43,7 +43,6 @@ public class Workflow extends OicrWorkflow {
         launchAndWaitScript = getRequiredProperty("launch_and_wait_script");
         copyOutputScript = getRequiredProperty("copy_output_script");
         provisionOutScript = getRequiredProperty("provision_out_script");
-
         cromwellJarPath = getRequiredProperty("cromwell_jar_path");
         cromwellHost = getRequiredProperty("cromwell_host");
         pollingInterval = getRequiredProperty("polling_interval");
@@ -53,6 +52,7 @@ public class Workflow extends OicrWorkflow {
         wdlDepsZip = getOptionalProperty("wdl_deps_zip", null);
         outputFilesDefinition = getOptionalProperty("output_files", null);
         manualOutput = Boolean.valueOf(getRequiredProperty("manual_output"));
+        jobMemory = getRequiredProperty("job_memory");
     }
 
     @Override
@@ -73,7 +73,7 @@ public class Workflow extends OicrWorkflow {
     public void buildWorkflow() {
 
         Job setup = newJob("setup");
-        setup.setMaxMemory("6000");
+        setup.setMaxMemory(jobMemory);
         Command setupCommand = setup.getCommand();
 
         // write wdl workflow to file
@@ -118,7 +118,7 @@ public class Workflow extends OicrWorkflow {
         // job execute wdl
         String workflowIdPath = tmpDir + "workflow_id";
         Job runWdlWorkflow = newJob("run_wdl");
-        runWdlWorkflow.setMaxMemory("6000");
+        runWdlWorkflow.setMaxMemory(jobMemory);
         runWdlWorkflow.addParent(setup);
 
         Command runWdlWorkflowCommand = runWdlWorkflow.getCommand();
@@ -189,7 +189,7 @@ public class Workflow extends OicrWorkflow {
         } else {
             // provision out all output files produced by cromwell workflow
             Job provisionOut = newJob("provision_out");
-            provisionOut.setMaxMemory("6000");
+            provisionOut.setMaxMemory(jobMemory);
             provisionOut.addParent(runWdlWorkflow);
 
             String outputPath;
