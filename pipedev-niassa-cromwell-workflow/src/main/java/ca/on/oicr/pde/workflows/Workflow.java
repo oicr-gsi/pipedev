@@ -25,13 +25,14 @@ public class Workflow extends OicrWorkflow {
     private String provisionOutScript;
     private String cromwellJarPath;
     private String cromwellHost;
+    private String pollingInterval;
     private String wdlWorkflow;
     private String wdlInputs;
     private String wdlOptions;
     private String wdlDepsZip;
     private String outputFilesDefinition;
     private boolean manualOutput = false;
-
+    private String jobMemory;
     private String outputDir = "output/";
     private String tmpDir = "tmp/";
 
@@ -42,15 +43,16 @@ public class Workflow extends OicrWorkflow {
         launchAndWaitScript = getRequiredProperty("launch_and_wait_script");
         copyOutputScript = getRequiredProperty("copy_output_script");
         provisionOutScript = getRequiredProperty("provision_out_script");
-
         cromwellJarPath = getRequiredProperty("cromwell_jar_path");
         cromwellHost = getRequiredProperty("cromwell_host");
+        pollingInterval = getRequiredProperty("polling_interval");
         wdlWorkflow = getRequiredProperty("wdl_workflow");
         wdlInputs = getRequiredProperty("wdl_inputs");
         wdlOptions = getOptionalProperty("wdl_options", null);
         wdlDepsZip = getOptionalProperty("wdl_deps_zip", null);
         outputFilesDefinition = getOptionalProperty("output_files", null);
         manualOutput = Boolean.valueOf(getRequiredProperty("manual_output"));
+        jobMemory = getRequiredProperty("job_memory");
     }
 
     @Override
@@ -70,29 +72,39 @@ public class Workflow extends OicrWorkflow {
     @Override
     public void buildWorkflow() {
 
-        // job write wdl workflow to file
+        Job setup = newJob("setup");
+        setup.setMaxMemory(jobMemory);
+        Command setupCommand = setup.getCommand();
+
+        // write wdl workflow to file
         String wdlWorkflowFile;
-        Job writeWdlToFile = null;
         if (wdlWorkflow.startsWith("file://")) {
             wdlWorkflowFile = wdlWorkflow;
         } else {
             wdlWorkflowFile = tmpDir + "workflow.wdl";
-            writeWdlToFile = newJob("write_wdl");
-            writeWdlToFile.setMaxMemory("4000");
-            writeWdlToFile.getCommand().setArguments(writeStringToFile(wdlWorkflow, wdlWorkflowFile));
+            setupCommand.getArguments().addAll(writeStringToFile(wdlWorkflow, wdlWorkflowFile));
         }
 
-        // job write wdl inputs to file
-        String wdlWorkflowInputsFile;
-        Job writeWdlInputsToFile = null;
+        // write wdl inputs to file
+        String wdlInputsFile;
         if (wdlInputs.startsWith("file://")) {
             //cromwell current does not support inputs urls, remove file:// prefix
-            wdlWorkflowInputsFile = wdlInputs.replaceFirst("^file://", "");
+            wdlInputsFile = wdlInputs.replaceFirst("^file://", "");
         } else {
-            wdlWorkflowInputsFile = tmpDir + "inputs.json";
-            writeWdlInputsToFile = newJob("write_inputs");
-            writeWdlInputsToFile.setMaxMemory("4000");
-            writeWdlInputsToFile.getCommand().setArguments(writeStringToFile(wdlInputs, wdlWorkflowInputsFile));
+            wdlInputsFile = tmpDir + "inputs.json";
+            setupCommand.getArguments().addAll(writeStringToFile(wdlInputs, wdlInputsFile));
+        }
+
+        // write wdl options to file
+        String wdlOptionsFile;
+        if (wdlOptions == null || wdlOptions.isEmpty()) {
+            wdlOptionsFile = null;
+        } else if (wdlOptions.startsWith("file://")) {
+            //cromwell current does not support options urls, remove file:// prefix
+            wdlOptionsFile = wdlOptions.replaceFirst("^file://", "");
+        } else {
+            wdlOptionsFile = tmpDir + "options.json";
+            setupCommand.getArguments().addAll(writeStringToFile(wdlOptions, wdlOptionsFile));
         }
 
         // job write wdl outputs definition to file
@@ -106,13 +118,8 @@ public class Workflow extends OicrWorkflow {
         // job execute wdl
         String workflowIdPath = tmpDir + "workflow_id";
         Job runWdlWorkflow = newJob("run_wdl");
-        runWdlWorkflow.setMaxMemory("6000");
-        if (writeWdlToFile != null) {
-            runWdlWorkflow.addParent(writeWdlToFile);
-        }
-        if (writeWdlInputsToFile != null) {
-            runWdlWorkflow.addParent(writeWdlInputsToFile);
-        }
+        runWdlWorkflow.setMaxMemory(jobMemory);
+        runWdlWorkflow.addParent(setup);
 
         Command runWdlWorkflowCommand = runWdlWorkflow.getCommand();
         runWdlWorkflowCommand.addArgument(launchAndWaitScript);
@@ -130,17 +137,19 @@ public class Workflow extends OicrWorkflow {
         runWdlWorkflowCommand.addArgument(cromwellJarPath);
         runWdlWorkflowCommand.addArgument("--cromwell-host");
         runWdlWorkflowCommand.addArgument(cromwellHost);
+        runWdlWorkflowCommand.addArgument("--polling-interval");
+        runWdlWorkflowCommand.addArgument(pollingInterval);
         runWdlWorkflowCommand.addArgument("--workflow");
         runWdlWorkflowCommand.addArgument(wdlWorkflowFile);
         runWdlWorkflowCommand.addArgument("--inputs");
-        runWdlWorkflowCommand.addArgument(wdlWorkflowInputsFile);
+        runWdlWorkflowCommand.addArgument(wdlInputsFile);
         runWdlWorkflowCommand.addArgument("--cromwell-workflow-id-path");
         runWdlWorkflowCommand.addArgument(workflowIdPath);
-        if (wdlOptions != null) {
+        if (wdlOptionsFile != null) {
             runWdlWorkflowCommand.addArgument("--options");
-            runWdlWorkflowCommand.addArgument(wdlOptions);
+            runWdlWorkflowCommand.addArgument(wdlOptionsFile);
         }
-        if (wdlDepsZip != null) {
+        if (wdlDepsZip != null && !wdlDepsZip.isEmpty()) {
             runWdlWorkflowCommand.addArgument("--deps-zip");
             runWdlWorkflowCommand.addArgument(wdlDepsZip);
         }
@@ -180,7 +189,7 @@ public class Workflow extends OicrWorkflow {
         } else {
             // provision out all output files produced by cromwell workflow
             Job provisionOut = newJob("provision_out");
-            provisionOut.setMaxMemory("6000");
+            provisionOut.setMaxMemory(jobMemory);
             provisionOut.addParent(runWdlWorkflow);
 
             String outputPath;

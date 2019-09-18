@@ -14,6 +14,7 @@ INPUTS=""
 CROMWELL_WORKFLOW_ID_PATH=""
 OPTIONS=""
 DEPS_ZIP=""
+POLLING_INTERVAL="30"
 
 while (( "$#" )); do
     [[ -z "${2+not_set}" ]] && echo "Missing value for ${1}" && exit 1
@@ -30,6 +31,7 @@ while (( "$#" )); do
 		--cromwell-workflow-id-path) CROMWELL_WORKFLOW_ID_PATH="${2}"; shift 2 ;;
 		--options) OPTIONS="${2}"; shift 2 ;;
 		--deps-zip) DEPS_ZIP="${2}"; shift 2 ;;
+		--polling-interval) POLLING_INTERVAL="${2}"; shift 2 ;;
 		--*) echo "Unsupported option ${1}" >&2 ; exit 1 ;;
 		*) break ;;
     esac
@@ -50,12 +52,12 @@ LABELS_JSON='{\"niassa-workflow-run-id\": \"'${WORKFLOW_RUN_SWID}'\"}'
 
 SUBMIT_CMD="${JAVA} -XX:+UseSerialGC -Xmx1g -jar ${CROMWELL_JAR} submit ${WORKFLOW} --inputs ${INPUTS} --host ${CROMWELL_HOST} --labels <(echo ${LABELS_JSON})"
 
-if [[ -z ${OPTIONS} ]]; then
-  LAUNCH_CMD+=" --options ${OPTIONS}"
+if [[ -n ${OPTIONS} ]]; then
+  SUBMIT_CMD+=" --options ${OPTIONS}"
 fi
 
-if [[ -z ${DEPS_ZIP} ]]; then
-  LAUNCH_CMD+=" --imports ${DEPS_ZIP}"
+if [[ -n ${DEPS_ZIP} ]]; then
+  SUBMIT_CMD+=" --imports ${DEPS_ZIP}"
 fi
 
 SUBMIT_TEXT=$(eval ${SUBMIT_CMD})
@@ -85,7 +87,7 @@ net.sourceforge.seqware.pipeline.runner.PluginRunner \
 STATUS="Pending"
 while [[ "${STATUS}" == "Pending" || "${STATUS}" == "Submitted" || "${STATUS}" == "Running" ]]; do
   echo "Workflow id = ${WORKFLOW_ID} status = ${STATUS}"
-  sleep 30
+  sleep "${POLLING_INTERVAL}"
   STATUS=$(curl -s -X GET "${CROMWELL_HOST}/api/workflows/v1/${WORKFLOW_ID}/status" | "${JQ}" --raw-output --exit-status '.status')
 done
 
