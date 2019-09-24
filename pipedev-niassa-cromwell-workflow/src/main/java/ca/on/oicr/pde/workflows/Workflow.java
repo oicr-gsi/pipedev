@@ -196,7 +196,8 @@ public class Workflow extends OicrWorkflow {
             if (manualOutput) {
                 outputPath = this.getMetadata_output_file_prefix() + getMetadata_output_dir() + "/";
             } else {
-                outputPath = this.getMetadata_output_file_prefix() + getMetadata_output_dir() + "/" + this.getName() + "_" + this.getVersion() + "/" + this.getRandom() + "/";
+                // WORKFLOW_RUN_ACCESSION is exported and evaluated at runtime
+                outputPath = this.getMetadata_output_file_prefix() + getMetadata_output_dir() + "/" + this.getName() + "_" + this.getVersion() + "/${WORKFLOW_RUN_ACCESSION}/";
             }
 
             Command provisionOutCommand = provisionOut.getCommand();
@@ -208,9 +209,9 @@ public class Workflow extends OicrWorkflow {
             provisionOutCommand.addArgument("--jq-path");
             provisionOutCommand.addArgument(jqPath);
             provisionOutCommand.addArgument("--workflow-run-swid");
-            provisionOutCommand.addArgument("${WORKFLOW_RUN_ACCESSION}"); //exported at runtime
+            provisionOutCommand.addArgument("${WORKFLOW_RUN_ACCESSION}"); //exported and evaluated at runtime
             provisionOutCommand.addArgument("--processing-swid");
-            provisionOutCommand.addArgument("${PROCESSING_ACCESSION}"); //exported at runtime
+            provisionOutCommand.addArgument("${PROCESSING_ACCESSION}"); //exported and evaluated at runtime
             provisionOutCommand.addArgument("--cromwell-host");
             provisionOutCommand.addArgument(cromwellHost);
             provisionOutCommand.addArgument("--cromwell-workflow-id-path");
