@@ -342,8 +342,6 @@
                                     <excludeArtifactIds>pipedev-niassa-cromwell-workflow</excludeArtifactIds>
                                 </configuration>
                             </execution>
-
-
                             <execution>
                                 <id>unpack-niassa-cromwell-workflow-classes</id>
                                 <phase>process-sources</phase>
@@ -487,6 +485,24 @@
                                         </requireProperty>
                                     </rules>
                                     <fail>true</fail>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>check-wdl-workflow-exists</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <phase>process-resources</phase>
+                                <configuration>
+                                    <rules>
+                                        <requireFilesExist>
+                                            <files>
+                                                <file>
+                                                    ${bundleDirectory}/lib/${wdl-workflow}
+                                                </file>
+                                            </files>
+                                        </requireFilesExist>
+                                    </rules>
                                 </configuration>
                             </execution>
                             <execution>
