@@ -284,8 +284,9 @@ public class TestDefinition {
             } else if (getIniFile() != null && isFileAccessible(metricsDirectoryPath + "/" + getIniFile().getName() + ".metrics")) {
                 metricsFile = new File(metricsDirectoryPath + "/" + getIniFile().getName() + ".metrics");
             } else {
-                //no valid metrics file path
-                metricsFile = null;
+                // return a metrics file path as guidance to user as to where the expected metrics should exist
+                // RunTests will fail and notify the user that this file is not accessible
+                metricsFile = new File(metricsDirectoryPath + "/" + getId() + ".metrics");
             }
             return metricsFile;
         }
