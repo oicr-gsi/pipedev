@@ -2,6 +2,28 @@
 set -eu
 set -o pipefail
 
+function try {
+  local RETRY_MAX=$1
+  shift
+
+  local RETRY_WAIT=$1
+  shift
+
+  local COUNT=0
+  until "$@"; do
+    EXIT=$?
+    COUNT=$(($COUNT + 1))
+    if [ $COUNT -lt $RETRY_MAX ]; then
+      echo "Try ${COUNT} of ${RETRY_MAX} exited with exit code = ${EXIT}, waiting ${RETRY_WAIT}s" >&2
+      sleep $RETRY_WAIT
+    else
+      echo "Final try ${COUNT} of ${RETRY_MAX} exited with exit code = ${EXIT}." >&2
+      return $exit
+    fi
+  done
+  return 0
+}
+
 JAVA=""
 SEQWARE_JAR=""
 JQ=""
@@ -74,7 +96,7 @@ fi
 
 # annotate workflow run with cromwell workflow id
 echo "Annotating ${WORKFLOW_RUN_SWID}"
-"${JAVA}" \
+try 3 20 "${JAVA}" \
 -XX:+UseSerialGC -Xmx500M \
 -classpath "${SEQWARE_JAR}" \
 net.sourceforge.seqware.pipeline.runner.PluginRunner \
@@ -88,7 +110,8 @@ STATUS="Pending"
 while [[ "${STATUS}" == "Pending" || "${STATUS}" == "Submitted" || "${STATUS}" == "Running" ]]; do
   echo "Workflow id = ${WORKFLOW_ID} status = ${STATUS}"
   sleep "${POLLING_INTERVAL}"
-  STATUS=$(curl -s -X GET "${CROMWELL_HOST}/api/workflows/v1/${WORKFLOW_ID}/status" | "${JQ}" --raw-output --exit-status '.status')
+  STATUS_TEXT=$(try 3 20 curl --fail -s -X GET ${CROMWELL_HOST}/api/workflows/v1/${WORKFLOW_ID}/status)
+  STATUS=$(echo ${STATUS_TEXT} | ${JQ} --raw-output --exit-status '.status')
 done
 
 echo "Workflow id = ${WORKFLOW_ID} status = ${STATUS}"
