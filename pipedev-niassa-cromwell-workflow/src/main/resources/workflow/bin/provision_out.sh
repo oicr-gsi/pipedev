@@ -133,7 +133,7 @@ for i in ${!OUTPUTS[@]}; do
       METATYPE="application/rdata"
     ;;
     *)
-      METATYPE="unknown/unknown"
+      METATYPE="application/octet-stream"
     ;;
   esac
 
