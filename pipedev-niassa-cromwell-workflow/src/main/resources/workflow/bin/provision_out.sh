@@ -126,8 +126,14 @@ for i in ${!OUTPUTS[@]}; do
     *.out|*.log|*.txt)
       METATYPE="txt/plain"
     ;;
+    *.seg)
+      METATYPE="application/seg"
+    ;;
+    *.Rdata|*.RData)
+      METATYPE="application/rdata"
+    ;;
     *)
-      METATYPE="unknown/unknown"
+      METATYPE="application/octet-stream"
     ;;
   esac
 
