@@ -5,6 +5,7 @@ set -o pipefail
 JAVA=""
 SEQWARE_JAR=""
 JQ=""
+NIASSA_HOST=""
 WORKFLOW_RUN_SWID=""
 PROCESSING_SWID=""
 CROMWELL_JAR=""
@@ -22,6 +23,7 @@ while (( "$#" )); do
 		--java-path) JAVA="${2}"; shift 2 ;;
 		--seqware-jar-path) SEQWARE_JAR="${2}"; shift 2 ;;
 		--jq-path) JQ="${2}"; shift 2 ;;
+		--niassa-host) NIASSA_HOST="${2}"; shift 2 ;;
 		--workflow-run-swid) WORKFLOW_RUN_SWID="${2}"; shift 2 ;;
 		--processing-swid) PROCESSING_SWID="${2}"; shift 2 ;;
 		--cromwell-jar-path) CROMWELL_JAR="${2}"; shift 2 ;;
@@ -40,6 +42,7 @@ done
 [[ -z "${JAVA}" ]] && echo "--java-path is not set" >&2 && exit 1
 [[ -z "${SEQWARE_JAR}" ]] && echo "--seqware-jar-path is not set" >&2 && exit 1
 [[ -z "${JQ}" ]] && echo "--jq-path is not set" >&2 && exit 1
+[[ -z "${NIASSA_HOST}" ]] && echo "--niassa-host is not set" >&2 && exit 1
 [[ -z "${WORKFLOW_RUN_SWID}" ]] && echo "--workflow-run-swid is not set" >&2 && exit 1
 [[ -z "${PROCESSING_SWID}" ]] && echo "--processing-swid is not set" >&2 && exit 1
 [[ -z "${CROMWELL_JAR}" ]] && echo "--cromwell-jar-path is not set" >&2 && exit 1
@@ -48,7 +51,7 @@ done
 [[ -z "${INPUTS}" ]] && echo "--inputs is not set" >&2 && exit 1
 [[ -z "${CROMWELL_WORKFLOW_ID_PATH}" ]] && echo "--cromwell-workflow-id-path is not set" >&2 && exit 1
 
-LABELS_JSON='{\"niassa-workflow-run-id\": \"'${WORKFLOW_RUN_SWID}'\"}'
+LABELS_JSON='{\"niassa-workflow-run-id\": \"'${WORKFLOW_RUN_SWID}'\",\"external_id\":\"'${NIASSA_HOST}/workflowruns/${WORKFLOW_RUN_SWID}'\"}'
 
 SUBMIT_CMD="${JAVA} -XX:+UseSerialGC -Xmx1g -jar ${CROMWELL_JAR} submit ${WORKFLOW} --inputs ${INPUTS} --host ${CROMWELL_HOST} --labels <(echo ${LABELS_JSON})"
 
