@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import net.sourceforge.seqware.common.util.configtools.ConfigTools;
 
 import net.sourceforge.seqware.pipeline.workflowV2.model.Command;
 import net.sourceforge.seqware.pipeline.workflowV2.model.Job;
@@ -129,6 +130,8 @@ public class Workflow extends OicrWorkflow {
         runWdlWorkflowCommand.addArgument(seqwareDistributionJarPath);
         runWdlWorkflowCommand.addArgument("--jq-path");
         runWdlWorkflowCommand.addArgument(jqPath);
+        runWdlWorkflowCommand.addArgument("--niassa-host");
+        runWdlWorkflowCommand.addArgument(ConfigTools.getProperty("SW_REST_URL"));
         runWdlWorkflowCommand.addArgument("--workflow-run-swid");
         runWdlWorkflowCommand.addArgument("${WORKFLOW_RUN_ACCESSION}"); //exported at runtime
         runWdlWorkflowCommand.addArgument("--processing-swid");
