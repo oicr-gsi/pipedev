@@ -1,6 +1,7 @@
 package ca.on.oicr.pde.workflows;
 
 import ca.on.oicr.pde.utilities.workflows.OicrWorkflow;
+import io.seqware.pipeline.SqwKeys;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -131,7 +132,7 @@ public class Workflow extends OicrWorkflow {
         runWdlWorkflowCommand.addArgument("--jq-path");
         runWdlWorkflowCommand.addArgument(jqPath);
         runWdlWorkflowCommand.addArgument("--niassa-host");
-        runWdlWorkflowCommand.addArgument(ConfigTools.getProperty("SW_REST_URL"));
+        runWdlWorkflowCommand.addArgument(ConfigTools.getSettingsValue(SqwKeys.SW_REST_URL));
         runWdlWorkflowCommand.addArgument("--workflow-run-swid");
         runWdlWorkflowCommand.addArgument("${WORKFLOW_RUN_ACCESSION}"); //exported at runtime
         runWdlWorkflowCommand.addArgument("--processing-swid");
