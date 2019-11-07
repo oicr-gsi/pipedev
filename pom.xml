@@ -49,7 +49,7 @@
         
         <provenance-version>1.2.3</provenance-version>
         <seqware-version>2.0.5</seqware-version>
-        <pinery-version>2.6.0</pinery-version>
+        <pinery-version>2.7.0</pinery-version>
     </properties>
     
     <prerequisites>
