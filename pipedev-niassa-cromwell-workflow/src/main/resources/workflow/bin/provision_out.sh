@@ -126,6 +126,9 @@ for i in ${!OUTPUTS[@]}; do
     *.out|*.log|*.txt)
       METATYPE="txt/plain"
     ;;
+    *.junction)
+      METATYPE="txt/junction"
+    ;;
     *.seg)
       METATYPE="application/seg"
     ;;
