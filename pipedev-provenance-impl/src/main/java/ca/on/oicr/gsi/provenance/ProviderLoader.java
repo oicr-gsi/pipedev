@@ -66,6 +66,11 @@ public class ProviderLoader {
                 if (analysisProvenanceProviders.put(p.getProvider(), metadataProvenanceProvider) != null) {
                     throw new RuntimeException("Duplicate provider: " + p.getProvider());
                 }
+            } else if (GenericAnalysisProvenanceProvider.class.getCanonicalName().equals(p.getType())) {
+                GenericAnalysisProvenanceProvider metadataProvenanceProvider = GenericAnalysisProvenanceProvider.getProvider(p.getProviderSettings());
+                if (analysisProvenanceProviders.put(p.getProvider(), metadataProvenanceProvider) != null) {
+                    throw new RuntimeException("Duplicate provider: " + p.getProvider());
+                }
             } else {
                 throw new RuntimeException("Unsupported provider: " + p.getType());
             }
@@ -98,24 +103,29 @@ public class ProviderLoader {
     public static class Provider {
 
         public String getType() {
-			return type;
-		}
-		public void setType(String type) {
-			this.type = type;
-		}
-		public String getProvider() {
-			return provider;
-		}
-		public void setProvider(String provider) {
-			this.provider = provider;
-		}
-		public Map<String, String> getProviderSettings() {
-			return providerSettings;
-		}
-		public void setProviderSettings(Map<String, String> providerSettings) {
-			this.providerSettings = providerSettings;
-		}
-		private String type;
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getProvider() {
+            return provider;
+        }
+
+        public void setProvider(String provider) {
+            this.provider = provider;
+        }
+
+        public Map<String, String> getProviderSettings() {
+            return providerSettings;
+        }
+
+        public void setProviderSettings(Map<String, String> providerSettings) {
+            this.providerSettings = providerSettings;
+        }
+        private String type;
         private String provider;
         private Map<String, String> providerSettings;
     }
