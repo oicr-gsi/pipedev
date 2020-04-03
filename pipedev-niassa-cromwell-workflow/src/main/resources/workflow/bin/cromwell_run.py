@@ -89,7 +89,8 @@ try:
                                        stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE,
                                        check=True,
-                                       encoding='UTF-8')
+                                       encoding='UTF-8',
+                                       timeout=600)
     print(f"stdout:\n{submit_cmd_output.stdout}")
     print(f"stderr:\n{submit_cmd_output.stderr}")
 except subprocess.CalledProcessError as e:
