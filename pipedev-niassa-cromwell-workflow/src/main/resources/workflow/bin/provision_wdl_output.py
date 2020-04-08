@@ -92,7 +92,7 @@ for id, output in outputs.items():
             unique_file_names[file_name] = file
 
         if metatype is None:
-            metatype = get_metatype(file_name, extension_to_metatype_map)
+            metatype = get_metatype(file_name)
 
         output_file = args.output_dir + file_name
 

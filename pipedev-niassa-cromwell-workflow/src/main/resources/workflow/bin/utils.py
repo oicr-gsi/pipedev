@@ -182,7 +182,9 @@ def parse_workflow_output(workflow_outputs, wdl_outputs):
     return {e["id"]: e for e in outputs}
 
 
-extension_to_metatype_map = [
+# this is an priority ordered list of file extensions to metatype
+# e.g. the file extension ".txt.gz" should be returned before ".gz"
+default_extension_to_metatype_map = [
     (".bam", "application/bam"),
     (".bai", "application/bam-index"),
     (".g.vcf.gz", "application/g-vcf-gz"),
@@ -215,10 +217,11 @@ extension_to_metatype_map = [
 ]
 
 
-def get_metatype(filename, extension_to_metatype_map):
+def get_metatype(filename, extension_to_metatype_map=default_extension_to_metatype_map):
     for (extension, metatype) in extension_to_metatype_map:
         if filename.endswith(extension):
             return metatype
+    raise ParsingException(f"Unable to get metatype for {filename}")
 
 
 def retry(func, *func_args, times=3, delay=20, allowed_exceptions=(), **kwargs):
