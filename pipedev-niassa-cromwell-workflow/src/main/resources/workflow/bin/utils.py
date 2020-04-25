@@ -30,7 +30,7 @@ def parse_string_output(id, value, wdl_output):
     if wdl_output:
         metatype = wdl_output.get("metatype", None)
         annotations = wdl_output.get("annotations", {})
-        limskeys = wdl_output.get("limskeys", [])
+        limskeys = wdl_output.get("limsKeys", [])
     return [{"id": id, "files": [value], "metatype": metatype, "limskeys": limskeys,
              "annotations": annotations}]
 
@@ -42,7 +42,7 @@ def parse_list_of_string_output(id, value, wdl_output):
     if wdl_output:
         metatype = wdl_output.get("metatype", None)
         annotations = wdl_output.get("annotations", {})
-        limskeys = wdl_output.get("limskeys", [])
+        limskeys = wdl_output.get("limsKeys", [])
     return [{"id": id, "files": value, "metatype": metatype, "limskeys": limskeys,
              "annotations": annotations}]
 
@@ -104,7 +104,7 @@ def parse_pair_output(id, value, wdl_output):
     if wdl_output:
         metatype = wdl_output.get("metatype", None)
         annotations = wdl_output.get("annotations", {})
-        limskeys = wdl_output.get("limskeys", [])
+        limskeys = wdl_output.get("limsKeys", [])
     left_type = type(value["left"])
     right_type = type(value["right"])
     if left_type is str and right_type is dict:

@@ -114,7 +114,7 @@ for id, output in outputs.items():
 
         for parentId in parentIds:
             command.append("--metadata-parent-accession")
-            command.append(parentId)
+            command.append(str(parentId))
 
         command.extend(["--metadata-workflow-run-ancestor-accession",
                         args.workflow_run_swid,
