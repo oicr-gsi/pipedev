@@ -2,16 +2,16 @@ import pytest
 
 from utils import parse_workflow_output, ParsingException
 
-wdl_outputs = {"workflow.file": {"limskeys": [1, 2, 3],
+wdl_outputs = {"workflow.file": {"limsKeys": [1, 2, 3],
                                  "annotations": {"r": "1"},
                                  "metatype": "meta/type"},
-               "workflow.optionalFile": {"limskeys": [1, 2, 3],
+               "workflow.optionalFile": {"limsKeys": [1, 2, 3],
                                          "annotations": {"r": "1"},
                                          "metatype": "meta/type"},
-               "workflow.files": {"limskeys": [1, 2, 3],
+               "workflow.files": {"limsKeys": [1, 2, 3],
                                   "annotations": {"r": "1"},
                                   "metatype": "meta/type"},
-               "workflow.filePairs": {"limskeys": [1, 2, 3],
+               "workflow.filePairs": {"limsKeys": [1, 2, 3],
                                       "annotations": {"size": "should be set by workflow",
                                                       "r": 1}},
                "workflow.outputGroups1": [{"key": {"sample": "1"}},
@@ -19,22 +19,22 @@ wdl_outputs = {"workflow.file": {"limskeys": [1, 2, 3],
                "workflow.outputGroups2": [{"key": {"sample": "1"},
                                            "outputs": {
                                                "file1": {
-                                                   "limskeys": [1, 2, 3],
+                                                   "limsKeys": [1, 2, 3],
                                                    "annotations": {"r": "1"},
                                                    "metatype": "meta/type1"},
                                                "file2": {
-                                                   "limskeys": [1, 2, 3],
+                                                   "limsKeys": [1, 2, 3],
                                                    "annotations": {"r": "1"},
                                                    "metatype": "meta/type2"}}
                                            },
                                           {"key": {"sample": "2"},
                                            "outputs": {
                                                "file1": {
-                                                   "limskeys": [4, 5, 6],
+                                                   "limsKeys": [4, 5, 6],
                                                    "annotations": {"r": "1"},
                                                    "metatype": "meta/type1"},
                                                "file2": {
-                                                   "limskeys": [4, 5, 6],
+                                                   "limsKeys": [4, 5, 6],
                                                    "annotations": {"r": "1"},
                                                    "metatype": "meta/type2"}
                                            }
@@ -44,13 +44,13 @@ wdl_outputs = {"workflow.file": {"limskeys": [1, 2, 3],
                "workflow.outputGroups4": [{"key": {"sample": "1"},
                                            "outputs": {
                                                "file": {
-                                                   "limskeys": [1, 2, 3],
+                                                   "limsKeys": [1, 2, 3],
                                                    "annotations": {"size": "should be set by workflow", "r": "1"},
                                                    "metatype": "meta/type"}}},
                                           {"key": {"sample": "2"},
                                            "outputs": {
                                                "file": {
-                                                   "limskeys": [4, 5, 6],
+                                                   "limsKeys": [4, 5, 6],
                                                    "annotations": {"size": "should be set by workflow", "r": "1"},
                                                    "metatype": "meta/type"}}
                                            }],
