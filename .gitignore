@@ -195,3 +195,7 @@ nb-configuration*.xml
 *.iml
 .idea/
 
+
+!pipedev-niassa-cromwell-workflow/src/main/resources/workflow/bin/
+__pycache__/
+*.iml
