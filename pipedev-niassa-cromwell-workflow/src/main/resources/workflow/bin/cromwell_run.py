@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import os
 import re
 import subprocess
 import sys
@@ -53,6 +54,10 @@ parser.add_argument("--wdl-options",
 parser.add_argument("--wdl-deps-zip",
                     help="The WDL dependencies file to submit to Cromwell",
                     required=False)
+parser.add_argument("--symlink-cromwell-working-directory",
+                    help="Symlinks to cromwell working directory into the current directory",
+                    required=False,
+                    action='store_false')  # aka default=True
 
 args = parser.parse_args()
 
@@ -126,19 +131,49 @@ seqware_annotate_cmd = [args.java_path,
                         "--value",
                         cromwell_workflow_id]
 
-print(f"Executing: {' '.join(seqware_annotate_cmd)}")
-retry(subprocess.run,
-      seqware_annotate_cmd,
-      stdout=subprocess.PIPE,
-      stderr=subprocess.PIPE,
-      check=True,
-      encoding='UTF-8',
-      allowed_exceptions=(subprocess.CalledProcessError),
-      times=5,
-      delay=60)
+if args.workflow_run_swid == "0":
+    print(f"Workflow run swid == 0 (dry run mode), would have executed: {' '.join(seqware_annotate_cmd)}")
+else:
+    print(f"Executing: {' '.join(seqware_annotate_cmd)}")
+    retry(subprocess.run,
+          seqware_annotate_cmd,
+          stdout=subprocess.PIPE,
+          stderr=subprocess.PIPE,
+          check=True,
+          encoding='UTF-8',
+          allowed_exceptions=(subprocess.CalledProcessError),
+          times=5,
+          delay=60)
 
+# wait until cromwell has processed the workflow submission
 status = "Pending"
-while status in ["Pending", "Submitted", "Running"]:
+while status in ["Pending", "Submitted"]:
+    print(f"Workflow id = {cromwell_workflow_id} status = {status}")
+    time.sleep(int(args.polling_interval))
+    status = retry(get_cromwell_status,
+                   args.cromwell_host,
+                   cromwell_workflow_id,
+                   allowed_exceptions=(URLError),
+                   times=5,
+                   delay=20)
+
+# get the cromwell working directory
+workflow_metadata = retry(get_cromwell_metadata,
+                          args.cromwell_host,
+                          cromwell_workflow_id,
+                          allowed_exceptions=(URLError),
+                          times=5,
+                          delay=20)
+working_directory = workflow_metadata.get("workflowRoot")
+print(f"Workflow id = {cromwell_workflow_id} working directory = {working_directory}")
+if args.symlink_cromwell_working_directory:
+    if working_directory:
+        if os.path.islink("cromwell_working_directory"):
+            os.unlink("cromwell_working_directory")
+        os.symlink(working_directory, "cromwell_working_directory")
+
+# wait while the workflow is running
+while status in ["Running"]:
     print(f"Workflow id = {cromwell_workflow_id} status = {status}")
     time.sleep(int(args.polling_interval))
     status = retry(get_cromwell_status,
