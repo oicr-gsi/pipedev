@@ -143,7 +143,7 @@ def parse_object_output(id, value, wdl_output):
 
 def parse_output(id, value, wdl_output):
     # optional value
-    if value == "null":
+    if value in [None, "null"]:
         return []
 
     value_type = type(value)

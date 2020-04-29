@@ -138,16 +138,19 @@ for id, output in outputs.items():
         commands.append(command)
 
 for command in commands:
-    print(f"Executing: {' '.join(command)}")
-    try:
-        command_output = subprocess.run(command,
-                                        stdout=subprocess.PIPE,
-                                        stderr=subprocess.PIPE,
-                                        check=True,
-                                        encoding='UTF-8')
-        print(f"stdout:\n{command_output.stdout}")
-        print(f"stderr:\n{command_output.stderr}")
-    except subprocess.CalledProcessError as e:
-        print(f"stdout:\n{e.stdout}")
-        print(f"stderr:\n{e.stderr}")
-        raise e
+    if args.workflow_run_swid == "0":
+        print(f"Workflow run swid == 0 (dry run mode), would have executed: {' '.join(command)}")
+    else:
+        print(f"Executing: {' '.join(command)}")
+        try:
+            command_output = subprocess.run(command,
+                                            stdout=subprocess.PIPE,
+                                            stderr=subprocess.PIPE,
+                                            check=True,
+                                            encoding='UTF-8')
+            print(f"stdout:\n{command_output.stdout}")
+            print(f"stderr:\n{command_output.stderr}")
+        except subprocess.CalledProcessError as e:
+            print(f"stdout:\n{e.stdout}")
+            print(f"stderr:\n{e.stderr}")
+            raise e
