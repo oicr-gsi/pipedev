@@ -79,10 +79,10 @@ public class DryRun<T extends AbstractWorkflowDataModel> {
         //check for null string
         for (AbstractJob j : w.getWorkflow().getJobs()) {
 
-            String c = Joiner.on(" ").useForNull("null").join(j.getCommand().getArguments());
+            String c = Joiner.on(" ").useForNull("<null>").join(j.getCommand().getArguments());
 
             //check for null string
-            Assert.assertFalse(c.contains("null"), "Warning: command contains \"null\":\n" + c + "\n");
+            Assert.assertFalse(c.contains("<null>"), "Warning: command contains \"null\":\n" + c + "\n");
 
             // check for missing spaces
             Assert.assertFalse(c.matches("(.*)[^ ]--(.*)"));
