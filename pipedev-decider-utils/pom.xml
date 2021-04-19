@@ -23,6 +23,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.kohsuke.metainf-services</groupId>
+            <artifactId>metainf-services</artifactId>
+            <version>1.8</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>ca.on.oicr.gsi</groupId>
             <artifactId>pipedev-test-utils</artifactId>
             <scope>test</scope>

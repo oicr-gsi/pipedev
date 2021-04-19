@@ -10,7 +10,7 @@ import joptsimple.OptionSet;
 import net.sourceforge.seqware.common.module.ReturnValue;
 import net.sourceforge.seqware.pipeline.module.Module;
 import net.sourceforge.seqware.pipeline.module.ModuleInterface;
-import org.openide.util.lookup.ServiceProvider;
+import org.kohsuke.MetaInfServices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Morgan Taschuk, Brian O'Connor
  */
-@ServiceProvider(service = ModuleInterface.class)
+@MetaInfServices(ModuleInterface.class)
 public class OicrModule extends Module {
     private final Logger logger = LoggerFactory.getLogger(OicrModule.class);
 

@@ -71,13 +71,13 @@ import net.sourceforge.seqware.pipeline.tools.SetOperations;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.openide.util.lookup.ServiceProvider;
+import org.kohsuke.MetaInfServices;
 
 /**
  *
  * @author mtaschuk
  */
-@ServiceProvider(service = PluginInterface.class)
+@MetaInfServices(PluginInterface.class)
 public class BasicDecider extends Plugin implements DeciderInterface {
     private static final Logger LOGGER = LogManager.getLogger(BasicDecider.class);
 
