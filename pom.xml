@@ -56,14 +56,7 @@
         <maven>3.2.1</maven>
     </prerequisites>
     
-    <distributionManagement>
-        <repository>
-            <id>not_configured</id>
-            <name>Not Configured</name>
-            <url>file:///tmp</url>
-        </repository>
-    </distributionManagement>
-    
+   
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -141,37 +134,37 @@
             <dependency>
                 <groupId>ca.on.oicr.gsi</groupId>
                 <artifactId>pipedev-common</artifactId>
-                <version>2.5.18</version>
+                <version>2.5.19</version>
             </dependency>
             <dependency>
                 <groupId>ca.on.oicr.gsi</groupId>
                 <artifactId>pipedev-decider-utils</artifactId>
-                <version>2.5.18</version>
+                <version>2.5.19</version>
             </dependency>
             <dependency>
                 <groupId>ca.on.oicr.gsi</groupId>
                 <artifactId>pipedev-workflow-utils</artifactId>
-                <version>2.5.18</version>
+                <version>2.5.19</version>
             </dependency>
             <dependency>
                 <groupId>ca.on.oicr.gsi</groupId>
                 <artifactId>pipedev-provenance-impl</artifactId>
-                <version>2.5.18</version>
+                <version>2.5.19</version>
             </dependency>
             <dependency>
                 <groupId>ca.on.oicr.gsi</groupId>
                 <artifactId>pipedev-test-utils</artifactId>
-                <version>2.5.18</version>
+                <version>2.5.19</version>
             </dependency>
             <dependency>
                 <groupId>ca.on.oicr.gsi</groupId>
                 <artifactId>pipedev-niassa-cromwell-workflow</artifactId>
-                <version>2.5.18</version>
+                <version>2.5.19</version>
             </dependency>
             <dependency>
                 <groupId>ca.on.oicr.gsi</groupId>
                 <artifactId>pipedev-niassa-cromwell-workflow</artifactId>
-                <version>2.5.18</version>
+                <version>2.5.19</version>
                 <classifier>tests</classifier>
                 <type>test-jar</type>
             </dependency>
@@ -475,6 +468,18 @@
         </plugins>
 
     </build>
+  <distributionManagement>
+    <repository>
+      <id>deploy.artifacts.oicr</id>
+      <name>GSI Releases</name>
+      <url>https://artifacts.oicr.on.ca/artifactory/gsi-release</url>
+    </repository>
+    <snapshotRepository>
+      <id>deploy.artifacts.oicr</id>
+      <name>GSI Snapshots</name>
+      <url>https://artifacts.oicr.on.ca/artifactory/gsi-snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
 
     <repositories>
         <repository>
