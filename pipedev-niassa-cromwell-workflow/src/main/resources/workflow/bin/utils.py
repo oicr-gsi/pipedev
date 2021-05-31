@@ -13,19 +13,19 @@ class ExecutionException(Exception):
 
 def get_cromwell_status(cromwell_url, cromwell_id):
     url = cromwell_url + "/api/workflows/v1/" + cromwell_id + "/status"
-    result = json.load(req.urlopen(url, timeout=10))
+    result = json.load(req.urlopen(url, timeout=100))
     return result["status"]
 
 
 def get_cromwell_metadata(cromwell_url, cromwell_id):
     url = cromwell_url + "/api/workflows/v1/" + cromwell_id + "/metadata"
-    result = json.load(req.urlopen(url, timeout=10))
+    result = json.load(req.urlopen(url, timeout=100))
     return result
 
 
 def get_cromwell_outputs(cromwell_url, cromwell_id):
     url = cromwell_url + "/api/workflows/v1/" + cromwell_id + "/outputs"
-    result = json.load(req.urlopen(url, timeout=10))
+    result = json.load(req.urlopen(url, timeout=100))
     return result["outputs"]
 
 
